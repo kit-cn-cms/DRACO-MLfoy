@@ -1,7 +1,7 @@
 import miniAOD_preprocessing as preproc
 
 # !!! change this !!!
-basedir = "/nfs/dust/cms/user/vdlinden/miniAOD_output"
+basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir"
 
 sample_dict = {
     "ttHbb": basedir + "/out_files/ttHbb_*.h5",
