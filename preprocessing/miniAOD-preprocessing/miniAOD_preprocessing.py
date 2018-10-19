@@ -115,7 +115,7 @@ def get_2dhist( candidates, hdfConfig):
         range =         [hdfConfig.etaRange, hdfConfig.phiRange], 
         weights =       weights )
     # transpose histogram (makes reshaping easier) and flatten into 1d string
-    flattened = H.T.flatten()
+    flattened = H.flatten()
 
     if hdfConfig.lognorm:
         flattened = np.array([ np.log(f) if f > 1. else 0. for f in flattened])
@@ -135,6 +135,7 @@ def load_data( inFile, outFile, hdfConfig):
     evt_data = []
     data = []
     for iev, event in enumerate(events):
+        if iev == 15000: break
         if iev%1000 == 0:
             print("at event #"+str(iev))
         #read particle candidates of event
@@ -275,8 +276,8 @@ def prepare_training_sample(sample_dict, outFile, train_pc = 0.5, val_pc = 0.3):
     del df
     del val_df
     # add meta info
-    label_df.to_hdf( train_file, key = "label_dict", mode = "a" )
-    shape_df.to_hdf( train_file, key = "image_size", mode = "a" )
+    label_df.to_hdf( val_file, key = "label_dict", mode = "a" )
+    shape_df.to_hdf( val_file, key = "image_size", mode = "a" )
 
 
     # handle test data
@@ -287,8 +288,8 @@ def prepare_training_sample(sample_dict, outFile, train_pc = 0.5, val_pc = 0.3):
     del leftover
     del test_df
     # add meta info
-    label_df.to_hdf( train_file, key = "label_dict", mode = "a" )
-    shape_df.to_hdf( train_file, key = "image_size", mode = "a" )
+    label_df.to_hdf( test_file, key = "label_dict", mode = "a" )
+    shape_df.to_hdf( test_file, key = "image_size", mode = "a" )
 
     print("done.")
 
