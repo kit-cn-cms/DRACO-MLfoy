@@ -13,6 +13,6 @@ outFile = basedir + "/out_files/base_train_set"
 preproc.prepare_training_sample(
     sample_dict = sample_dict, 
     outFile     = outFile,
-    train_pc    = 0.7,
-    val_pc      = 0.2
+    train_pc    = 0.8,
+    val_pc      = 0.1
     )
