@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import pandas as pd
+import glob
 
 # import ROOT in batch mode
 oldargv = sys.argv[:]
@@ -161,7 +162,7 @@ def load_data( inFile, outFile, hdfConfig):
     meta_info_dict = {"input_shape": input_shape, "n_events": evts_in_file}
 
     meta_info_df = pd.DataFrame.from_dict( meta_info_dict )
-    df.to_hdf( outFile, key = "meta_info", mode = "a")
+    meta_info_df.to_hdf( outFile, key = "meta_info", mode = "a")
 
 
 def split_dataframe(df, train_pc, val_pc):
@@ -180,49 +181,114 @@ def split_dataframe(df, train_pc, val_pc):
     test_df = leftover.tail(entries-train_size-val_size)
 
     return train_df, val_df, test_df
-    
 
-def merge_training_sample(sample_dict, outFile, train_percentage = 0.5, val_percentage = 0.3):
-    ''' merge dataframes from single processes into training dataframe
+def check_image_size(old_size, new_size):
+    if not old_size.equals( new_size ):
+        print("sizes are not compatible")
+        print("old image size: "+str(old_size))
+        print("new image size: "+str(new_size))
+        exit()
+
+def prepare_training_sample(sample_dict, outFile, train_pc = 0.5, val_pc = 0.3):
+    ''' prepare dataframes from single processes into training dataframe
         output dataframe is shuffled and split into train/val/test sets '''
-
     from sklearn.utils import shuffle
 
+    df = None
+    key_dict = {}
+    image_size = None
+
     # looping over all classes
-    data = None
     for n, key in enumerate(sample_dict):
-        inFile = sample_dict[key]
-        print("loading "+str(inFile))
-        
-        # getting keys
-        with pd.HDFStore(inFile,"r") as s:
-            df_keys = s.keys()
+        class_label = len(key_dict)
+        print(str(key)+" got class label "+str(class_label))
+        key_dict[key] = class_label
 
-        # loading all subsamples in file
-        for ik, df_key in enumerate(df_keys):
-            print("... at dataframe "+str(df_key))
-            df = pd.read_hdf(inFile, key = df_key)
-            if not isinstance(data, pd.DataFrame):
-                data = df
+
+        # grep all files with filename_*.h5 loop over them
+	file_path = sample_dict[key]
+        files = [file_path]
+	if "*" in file_path:
+            print("globbed files from "+str(file_path))
+            files = glob.glob( file_path )
+            print(files)
+
+        # add them all to one data frame
+        for f in files:
+            print("loading "+str(f))
+            new_df = pd.read_hdf(f, key = "data")
+            meta = pd.read_hdf(f, key = "meta_info")
+            if not isinstance(image_size, pd.Series):
+                image_size = meta["input_shape"]
             else:
-                data = data.append(df, ignore_index = True)
+                # check if image sizes are different (that would not be compatible for training)
+                check_image_size( image_size, meta["input_shape"] )       
 
-        print("... adding labels")
-        data["textLabel"] = pd.Series( [key]*data.shape[0], index = data.index )
-        data["numLabel"] = pd.Series( [n]*data.shape[0], index = data.index)
+            # add labels depending on classes
+            new_df["class_label"] = pd.Series( [class_label]*new_df.shape[0], index = new_df.index )
 
+            # concatenating dataframes
+            if not isinstance(df, pd.DataFrame):
+                print("creating new instance of dataframe")
+                df = new_df
+            else:
+                df = df.append(new_df, ignore_index = True)
+            del new_df
+    
+        
     print("done loading all data")
-    print("shuffling data")
-    data = shuffle(data).reset_index(drop=True)
-    train_df, val_df, test_df = split_dataframe(data, 
-        train_pc = train_percentage, val_pc = val_percentage)
+    print("creating meta info dataframes")
+    label_df = pd.DataFrame(key_dict, index = [0])
+    image_size = image_size.values
+    shape = {"x": image_size[0], "y": image_size[1], "z": image_size[2]}
+    print("output images will have shape "+str(shape))
+    shape_df = pd.DataFrame( shape, index = [0] )
 
-    print("writing train sample with size "+str(train_df.shape))
-    train_df.to_hdf(outFile, key = "df_train", mode = "a")
-    print("writing val sample with size "+str(val_df.shape))
-    val_df.to_hdf(outFile, key = "df_val", mode = "a")
-    print("writing test sample with size "+str(test_df.shape))
-    test_df.to_hdf(outFile, key = "df_test", mode = "a")
+    print("shuffling data")
+    df = shuffle(df).reset_index(drop=True)
+    
+    # get splitting ratios for train/val/test set  
+    entries = df.shape[0]
+    train_size = int(entries*train_pc)
+    val_size = int(entries*val_pc)
+    test_size = entries - train_size - val_size
+
+    # split into three dataframe according to split percentage
+    
+    # handle training data
+    train_file = outFile+"_train.h5"
+    print("writing train data to "+str(train_file)+" with "+str(train_size)+" entries")
+    train_df = df.head(train_size)
+    train_df.to_hdf( train_file, key = "data", mode = "w")
+    del train_df
+    # add meta info
+    label_df.to_hdf( train_file, key = "label_dict", mode = "a" )
+    shape_df.to_hdf( train_file, key = "image_size", mode = "a" )
+
+
+    # handle validation data
+    val_file = outFile+"_val.h5"
+    print("writing val data to "+str(val_file)+" with "+str(val_size)+" entries")
+    leftover = df.tail(entries - train_size)
+    val_df = leftover.head(val_size)
+    val_df.to_hdf( val_file, key = "data", mode = "w")
+    del df
+    del val_df
+    # add meta info
+    label_df.to_hdf( train_file, key = "label_dict", mode = "a" )
+    shape_df.to_hdf( train_file, key = "image_size", mode = "a" )
+
+
+    # handle test data
+    test_file = outFile+"_test.h5"
+    print("writing test data to "+str(test_file)+" with "+str(test_size)+" entries")
+    test_df = leftover.tail(test_size)
+    test_df.to_hdf( test_file, key = "data", mode = "w")
+    del leftover
+    del test_df
+    # add meta info
+    label_df.to_hdf( train_file, key = "label_dict", mode = "a" )
+    shape_df.to_hdf( train_file, key = "image_size", mode = "a" )
 
     print("done.")
 
