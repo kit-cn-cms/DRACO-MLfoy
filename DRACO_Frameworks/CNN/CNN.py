@@ -65,34 +65,36 @@ class CNN():
         
         # input layer
         model.add(
-            layer.Conv2D( 64, kernel_size = (4,4), activation = "relu", padding = "same", 
+            layer.Conv2D( 64, kernel_size = (8,8), activation = "linear", padding = "same", 
             input_shape = self.train_data.input_shape ))
         model.add(
-            layer.MaxPooling2D( pool_size = (4,4), padding = "same" ))
+            layer.MaxPooling2D( pool_size = (3,3), padding = "same" ))
         model.add(
-            layer.Dropout(0.2))
+            layer.Dropout(0.5))
 
         # second layer
         model.add(
-            layer.Conv2D( 128, kernel_size = (4,4), activation = "relu", padding = "same"))
+            layer.Conv2D( 128, kernel_size = (4,4), activation = "linear", padding = "same"))
         model.add(
-            layer.MaxPooling2D( pool_size = (2,2), padding = "same" ))
+            layer.MaxPooling2D( pool_size = (3,3), padding = "same" ))
         model.add(
-            layer.Dropout(0.2))
+            layer.Dropout(0.5))
     
         # third layer
         model.add(
-            layer.Conv2D( 256, kernel_size = (4,4), activation = "relu", padding = "same"))
+            layer.Conv2D( 256, kernel_size = (3,3), activation = "linear", padding = "same"))
         model.add(
             layer.MaxPooling2D( pool_size = (2,2), padding = "same" ))
         model.add(
-            layer.Dropout(0.4))
+            layer.Dropout(0.5))
 
         # dense layer
         model.add(
             layer.Flatten())
         model.add(
-            layer.Dense( 256, activation = "relu" ))
+            layer.Dense( 256, activation = "sigmoid" ))
+        model.add(
+            layer.Dropout(0.5))
 
         # output
         model.add( 
@@ -318,8 +320,8 @@ class CNN():
         plt.clf()
         plt.figure( figsize = (1.5*self.num_classes, 1.5*self.num_classes) )
         
-        minimum = np.min( self.confusion_matrix )# /(np.pi**2.0 * np.exp(1.0)**2.0)
-        maximum = np.max( self.confusion_matrix )# *(np.pi**2.0 * np.exp(1.0)**2.0)
+        minimum = np.min( self.confusion_matrix ) /(np.pi**2.0 * np.exp(1.0)**2.0)
+        maximum = np.max( self.confusion_matrix ) *(np.pi**2.0 * np.exp(1.0)**2.0)
 
         x = np.linspace(0, self.num_classes, self.num_classes+1)
         y = np.linspace(0, self.num_classes, self.num_classes+1)

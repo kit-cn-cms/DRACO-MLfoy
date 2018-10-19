@@ -12,14 +12,14 @@ sys.path.append(basedir)
 import DRACO_Frameworks.CNN.CNN as CNN
 
 
-inPath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/CNN_input_data/base_train_set"
+inPath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/train_samples/base_train_set"
 
 cnn = CNN.CNN(
     in_path         = inPath,
-    save_path       = basedir+"/workdir/cnn_test",
+    save_path       = basedir+"/workdir/basic_cnn",
     class_label     = "class_label",
-    batch_size      = 256,
-    train_epochs    = 1,
+    batch_size      = 128,
+    train_epochs    = 20,
     optimizer       = "adam",
     loss_function   = "categorical_crossentropy",
     eval_metrics    = ["mean_squared_error", "acc"] )
