@@ -13,7 +13,7 @@ ttZqq_files = [
     ]
 
 # !!! change this !!!
-basedir = "/nfs/dust/cms/user/vdlinden/miniAOD_output"
+basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir"
 
 print("writing shell scripts for ttH")
 ttH_scripts = NAFSubmit.writeShellScripts( 
