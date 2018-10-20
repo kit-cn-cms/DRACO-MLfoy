@@ -8,18 +8,17 @@ import sys
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
-#import DRACO_Frameworks.CNN.data_frame as data_frame
-import DRACO_Frameworks.CNN.CNN as CNN
+import DRACO_Frameworks.CNN.CNN_one_hot as CNN
 
 
 inPath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/train_samples/base_train_set"
 
 cnn = CNN.CNN(
     in_path         = inPath,
-    save_path       = basedir+"/workdir/basic_cnn",
-    class_label     = "class_label",
-    batch_size      = 128,
-    train_epochs    = 20,
+    save_path       = basedir+"/workdir/basic_cnn_one_hot",
+    class_label     = "nJets",
+    batch_size      = 256,
+    train_epochs    = 10,
     optimizer       = "adam",
     loss_function   = "categorical_crossentropy",
     eval_metrics    = ["mean_squared_error", "acc"] )

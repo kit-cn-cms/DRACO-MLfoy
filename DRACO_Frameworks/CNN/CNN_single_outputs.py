@@ -20,7 +20,7 @@ import data_frame
 
 class CNN():
     def __init__(self, in_path, save_path,      
-                class_label = "class_label", 
+                class_label = "nJets", 
                 batch_size = 128, 
                 train_epochs = 20,
                 optimizer = "adam", 
@@ -52,9 +52,9 @@ class CNN():
     def load_datasets(self):
         ''' load train and validation dataset '''
         self.train_data = data_frame.DataFrame( 
-            self.in_path+"_train.h5", output_label = self.class_label )
+            self.in_path+"_train.h5", output_label = self.class_label, one_hot = False )
         self.val_data = data_frame.DataFrame( 
-            self.in_path+"_val.h5", output_label = self.class_label )
+            self.in_path+"_val.h5", output_label = self.class_label, one_hot = False )
 
         self.num_classes = self.train_data.num_classes
 
@@ -65,40 +65,40 @@ class CNN():
         
         # input layer
         model.add(
-            layer.Conv2D( 64, kernel_size = (8,8), activation = "linear", padding = "same", 
+            layer.Conv2D( 64, kernel_size = (5,5), activation = "relu", padding = "same", 
             input_shape = self.train_data.input_shape ))
         model.add(
-            layer.MaxPooling2D( pool_size = (3,3), padding = "same" ))
+            layer.AveragePooling2D( pool_size = (3,3), padding = "same" ))
         model.add(
-            layer.Dropout(0.5))
+            layer.Dropout(0.1))
 
         # second layer
         model.add(
-            layer.Conv2D( 128, kernel_size = (4,4), activation = "linear", padding = "same"))
+            layer.Conv2D( 128, kernel_size = (4,4), activation = "relu", padding = "same"))
         model.add(
-            layer.MaxPooling2D( pool_size = (3,3), padding = "same" ))
+            layer.AveragePooling2D( pool_size = (3,3), padding = "same" ))
         model.add(
-            layer.Dropout(0.5))
+            layer.Dropout(0.1))
     
         # third layer
         model.add(
-            layer.Conv2D( 256, kernel_size = (3,3), activation = "linear", padding = "same"))
+            layer.Conv2D( 256, kernel_size = (3,3), activation = "relu", padding = "same"))
         model.add(
-            layer.MaxPooling2D( pool_size = (2,2), padding = "same" ))
+            layer.MaxPooling2D( pool_size = (3,3), padding = "same" ))
         model.add(
-            layer.Dropout(0.5))
+            layer.Dropout(0.1))
 
         # dense layer
         model.add(
             layer.Flatten())
         model.add(
-            layer.Dense( 256, activation = "sigmoid" ))
+            layer.Dense( 256, activation = "relu" ))
         model.add(
-            layer.Dropout(0.5))
+            layer.Dropout(0.1))
 
         # output
         model.add( 
-            layer.Dense( self.num_classes, activation = "softmax" ))
+            layer.Dense( self.num_classes, activation = "relu" ))
         return model
 
 
@@ -129,11 +129,11 @@ class CNN():
     def train_model(self):
         self.trained_model = self.model.fit(
             x = self.train_data.X,
-            y = self.train_data.one_hot,
+            y = self.train_data.Y,
             batch_size = self.batch_size,
             epochs = self.train_epochs,
             shuffle = True,
-            validation_data = (self.val_data.X, self.val_data.one_hot ))
+            validation_data = (self.val_data.X, self.val_data.Y ))
 
         # save trained model
         out_file = self.save_path +"/trained_model.h5py"
@@ -153,25 +153,25 @@ class CNN():
     def eval_model(self):
         # loading test examples
         self.test_data = data_frame.DataFrame( 
-            self.in_path+"_test.h5", output_label = self.class_label )
+            self.in_path+"_test.h5", output_label = self.class_label, one_hot = False )
 
-        self.target_names = [self.test_data.inverted_label_dict[i] for i in range(self.num_classes)]
 
         self.test_eval = self.model.evaluate(
-            self.test_data.X, self.test_data.one_hot)
-        print("test loss:     {}".format( self.test_eval[0] ))
+            self.test_data.X, self.test_data.Y)
+        print("test loss: {}".format( self.test_eval[0] ))
         for im, metric in enumerate(self.eval_metrics):
             print("test {}: {}".format( metric, self.test_eval[im+1] ))
 
         self.history = self.trained_model.history
         
         self.predicted_vector = self.model.predict( self.test_data.X )
-        self.predicted_classes = np.argmax( np.round(self.predicted_vector), axis = 1)
+        
+        # correct predictons (kind of arbitrary)
+        # everything so far only implemented for a single output neuron with integer targets
+        self.predicted_classes = [int(val+0.5) for val in self.predicted_vector[:,0]]
 
         self.confusion_matrix = confusion_matrix(
-            self.test_data.Y, self.predicted_classes )
-
-
+            self.test_data.Y, self.predicted_classes)
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -179,47 +179,24 @@ class CNN():
     def print_classification_examples(self):
         ''' print some examples of classifications '''
 
-        correct = np.where( self.predicted_classes == self.test_data.Y )[0]
-        print("found {} correct classifications".format(len(correct)))
-        incorrect = np.where( self.predicted_classes != self.test_data.Y)[0]
-        print("found {} incorrect classifications".format(len(incorrect)))
-
         # plot correct examples
         plt.clf()
         plt.figure(figsize = [5,5])
-        for i, sample in enumerate(correct[:4]):
+        for i in range(4):
             plt.subplot(2,2,i+1)
             plt.imshow( 
-                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]),
+                self.test_data.X[i].reshape(*self.test_data.input_shape[:2]),
                 cmap = "Greens", norm = LogNorm())
         
             plt.title( "Predicted {}\nTrue {}".format(
-                self.test_data.inverted_label_dict[self.predicted_classes[sample]],
-                self.test_data.inverted_label_dict[self.test_data.Y[sample]] ))
+                self.predicted_vector[i][0],
+                self.test_data.Y[i] ))
 
-        out_path = self.save_path + "/correct_prediction_examples.pdf"
+        out_path = self.save_path + "/prediction_examples.pdf"
         plt.savefig( out_path )
-        print("saved examples of correct predictions to "+str(out_path))
+        print("saved examples of predictions to "+str(out_path))
         plt.clf()
         
-        # plot incorrect examples
-        plt.figure(figsize = [5,5])
-        for i, sample in enumerate(incorrect[:4]):
-            plt.subplot(2,2,i+1)
-            plt.imshow( 
-                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]),
-                cmap = "Greens", norm = LogNorm())
-
-            plt.title( "Predicted {}\nClass {}".format(
-                self.test_data.inverted_label_dict[self.predicted_classes[sample]],
-                self.test_data.inverted_label_dict[self.test_data.Y[sample]] ))
-
-        out_path = self.save_path + "/incorrect_prediction_examples.pdf"
-        plt.savefig( out_path )
-        print("saved examples of incorrect predictions to "+str(out_path))
-        plt.clf()
-
-
     def print_classification_report(self):
         ''' print a classification report '''
 
@@ -263,54 +240,31 @@ class CNN():
     def plot_discriminators(self, log = False):
         ''' plot discriminator for output classes '''
 
-        for i in range(self.num_classes):
-            values = self.predicted_vector[:,i]
-
-            bkg_values = []
-            bkg_labels = []
-            n_bkg_evts = 0
-            n_sig_evts = 0
-
-            for j in range(self.num_classes):
-                filtered_values = [values[k] for k in range(len(values)) if self.test_data.Y[k] == j]
-                if i == j:
-                    sig_values = filtered_values
-                    sig_label = self.test_data.inverted_label_dict[j]
-                    n_sig_evts += len(filtered_values)
-                else:
-                    bkg_values.append(filtered_values)
-                    bkg_labels.append(self.test_data.inverted_label_dict[j])
-                    n_bkg_evts += len(filtered_values)
-
-            # plot the discriminator output
-            plt.clf()
-            plt.figure( figsize = [5,5] )
-            # stack backgrounds
-            plt.hist( bkg_values, stacked = True, histtype = "stepfilled", 
-                        bins = 20, range = [0,1], label = bkg_labels, log = log)
-
-            # get signal weights
-            bkg_sig_ratio = 1.* n_bkg_evts / n_sig_evts     
-            sig_weights = [bkg_sig_ratio]*len(sig_values)
-            sig_label += "*{:.3f}".format(bkg_sig_ratio)
-
-            # plot signal shape
-            plt.hist( sig_values, histtype = "step", weights = sig_weights,
-                        bins = 20, range = [0,1], label = sig_label, log = log)
-
-            plt.legend(loc = "upper center")
-            plt.xlabel("discriminator output")
-            plt.title("discriminator for {}".format(
-                self.test_data.inverted_label_dict[i]))
-            
-            out_path = self.save_path +"/discriminator_{}.pdf".format(
-                self.test_data.inverted_label_dict[i].replace(" ","_"))
+        predicted_values = self.predicted_vector
+        true_values = self.test_data.Y
         
-            plt.savefig(out_path)
-            print("plot for discriminator of {} saved at {}".format(
-                self.test_data.inverted_label_dict[i], out_path))
+        min_val = np.min([np.min(self.predicted_classes), np.min(self.test_data.Y)])
+        max_val = np.max([np.max(self.predicted_classes), np.max(self.test_data.Y)])
 
-            plt.clf()
+        n_bins = max_val - min_val + 1
+        bin_range = [min_val - 0.5, max_val + 0.5]
+
+        plt.clf()
+        plt.hist(true_values, bins = n_bins, range = bin_range,
+            histtype = "stepfilled", label = "truth")
+
+        # prepare predicted histogram
+        hist, _ = np.histogram(predicted_values, bins = n_bins, range = bin_range)
+        x_values = np.arange(min_val, max_val+1, step = 1)
+        plt.plot( x_values, hist, "o", color = "black", label = "prediction")
+
+        plt.grid()
+        plt.legend()
+        plt.xlabel(str(self.class_label))
+        
+        out_file = self.save_path+"/discriminator_"+str(self.class_label)+".pdf"
+        plt.savefig(out_file)
+        print("saved discriminator plot for "+str(self.class_label)+" at "+str(out_file))
 
 
 
@@ -318,39 +272,42 @@ class CNN():
         ''' generate confusion matrix for classification '''
   
         plt.clf()
-        plt.figure( figsize = (1.5*self.num_classes, 1.5*self.num_classes) )
+        plt.figure( figsize = (10,10) )
         
         minimum = np.min( self.confusion_matrix ) /(np.pi**2.0 * np.exp(1.0)**2.0)
         maximum = np.max( self.confusion_matrix ) *(np.pi**2.0 * np.exp(1.0)**2.0)
+        
+        min_val = np.min([np.min(self.predicted_classes), np.min(self.test_data.Y)])
+        max_val = np.max([np.max(self.predicted_classes), np.max(self.test_data.Y)])
 
-        x = np.linspace(0, self.num_classes, self.num_classes+1)
-        y = np.linspace(0, self.num_classes, self.num_classes+1)
 
+        x = np.arange(min_val, max_val+1, step = 1)
+        y = np.arange(min_val, max_val+1, step = 1)
         xn, yn = np.meshgrid(x,y)
 
         plt.pcolormesh(xn, yn, self.confusion_matrix, 
             norm = LogNorm( vmin = max(minimum, 1e-6), vmax = maximum ))
         plt.colorbar()
 
-        plt.xlim(0,self.num_classes)
-        plt.ylim(0,self.num_classes)
+        plt.xlim(min_val,max_val+1)
+        plt.ylim(min_val,max_val+1)
 
         plt.xlabel("Predicted")
         plt.ylabel("True")
 
         for yit in range(self.confusion_matrix.shape[0]):
             for xit in range(self.confusion_matrix.shape[1]):
-                plt.text( xit+0.5, yit+0.5,
+                plt.text( xit+min_val+0.5, yit+min_val+0.5,
                     "{:.1f}".format(self.confusion_matrix[yit, xit]),
                     horizontalalignment = "center",
                     verticalalignment = "center")
 
         plt_axis = plt.gca()
-        plt_axis.set_xticks(np.arange( (x.shape[0] -1)) + 0.5, minor = False )
-        plt_axis.set_yticks(np.arange( (y.shape[0] -1)) + 0.5, minor = False )
+        plt_axis.set_xticks(x + 0.5, minor = False )
+        plt_axis.set_yticks(y + 0.5, minor = False )
 
-        plt_axis.set_xticklabels(self.target_names)
-        plt_axis.set_yticklabels(self.target_names)
+        plt_axis.set_xticklabels(x)
+        plt_axis.set_yticklabels(y)
 
         plt_axis.set_aspect("equal")
 
