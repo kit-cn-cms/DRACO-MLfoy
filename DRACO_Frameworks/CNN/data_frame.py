@@ -1,5 +1,6 @@
 import pandas as pd
 from keras.utils import to_categorical
+import numpy as np
 
 class DataFrame( object ):
     def __init__(self, path_to_input_file, output_label = "class_label", one_hot = True):
@@ -21,7 +22,11 @@ class DataFrame( object ):
         print("chose '"+str(output_label)+"' as label for output classes")
         self.Y = df[output_label].values
         # TODO hardcoded restrictions to 12 jets not very elegant
-        self.Y = [j if j<=12 else 12 for j in self.Y]
+        self.min_jets = 3
+        self.max_jets = 12
+        self.Y = [self.max_jets if j>=self.max_jets \
+                else self.min_jets if j<=self.min_jets \
+                else j for j in self.Y]
 
         if one_hot:
             # generating label vectors (one-hot-encoding)

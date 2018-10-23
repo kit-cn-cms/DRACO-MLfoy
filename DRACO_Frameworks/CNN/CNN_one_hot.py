@@ -12,6 +12,11 @@ from sklearn.metrics import confusion_matrix
 
 import os
 
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.5
+set_session(tf.Session(config=config))
 # local imports
 import data_frame
 
@@ -155,7 +160,8 @@ class CNN():
         self.test_data = data_frame.DataFrame( 
             self.in_path+"_test.h5", output_label = self.class_label )
 
-        self.target_names = [self.test_data.inverted_label_dict[i] for i in range(self.num_classes)]
+        self.target_names = [self.test_data.inverted_label_dict[i] for i in range(
+            self.test_data.min_jets, self.test_data.max_jets+1)]
 
         self.test_eval = self.model.evaluate(
             self.test_data.X, self.test_data.one_hot)
@@ -170,8 +176,11 @@ class CNN():
 
         self.confusion_matrix = confusion_matrix(
             self.test_data.Y, self.predicted_classes )
-
-
+        print(min(self.test_data.Y))
+        print(max(self.test_data.Y))
+        print(self.predicted_classes.shape)
+        print(self.confusion_matrix)
+        print(self.confusion_matrix.shape)
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -324,8 +333,11 @@ class CNN():
         minimum = np.min( self.confusion_matrix ) /(np.pi**2.0 * np.exp(1.0)**2.0)
         maximum = np.max( self.confusion_matrix ) *(np.pi**2.0 * np.exp(1.0)**2.0)
 
-        x = np.linspace(0, self.num_classes, self.num_classes+1)
-        y = np.linspace(0, self.num_classes, self.num_classes+1)
+        n_classes = self.confusion_matrix.shape[0]       
+        #x = np.arange(self.train_data.min_jets, self.train_data.max_jets+1, 1)
+        #y = np.arange(self.train_data.min_jets, self.train_data.max_jets+1, 1)
+        x = np.arange(0,n_classes+1,1)
+        y = np.arange(0,n_classes+1,1)
 
         xn, yn = np.meshgrid(x,y)
 
@@ -333,14 +345,14 @@ class CNN():
             norm = LogNorm( vmin = max(minimum, 1e-6), vmax = maximum ))
         plt.colorbar()
 
-        plt.xlim(0,self.num_classes)
-        plt.ylim(0,self.num_classes)
+        plt.xlim(0, n_classes+1)
+        plt.ylim(0, n_classes+1)
 
         plt.xlabel("Predicted")
         plt.ylabel("True")
 
-        for yit in range(self.confusion_matrix.shape[0]):
-            for xit in range(self.confusion_matrix.shape[1]):
+        for yit in range(n_classes):
+            for xit in range(n_classes):
                 plt.text( xit+0.5, yit+0.5,
                     "{:.1f}".format(self.confusion_matrix[yit, xit]),
                     horizontalalignment = "center",
@@ -349,7 +361,7 @@ class CNN():
         plt_axis = plt.gca()
         plt_axis.set_xticks(np.arange( (x.shape[0] -1)) + 0.5, minor = False )
         plt_axis.set_yticks(np.arange( (y.shape[0] -1)) + 0.5, minor = False )
-
+        print(self.target_names)
         plt_axis.set_xticklabels(self.target_names)
         plt_axis.set_yticklabels(self.target_names)
 
