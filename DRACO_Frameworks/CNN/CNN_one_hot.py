@@ -26,6 +26,7 @@ import data_frame
 class CNN():
     def __init__(self, in_path, save_path,      
                 class_label = "class_label", 
+                phi_padding = None,
                 batch_size = 128, 
                 train_epochs = 20,
                 optimizer = "adam", 
@@ -42,7 +43,9 @@ class CNN():
             os.makedirs( self.save_path )
         # name of classification variable
         self.class_label = class_label
-        
+        # phi padding for rotational symmetries
+        self.phi_padding = phi_padding
+
         # batch size for training
         self.batch_size  = batch_size
         # number of training epochs
@@ -57,9 +60,11 @@ class CNN():
     def load_datasets(self):
         ''' load train and validation dataset '''
         self.train_data = data_frame.DataFrame( 
-            self.in_path+"_train.h5", output_label = self.class_label )
+            self.in_path+"_train.h5", output_label = self.class_label,
+            phi_padding = self.phi_padding )
         self.val_data = data_frame.DataFrame( 
-            self.in_path+"_val.h5", output_label = self.class_label )
+            self.in_path+"_val.h5", output_label = self.class_label,
+            phi_padding = self.phi_padding )
 
         self.num_classes = self.train_data.num_classes
 
@@ -158,7 +163,8 @@ class CNN():
     def eval_model(self):
         # loading test examples
         self.test_data = data_frame.DataFrame( 
-            self.in_path+"_test.h5", output_label = self.class_label )
+            self.in_path+"_test.h5", output_label = self.class_label,
+            phi_padding = self.phi_padding )
 
         self.target_names = [self.test_data.inverted_label_dict[i] for i in range(
             self.test_data.min_jets, self.test_data.max_jets+1)]
@@ -198,13 +204,17 @@ class CNN():
         for i, sample in enumerate(correct[:4]):
             plt.subplot(2,2,i+1)
             plt.imshow( 
-                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]),
-                cmap = "Greens", norm = LogNorm())
+                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]).T,
+                cmap = "Greens")
         
             plt.title( "Predicted {}\nTrue {}".format(
                 self.test_data.inverted_label_dict[self.predicted_classes[sample]],
                 self.test_data.inverted_label_dict[self.test_data.Y[sample]] ))
+            plt_axis = plt.gca()
+            plt_axis.get_xaxis().set_visible(False)
+            plt_axis.get_yaxis().set_visible(False)
 
+        plt.tight_layout()
         out_path = self.save_path + "/correct_prediction_examples.pdf"
         plt.savefig( out_path )
         print("saved examples of correct predictions to "+str(out_path))
@@ -215,13 +225,17 @@ class CNN():
         for i, sample in enumerate(incorrect[:4]):
             plt.subplot(2,2,i+1)
             plt.imshow( 
-                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]),
-                cmap = "Greens", norm = LogNorm())
+                self.test_data.X[sample].reshape(*self.test_data.input_shape[:2]).T,
+                cmap = "Greens")
 
             plt.title( "Predicted {}\nClass {}".format(
                 self.test_data.inverted_label_dict[self.predicted_classes[sample]],
                 self.test_data.inverted_label_dict[self.test_data.Y[sample]] ))
+            plt_axis = plt.gca()
+            plt_axis.get_xaxis().set_visible(False)
+            plt_axis.get_yaxis().set_visible(False)
 
+        plt.tight_layout()
         out_path = self.save_path + "/incorrect_prediction_examples.pdf"
         plt.savefig( out_path )
         print("saved examples of incorrect predictions to "+str(out_path))

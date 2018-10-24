@@ -11,6 +11,11 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
 import os
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.3
+set_session(tf.Session(config=config))
 
 # local imports
 import data_frame
@@ -21,6 +26,7 @@ import data_frame
 class CNN():
     def __init__(self, in_path, save_path,      
                 class_label = "nJets", 
+                phi_padding = None,
                 batch_size = 128, 
                 train_epochs = 20,
                 optimizer = "adam", 
@@ -37,7 +43,9 @@ class CNN():
             os.makedirs( self.save_path )
         # name of classification variable
         self.class_label = class_label
-        
+        # phi padding for rotational symmetries
+        self.phi_padding = phi_padding        
+
         # batch size for training
         self.batch_size  = batch_size
         # number of training epochs
@@ -52,9 +60,11 @@ class CNN():
     def load_datasets(self):
         ''' load train and validation dataset '''
         self.train_data = data_frame.DataFrame( 
-            self.in_path+"_train.h5", output_label = self.class_label, one_hot = False )
+            self.in_path+"_train.h5", output_label = self.class_label, one_hot = False,
+            phi_padding = self.phi_padding )
         self.val_data = data_frame.DataFrame( 
-            self.in_path+"_val.h5", output_label = self.class_label, one_hot = False )
+            self.in_path+"_val.h5", output_label = self.class_label, one_hot = False,
+            phi_padding = self.phi_padding)
 
         self.num_classes = self.train_data.num_classes
 
@@ -153,7 +163,8 @@ class CNN():
     def eval_model(self):
         # loading test examples
         self.test_data = data_frame.DataFrame( 
-            self.in_path+"_test.h5", output_label = self.class_label, one_hot = False )
+            self.in_path+"_test.h5", output_label = self.class_label, one_hot = False,
+            phi_padding = self.phi_padding )
 
 
         self.test_eval = self.model.evaluate(
