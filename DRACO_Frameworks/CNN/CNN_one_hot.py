@@ -172,15 +172,14 @@ class CNN():
         self.history = self.trained_model.history
         
         self.predicted_vector = self.model.predict( self.test_data.X )
-        self.predicted_classes = np.argmax( np.round(self.predicted_vector), axis = 1)
+        self.predicted_classes = np.argmax( self.predicted_vector, axis = 1)
+        
+        self.predicted_classes = np.array([self.test_data.max_jets if j >= self.test_data.max_jets \
+                             else self.test_data.min_jets if j <= self.test_data.min_jets \
+                             else j for j in self.predicted_classes])
 
         self.confusion_matrix = confusion_matrix(
             self.test_data.Y, self.predicted_classes )
-        print(min(self.test_data.Y))
-        print(max(self.test_data.Y))
-        print(self.predicted_classes.shape)
-        print(self.confusion_matrix)
-        print(self.confusion_matrix.shape)
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -345,8 +344,8 @@ class CNN():
             norm = LogNorm( vmin = max(minimum, 1e-6), vmax = maximum ))
         plt.colorbar()
 
-        plt.xlim(0, n_classes+1)
-        plt.ylim(0, n_classes+1)
+        plt.xlim(0, n_classes)
+        plt.ylim(0, n_classes)
 
         plt.xlabel("Predicted")
         plt.ylabel("True")
@@ -361,7 +360,6 @@ class CNN():
         plt_axis = plt.gca()
         plt_axis.set_xticks(np.arange( (x.shape[0] -1)) + 0.5, minor = False )
         plt_axis.set_yticks(np.arange( (y.shape[0] -1)) + 0.5, minor = False )
-        print(self.target_names)
         plt_axis.set_xticklabels(self.target_names)
         plt_axis.set_yticklabels(self.target_names)
 

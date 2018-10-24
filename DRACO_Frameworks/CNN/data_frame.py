@@ -47,7 +47,6 @@ class DataFrame( object ):
         if output_label == "nJets":
             self.label_dict = {str(i)+" jets": i for i in range(self.num_classes)}
             self.inverted_label_dict = {val: key for key, val in self.label_dict.items()}
-
         # input data
         self.X  = df.values[:,:self.input_size]
         # reshape as CNN inputs
