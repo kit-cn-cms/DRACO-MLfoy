@@ -90,6 +90,9 @@ def read_event(iev, event, applyCuts = True):
     nJets = 0
     for i,j in enumerate(jets.product()):
         if applyCuts and (j.pt() < 20): continue
+        # only read out jets with eta < 2.5
+        if np.abs(j.eta()) > 2.5: continue
+        
         # candidates.append( Candidate(j, "jet") )
         nJets += 1
         # loop over jet constituents and only add them to the histogram
