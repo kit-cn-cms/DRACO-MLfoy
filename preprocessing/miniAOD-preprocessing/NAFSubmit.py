@@ -4,12 +4,19 @@ import subprocess
 import stat
 
 
-def writeShellScripts( workdir, inFiles, nameBase ):
+def writeShellScripts( workdir, inFiles, nameBase, data_type ):
     ''' write shell script to execute 'preprocessing_single_file.py'
         to process a single root file '''
 
     shellpath = workdir + "/shell_scripts"
-    single_file_path = os.path.dirname(os.path.realpath(__file__)) + "/preprocessing_single_file.py"
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    if data_type == "pf_cands":
+        single_file_path = dir_path + "/preprocessing_pf_candidates.py"
+    elif data_type == "cnn_map":
+        single_file_path = dir_path + "/preprocessing_cnn_map.py"
+    else:
+        print("choose viable data_type")
+        exit()
 
     if not os.path.exists(shellpath):
         os.makedirs(shellpath)
