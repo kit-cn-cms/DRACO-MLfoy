@@ -25,25 +25,27 @@ photons,        photonLabel     = Handle("std::vector<pat::Photon>"),   "slimmed
 taus,           tauLabel        = Handle("std::vector<pat::Tau>"),      "slimmedTaus"
 jets,           jetLabel        = Handle("std::vector<pat::Jet>"),      "slimmedJets"
 
-class HDFConfig():
-    ''' configuration of data written to h5 file '''
-    def __init__(self, imageSize, etaRange, phiRange, logNorm):
-        # image size with [x,y,z] size
-        self.imageSize = imageSize[:2]
-        self.nImages = imageSize[2]
-        self.etaRange = etaRange
-        self.phiRange = phiRange
-        self.lognorm = logNorm
-
 class Candidate():
     ''' save neccesary info about a particle candidate instead of copying the whole object '''
     def __init__(self, obj, name):
         self.name = name
-        self.eta = obj.eta()
-        self.phi = obj.phi()*180./(np.pi)
-        #define what to use as histogram weight
-        self.weight = obj.pt()
+        self.obj = obj
+        self.pt = obj.pt()
+        self.phi = obj.phi()
         del obj
+
+    def return_vector(self, first_jet):
+        pt = self.obj.pt()
+        pz = self.obj.pz()
+        energy = self.obj.energy()
+        phi = self.obj.phi() - first_jet.obj.phi()
+        eta = self.obj.eta()
+        mass2 = self.obj.mass()**2        
+        
+        features = [energy, pt, pz, mass2, phi, eta]
+        names = ["E", "pT", "pz", "M2", "phi", "eta"]
+        return features, names
+        
 
         
 def read_event(iev, event, applyCuts = True):
@@ -54,7 +56,7 @@ def read_event(iev, event, applyCuts = True):
             the dictionary is used to write additional information to the dataframes
             like number of leptons or jets '''
     # initialize list for candidates
-    candidates = []
+    candidates = {}
     event_data = {}
 
     event.getByLabel(muonLabel, muons)
@@ -67,73 +69,57 @@ def read_event(iev, event, applyCuts = True):
     for i,mu in enumerate(muons.product()):
         # cuts
         if applyCuts and (mu.pt() < 5 or not mu.isLooseMuon()): continue
-        candidates.append( Candidate(mu, "muon") )
+        candidates[Candidate(mu, "muon")] = mu.pt()
 
     # read Electrons
     for i,el in enumerate(electrons.product()):
         if applyCuts and (el.pt() < 5): continue
-        candidates.append( Candidate(el, "electron") )
+        candidates[Candidate(el, "electron")] = el.pt()
         
     event_data["nLeptons"] = len(candidates)
 
     # Photon
     for i,pho in enumerate(photons.product()):
         if applyCuts and (pho.pt() < 20 or pho.chargedHadronIso()/pho.pt() > 0.3): continue
-        candidates.append( Candidate(pho, "photon") )
+        candidates[Candidate(pho, "photon")] = pho.pt()
        
     # Tau
     for i,tau in enumerate(taus.product()):
         if applyCuts and (tau.pt() < 20): continue
-        candidates.append( Candidate(tau, "tau") )
+        candidates[Candidate(tau, "tau")] = tau.pt()
     
     # Jets
     nJets = 0
+    jet_candidates = {}
     for i,j in enumerate(jets.product()):
         if applyCuts and (j.pt() < 20): continue
         # only read out jets with eta < 2.5
         if np.abs(j.eta()) > 2.5: continue
-        
+        jet_candidates[Candidate(j, "jet")] = j.pt()
         # candidates.append( Candidate(j, "jet") )
         nJets += 1
         # loop over jet constituents and only add them to the histogram
         constituents = [ j.daughter(i2) for i2 in xrange(j.numberOfDaughters()) ]
         for i2, cand in enumerate(constituents):
-            candidates.append( Candidate(cand, "jet_"+str(i)+"_candidate") )
+            candidates[Candidate(cand, "jet_"+str(i)+"_candidate")] = cand.pt()
 
     event_data["nJets"] = nJets
+    pt_sorted_candidates = pt_sort(candidates)
+    first_jet = pt_sort(jet_candidates)[0]
+        
 
-    return candidates, event_data
+    return pt_sorted_candidates, event_data, first_jet
 
+def pt_sort(candidates):
+    sorted_cands = np.array(sorted(candidates.iteritems(), key = lambda (k,v): (v,k), reverse = True))
+    return sorted_cands[:,0]
 
-def get_2dhist( candidates, hdfConfig):
-    ''' create 2d histogram of event 
-        returns flattened matrix ready to be saved in dataframe '''
-    eta = [ c.eta for c in candidates ]
-    phi = [ c.phi for c in candidates ]
-    weights = [ c.weight for c in candidates ]
-    H, _, _ = np.histogram2d(
-        x =             eta, 
-        y =             phi, 
-        bins =          hdfConfig.imageSize, 
-        range =         [hdfConfig.etaRange, hdfConfig.phiRange], 
-        weights =       weights )
-    # transpose histogram (makes reshaping easier) and flatten into 1d string
-    flattened = H.flatten()
-
-    if hdfConfig.lognorm:
-        flattened = np.array([ np.log(f) if f > 1. else 0. for f in flattened])
-
-    # norm entries between 0 and 1
-    maximum = np.max(flattened)
-    flattened = flattened/maximum
-    return flattened
-
-def load_data( inFile, outFile, hdfConfig):
+def load_data( inFile, outFile):
     ''' loading data from a single .root file
         saving it a s dataframe in given outFile '''
     # initializing events
     events = Events(inFile)
-
+    n_cands = 75
     # init empty data
     evt_data = []
     data = []
@@ -142,31 +128,38 @@ def load_data( inFile, outFile, hdfConfig):
         if iev%1000 == 0:
             print("at event #"+str(iev))
         #read particle candidates of event
-        candidates, event_data = read_event(iev, event)
-        # generate 2dhistogram 
-        hist_flat = get_2dhist( candidates, hdfConfig )
-        # append flattened hist to data list
-        data.append( hist_flat )
-        # append additional event data to list
-        evt_data.append( event_data )
+        pt_sorted_candidates, event_data, first_jet = read_event(iev, event)
+        pt_sorted_candidates = pt_candidates[:n_cands]    
+        features = []
+        labels = []
+        for i, cand in enumerate(pt_sorted_candidates):
+            f, l = cand.return_vector(first_jet)
+            n_features = len(f)
+            l = [label+"_"+str(i) for label in l]
+            features += f
+            labels += l
+        data.append( features )
+        evt_data.append(event_data)
+        
 
-    df = pd.DataFrame.from_records(data)
+    df = pd.DataFrame.from_records(data, columns = labels)
     for key in evt_data[0]:
         values = [evt_data[i][key] for i in range(len(evt_data))]
         df[key] = pd.Series( values, index = df.index )
 
     print("writing data to dataframe")
     df.to_hdf( outFile, key = "data", mode = "w" )
-    
+
     #meta info
     print("saving meta info")
-    evts_in_file = len(list(events))
-    input_shape = (hdfConfig.imageSize[0], hdfConfig.imageSize[1], hdfConfig.nImages)
+    input_shape = (1,n_cands,n_features)
 
-    meta_info_dict = {"input_shape": input_shape, "n_events": evts_in_file}
+    meta_info_dict = {"input_shape": input_shape}
 
     meta_info_df = pd.DataFrame.from_dict( meta_info_dict )
     meta_info_df.to_hdf( outFile, key = "meta_info", mode = "a")
+
+
 
 
 def split_dataframe(df, train_pc, val_pc):
