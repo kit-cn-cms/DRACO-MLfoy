@@ -14,13 +14,14 @@ categories = {
 example_cat = "(N_Jets == 6 and N_BTagsM >= 3)"
 
 data_set = data_frame(
-    inFile_path                 = workdir,
+    path_to_input_files         = workdir,
     classes                     = classes,
-    category                    = example_cat,
-    variables                   = categories[example_cat],
-    intermediate_variables      = ["N_Jets", "N_BTagsM"], # placeholders
-    test_percentage             = 0.3,
-    train_percentage            = 0.5,
-    norm_variables              = True)
+    event_category              = example_cat,
+    train_variables             = categories[example_cat],
+    prenet_targets              = ["N_Jets", "N_BTagsM"], # placeholders
+    test_percentage             = 0.1,
+    norm_variables              = False)
+
+data_set.hist_train_variables(signal_hists = ["ttHbb"])
 
 

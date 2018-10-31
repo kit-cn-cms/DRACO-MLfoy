@@ -1,55 +1,161 @@
 import pandas as pd
 import numpy as np
 from sklearn.utils import shuffle
+from keras.utils import to_categorical
 
+import matplotlib.pyplot as plt
 
 class DataFrame(object):
-    def __init__(self, inFile_path, classes, category, variables, intermediate_variables,
-                test_percentage = 0.1, train_percentage = 0.5, norm_variables = False):
+    def __init__(self, path_to_input_files, 
+                classes, event_category, 
+                train_variables, prenet_targets,
+                test_percentage = 0.1,
+                norm_variables = False):
 
-        dfs = []
+        ''' takes a path to a folder where one h5 per class is located
+            the events are cut according to the event_category
+            variables in train_variables are used as input variables
+            variables in prenet_targets are used as classes for the pre net
+            the dataset is shuffled and split into a test and train sample
+                according to test_percentage
+            for better training, the variables can be normed to std(1) and mu(0) '''
+
+        # loop over all classes and extract data as well as event weights
+        class_dataframes = list()
         for cls in classes:
-            class_file = inFile_path + "/" + cls + ".h5"
+            class_file = path_to_input_files + "/" + cls + ".h5"
+            print("-"*50)
             print("loading class file "+str(class_file))
+
             with pd.HDFStore( class_file, mode = "r" ) as store:
                 cls_df = store.select("data")
                 print("number of events before selections: "+str(cls_df.shape[0]))
 
-            # apply category
-            cls_df.query(category, inplace = True)
-            print("number of events after applying event category cut: "+str(cls_df.shape[0]))
+            # apply event category cut
+            cls_df.query(event_category, inplace = True)
+            self.event_category = event_category
+            print("number of events after selections:  "+str(cls_df.shape[0]))
 
             # add event weight
             weights = cls_df["Weight_XS"].values
             weight_sum = sum(weights)
-            print("weight sum for "+str(cls)+ ": "+str(weight_sum))
-            cls_df["train_weight"] = pd.Series( [1.*w/weight_sum for w in weights], index = cls_df.index )
+            # sum of weights per class normed to 1
+            cls_df["train_weight"] = pd.Series( [w/weight_sum for w in weights], index = cls_df.index )
             
-            dfs.append( cls_df )
+            # add data to list of dataframes
+            class_dataframes.append( cls_df )
+            print("-"*50)
 
         # concatenating all dataframes
-        df = pd.concat( dfs )
+        df = pd.concat( class_dataframes )
+        del class_dataframes
 
+        # norm weights to mean(1)
+        df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
 
+        # save some meta data about net
+        self.n_input_neurons = len(train_variables)
+        self.n_prenet_output_neurons = len(prenet_targets)
+        self.n_output_neurons = len(classes)
 
-        # do whatever needed with the dataframes, eg. splitting into train/etc (TODO)
+        # shuffle dataframe
         df = shuffle(df)
 
-        # generate dataframe with training variables
-        self.X = df[ variables ]
-        # generate dataframe with intermediate target variables
-        self.intermediate_Y = df[ intermediate_variables ]
-        # generate dataframe with train target
-        self.Y = df["class_label"]
-        # generate dataframe with training weights
-        self.W = df["train_weight"]
-
+        # norm variables if wanted
         if norm_variables:
-            self.X = (self.X - self.X.mean())/self.X.std()
+            df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
 
-        print(self.X.shape)
-        print(self.Y.shape)
-        print(self.intermediate_Y.shape)
-        print(self.W.shape)
+        # split test sample
+        n_test_samples = int( df.shape[0]*test_percentage )
+        self.df_test = df.head(n_test_samples)
+        self.df_train = df.tail(df.shape[0] - n_test_samples )
+        del df
+
+        # save variable lists
+        self.train_variables = train_variables
+        self.prenet_targets = prenet_targets
+        self.output_classes = classes
+
+    def get_train_data(self, as_matrix = True):
+        if as_matrix: return self.df_train[ self.train_variables ].values
+        else:         return self.df_train[ self.train_variables ]
+
+    def get_train_weights(self):
+        return self.df_train["train_weight"].values
+
+    def get_train_labels(self):
+        return to_categorical( self.df_train["class_label"].values )      
+
+    def get_prenet_train_labels(self):
+        return self.df_train[ self.prenet_targets ].values
+        
+    def get_test_data(self, as_matrix = True):
+        if as_matrix: return self.df_test[ self.train_variables ].values
+        else:         return self.df_test[ self.train_variables ]
+
+    def get_train_labels(self):
+        return self.df_test["train_weight"].values
+
+    def get_test_labels(self, as_matrix = True):
+        return to_categorical( self.df_test["class_label"].values )      
+
+    def get_prenet_test_labels(self, as_matrix = True):
+        return self.df_test[ self.prenet_targets ].values
+
+
+
+
+    def hist_train_variables(self, signal_hists = [], n_bins = 20, logscale = True):
+
+        # loop over variables
+        for var in self.train_variables:
+            plt.figure()
+            
+            # figure out binning
+            max_val = max(self.df_train[var].values)
+            min_val = min(self.df_train[var].values)
+            bin_range = [min_val, max_val]
+
+            # stack backgrounds
+            bkg_values = []
+            bkg_labels = []
+            bkg_weights = []
+            for cls in self.output_classes:
+                if  cls in signal_hists: continue
+                condition = "(class_label == '"+str(cls)+"')"
+                bkg_values.append( self.df_train.query(condition)[var].values )
+                bkg_weights.append( self.df_train.query(condition)["train_weight"].values )
+                bkg_labels.append(cls)
+
+            # plot backgrounds
+            plt.hist( bkg_values, weights = bkg_weights,
+                bins = n_bins, range = bin_range, 
+                label = bkg_labels, stacked = True, histtype = "stepfilled",
+                log = logscale, normed = True)
+
+            n_bkgs = len(bkg_labels)
+
+            # loop over signals
+            for cls in signal_hists:
+                condition = "(class_label == '"+str(cls)+"')"
+                sig_values = self.df_train.query(condition)[var].values
+                sig_weights = self.df_train.query(condition)["train_weight"].values
+
+                # plot signal
+                plt.hist(sig_values, weights = sig_weights,
+                    bins = n_bins, range = bin_range,
+                    label = cls, histtype = "step", 
+                    color = "black", lw = 2, log = logscale, normed = True)
+
+            # annotations
+            plt.legend()
+            plt.grid()
+            plt.xlabel(var)
+            plt.title(self.event_category)
+            # plt.savefig(str(var)+".pdf")
+            
+        # plot all
+        plt.show()
+
 
 
