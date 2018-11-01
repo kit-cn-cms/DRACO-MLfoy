@@ -93,7 +93,7 @@ class DataFrame(object):
         if as_matrix: return self.df_test[ self.train_variables ].values
         else:         return self.df_test[ self.train_variables ]
 
-    def get_train_labels(self):
+    def get_test_weights(self):
         return self.df_test["train_weight"].values
 
     def get_test_labels(self, as_matrix = True):
