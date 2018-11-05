@@ -84,8 +84,68 @@ class DNN():
 
     def build_default_model(self):
         ''' default Aachen-DNN model as used in the analysis '''
+        
+        number_of_input_neurons = self.data.n_input_neurons
 
-        # TODO
+        number_of_neurons_per_layer = [100,100]
+        Dropout                     = [0.7,0.7]
+        activation_function         = "relu"
+        lw_regularization_beta      = 0.0001
+    
+        # prenet
+        Inputs = layer.Input( shape = (self.data.n_input_neurons,) )
+
+        X = Inputs
+        layer_list = [X]
+        for i, nNeurons in enumerate(number_of_neurons_per_layer):
+            Dense = layer.Dense(nNeurons, activation = activation_function,
+                                kernel_regularize = keras.regularizers.l2(l2_regularization_beta),
+                                name = "Dense_"+str(i))(X)
+
+            layer_lists.append( Dense )
+            if dropout[i] != 1: 
+                X = layer.Dropout( drouput[i] )(Dense)
+        
+        X = layer.Dense(self.data.n_prenet_output_neurons,
+                activation = "sigmoid",
+                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta))(X)
+        layers_list.append(X)
+
+        pre_net = models.Model(inputs = [Inputs], outputs = [X])
+        pre_net.summary()
+
+        # compile and fit here?
+
+        # Make Parameters of first model untrainable
+        for layer in first_model.layers:
+            layer.trainable = False
+
+        # ---------------
+        # main net
+        number_of_neurons_per_layer = [100, 100]
+        dropout                     = [0.7, 0.7]        
+
+        # Create Input/conc layer for second NN
+        conc_layer = layer.concatenate(layers_list, axis = -1)
+
+        Y = conc_layer
+
+        for i, nNeurons in enumerate(number_of_neurons_per_layer):
+            Y = layer.Dense(nNeurons, activation = activation_function,
+                            kernel_regularizer=keras.regularizers.l2(l2_regularization_beta),
+                            name = "Dense_main_"+str(i))(Y)
+
+            if dropout[i] != 1:
+                Y = layer.Dropout(dropout[i])(Y)
+
+        Y = layer.Dense(self.data.n_output_neurons,
+                activation = "categorical_crossentropy",
+                kernel_regularizer=keras.regularizers.l2(l2_regularization_beta))(Y)
+
+        pre_net.trainable = False
+        main_net = models.Model(inputs = [Inputs], outputs = [Y])
+        main_net.summary()
+
         return pre_net, main_net
 
 
