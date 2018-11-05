@@ -203,8 +203,8 @@ class DNN():
             batch_size = self.batch_size,
             epochs = self.train_epochs,
             shuffle = True,
-            callbacks = callbacks
-            # TODO implement cross validation
+            callbacks = callbacks,
+            validation_split=0.2,
             )
 
         # save trained model
@@ -225,13 +225,13 @@ class DNN():
 
         # train main net
         self.trained_main_net = self.main_net.fit(
-            x = None, # TODO implement main net input
+            x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
             batch_size = self.batch_size,
             epochs = self.train_epochs,
             shuffle = True,
-            callbacks = callbacks
-            # TODO implement cross validation
+            callbacks = callbacks,
+            validation_split=0.2,
             )
 
         # save trained model
@@ -267,7 +267,7 @@ class DNN():
 
         # main net evaluation
         self.mainnet_eval = self.main_net.evaluate(
-            # TODO implement main net input
+            x = self.data.get_test_data(as_matrix = True)
             )
         print("mainnet test loss: {}".format(self.mainnet_eval[0]))
         for im, metric in enumerate(self.eval_metrics):
