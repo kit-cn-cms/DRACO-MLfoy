@@ -53,9 +53,9 @@ all_variables = {
     "min_dR_lep_tag":           "Evt_Dr_MinDeltaRLeptonTaggedJet",
 
     # fox wolframs
-    "H_2":                      "BDT_common5_input_h2",
-    "H_3":                      "BDT_common5_input_h3",
-    "H_4":                      "BDT_common5_input_h4",
+    "H_2":                      "BDT_common5_input_h1",
+    "H_3":                      "BDT_common5_input_h2",
+    "H_4":                      "BDT_common5_input_h3",
 
     "M_lep_closest_tag":        "Evt_M_MinDeltaRLeptonTaggedJet",
 
@@ -84,7 +84,6 @@ undefined_variables = [
     "HT_tag",
     #"max_dR_jj", # replaced by deta
     #"max_dR_bb", # replaced by deta
-    "H_4",       # somehow doesnt exist
     "aplanarity_tags",
     "sphericity_tags",
     "centrality_tags",
