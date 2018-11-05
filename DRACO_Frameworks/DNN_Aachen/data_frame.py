@@ -76,6 +76,7 @@ class DataFrame(object):
         self.prenet_targets = prenet_targets
         self.output_classes = classes
 
+    # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
         if as_matrix: return self.df_train[ self.train_variables ].values
         else:         return self.df_train[ self.train_variables ]
@@ -89,6 +90,7 @@ class DataFrame(object):
     def get_prenet_train_labels(self):
         return self.df_train[ self.prenet_targets ].values
         
+    # test data ------------------------------------
     def get_test_data(self, as_matrix = True):
         if as_matrix: return self.df_test[ self.train_variables ].values
         else:         return self.df_test[ self.train_variables ]
@@ -96,7 +98,7 @@ class DataFrame(object):
     def get_test_weights(self):
         return self.df_test["train_weight"].values
 
-    def get_test_labels(self, as_matrix = True):
+    def get_test_labels(self):
         return to_categorical( self.df_test["class_label"].values )      
 
     def get_prenet_test_labels(self, as_matrix = True):

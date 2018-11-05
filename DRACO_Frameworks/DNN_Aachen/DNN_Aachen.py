@@ -131,11 +131,11 @@ class DNN():
     def train_models(self):
         ''' train prenet first then the main net '''
 
+        callbacks = None
         if self.early_stopping:
             callbacks = [keras.callbacks.EarlyStopping(
                             monitor = "val_loss", 
                             patience = self.early_stopping)]
-        else: callbacks = None
 
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -150,7 +150,7 @@ class DNN():
         # save trained model
         out_file = self.save_path = "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
-        print("saved trained prenet model at "*str(out_file))
+        print("saved trained prenet model at "+str(out_file))
 
         prenet_config = self.pre_net.get_config()
         out_file = self.save_path +"/trained_pre_net_config"
@@ -190,7 +190,108 @@ class DNN():
         print("wrote trained weights to "+str(out_file))
 
 
-            
+    def eval_model(self):
+        ''' evaluate trained model '''
+
+        # prenet evaluation
+        self.prenet_eval = self.pre_net.evaluate(
+            self.data.get_test_data(as_matrix = True))
+        print("prenet test loss: {}".format(self.prenet_eval[0]))
+        for im, metric in enumerate(self.eval_metrics):
+            print("prenet test {}: {}".format(metric, self.test_eval[im+1]))
+
+        self.prenet_history = self.trained_pre_net.history
+
+        self.prenet_predicted_vector = self.pre_net.predict( self.data.get_test_data(as_matrix = True) )
+
+
+        # main net evaluation
+        self.mainnet_eval = self.main_net.evaluate(
+            # TODO implement main net input
+            )
+        print("mainnet test loss: {}".format(self.mainnet_eval[0]))
+        for im, metric in enumerate(self.eval_metrics):
+            print("mainnet test {}: {}".format(metric, self. test_eval[im+1]))
+
+        self.mainnet_history = self.trained_main_net.history
+
+        self.mainnet_predicted_vector = self.main_net.predict() # TODO implement main net input
+
+        self.predicted_classes = np.argmax( self.mainnet_predicted_vector, axis = 1)
+    
+        self.confusion_matrix = confusion_matrix(
+            self.get_test_labels(), self.predicted_classes)
+
+        
+
+    # --------------------------------------------------------------------
+    # result plotting functions
+    # --------------------------------------------------------------------
+
+    def plot_metrics(self):
+        ''' plot history of loss function and evaluation metrics '''
+
+
+        metrics = ["loss"]+self.eval_metrics
+
+        for metric in metrics:
+            # prenet plot
+            plt.clf()
+            train_history = self.prenet_history[metric]
+            val_history = self.prenet_history["val_"+metric]
+
+            n_epochs = len(train_history)
+            epochs = np.arange(1,n_epochs+1,1)
+
+            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
+            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            plt.title("train and validation "+str(metric)+" of prenet")
+
+            plt.grid()
+            plt.xlabel("epoch")
+            plt.ylabel(metric)
+
+            plt.legend()
+
+            out_path = self.save_path + "/prenet_history_"+str(metric)+".pdf"
+            plt.savefig(out_path)
+            print("saved plot of "+str(metric)+" at "+str(out_path))
+
+            # main net
+            plt.clf()
+            train_history = self.mainnet_history[metric]
+            val_history = self.mainnet_history["val_"+metric]
+
+            n_epochs = len(train_history)
+            epochs = np.arange(1,n_epochs+1,1)
+
+            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
+            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            plt.title("train and validation "+str(metric)+" of mainnet")
+
+            plt.grid()
+            plt.xlabel("epoch")
+            plt.ylabel(metric)
+
+            plt.legend()
+
+            out_path = self.save_path + "/mainnet_history_"+str(metric)+".pdf"
+            plt.savefig(out_path)
+            print("saved plot of "+str(metric)+" at "+str(out_path))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
