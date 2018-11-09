@@ -166,11 +166,25 @@ def preprocess_data(ttH_location, ttbar_location, base_selection, workdir):
     # append variables for class labels
     variables += ['GenEvt_I_TTPlusBB', 'GenEvt_I_TTPlusCC']
 
+    # append variables for prenet-targets
+    variables += [
+        "GenTopHad_B_inacceptance_part",
+        "GenTopHad_Q_inacceptance_part",
+        "GenTopHad_QQ_inacceptance_part",
+        "GenTopLep_B_inacceptance_part",
+        "GenHiggs_B_inacceptance_part",
+        "GenHiggs_BB_inacceptance_part",
+        "GenAdd_B_inacceptance_part",
+        "GenAdd_BB_inacceptance_part"]
+
     # append variable for train/test splitting
     variables += ["Evt_Odd"]
 
     # variables for weighting events
     variables += ["Weight_XS"]
+
+    # append variables for MEM matching
+    variabels += ["evt_id", "run", "lumi"]
     # --------------------------------------------------------
 
     process_files( ttH_files,   variables, vecvars, base_selection, workdir, is_ttH = True)
