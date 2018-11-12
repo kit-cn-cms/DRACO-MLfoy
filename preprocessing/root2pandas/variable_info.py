@@ -19,26 +19,26 @@ all_variables = {
     "eta_lep1":                 "LooseLepton_Eta[0]",
 
     "HT":                       "Evt_HT",
-    "HT_tag":                   None,
+    "HT_tag":                   "HT_tag",
 
     "min_dR_jj":                "Evt_Dr_MinDeltaRJets",
     "min_dR_bb":                "Evt_Dr_MinDeltaRTaggedJets",
 
-    "max_dR_jj":                "BDT_common5_input_maxeta_jet_jet", #gibt nur maxeta_jet_jet, aber kein dR
-    "max_dR_bb":                "BDT_common5_input_maxeta_tag_tag",
+    "max_dR_jj":                "max_dR_jj", 
+    "max_dR_bb":                "max_dR_bb",
 
-    "aplanarity_jets":          "BDT_common5_input_aplanarity",
-    "aplanarity_tags":          None,
+    "aplanarity_jets":          "aplanarity_jets",
+    "aplanarity_tags":          "aplanarity_tags",
 
     "centrality_jets":          "Evt_JetPtOverJetE",
-    "centrality_tags":          None,
+    "centrality_tags":          "pt_all_jets_over_E_all_jets_tags",
 
-    "sphericity_jets":          "BDT_common5_input_sphericity",
-    "sphericity_tags":          None,
+    "sphericity_jets":          "sphericity_jets",
+    "sphericity_tags":          "sphericity_tags",
 
     # transverse sphericities
-    "sphericityT_jets":         None,
-    "sphericityT_tags":         None,
+    "sphericityT_jets":         "transverse_sphericity_jets",
+    "sphericityT_tags":         "transverse_sphericity_tags",
 
     "avg_CSV_jets":             "Evt_CSV_Average",
     "avg_CSV_tags":             "Evt_CSV_Average_Tagged",
@@ -81,14 +81,6 @@ all_variables = {
 
 
 undefined_variables = [
-    "HT_tag",
-    #"max_dR_jj", # replaced by deta
-    #"max_dR_bb", # replaced by deta
-    "aplanarity_tags",
-    "sphericity_tags",
-    "centrality_tags",
-    "sphericityT_jets",
-    "sphericityT_tags",
     "dank_MEM",
     ]
 
