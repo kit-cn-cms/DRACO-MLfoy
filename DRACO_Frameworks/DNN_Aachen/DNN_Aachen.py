@@ -2,7 +2,8 @@
 import keras
 import keras.models as models
 import keras.layers as layer
-
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,12 +16,15 @@ import os
 # Limit gpu usage
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
+
+
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
 # local imports
 import data_frame
+from Network_architecture import architecture
 
 class DNN():
     def __init__(self, in_path, save_path,
@@ -28,13 +32,13 @@ class DNN():
                 event_category,
                 train_variables, 
                 prenet_targets,
-                batch_size = 4000,
+                batch_size =54000,
                 train_epochs = 500,
                 early_stopping = None,
-                optimizer = "adam",
+                optimizer = None,
                 loss_function = "categorical_crossentropy",
                 test_percentage = 0.2,
-                eval_metrics = None)
+                eval_metrics = None):
 
         # save some information
         
@@ -63,17 +67,27 @@ class DNN():
         # percentage of events saved for testing
         self.test_percentage = test_percentage        
 
-        # optimizer for training
-        self.optimizer = optimizer
         # loss function for training
         self.loss_function = loss_function
         # additional metrics for evaluation of training process
         self.eval_metrics = eval_metrics
 
+        # load dataset
+        self.data= self._load_datasets()
 
-    def load_datasets(self):
+        # dict with aachen architectures for sl analysis
+        self.architecture_dic = architecture.get_architecture(self.event_category)
+
+         # optimizer for training
+        if not(optimizer):
+            self.optimizer = self.architecture_dic["optimizer"]
+        else:
+            self.optimizer = optimizer
+
+
+    def _load_datasets(self):
         ''' load dataset '''
-        self.data = data_frame.DataFrame(
+        return data_frame.DataFrame(
             path_to_input_files = self.in_path,
             classes             = self.event_classes,
             event_category      = self.event_category,
@@ -84,13 +98,14 @@ class DNN():
 
     def build_default_model(self):
         ''' default Aachen-DNN model as used in the analysis '''
-        
+
         number_of_input_neurons = self.data.n_input_neurons
 
-        number_of_neurons_per_layer = [100,100]
-        Dropout                     = [0.7,0.7]
-        activation_function         = "relu"
-        lw_regularization_beta      = 0.0001
+
+        number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]
+        Dropout                     = self.architecture_dic["Dropout"]
+        activation_function         = self.architecture_dic["activation_function"]
+        lw_regularization_beta      = self.architecture_dic["L2_Norm"]
     
         # prenet
         Inputs = layer.Input( shape = (self.data.n_input_neurons,) )
@@ -104,7 +119,9 @@ class DNN():
 
             layer_lists.append( Dense )
             if dropout[i] != 1: 
-                X = layer.Dropout( drouput[i] )(Dense)
+                X = layer.Dropout( drouput )(Dense)
+            else:
+                X= Dense 
         
         X = layer.Dense(self.data.n_prenet_output_neurons,
                 activation = "sigmoid",
@@ -122,8 +139,7 @@ class DNN():
 
         # ---------------
         # main net
-        number_of_neurons_per_layer = [100, 100]
-        dropout                     = [0.7, 0.7]        
+        number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]      
 
         # Create Input/conc layer for second NN
         conc_layer = layer.concatenate(layers_list, axis = -1)
@@ -136,7 +152,7 @@ class DNN():
                             name = "Dense_main_"+str(i))(Y)
 
             if dropout[i] != 1:
-                Y = layer.Dropout(dropout[i])(Y)
+                Y = layer.Dropout(dropout)(Y)
 
         Y = layer.Dense(self.data.n_output_neurons,
                 activation = "categorical_crossentropy",
