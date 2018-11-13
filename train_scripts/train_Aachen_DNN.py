@@ -20,10 +20,10 @@ event_category = ["(N_Jets == 6 and N_BTagsM >= 3)",
 				  "(N_Jets == 4 and N_BTagsM >= 3)"]
 
 
-inPath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/aachen_data"
+inPath = "/storage/9/jschindler/AachenDNN_files"
 outpath = "/storage/9/jschindler/Aachen_DNN"
 event_classes = ["ttHbb", "ttbb", "ttb", "tt2b", "ttcc", "ttlf"]
-category = event_category[0]
+category = event_category[2]
 
 
 
@@ -32,9 +32,16 @@ dnn_aachen = DNN_Aachen.DNN(in_path=inPath,
                 			event_classes=event_classes, 
                 			event_category=category,
                 			train_variables=categories_dic[category], 
-                			prenet_targets=["N_Jets", "N_BTagsM"]) # placeholders )
+                			prenet_targets=["GenAdd_BB_inacceptance",
+									        "GenAdd_B_inacceptance",
+									        "GenHiggs_BB_inacceptance",
+									        "GenHiggs_B_inacceptance",
+									        "GenTopHad_B_inacceptance",
+									        "GenTopHad_QQ_inacceptance",
+									        "GenTopHad_Q_inacceptance",
+									        "GenTopLep_B_inacceptance"]) # placeholders )
 
 dnn_aachen.build_model()
-dnn_aachen.train_model()
+dnn_aachen.train_models()
 
 

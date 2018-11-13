@@ -16,6 +16,7 @@ import os
 # Limit gpu usage
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
+from sklearn.metrics import roc_auc_score
 
 
 config = tf.ConfigProto()
@@ -32,9 +33,9 @@ class DNN():
                 event_category,
                 train_variables, 
                 prenet_targets,
-                batch_size =54000,
+                batch_size =500,
                 train_epochs = 500,
-                early_stopping = None,
+                early_stopping = 5,
                 optimizer = None,
                 loss_function = "categorical_crossentropy",
                 test_percentage = 0.2,
@@ -76,7 +77,8 @@ class DNN():
         self.data= self._load_datasets()
 
         # dict with aachen architectures for sl analysis
-        self.architecture_dic = architecture.get_architecture(self.event_category)
+        architecture_1 = architecture()
+        self.architecture_dic = architecture_1.get_architecture(self.event_category)
 
          # optimizer for training
         if not(optimizer):
@@ -103,30 +105,30 @@ class DNN():
 
 
         number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]
-        Dropout                     = self.architecture_dic["Dropout"]
+        dropout                     = self.architecture_dic["Dropout"]
         activation_function         = self.architecture_dic["activation_function"]
-        lw_regularization_beta      = self.architecture_dic["L2_Norm"]
+        l2_regularization_beta      = self.architecture_dic["L2_Norm"]
     
         # prenet
-        Inputs = layer.Input( shape = (self.data.n_input_neurons,) )
+        Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,) )
 
         X = Inputs
-        layer_list = [X]
+        self.layer_list = [X]
         for i, nNeurons in enumerate(number_of_neurons_per_layer):
-            Dense = layer.Dense(nNeurons, activation = activation_function,
-                                kernel_regularize = keras.regularizers.l2(l2_regularization_beta),
+            Dense = keras.layers.Dense(nNeurons, activation = activation_function,
+                                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
                                 name = "Dense_"+str(i))(X)
 
-            layer_lists.append( Dense )
-            if dropout[i] != 1: 
-                X = layer.Dropout( drouput )(Dense)
+            self.layer_list.append( Dense )
+            if dropout != 1: 
+                X = keras.layers.Dropout( dropout )(Dense)
             else:
                 X= Dense 
         
-        X = layer.Dense(self.data.n_prenet_output_neurons,
-                activation = "sigmoid",
+        X = keras.layers.Dense(self.data.n_prenet_output_neurons,
+                activation = "softmax",
                 kernel_regularizer = keras.regularizers.l2(l2_regularization_beta))(X)
-        layers_list.append(X)
+        self.layer_list.append(X)
 
         pre_net = models.Model(inputs = [Inputs], outputs = [X])
         pre_net.summary()
@@ -134,7 +136,7 @@ class DNN():
         # compile and fit here?
 
         # Make Parameters of first model untrainable
-        for layer in first_model.layers:
+        for layer in pre_net.layers:
             layer.trainable = False
 
         # ---------------
@@ -142,23 +144,23 @@ class DNN():
         number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]      
 
         # Create Input/conc layer for second NN
-        conc_layer = layer.concatenate(layers_list, axis = -1)
+        conc_layer = keras.layers.concatenate(self.layer_list, axis = -1)
 
         Y = conc_layer
 
         for i, nNeurons in enumerate(number_of_neurons_per_layer):
-            Y = layer.Dense(nNeurons, activation = activation_function,
+            Y = keras.layers.Dense(nNeurons, activation = activation_function,
                             kernel_regularizer=keras.regularizers.l2(l2_regularization_beta),
                             name = "Dense_main_"+str(i))(Y)
 
-            if dropout[i] != 1:
-                Y = layer.Dropout(dropout)(Y)
+            if dropout != 1:
+                Y = keras.layers.Dropout(dropout)(Y)
 
-        Y = layer.Dense(self.data.n_output_neurons,
-                activation = "categorical_crossentropy",
+        Y = keras.layers.Dense(self.data.n_output_neurons,
+                activation = "softmax",
                 kernel_regularizer=keras.regularizers.l2(l2_regularization_beta))(Y)
 
-        pre_net.trainable = False
+
         main_net = models.Model(inputs = [Inputs], outputs = [Y])
         main_net.summary()
 
@@ -172,19 +174,21 @@ class DNN():
         if pre_net == None or main_net == None:
             print("loading default models")
             pre_net, main_net = self.build_default_model()
-        
+
+        for layer in pre_net.layers:
+            layer.trainable = True
         # compile models
         pre_net.compile(
             loss = self.loss_function,
             optimizer = self.optimizer,
-            metrics = self.eval_metrics,
-            loss_weights = self.data.get_train_weights())
-    
+            metrics = self.eval_metrics)
+
+        for layer in pre_net.layers:
+            layer.trainable = False
         main_net.compile(
             loss = self.loss_function,
             optimizer = self.optimizer,
-            metrics = self.eval_metrics,
-            loss_weights = self.data.get_train_weights())
+            metrics = self.eval_metrics)
             
         self.pre_net = pre_net
         self.main_net = main_net
@@ -206,14 +210,13 @@ class DNN():
 
     def train_models(self):
         ''' train prenet first then the main net '''
-
         callbacks = None
         if self.early_stopping:
             callbacks = [keras.callbacks.EarlyStopping(
                             monitor = "val_loss", 
                             patience = self.early_stopping)]
 
-        self.trained_pre_net = self.pre_net.fit(
+        self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_prenet_train_labels(),
             batch_size = self.batch_size,
@@ -222,8 +225,19 @@ class DNN():
             callbacks = callbacks,
             validation_split=0.2,
             )
+        y_pred = self.pre_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
 
+        score = roc_auc_score(self.data.get_prenet_train_labels(), y_pred)
+        print('##############################################################################')
+        print(score)
+        print('##############################################################################')
+
+
+
+        for layer in self.pre_net.layers:
+            layer.trainable = False
         # save trained model
+        '''
         out_file = self.save_path = "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
         print("saved trained prenet model at "+str(out_file))
@@ -237,10 +251,10 @@ class DNN():
         out_file = self.save_path +"/trained_pre_net_weights.h5"
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
-
+        '''
 
         # train main net
-        self.trained_main_net = self.main_net.fit(
+        self.main_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
             batch_size = self.batch_size,
@@ -250,6 +264,13 @@ class DNN():
             validation_split=0.2,
             )
 
+        y_pred = self.main_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
+
+        score = roc_auc_score(self.data.get_train_labels(), y_pred)
+        print('##############################################################################')
+        print(score)
+        print('##############################################################################')
+        '''
         # save trained model
         out_file = self.save_path = "/trained_main_net.h5py"
         self.main_net.save(out_file)
@@ -264,7 +285,7 @@ class DNN():
         out_file = self.save_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
-
+        '''
 
     def eval_model(self):
         ''' evaluate trained model '''

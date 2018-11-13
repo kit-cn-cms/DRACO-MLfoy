@@ -57,7 +57,7 @@ class DataFrame(object):
             self.class_translation[cls] = index
             index += 1
 
-        df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = cls_df.index )
+        df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
         # norm weights to mean(1)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
