@@ -19,26 +19,26 @@ all_variables = {
     "eta_lep1":                 "LooseLepton_Eta[0]",
 
     "HT":                       "Evt_HT",
-    "HT_tag":                   "HT_tag",
+    "HT_tag":                   "BDT_common5_input_HT_tag",
 
     "min_dR_jj":                "Evt_Dr_MinDeltaRJets",
     "min_dR_bb":                "Evt_Dr_MinDeltaRTaggedJets",
 
-    "max_dR_jj":                "max_dR_jj", 
-    "max_dR_bb":                "max_dR_bb",
+    "max_dR_jj":                "BDT_common5_input_max_dR_jj", 
+    "max_dR_bb":                "BDT_common5_input_max_dR_bb",
 
-    "aplanarity_jets":          "aplanarity_jets",
-    "aplanarity_tags":          "aplanarity_tags",
+    "aplanarity_jets":          "BDT_common5_input_aplanarity_jets",
+    "aplanarity_tags":          "BDT_common5_input_aplanarity_tags",
 
     "centrality_jets":          "Evt_JetPtOverJetE",
-    "centrality_tags":          "pt_all_jets_over_E_all_jets_tags",
+    "centrality_tags":          "BDT_common5_input_pt_all_jets_over_E_all_jets_tags",
 
-    "sphericity_jets":          "sphericity_jets",
-    "sphericity_tags":          "sphericity_tags",
+    "sphericity_jets":          "BDT_common5_input_sphericity_jets",
+    "sphericity_tags":          "BDT_common5_input_sphericity_tags",
 
     # transverse sphericities
-    "sphericityT_jets":         "transverse_sphericity_jets",
-    "sphericityT_tags":         "transverse_sphericity_tags",
+    "sphericityT_jets":         "BDT_common5_input_transverse_sphericity_jets",
+    "sphericityT_tags":         "BDT_common5_input_transverse_sphericity_tags",
 
     "avg_CSV_jets":             "Evt_CSV_Average",
     "avg_CSV_tags":             "Evt_CSV_Average_Tagged",
@@ -82,6 +82,17 @@ all_variables = {
 
 undefined_variables = [
     "dank_MEM",
+    "max_CSV_tags", #already covered
+    #"sphericityT_jets",
+    #"sphericityT_tags",
+    #"HT_tag",
+    #"aplanarity_tags",
+    #"aplanarity_jets",
+    #"sphericity_jets",
+    #"sphericity_tags",
+    #"max_dR_bb",
+    #"max_dR_jj",
+    #"centrality_tags",
     ]
 
 
