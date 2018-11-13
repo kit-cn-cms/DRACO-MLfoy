@@ -86,6 +86,15 @@ class DNN():
         else:
             self.optimizer = optimizer
 
+    def _get_color_dict(self):
+        return {
+            "ttHbb": "blue",
+            "ttlf":  "salmon",
+            "ttcc":  "tomato",
+            "ttbb":  "brown",
+            "tt2b":  "darkred",
+            "ttb":   "red"
+            }
 
     def _load_datasets(self):
         ''' load dataset '''
@@ -126,7 +135,7 @@ class DNN():
                 X= Dense 
         
         X = keras.layers.Dense(self.data.n_prenet_output_neurons,
-                activation = "softmax",
+                activation = "sigmoid",
                 kernel_regularizer = keras.regularizers.l2(l2_regularization_beta))(X)
         self.layer_list.append(X)
 
@@ -216,7 +225,7 @@ class DNN():
                             monitor = "val_loss", 
                             patience = self.early_stopping)]
 
-        self.pre_net.fit(
+        self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_prenet_train_labels(),
             batch_size = self.batch_size,
@@ -226,20 +235,11 @@ class DNN():
             validation_split=0.2,
             sample_weight = self.data.get_train_weights()
             )
-        y_pred = self.pre_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
-
-        score = roc_auc_score(self.data.get_prenet_train_labels(), y_pred)
-        print('#'*100)
-        print(score)
-        print('#'*100)
-
-
 
         for layer in self.pre_net.layers:
             layer.trainable = False
         # save trained model
-        '''
-        out_file = self.save_path = "/trained_pre_net.h5py"
+        out_file = self.save_path + "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
         print("saved trained prenet model at "+str(out_file))
 
@@ -252,10 +252,9 @@ class DNN():
         out_file = self.save_path +"/trained_pre_net_weights.h5"
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
-        '''
 
         # train main net
-        self.main_net.fit(
+        self.trained_main_net = self.main_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
             batch_size = self.batch_size,
@@ -266,20 +265,13 @@ class DNN():
             sample_weight = self.data.get_train_weights()
             )
 
-        y_pred = self.main_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
-
-        score = roc_auc_score(self.data.get_train_labels(), y_pred)
-        print('##############################################################################')
-        print(score)
-        print('##############################################################################')
-        '''
         # save trained model
-        out_file = self.save_path = "/trained_main_net.h5py"
+        out_file = self.save_path + "/trained_main_net.h5py"
         self.main_net.save(out_file)
-        print("saved trained model at "*str(out_file))
+        print("saved trained model at "+str(out_file))
 
         mainnet_config = self.main_net.get_config()
-        out_file = self.save_path +"/trained_main_net_config"
+        out_file = self.save_path + "/trained_main_net_config"
         with open(out_file, "w") as f:
             f.write( str(mainnet_config))
         print("saved model config at "+str(out_file))
@@ -287,39 +279,49 @@ class DNN():
         out_file = self.save_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
-        '''
 
     def eval_model(self):
         ''' evaluate trained model '''
 
         # prenet evaluation
         self.prenet_eval = self.pre_net.evaluate(
-            self.data.get_test_data(as_matrix = True))
-        print("prenet test loss: {}".format(self.prenet_eval[0]))
-        for im, metric in enumerate(self.eval_metrics):
-            print("prenet test {}: {}".format(metric, self.test_eval[im+1]))
+            self.data.get_test_data(as_matrix = True),
+            self.data.get_prenet_test_labels())
 
         self.prenet_history = self.trained_pre_net.history
 
         self.prenet_predicted_vector = self.pre_net.predict( self.data.get_test_data(as_matrix = True) )
 
+        print("prenet test roc:  {}".format(
+            roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
+        if self.eval_metrics: 
+            print("prenet test loss: {}".format(self.prenet_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("prenet test {}: {}".format(metric, self.prenet_eval[im+1]))
+
+
 
         # main net evaluation
         self.mainnet_eval = self.main_net.evaluate(
-            x = self.data.get_test_data(as_matrix = True)
-            )
-        print("mainnet test loss: {}".format(self.mainnet_eval[0]))
-        for im, metric in enumerate(self.eval_metrics):
-            print("mainnet test {}: {}".format(metric, self. test_eval[im+1]))
+            self.data.get_test_data(as_matrix = True),
+            self.data.get_test_labels())
 
         self.mainnet_history = self.trained_main_net.history
 
-        self.mainnet_predicted_vector = self.main_net.predict() # TODO implement main net input
+        self.mainnet_predicted_vector = self.main_net.predict( self.data.get_test_data(as_matrix = True) )
 
         self.predicted_classes = np.argmax( self.mainnet_predicted_vector, axis = 1)
     
         self.confusion_matrix = confusion_matrix(
-            self.get_test_labels(), self.predicted_classes)
+            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+
+        print("mainnet test roc:  {}".format(
+            roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
+        if self.eval_metrics: 
+            print("mainnet test loss: {}".format(self.mainnet_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("mainnet test {}: {}".format(metric, self.mainnet_eval[im+1]))
+
 
         
 
@@ -330,8 +332,8 @@ class DNN():
     def plot_metrics(self):
         ''' plot history of loss function and evaluation metrics '''
 
-
-        metrics = ["loss"]+self.eval_metrics
+        metrics = ["loss"]
+        if self.eval_metrics: metrics += self.eval_metrics
 
         for metric in metrics:
             # prenet plot
@@ -380,8 +382,126 @@ class DNN():
 
 
 
+    def plot_prenet_nodes(self, log = False):
+        ''' plot prenet nodes '''
+
+        for i, node_cls in enumerate(self.prenet_targets):       
+            # get outputs of class node
+            out_values = self.prenet_predicted_vector[:,i]
+
+            prenet_labels = self.data.get_prenet_test_labels()[:,i]
+
+            sig_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
+            bkg_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
+
+            sig_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
+            bkg_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
+
+            bkg_sig_ratio = 1.*sum(bkg_weights)/sum(sig_weights)
+            sig_weights = [w*bkg_sig_ratio for w in sig_weights]
+
+            sig_label = "True"
+            bkg_label = "False"
+
+            sig_label += "*{:.3f}".format(bkg_sig_ratio)
+
+            # plot output
+            plt.clf()
+            plt.figure(figsize = [15,10])
+            
+            plt.hist( bkg_values, histtype = "stepfilled", bins = 15, range = [0.,1.], label = bkg_label, log = log, weights = bkg_weights)
+            plt.hist( sig_values, histtype = "step", bins = 15, range = [0.,1.], label = sig_label, log = log, weights = sig_weights, lw = 2)
+
+            plt.legend()
+            plt.grid()
+            plt.xlabel("output of prenet node")
+            plt.title("output for {}".format(node_cls), loc = "right")
+            plt.title("CMS private work", loc = "left")
+
+            out_path = self.save_path + "/prenet_output_{}.pdf".format(node_cls)
+
+            plt.savefig(out_path)
+            print("plot for prenet output of {} saved at {}".format(node_cls, out_path))
+
+            plt.clf()
 
 
+    def plot_classification_nodes(self, log = False):
+        ''' plot discriminators for output classes '''
+
+        for i, node_cls in enumerate(self.event_classes):
+            # get outputs of class node
+            out_values = self.mainnet_predicted_vector[:,i]
+
+            bkg_values = []
+            bkg_labels = []
+            bkg_weights = []
+            bkg_colors = []
+            n_bkg_evts = 0
+            n_sig_evts = 0
+
+            # fill lists according to class
+            for j, truth_cls in enumerate(self.event_classes):
+                class_index = self.data.class_translation[truth_cls]
+                # filter values per event class
+                filtered_values = [ out_values[k] for k in range(len(out_values)) if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                filtered_weights = [ self.data.get_test_weights()[k] for k in range(len(out_values)) if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                if i == j:
+                    # signal in this node
+                    sig_values = filtered_values 
+                    sig_label = str(truth_cls)
+                    sig_weights = filtered_weights
+                    sig_color = self._get_color_dict()[truth_cls]
+                    n_sig_evts += len(filtered_values)
+                else:
+                    # background in this node
+                    bkg_values.append(filtered_values)
+                    bkg_labels.append(str(truth_cls))
+                    bkg_weights.append(filtered_weights)
+                    bkg_colors.append( self._get_color_dict()[truth_cls] )
+                    n_bkg_evts += len(filtered_values)
+            
+            if n_sig_evts == 0: continue
+            
+            # plot discriminator output
+            plt.clf()
+            plt.figure(figsize = [15,10])
+        
+            # stack backgrounds
+            plt.hist( bkg_values, stacked = True, histtype = "stepfilled", bins = 15, range = [0.,1.], label = bkg_labels, log = log, weights = bkg_weights, color = bkg_colors)
+
+            # get weights for signal
+            bkg_sig_ratio = 1.* sum([sum(ws) for ws in bkg_weights])/sum(sig_weights)
+            sig_weights = [w*bkg_sig_ratio for w in sig_weights]
+            sig_label += "*{:.3f}".format(bkg_sig_ratio)
+
+            # plot signal shape
+            plt.hist( sig_values, histtype = "step", bins = 15, range = [0.,1.], label = sig_label, log = log, weights = sig_weights, lw = 2, color = sig_color)
+
+            plt.legend()
+            plt.grid()
+            plt.xlabel("discriminator output")
+            plt.title("discriminator for {}".format(node_cls), loc = "right")
+            plt.title("CMS private work", loc = "left")
+            
+
+            out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
+        
+            plt.savefig(out_path)
+            print("plot for discriminator of {} saved at {}".format(node_cls, out_path))
+
+            plt.clf()
+
+
+
+    def plot_input_output_correlation(self):
+        return
+
+    def plot_output_output_correlation(self):
+        return
+
+    def plot_confusion_matrix(self):
+        return
 
 
 

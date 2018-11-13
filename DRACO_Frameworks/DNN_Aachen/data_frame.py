@@ -37,10 +37,10 @@ class DataFrame(object):
             print("number of events after selections:  "+str(cls_df.shape[0]))
 
             # add event weight
-            cls_df = cls_df.assign(train_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
+            cls_df = cls_df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
             
-            weight_sum = sum(cls_df["train_weight"].values)
-            cls_df = cls_df.assign(train_weight = lambda x: 1.*x.train_weight/weight_sum)
+            weight_sum = sum(cls_df["total_weight"].values)
+            cls_df = cls_df.assign(train_weight = lambda x: 1.*x.total_weight/weight_sum)
             print("weight sum of train_weight: "+str( sum(cls_df["train_weight"].values) ))
 
             # add data to list of dataframes
@@ -94,8 +94,9 @@ class DataFrame(object):
     def get_train_weights(self):
         return self.df_train["train_weight"].values
 
-    def get_train_labels(self):
-        return to_categorical( self.df_train["index_label"].values )      
+    def get_train_labels(self, as_categorical = True):
+        if as_categorical: return to_categorical( self.df_train["index_label"].values )      
+        else:              return self.df_train["index_label"].values
 
     def get_prenet_train_labels(self):
         return self.df_train[ self.prenet_targets ].values
@@ -106,10 +107,11 @@ class DataFrame(object):
         else:         return self.df_test[ self.train_variables ]
 
     def get_test_weights(self):
-        return self.df_test["train_weight"].values
+        return self.df_test["total_weight"].values
 
-    def get_test_labels(self):
-        return to_categorical( self.df_test["index_label"].values )      
+    def get_test_labels(self, as_categorical = True):
+        if as_categorical: return to_categorical( self.df_test["index_label"].values )
+        else:              return self.df_test["index_label"].values
 
     def get_prenet_test_labels(self, as_matrix = True):
         return self.df_test[ self.prenet_targets ].values
