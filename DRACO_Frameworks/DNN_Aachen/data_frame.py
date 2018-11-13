@@ -50,6 +50,15 @@ class DataFrame(object):
         df = pd.concat( class_dataframes )
         del class_dataframes
 
+        # add class_label translation
+        index = 0
+        self.class_translation = {}
+        for cls in classes:
+            self.class_translation[cls] = index
+            index += 1
+
+        df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = cls_df.index )
+
         # norm weights to mean(1)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
 
@@ -85,7 +94,7 @@ class DataFrame(object):
         return self.df_train["train_weight"].values
 
     def get_train_labels(self):
-        return to_categorical( self.df_train["class_label"].values )      
+        return to_categorical( self.df_train["index_label"].values )      
 
     def get_prenet_train_labels(self):
         return self.df_train[ self.prenet_targets ].values
@@ -99,7 +108,7 @@ class DataFrame(object):
         return self.df_test["train_weight"].values
 
     def get_test_labels(self):
-        return to_categorical( self.df_test["class_label"].values )      
+        return to_categorical( self.df_test["index_label"].values )      
 
     def get_prenet_test_labels(self, as_matrix = True):
         return self.df_test[ self.prenet_targets ].values
