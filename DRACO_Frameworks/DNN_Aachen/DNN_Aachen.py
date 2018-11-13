@@ -140,7 +140,6 @@ class DNN():
         self.layer_list.append(X)
 
         pre_net = models.Model(inputs = [Inputs], outputs = [X])
-        pre_net.summary()
 
         # compile and fit here?
 
@@ -171,7 +170,7 @@ class DNN():
 
 
         main_net = models.Model(inputs = [Inputs], outputs = [Y])
-        main_net.summary()
+
 
         return pre_net, main_net
 
@@ -198,7 +197,7 @@ class DNN():
             loss = self.loss_function,
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
-            
+
         self.pre_net = pre_net
         self.main_net = main_net
 
@@ -224,6 +223,8 @@ class DNN():
             callbacks = [keras.callbacks.EarlyStopping(
                             monitor = "val_loss", 
                             patience = self.early_stopping)]
+        for layer in self.pre_net.layers:
+            layer.trainable = True
 
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -235,10 +236,22 @@ class DNN():
             validation_split=0.2,
             sample_weight = self.data.get_train_weights()
             )
+<<<<<<< Updated upstream
+=======
+        y_pred = self.pre_net.predict(self.data.get_test_data(as_matrix = True), verbose=1)
+
+        score = roc_auc_score(self.data.get_prenet_test_labels(), y_pred)
+        print('#'*100)
+        print(score)
+        print('#'*100)
+
+
+>>>>>>> Stashed changes
 
         for layer in self.pre_net.layers:
             layer.trainable = False
         # save trained model
+<<<<<<< Updated upstream
         out_file = self.save_path + "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
         print("saved trained prenet model at "+str(out_file))
@@ -253,6 +266,13 @@ class DNN():
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
 
+=======
+        
+        out_file = self.save_path = "/trained_pre_net.h5"
+        self.pre_net.save(out_file)
+        print("saved trained prenet model at "+str(out_file))
+        
+>>>>>>> Stashed changes
         # train main net
         self.trained_main_net = self.main_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -265,11 +285,24 @@ class DNN():
             sample_weight = self.data.get_train_weights()
             )
 
+<<<<<<< Updated upstream
         # save trained model
         out_file = self.save_path + "/trained_main_net.h5py"
+=======
+        y_pred = self.main_net.predict(self.data.get_test_data(as_matrix = True), verbose=1)
+
+        score = roc_auc_score(self.data.get_test_labels(), y_pred)
+        print('##############################################################################')
+        print(score)
+        print('##############################################################################')
+
+        # save trained model
+        out_file = self.save_path = "/trained_main_net.h5"
+>>>>>>> Stashed changes
         self.main_net.save(out_file)
         print("saved trained model at "+str(out_file))
 
+<<<<<<< Updated upstream
         mainnet_config = self.main_net.get_config()
         out_file = self.save_path + "/trained_main_net_config"
         with open(out_file, "w") as f:
@@ -279,6 +312,10 @@ class DNN():
         out_file = self.save_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
+=======
+
+
+>>>>>>> Stashed changes
 
     def eval_model(self):
         ''' evaluate trained model '''
