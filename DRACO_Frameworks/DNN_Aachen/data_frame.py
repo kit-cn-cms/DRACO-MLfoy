@@ -37,11 +37,12 @@ class DataFrame(object):
             print("number of events after selections:  "+str(cls_df.shape[0]))
 
             # add event weight
-            weights = cls_df["Weight_XS"].values
-            weight_sum = sum(weights)
-            # sum of weights per class normed to 1
-            cls_df["train_weight"] = pd.Series( [w/weight_sum for w in weights], index = cls_df.index )
+            cls_df = cls_df.assign(train_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
             
+            weight_sum = sum(cls_df["train_weight"].values)
+            cls_df = cls_df.assign(train_weight = lambda x: 1.*x.train_weight/weight_sum)
+            print("weight sum of train_weight: "+str( sum(cls_df["train_weight"].values) ))
+
             # add data to list of dataframes
             class_dataframes.append( cls_df )
             print("-"*50)
