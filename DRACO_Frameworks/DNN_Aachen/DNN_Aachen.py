@@ -135,7 +135,7 @@ class DNN():
                 X= Dense 
         
         X = keras.layers.Dense(self.data.n_prenet_output_neurons,
-                activation = "softmax",
+                activation = "sigmoid",
                 kernel_regularizer = keras.regularizers.l2(l2_regularization_beta))(X)
         self.layer_list.append(X)
 
@@ -292,11 +292,12 @@ class DNN():
 
         self.prenet_predicted_vector = self.pre_net.predict( self.data.get_test_data(as_matrix = True) )
 
-        if self.eval_metrics: print("prenet test loss: {}".format(self.prenet_eval[0]))
         print("prenet test roc:  {}".format(
             roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
-        for im, metric in enumerate(self.eval_metrics):
-            print("prenet test {}: {}".format(metric, self.prenet_eval[im+1]))
+        if self.eval_metrics: 
+            print("prenet test loss: {}".format(self.prenet_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("prenet test {}: {}".format(metric, self.prenet_eval[im+1]))
 
 
 
@@ -314,11 +315,12 @@ class DNN():
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
-        if self.eval_metrics: print("mainnet test loss: {}".format(self.mainnet_eval[0]))
         print("mainnet test roc:  {}".format(
             roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
-        for im, metric in enumerate(self.eval_metrics):
-            print("mainnet test {}: {}".format(metric, self.mainnet_eval[im+1]))
+        if self.eval_metrics: 
+            print("mainnet test loss: {}".format(self.mainnet_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("mainnet test {}: {}".format(metric, self.mainnet_eval[im+1]))
 
 
         
@@ -330,8 +332,8 @@ class DNN():
     def plot_metrics(self):
         ''' plot history of loss function and evaluation metrics '''
 
-
-        metrics = ["loss"]+self.eval_metrics
+        metrics = ["loss"]
+        if self.eval_metrics: metrics += self.eval_metrics
 
         for metric in metrics:
             # prenet plot
@@ -380,8 +382,49 @@ class DNN():
 
 
 
-    def plot_prenet_nodes(self):
-        return   
+    def plot_prenet_nodes(self, log = False):
+        ''' plot prenet nodes '''
+
+        for i, node_cls in enumerate(self.prenet_targets):       
+            # get outputs of class node
+            out_values = self.prenet_predicted_vector[:,i]
+
+            prenet_labels = self.data.get_prenet_test_labels()[:,i]
+
+            sig_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
+            bkg_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
+
+            sig_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
+            bkg_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
+
+            bkg_sig_ratio = 1.*sum(bkg_weights)/sum(sig_weights)
+            sig_weights = [w*bkg_sig_ratio for w in sig_weights]
+
+            sig_label = "True"
+            bkg_label = "False"
+
+            sig_label += "*{:.3f}".format(bkg_sig_ratio)
+
+            # plot output
+            plt.clf()
+            plt.figure(figsize = [15,10])
+            
+            plt.hist( bkg_values, histtype = "stepfilled", bins = 15, range = [0.,1.], label = bkg_label, log = log, weights = bkg_weights)
+            plt.hist( sig_values, histtype = "step", bins = 15, range = [0.,1.], label = sig_label, log = log, weights = sig_weights, lw = 2)
+
+            plt.legend()
+            plt.grid()
+            plt.xlabel("output of prenet node")
+            plt.title("output for {}".format(node_cls), loc = "right")
+            plt.title("CMS private work", loc = "left")
+
+            out_path = self.save_path + "/prenet_output_{}.pdf".format(node_cls)
+
+            plt.savefig(out_path)
+            print("plot for prenet output of {} saved at {}".format(node_cls, out_path))
+
+            plt.clf()
+
 
     def plot_classification_nodes(self, log = False):
         ''' plot discriminators for output classes '''
