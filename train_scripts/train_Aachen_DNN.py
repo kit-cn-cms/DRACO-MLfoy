@@ -11,9 +11,9 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN_Aachen.DNN_Aachen as DNN_Aachen
 import DRACO_Frameworks.DNN_Aachen.variable_info as variable_info
 
-categories_dic = {"(N_Jets == 6 and N_BTagsM >= 3)": variable_info.variables_4j_3b,
+categories_dic = {"(N_Jets == 6 and N_BTagsM >= 3)": variable_info.variables_6j_3b,
     			  "(N_Jets == 5 and N_BTagsM >= 3)": variable_info.variables_5j_3b,
-    			  "(N_Jets == 4 and N_BTagsM >= 3)": variable_info.variables_6j_3b,} 
+    			  "(N_Jets == 4 and N_BTagsM >= 3)": variable_info.variables_4j_3b,} 
 
 event_category = ["(N_Jets == 6 and N_BTagsM >= 3)",
 				  "(N_Jets == 5 and N_BTagsM >= 3)",
@@ -23,7 +23,7 @@ event_category = ["(N_Jets == 6 and N_BTagsM >= 3)",
 inPath = "/storage/9/jschindler/AachenDNN_files"
 outpath = "/storage/9/jschindler/Aachen_DNN"
 event_classes = ["ttHbb", "ttbb", "ttb", "tt2b", "ttcc", "ttlf"]
-category = event_category[2]
+category = event_category[0]
 
 
 
