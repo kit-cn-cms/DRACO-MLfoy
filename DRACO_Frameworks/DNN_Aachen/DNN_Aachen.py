@@ -224,6 +224,7 @@ class DNN():
             shuffle = True,
             callbacks = callbacks,
             validation_split=0.2,
+            sample_weight = self.data.get_train_weights()
             )
         y_pred = self.pre_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
 
@@ -262,6 +263,7 @@ class DNN():
             shuffle = True,
             callbacks = callbacks,
             validation_split=0.2,
+            sample_weight = self.data.get_train_weights()
             )
 
         y_pred = self.main_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
