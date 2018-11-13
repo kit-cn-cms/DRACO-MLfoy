@@ -145,7 +145,10 @@ def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, addit
             - write data to output directory '''
 
     # determine mem file location
-    h5_mem_file = workdir + "/" + str(mem_name) +".h5"
+    mem_path = workdir + "/MEM/"
+    if not os.path.exists(mem_path):
+        os.makedirs(mem_path)
+    h5_mem_file = mem_path + "/" + str(mem_name) +".h5"
 
     # get mem dataframe
     mem_df = generate_mem_h5(mem_files, h5_mem_file)
@@ -219,7 +222,7 @@ def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, addit
 
 
 
-def preprocess_single_sample(sample, old_h5_files, variables, vecvars, base_selection, workdir, additional_selection, trigger_variables, is_ttH):
+def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_selection, workdir, additional_selection, trigger_variables, is_ttH):
     ''' handle preprocessing of a single file
         - glob files
         - create MEM df or use old MEM df
@@ -237,7 +240,7 @@ def preprocess_single_sample(sample, old_h5_files, variables, vecvars, base_sele
     print("="*100)
 
     # check if mem file exists and remove if wanted
-    for f in old_h5_files:
+    for f in old_mem_files:
         if mem_name in f:
             print("found old MEM file in directory: "+str(f))
             if ask_yes_no("should the old MEM file be used?"):
@@ -268,10 +271,11 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
     if not os.path.exists(workdir):
         os.makedirs(workdir)
 
-    # remove old h5 files
     old_h5_files = glob.glob(workdir+"/*.h5")
-    for f in old_h5_files:
-        if not "MEM" in f: os.remove(f)
+    for f in old_h5_files: os.remove(f)
+
+    mem_path = workdir + "/MEM/*.h5"
+    old_mem_files = glob.glob(mem_path)
 
     # get variable lists
     variables, vecvars, trigger_variables = get_variable_lists()
@@ -280,7 +284,7 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
     for sample in ttH_samples:
         preprocess_single_sample(
             sample, 
-            old_h5_files, 
+            old_mem_files, 
             variables, 
             vecvars, 
             base_selection, 
@@ -293,7 +297,7 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
     for sample in ttbar_samples:
         preprocess_single_sample(
             sample, 
-            old_h5_files, 
+            old_mem_files, 
             variables, 
             vecvars, 
             base_selection, 
@@ -342,22 +346,19 @@ def get_variable_lists():
     variables, vecvars = get_vars_and_vecvars(variable_list)
 
     # add some more variables needed
-    # append variables for category cutting to varlist
-    variables += ["N_Jets", "N_BTagsM"]
-
     # append variables for class labels
     variables += ['GenEvt_I_TTPlusBB', 'GenEvt_I_TTPlusCC']
 
     # append variables for prenet-targets
     variables += [
-        "GenTopHad_B_inacceptance_part",
-        "GenTopHad_Q_inacceptance_part",
-        "GenTopHad_QQ_inacceptance_part",
-        "GenTopLep_B_inacceptance_part",
-        "GenHiggs_B_inacceptance_part",
-        "GenHiggs_BB_inacceptance_part",
-        "GenAdd_B_inacceptance_part",
-        "GenAdd_BB_inacceptance_part"
+        "GenAdd_BB_inacceptance",
+        "GenAdd_B_inacceptance",
+        "GenHiggs_BB_inacceptance",
+        "GenHiggs_B_inacceptance",
+        "GenTopHad_B_inacceptance",
+        "GenTopHad_QQ_inacceptance",
+        "GenTopHad_Q_inacceptance",
+        "GenTopLep_B_inacceptance",
             ]
     # append variable for train/test splitting
     variables += ["Evt_Odd"]
@@ -373,9 +374,14 @@ def get_variable_lists():
     variables += ["Evt_ID", "Evt_Run", "Evt_Lumi"]
 
     # variables for triggering ------
-    trigger_variables = [
-        "N_LooseMuons", "N_TightElectrons", 
-        "N_LooseElectrons", "N_TightMuons",    
+    # append variables for category cutting
+    trigger_variables = ["N_Jets", "N_BTagsM"]
+    # variables for mcTriggerWeights
+    trigger_variables += [
+        "N_LooseMuons", 
+        "N_TightElectrons", 
+        "N_LooseElectrons", 
+        "N_TightMuons",    
         "Triggered_HLT_Ele35_WPTight_Gsf_vX", 
         "Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX",
         "Muon_Pt",
@@ -404,17 +410,17 @@ def get_variable_lists():
 # location of ttH and ttbar samples
 ttH = [
         {"name":    "ttHbb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
 
         {"name":    "ttHNobb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root"}
         ]
 
 ttbar = [
         {"name":    "TTToSL",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"}
         ]
 
