@@ -228,9 +228,9 @@ class DNN():
         y_pred = self.pre_net.predict(self.data.get_train_data(as_matrix = True), verbose=1)
 
         score = roc_auc_score(self.data.get_prenet_train_labels(), y_pred)
-        print('##############################################################################')
+        print('#'*100)
         print(score)
-        print('##############################################################################')
+        print('#'*100)
 
 
 
