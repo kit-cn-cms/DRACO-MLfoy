@@ -7,6 +7,7 @@ matplotlib.use('Agg')
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
 import numpy as np
+import rootpy.plotting as rp
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -18,13 +19,13 @@ import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 from sklearn.metrics import roc_auc_score
 
-
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
 # local imports
 import data_frame
+import variable_binning
 from Network_architecture import architecture
 
 class DNN():
@@ -33,9 +34,9 @@ class DNN():
                 event_category,
                 train_variables, 
                 prenet_targets,
-                batch_size =500,
+                batch_size = 5000,
                 train_epochs = 500,
-                early_stopping = 5,
+                early_stopping = 10,
                 optimizer = None,
                 loss_function = "categorical_crossentropy",
                 test_percentage = 0.2,
@@ -112,64 +113,75 @@ class DNN():
 
         number_of_input_neurons = self.data.n_input_neurons
 
-
         number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]
         dropout                     = self.architecture_dic["Dropout"]
         activation_function         = self.architecture_dic["activation_function"]
         l2_regularization_beta      = self.architecture_dic["L2_Norm"]
     
-        # prenet
+        # build pre net ===========================================================================
         Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,) )
 
         X = Inputs
         self.layer_list = [X]
-        for i, nNeurons in enumerate(number_of_neurons_per_layer):
-            Dense = keras.layers.Dense(nNeurons, activation = activation_function,
-                                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
-                                name = "Dense_"+str(i))(X)
 
+        # loop over dense layers
+        for i, nNeurons in enumerate(number_of_neurons_per_layer):
+            Dense = keras.layers.Dense(
+                nNeurons, 
+                activation = activation_function,
+                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
+                name = "Dense_"+str(i)
+                )(X)
             self.layer_list.append( Dense )
+
             if dropout != 1: 
-                X = keras.layers.Dropout( dropout )(Dense)
+                X = keras.layers.Dropout(dropout)(Dense)
             else:
-                X= Dense 
+                X = Dense 
         
-        X = keras.layers.Dense(self.data.n_prenet_output_neurons,
-                activation = "sigmoid",
-                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta))(X)
+        # generate output layer
+        X = keras.layers.Dense(
+            self.data.n_prenet_output_neurons,
+            activation = "sigmoid",
+            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)
+            )(X)
         self.layer_list.append(X)
 
+        # define model
         pre_net = models.Model(inputs = [Inputs], outputs = [X])
         pre_net.summary()
-
-        # compile and fit here?
 
         # Make Parameters of first model untrainable
         for layer in pre_net.layers:
             layer.trainable = False
 
-        # ---------------
-        # main net
+        # build main net ==========================================================================
         number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]      
 
         # Create Input/conc layer for second NN
         conc_layer = keras.layers.concatenate(self.layer_list, axis = -1)
-
         Y = conc_layer
 
+        # loop over dense layers
         for i, nNeurons in enumerate(number_of_neurons_per_layer):
-            Y = keras.layers.Dense(nNeurons, activation = activation_function,
-                            kernel_regularizer=keras.regularizers.l2(l2_regularization_beta),
-                            name = "Dense_main_"+str(i))(Y)
+            Y = keras.layers.Dense(
+                nNeurons, 
+                activation = activation_function,
+                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
+                name = "Dense_main_"+str(i)
+                )(Y)
 
             if dropout != 1:
                 Y = keras.layers.Dropout(dropout)(Y)
 
-        Y = keras.layers.Dense(self.data.n_output_neurons,
-                activation = "softmax",
-                kernel_regularizer=keras.regularizers.l2(l2_regularization_beta))(Y)
+        # generate output layer
+        Y = keras.layers.Dense(
+            self.data.n_output_neurons,
+            activation = "softmax",
+            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)
+            )(Y)
 
-
+        # define model
         main_net = models.Model(inputs = [Inputs], outputs = [Y])
         main_net.summary()
 
@@ -184,21 +196,27 @@ class DNN():
             print("loading default models")
             pre_net, main_net = self.build_default_model()
 
+        # set pre net trainable
         for layer in pre_net.layers:
             layer.trainable = True
-        # compile models
+
+        # compile prenet
         pre_net.compile(
             loss = self.loss_function,
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
 
+        # ste pre net untrainable
         for layer in pre_net.layers:
             layer.trainable = False
+
+        # compile main net
         main_net.compile(
             loss = self.loss_function,
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
             
+        # save compiled nets
         self.pre_net = pre_net
         self.main_net = main_net
 
@@ -206,6 +224,7 @@ class DNN():
         self.pre_net.summary()
         self.main_net.summary()
 
+        # save net information
         out_file = self.save_path+"/pre_net_summmary.yml"
         yml_pre_net = self.pre_net.to_yaml()
         with open(out_file, "w") as f:
@@ -219,11 +238,13 @@ class DNN():
 
     def train_models(self):
         ''' train prenet first then the main net '''
+
+        # add early stopping if activated
         callbacks = None
         if self.early_stopping:
             callbacks = [keras.callbacks.EarlyStopping(
-                            monitor = "val_loss", 
-                            patience = self.early_stopping)]
+                monitor = "val_loss", 
+                patience = self.early_stopping)]
 
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -232,13 +253,15 @@ class DNN():
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
-            validation_split=0.2,
+            validation_split = 0.2,
             sample_weight = self.data.get_train_weights()
             )
 
+        # set pre net as untrainable
         for layer in self.pre_net.layers:
             layer.trainable = False
-        # save trained model
+
+        # save trained prenet model
         out_file = self.save_path + "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
         print("saved trained prenet model at "+str(out_file))
@@ -261,7 +284,7 @@ class DNN():
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
-            validation_split=0.2,
+            validation_split = 0.2,
             sample_weight = self.data.get_train_weights()
             )
 
@@ -288,10 +311,14 @@ class DNN():
             self.data.get_test_data(as_matrix = True),
             self.data.get_prenet_test_labels())
 
+        # save history of eval metrics
         self.prenet_history = self.trained_pre_net.history
 
-        self.prenet_predicted_vector = self.pre_net.predict( self.data.get_test_data(as_matrix = True) )
+        # save predicitons
+        self.prenet_predicted_vector = self.pre_net.predict( 
+            self.data.get_test_data(as_matrix = True) )
 
+        # print evaluations
         print("prenet test roc:  {}".format(
             roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
         if self.eval_metrics: 
@@ -300,21 +327,26 @@ class DNN():
                 print("prenet test {}: {}".format(metric, self.prenet_eval[im+1]))
 
 
-
         # main net evaluation
         self.mainnet_eval = self.main_net.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
 
+        # save history of eval metrics
         self.mainnet_history = self.trained_main_net.history
 
-        self.mainnet_predicted_vector = self.main_net.predict( self.data.get_test_data(as_matrix = True) )
+        # save predictions
+        self.mainnet_predicted_vector = self.main_net.predict( 
+            self.data.get_test_data(as_matrix = True) )
 
+        # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.mainnet_predicted_vector, axis = 1)
     
+        # save confusion matrix
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
+        # print evaluations
         print("mainnet test roc:  {}".format(
             roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
         if self.eval_metrics: 
@@ -324,6 +356,8 @@ class DNN():
 
 
         
+
+
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -426,75 +460,152 @@ class DNN():
             plt.clf()
 
 
-    def plot_classification_nodes(self, log = False):
+    def plot_classification_nodes(self, nbins = 20, bin_range = (0., 1.), log = False):
         ''' plot discriminators for output classes '''
 
+        # loop over discriminator nodes
         for i, node_cls in enumerate(self.event_classes):
-            # get outputs of class node
+            # get outputs of node
             out_values = self.mainnet_predicted_vector[:,i]
 
-            bkg_values = []
-            bkg_labels = []
-            bkg_weights = []
-            bkg_colors = []
-            n_bkg_evts = 0
-            n_sig_evts = 0
-
             # fill lists according to class
+            bkg_hists = []
+            weight_integral = 0
+            
+            # loop over all classes to fill hist according to predicted class
             for j, truth_cls in enumerate(self.event_classes):
                 class_index = self.data.class_translation[truth_cls]
                 # filter values per event class
-                filtered_values = [ out_values[k] for k in range(len(out_values)) if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
-                filtered_weights = [ self.data.get_test_weights()[k] for k in range(len(out_values)) if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                filtered_values = [ out_values[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                filtered_weights = [ self.data.get_test_weights()[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
                 if i == j:
                     # signal in this node
                     sig_values = filtered_values 
                     sig_label = str(truth_cls)
                     sig_weights = filtered_weights
-                    sig_color = self._get_color_dict()[truth_cls]
-                    n_sig_evts += len(filtered_values)
                 else:
                     # background in this node
-                    bkg_values.append(filtered_values)
-                    bkg_labels.append(str(truth_cls))
-                    bkg_weights.append(filtered_weights)
-                    bkg_colors.append( self._get_color_dict()[truth_cls] )
                     n_bkg_evts += len(filtered_values)
-            
-            if n_sig_evts == 0: continue
-            
-            # plot discriminator output
-            plt.clf()
-            plt.figure(figsize = [15,10])
-        
+
+                    weight_integral += sum( filtered_weights )
+                    hist = rp.Hist( nbins, *bin_range, title = str(truth_cls),
+                        markersize = 0, legendstyle = "F")
+                    hist.Sumw2()
+                    hist.fill_array( filtered_values, filtered_weights )
+                    hist.fillstyle = "solid"
+                    hist.fillcolor = self._get_color_dict()[truth_cls]
+                    hist.linecolor = "black"
+                    hist.linewidth = 1
+                    bkg_hists.append(hist)
+
             # stack backgrounds
-            plt.hist( bkg_values, stacked = True, histtype = "stepfilled", bins = 15, range = [0.,1.], label = bkg_labels, log = log, weights = bkg_weights, color = bkg_colors)
+            bkg_stack = rp.HistStack( bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
+            bkg_stack.SetMinimum(1e-4)
 
-            # get weights for signal
-            bkg_sig_ratio = 1.* sum([sum(ws) for ws in bkg_weights])/sum(sig_weights)
-            sig_weights = [w*bkg_sig_ratio for w in sig_weights]
-            sig_label += "*{:.3f}".format(bkg_sig_ratio)
+            # plot signal
+            weight_sum = sum(sig_weights)
+            scale_factor = 1.*weight_integral/weight_sum
+            sig_weights = [w*scale_factor for w in weights]
 
-            # plot signal shape
-            plt.hist( sig_values, histtype = "step", bins = 15, range = [0.,1.], label = sig_label, log = log, weights = sig_weights, lw = 2, color = sig_color)
-
-            plt.legend()
-            plt.grid()
-            plt.xlabel("discriminator output")
-            plt.title("discriminator for {}".format(node_cls), loc = "right")
-            plt.title("CMS private work", loc = "left")
+            sig_title = sig_label + "*{:.3f}".format(scale_factor)
+            sig_hist = rp.Hist( nbins, *bin_range, title = sig_title, 
+                markersize = 0, drawstyle = "shape", legendstyle = "L")
+            sig_hist.Sumw2()
+            sig_hist.fill_array( sig_values, sig_weights)
+            sig_hist.fillstyle = "hollow"
+            sig_hist.linestyle = "solid"
+            sig_hist.linecolor = self._get_color_dict()[sig_label]
+            sig_hist.linewidth = 2
             
+            # creating canvas
+            canvas = rp.Canvas(width = 1024, height = 768)
+            canvas.SetTopMargin(0.07)
+            canvas.SetBottomMargin(0.15)
+            canvas.SetRightMargin(0.05)
+            canvas.SetLeftMargin(0.15)
+            canvas.SetTicks(1,1)
+           
+            rp.utils.draw([bkg_stack, sig_hist], 
+                xtitle = cls_node+" Discriminator", ytitle = "Events", pad = canvas)
+            
+            if log: canvas.cd().SetLogy()
+
+            # creting legend
+            legend = rp.Legend(bkg_hists+[sig_hist], entryheight = 0.03)
+            legend.SetX1NDC(0.90)
+            legend.SetX2NDC(0.99)
+            legend.SetY1NDC(0.90)
+            legend.SetY2NDC(0.99)
+            legend.SetBorderSize(0)
+            legend.SetLineStyle(0)
+            legend.SetTextSize(0.04)
+            legend.SetTextFont(42)
+            legend.SetFillStyle(0)
+            legend.Draw()
+
+            canvas.Modified()
+            canvas.Update()
 
             out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
-        
-            plt.savefig(out_path)
-            print("plot for discriminator of {} saved at {}".format(node_cls, out_path))
-
-            plt.clf()
-
-
+            canvas.SaveAs(plot_name)
+            canvas.Clear()
 
     def plot_input_output_correlation(self):
+
+        # get input variables from test set TODO get them unnormed
+        input_data = self.data.get_test_data(as_matrix = False)
+
+        # initialize empty dataframe
+        df = pd.DataFrame()
+
+        # loop over classes
+        for i_cls, cls in enumerate(self.event_classes):
+
+            # get predictions for current output note
+            pred_values = self.mainnet_predicted_vector[:,i_cls]
+
+            # correlation values for class
+            corr_values = {}
+
+            # loop over input variables
+            for i_var, var in enumerate(self.train_variables):
+                # scatter plot:
+                # x-axis: input variable value
+                # y-axis: predicted discriminator output
+                
+                var_values = input_data[var].values
+
+                assert( len(var_values) == len(pred_values) )
+
+                plt.plot(var_values, pred_values, ".", color = "black")
+
+                # get xrange from binning file
+                # set yrange [0-1]
+                plt.ylim([0,1])
+                plt.xlim( variable_binning.binning[var]["bin_range"] )
+
+                # calculate correlation value
+                correlation = None
+                print("correlation between {} and {}: {}".format(
+                    cls, var, correlation))
+
+                # write correlation value on plot
+                plt.title( correlation, loc = "left")
+                plt.xlabel(var)
+                plt.ylabel(cls+"_predicted")
+
+                
+                plt.show()
+
+
+                corr_values[var] = correlation
+
+            # save correlation value to dataframe
+            df[cls] = pd.Series( corr_values )
+                
+        # save dataframe of correlations
         return
 
     def plot_output_output_correlation(self):

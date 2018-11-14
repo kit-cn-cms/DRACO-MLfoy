@@ -8,7 +8,6 @@ import os
 #import ROOT
 import numpy as np
 import rootpy.plotting as rp
-import rootpy.plotting.root2matplotlib as rplt
 
 style = rp.style.get_style("ATLAS")
 style.SetEndErrorSize(3)
@@ -58,10 +57,6 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     bins = variable_binning.binning[variable]["nbins"]
     bin_range = variable_binning.binning[variable]["bin_range"]
 
-    #r = bin_range[1]-bin_range[0]
-    #bin_range[0]-= 0.5*r
-    #bin_range[1]+= 0.5*r
-
     bkg_hists = []
     weight_integral = 0
     for key in ordered_bkgs:
@@ -79,6 +74,7 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
 
     bkg_stack = rp.HistStack( bkg_hists, stacked = True , drawstyle ="HIST E1 X0")
     bkg_stack.SetMinimum(1e-4)
+
     # plot ttH    
     sig_key = "ttH"
 
@@ -91,7 +87,6 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     sig_title = sig_key + "*{:.3f}".format(scale_factor)
     sig_hist = rp.Hist( bins, *bin_range, title = sig_title, markersize = 0, drawstyle = "shape", legendstyle = "L" )
     sig_hist.Sumw2()
-    #sig_hist.markersize = 1
     sig_hist.fillstyle = "hollow"
     sig_hist.linestyle = "solid"
     sig_hist.linecolor = color_dict[sig_key]
@@ -105,7 +100,6 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     canvas.SetRightMargin(0.05)
     canvas.SetLeftMargin(0.15)
     canvas.SetTicks(1,1)
-    #rp.utils.draw([bkg_stack, sig_stack], xtitle = variable, ytitle = "Events", pad = canvas)
     rp.utils.draw([bkg_stack, sig_hist], xtitle = variable, ytitle = "Events", pad = canvas)
     
     if log: canvas.cd().SetLogy()
