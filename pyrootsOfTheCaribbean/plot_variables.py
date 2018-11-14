@@ -87,8 +87,7 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
 
     # save plot
     if log: plot_name = plot_name.replace(".pdf","_log.pdf")
-    ps.save_canvas(canvas)
-
+    ps.save_canvas(canvas, plot_name)
 
 # load dataframes
 bkg_dfs = {}

@@ -15,7 +15,7 @@ def get_plot_color( cls ):
 
 # intialize plotting style
 def init_plot_style():
-    rp.style.get_style("ATLAS")
+    style = rp.style.get_style("ATLAS")
     style.SetEndErrorSize(3)
     rp.style.set_style(style)
 
