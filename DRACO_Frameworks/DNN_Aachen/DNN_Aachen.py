@@ -1,4 +1,4 @@
-# global imports
+#global imports
 import keras
 import keras.models as models
 import keras.layers as layer
@@ -500,8 +500,66 @@ class DNN():
     def plot_output_output_correlation(self):
         return
 
-    def plot_confusion_matrix(self):
-        return
+    def plot_confusion_matrix(self, norm_matrix = True):
+        ''' generate confusion matrix '''
+        n_classes = self.confusion_matrix.shape[0]
+
+        # norm confusion matrix if wanted
+        if norm_matrix:
+            cm = np.empty( (n_classes, n_classes), dtype = np.float64 )
+            for yit in range(n_classes):
+                evt_sum = float(sum(self.confusion_matrix[yit,:]))
+                for xit in range(n_classes):
+                    cm[yit,xit] = self.confusion_matrix[yit,xit]/evt_sum
+
+            self.confusion_matrix = cm
+
+        plt.clf()
+
+        plt.figure( figsize = [10,10])
+
+        minimum = np.min( self.confusion_matrix )/(np.pi**2.0 * np.exp(1.0)**2.0)
+        maximum = np.max( self.confusion_matrix )*(np.pi**2.0 * np.exp(1.0)**2.0)
+
+        x = np.arange(0, n_classes+1, 1)
+        y = np.arange(0, n_classes+1, 1)
+
+        xn, yn = np.meshgrid(x,y)
+
+        plt.pcolormesh(xn, yn, self.confusion_matrix,
+            norm = LogNorm( vmin = max(minimum, 1e-6), vmax = min(maximum,1.) ))
+        plt.colorbar()
+
+        plt.xlim(0, n_classes)
+        plt.ylim(0, n_classes)
+
+        plt.xlabel("Predicted")
+        plt.ylabel("True")
+    
+        # add textlabel
+        for yit in range(n_classes):
+            for xit in range(n_classes):
+                plt.text( 
+                    xit+0.5, yit+0.5,
+                    "{:.3f}".format(self.confusion_matrix[yit, xit]),
+                    horizontalalignment = "center",
+                    verticalalignment = "center")
+        
+        plt_axis = plt.gca()
+        plt_axis.set_xticks(np.arange( (x.shape[0] -1)) + 0.5, minor = False )
+        plt_axis.set_yticks(np.arange( (y.shape[0] -1)) + 0.5, minor = False )
+
+        plt_axis.set_xticklabels(self.data.classes)
+        plt_axis.set_yticklabels(self.data.classes)
+
+        plt_axis.set_aspect("equal")
+        plt.tight_layout()
+
+        out_path = self.save_path + "/confusion_matrix.pdf"
+        plt.savefig(out_path)
+        print("saved confusion matrix at "+str(out_path))
+        plt.clf()       
+
 
 
 

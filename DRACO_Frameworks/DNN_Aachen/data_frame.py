@@ -57,6 +57,8 @@ class DataFrame(object):
         for cls in classes:
             self.class_translation[cls] = index
             index += 1
+        self.classes = classes
+        self.index_classes = [self.class_translation[c] for c in classes]
 
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
