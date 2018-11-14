@@ -58,6 +58,10 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     bins = variable_binning.binning[variable]["nbins"]
     bin_range = variable_binning.binning[variable]["bin_range"]
 
+    #r = bin_range[1]-bin_range[0]
+    #bin_range[0]-= 0.5*r
+    #bin_range[1]+= 0.5*r
+
     bkg_hists = []
     weight_integral = 0
     for key in ordered_bkgs:
@@ -151,7 +155,10 @@ add_vars = [
     "GenTopHad_B_inacceptance",
     "GenTopHad_QQ_inacceptance",
     "GenTopHad_Q_inacceptance",
-    "GenTopLep_B_inacceptance"]
+    "GenTopLep_B_inacceptance",
+    "Weight_XS",
+    "Weight_CSV",
+    "Weight_GEN_nom"]
 
 # loop over categories and get list of variables
 for cat in categories:
@@ -169,6 +176,7 @@ for cat in categories:
         cut_sig_dfs[key] = sig_dfs[key].query(category_cut)[category_vars+["weight"]]
 
     for variable in category_vars:
+        print(variable)
         plot_name = plot_dir + "/{}_{}.pdf".format(category_names[cat], variable)
         plot_name = plot_name.replace("[","_").replace("]","")
 
