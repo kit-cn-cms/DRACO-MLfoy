@@ -8,7 +8,9 @@ def get_plot_color( cls ):
         "ttcc":  "tomato",
         "ttbb":  "brown",
         "tt2b":  "darkred",
-        "ttb":   "red"
+        "ttb":   "red",
+        "False": "red",
+        "True":  "black"
         }
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
@@ -28,7 +30,7 @@ def set_sig_hist_style( hist, cls ):
     hist.fillstyle = "hollow"
     hist.linestyle = "solid"
     hist.linecolor = get_plot_color(cls)
-    hist.linewidth = 1.5
+    hist.linewidth = 2
 
 # define style of background histogram
 def set_bkg_hist_style( hist, cls ):

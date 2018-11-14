@@ -74,6 +74,7 @@ class DataFrame(object):
         df = shuffle(df)
 
         # norm variables if wanted
+        unnormed_df = df
         if norm_variables:
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
 
@@ -81,6 +82,7 @@ class DataFrame(object):
         n_test_samples = int( df.shape[0]*test_percentage )
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples )
+        self.df_test_unnormed = unnormed_df.head(n_test_samples)
         del df
 
         # save variable lists
@@ -104,9 +106,10 @@ class DataFrame(object):
         return self.df_train[ self.prenet_targets ].values
         
     # test data ------------------------------------
-    def get_test_data(self, as_matrix = True):
-        if as_matrix: return self.df_test[ self.train_variables ].values
-        else:         return self.df_test[ self.train_variables ]
+    def get_test_data(self, as_matrix = True, normed = True):
+        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if as_matrix:  return self.df_test[ self.train_variables ].values
+        else:          return self.df_test[ self.train_variables ]
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values

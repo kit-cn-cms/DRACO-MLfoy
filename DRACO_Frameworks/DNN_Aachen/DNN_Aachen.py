@@ -8,6 +8,7 @@ from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
 import numpy as np
 import rootpy.plotting as rp
+import pandas
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -431,21 +432,24 @@ class DNN():
             sig_label = "True"
             bkg_label = "False"
 
-            sig_label += "*{:.3f}".format(bkg_sig_ratio)
+            sig_title = sig_label +"*{:.3f}".format(bkg_sig_ratio)
 
             # plot output
             bkg_hist = rp.Hist(n_bins, *bin_range, title = bkg_label)
             ps.set_bkg_hist_style( bkg_hist, bkg_label)
             bkg_hist.fill_array( bkg_values, bkg_weights )
 
-            sig_hist = rp.Hist(n_bins, *bin_range, title = sig_label)
+            sig_hist = rp.Hist(n_bins, *bin_range, title = sig_title)
             ps.set_sig_hist_style( sig_hist, sig_label )
             sig_hist.fill_array( sig_values, sig_weights )
 
+            stack = rp.HistStack( [bkg_hist], stacked = True, drawstyle = "HIST E1 X0")
+            stack.SetMinimum(1e-4)
+
             canvas = ps.init_canvas(logY = log)
             
-            rp.utils.draw([bkg_hist, sig_hist],
-                xtitle = "prenet node {}".format(noce_cls), ytitle = "Events", pad = canvas)
+            rp.utils.draw([stack,sig_hist],
+                xtitle = "prenet node {}".format(node_cls), ytitle = "Events", pad = canvas)
 
             legend = ps.init_legend([bkg_hist, sig_hist])
 
@@ -487,8 +491,6 @@ class DNN():
                     sig_weights = filtered_weights
                 else:
                     # background in this node
-                    n_bkg_evts += len(filtered_values)
-
                     weight_integral += sum( filtered_weights )
                     hist = rp.Hist( nbins, *bin_range, title = str(truth_cls))
                     ps.set_bkg_hist_style(hist, truth_cls)
@@ -502,7 +504,7 @@ class DNN():
             # plot signal
             weight_sum = sum(sig_weights)
             scale_factor = 1.*weight_integral/weight_sum
-            sig_weights = [w*scale_factor for w in weights]
+            sig_weights = [w*scale_factor for w in sig_weights]
 
             sig_title = sig_label + "*{:.3f}".format(scale_factor)
             sig_hist = rp.Hist( nbins, *bin_range, title = sig_title)
@@ -514,7 +516,7 @@ class DNN():
 
             # drawing histograms
             rp.utils.draw([bkg_stack, sig_hist], 
-                xtitle = cls_node+" Discriminator", ytitle = "Events", pad = canvas)
+                xtitle = node_cls+" Discriminator", ytitle = "Events", pad = canvas)
             
             # creating legend
             legend = ps.init_legend( bkg_hists+[sig_hist] )
@@ -526,10 +528,16 @@ class DNN():
     def plot_input_output_correlation(self):
 
         # get input variables from test set TODO get them unnormed
-        input_data = self.data.get_test_data(as_matrix = False)
+        input_data = self.data.get_test_data(as_matrix = False, normed = False)
 
         # initialize empty dataframe
-        df = pd.DataFrame()
+        df = pandas.DataFrame()
+        plt.figure(figsize = [10,10])
+
+        # correlation plot path
+        plt_path = self.save_path + "/correlations"
+        if not os.path.exists(plt_path):
+            os.makedirs(plt_path)
 
         # loop over classes
         for i_cls, cls in enumerate(self.event_classes):
@@ -550,15 +558,13 @@ class DNN():
 
                 assert( len(var_values) == len(pred_values) )
 
-                plt.plot(var_values, pred_values, ".", color = "black")
-
-                # get xrange from binning file
-                # set yrange [0-1]
-                plt.ylim([0,1])
-                plt.xlim( variable_binning.binning[var]["bin_range"] )
+                plt.hist2d(var_values, pred_values, 
+                    bins = [binning.binning[var]["nbins"], 20],
+                    range = [binning.binning[var]["bin_range"], [0.,1.]])
+                plt.colorbar()
 
                 # calculate correlation value
-                correlation = None
+                correlation = np.corrcoef(var_values, pred_values)[0][1]
                 print("correlation between {} and {}: {}".format(
                     cls, var, correlation))
 
@@ -567,17 +573,19 @@ class DNN():
                 plt.xlabel(var)
                 plt.ylabel(cls+"_predicted")
 
-                
-                plt.show()
-
+                out_name = plt_path + "/correlation_{}_{}.pdf".format(cls,var)
+                plt.savefig(out_name.replace("[","_").replace("]",""))
+                plt.clf()
 
                 corr_values[var] = correlation
 
             # save correlation value to dataframe
-            df[cls] = pd.Series( corr_values )
+            df[cls] = pandas.Series( corr_values )
                 
         # save dataframe of correlations
-        return
+        out_path = self.save_path + "/correlation_matrix.h5"
+        df.to_hdf(out_path, "correlations")
+        print("saved correlation matrix at "+str(out_path))
 
     def plot_output_output_correlation(self):
         return
@@ -635,7 +643,6 @@ class DNN():
         plt_axis.set_yticklabels(self.data.classes)
 
         plt_axis.set_aspect("equal")
-        plt.tight_layout()
 
         out_path = self.save_path + "/confusion_matrix.pdf"
         plt.savefig(out_path)
