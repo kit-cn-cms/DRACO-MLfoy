@@ -25,7 +25,8 @@ set_session(tf.Session(config=config))
 
 # local imports
 import data_frame
-import variable_binning
+import plot_configs.variable_binning as binning
+import plot_configs.plotting_styles as ps
 from Network_architecture import architecture
 
 class DNN():
@@ -86,16 +87,6 @@ class DNN():
             self.optimizer = self.architecture_dic["optimizer"]
         else:
             self.optimizer = optimizer
-
-    def _get_color_dict(self):
-        return {
-            "ttHbb": "blue",
-            "ttlf":  "salmon",
-            "ttcc":  "tomato",
-            "ttbb":  "brown",
-            "tt2b":  "darkred",
-            "ttb":   "red"
-            }
 
     def _load_datasets(self):
         ''' load dataset '''
@@ -418,6 +409,9 @@ class DNN():
 
     def plot_prenet_nodes(self, log = False):
         ''' plot prenet nodes '''
+        ps.init_plot_style()
+        n_bins = 15
+        bin_range = [0.,1.]
 
         for i, node_cls in enumerate(self.prenet_targets):       
             # get outputs of class node
@@ -440,28 +434,32 @@ class DNN():
             sig_label += "*{:.3f}".format(bkg_sig_ratio)
 
             # plot output
-            plt.clf()
-            plt.figure(figsize = [15,10])
-            
-            plt.hist( bkg_values, histtype = "stepfilled", bins = 15, range = [0.,1.], label = bkg_label, log = log, weights = bkg_weights)
-            plt.hist( sig_values, histtype = "step", bins = 15, range = [0.,1.], label = sig_label, log = log, weights = sig_weights, lw = 2)
+            bkg_hist = rp.Hist(n_bins, *bin_range, title = bkg_label)
+            ps.set_bkg_hist_style( bkg_hist, bkg_label)
+            bkg_hist.fill_array( bkg_values, bkg_weights )
 
-            plt.legend()
-            plt.grid()
-            plt.xlabel("output of prenet node")
-            plt.title("output for {}".format(node_cls), loc = "right")
-            plt.title("CMS private work", loc = "left")
+            sig_hist = rp.Hist(n_bins, *bin_range, title = sig_label)
+            ps.set_sig_hist_style( sig_hist, sig_label )
+            sig_hist.fill_array( sig_values, sig_weights )
+
+            canvas = ps.init_canvas(logY = log)
+            
+            rp.utils.draw([bkg_hist, sig_hist],
+                xtitle = "prenet node {}".format(noce_cls), ytitle = "Events", pad = canvas)
+
+            legend = ps.init_legend([bkg_hist, sig_hist])
 
             out_path = self.save_path + "/prenet_output_{}.pdf".format(node_cls)
 
-            plt.savefig(out_path)
-            print("plot for prenet output of {} saved at {}".format(node_cls, out_path))
-
-            plt.clf()
+            ps.save_canvas(canvas,out_path)
 
 
-    def plot_classification_nodes(self, nbins = 20, bin_range = (0., 1.), log = False):
+    def plot_classification_nodes(self, log = False):
         ''' plot discriminators for output classes '''
+        ps.init_plot_style()
+
+        nbins = 20
+        bin_range = [0., 1.]
 
         # loop over discriminator nodes
         for i, node_cls in enumerate(self.event_classes):
@@ -475,11 +473,13 @@ class DNN():
             # loop over all classes to fill hist according to predicted class
             for j, truth_cls in enumerate(self.event_classes):
                 class_index = self.data.class_translation[truth_cls]
+
                 # filter values per event class
                 filtered_values = [ out_values[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
                 filtered_weights = [ self.data.get_test_weights()[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+
                 if i == j:
                     # signal in this node
                     sig_values = filtered_values 
@@ -490,14 +490,9 @@ class DNN():
                     n_bkg_evts += len(filtered_values)
 
                     weight_integral += sum( filtered_weights )
-                    hist = rp.Hist( nbins, *bin_range, title = str(truth_cls),
-                        markersize = 0, legendstyle = "F")
-                    hist.Sumw2()
+                    hist = rp.Hist( nbins, *bin_range, title = str(truth_cls))
+                    ps.set_bkg_hist_style(hist, truth_cls)
                     hist.fill_array( filtered_values, filtered_weights )
-                    hist.fillstyle = "solid"
-                    hist.fillcolor = self._get_color_dict()[truth_cls]
-                    hist.linecolor = "black"
-                    hist.linewidth = 1
                     bkg_hists.append(hist)
 
             # stack backgrounds
@@ -510,47 +505,23 @@ class DNN():
             sig_weights = [w*scale_factor for w in weights]
 
             sig_title = sig_label + "*{:.3f}".format(scale_factor)
-            sig_hist = rp.Hist( nbins, *bin_range, title = sig_title, 
-                markersize = 0, drawstyle = "shape", legendstyle = "L")
-            sig_hist.Sumw2()
+            sig_hist = rp.Hist( nbins, *bin_range, title = sig_title)
+            ps.set_sig_hist_style(sig_hist, sig_label)
             sig_hist.fill_array( sig_values, sig_weights)
-            sig_hist.fillstyle = "hollow"
-            sig_hist.linestyle = "solid"
-            sig_hist.linecolor = self._get_color_dict()[sig_label]
-            sig_hist.linewidth = 2
             
             # creating canvas
-            canvas = rp.Canvas(width = 1024, height = 768)
-            canvas.SetTopMargin(0.07)
-            canvas.SetBottomMargin(0.15)
-            canvas.SetRightMargin(0.05)
-            canvas.SetLeftMargin(0.15)
-            canvas.SetTicks(1,1)
-           
+            canvas = ps.init_canvas(logY = log)
+
+            # drawing histograms
             rp.utils.draw([bkg_stack, sig_hist], 
                 xtitle = cls_node+" Discriminator", ytitle = "Events", pad = canvas)
             
-            if log: canvas.cd().SetLogy()
+            # creating legend
+            legend = ps.init_legend( bkg_hists+[sig_hist] )
 
-            # creting legend
-            legend = rp.Legend(bkg_hists+[sig_hist], entryheight = 0.03)
-            legend.SetX1NDC(0.90)
-            legend.SetX2NDC(0.99)
-            legend.SetY1NDC(0.90)
-            legend.SetY2NDC(0.99)
-            legend.SetBorderSize(0)
-            legend.SetLineStyle(0)
-            legend.SetTextSize(0.04)
-            legend.SetTextFont(42)
-            legend.SetFillStyle(0)
-            legend.Draw()
-
-            canvas.Modified()
-            canvas.Update()
-
+            # save canvas
             out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
-            canvas.SaveAs(plot_name)
-            canvas.Clear()
+            ps.save_canvas(canvas, out_path)
 
     def plot_input_output_correlation(self):
 
