@@ -18,16 +18,17 @@ categories_dic = {
     "(N_Jets == 6 and N_BTagsM >= 3)": [variable_info.variables_6j_3b, "5j_ge3t"]}
 
 prenet_targets = [
-    "GenAdd_BB_inacceptance",
+    #"GenAdd_BB_inacceptance",
     "GenAdd_B_inacceptance",
     "GenHiggs_BB_inacceptance",
-    "GenHiggs_B_inacceptance",
-    "GenTopHad_B_inacceptance",
+    #"GenHiggs_B_inacceptance",
+    #"GenTopHad_B_inacceptance",
     "GenTopHad_QQ_inacceptance",
     "GenTopHad_Q_inacceptance",
-    "GenTopLep_B_inacceptance"]
+    #"GenTopLep_B_inacceptance"
+    ]
 
-event_classes = ["ttHbb", "ttbb", "ttb", "tt2b", "ttcc", "ttlf"]
+event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
 inPath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/aachen_data/"
 
