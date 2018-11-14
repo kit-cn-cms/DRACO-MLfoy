@@ -1,13 +1,23 @@
+import rootpy
 import pandas
 import matplotlib.pyplot as plt
 import variable_info
 import variable_binning
 import glob
 import os
+#import ROOT
+import numpy as np
+import rootpy.plotting as rp
+import rootpy.plotting.root2matplotlib as rplt
+
+style = rp.style.get_style("ATLAS")
+style.SetEndErrorSize(3)
+rp.style.set_style(style)
+
 
 def get_colors():
     return {
-        "ttH": "blue",
+        "ttH": "royalblue",
         "ttlf":  "salmon",
         "ttcc":  "tomato",
         "ttbb":  "brown",
@@ -41,7 +51,6 @@ if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
 def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
-    plt.figure(figsize = [15,10])
 
     color_dict = get_colors()
     ordered_bkgs = ["ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
@@ -49,42 +58,73 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     bins = variable_binning.binning[variable]["nbins"]
     bin_range = variable_binning.binning[variable]["bin_range"]
 
-    bkg_names = []
-    bkg_lists = []
-    bkg_weights = []
-    bkg_colors = []
+    bkg_hists = []
+    weight_integral = 0
     for key in ordered_bkgs:
-        bkg_names.append(key)
-        bkg_lists.append( bkgs[key][variable].values )
-        bkg_weights.append( bkgs[key]["weight"].values )
-        bkg_colors.append( color_dict[key] )
+        weight_integral += sum(bkgs[key]["weight"].values)
+        hist = rp.Hist( bins, *bin_range, title = key, markersize = 0, legendstyle = "F" )
+        hist.Sumw2()
+        hist.fill_array(
+            bkgs[key][variable].values, 
+            bkgs[key]["weight"].values )
+        hist.fillstyle = "solid"
+        hist.fillcolor = color_dict[key]
+        hist.linecolor = "black"
+        hist.linewidth = 1
+        bkg_hists.append( hist )
 
-    n, bins, _ = plt.hist( bkg_lists, bins = bins, range = bin_range, log = log, histtype = "stepfilled", stacked = True, weights = bkg_weights, label = bkg_names, color = bkg_colors )
+    bkg_stack = rp.HistStack( bkg_hists, stacked = True , drawstyle ="HIST E1 X0")
+    bkg_stack.SetMinimum(1e-4)
+    # plot ttH    
+    sig_key = "ttH"
 
-    weight_integral = sum([sum(l) for l in bkg_weights])
-    for key in sigs:
-        values = sigs[key][variable].values
-        weights = sigs[key]["weight"].values
-        weight_sum = sum(weights)
-        scale_factor = 1.*weight_integral/weight_sum
-        weights = [w*scale_factor for w in weights]
+    values = sigs[sig_key][variable].values
+    weights = sigs[sig_key]["weight"].values
+    weight_sum = sum(weights)
+    scale_factor = 1.*weight_integral/weight_sum
+    weights = [w*scale_factor for w in weights]
 
-        plt.hist( values, bins = bins, range = bin_range, log = log, histtype = "step", weights = weights, label = key, color = color_dict[key], lw = 2 )
+    sig_title = sig_key + "*{:.3f}".format(scale_factor)
+    sig_hist = rp.Hist( bins, *bin_range, title = sig_title, markersize = 0, drawstyle = "shape", legendstyle = "L" )
+    sig_hist.Sumw2()
+    #sig_hist.markersize = 1
+    sig_hist.fillstyle = "hollow"
+    sig_hist.linestyle = "solid"
+    sig_hist.linecolor = color_dict[sig_key]
+    sig_hist.linewidth = 2
+    sig_hist.fill_array(values, weights)
 
-    plt.xlabel( variable )
-    plt.ylabel( "entries per bin" )
-    plt.xlim(bin_range)
-    plt.legend()
-    plt.grid()
-    plt.title(plt_title, loc = "left")    
+    # create canvas
+    canvas = rp.Canvas(width = 1024, height = 768)
+    canvas.SetTopMargin(0.07)
+    canvas.SetBottomMargin(0.15)
+    canvas.SetRightMargin(0.05)
+    canvas.SetLeftMargin(0.15)
+    canvas.SetTicks(1,1)
+    #rp.utils.draw([bkg_stack, sig_stack], xtitle = variable, ytitle = "Events", pad = canvas)
+    rp.utils.draw([bkg_stack, sig_hist], xtitle = variable, ytitle = "Events", pad = canvas)
+    
+    if log: canvas.cd().SetLogy()
+
+    legend = rp.Legend(bkg_hists+[sig_hist], entryheight = 0.03)#, rightmargin = 0.05, margin = 0.3)
+    legend.SetX1NDC(0.90)
+    legend.SetX2NDC(0.99)
+    legend.SetY1NDC(0.90)
+    legend.SetY2NDC(0.99)
+    legend.SetBorderSize(0)
+    legend.SetLineStyle(0)
+    legend.SetTextSize(0.04)
+    legend.SetTextFont(42)
+    legend.SetFillStyle(0)
+    legend.Draw()
+    
+    canvas.Modified()
+    canvas.Update()
 
     if log: plot_name = plot_name.replace(".pdf","_log.pdf")
+    canvas.SaveAs(plot_name)
 
-    plt.savefig( plot_name )
-    print("saved plot at "+str(plot_name))
-    plt.clf()
-
-
+    canvas.Clear()
 
 
 
@@ -95,13 +135,13 @@ for key in signals:
     print("loading signal "+str(signals[key]))
     with pandas.HDFStore( signals[key], mode = "r" ) as store:
         df = store.select("data")
-        sig_dfs[key] = df.assign(weight = lambda x: x.Weight_XS)
+        sig_dfs[key] = df.assign(weight = lambda x: x.Weight_XS*x.Weight_CSV*x.Weight_GEN_nom)
         
 for key in backgrounds:
     print("loading backgroud "+str(backgrounds[key]))
     with pandas.HDFStore( backgrounds[key], mode = "r" ) as store:
         df = store.select("data")
-        bkg_dfs[key] = df.assign(weight = lambda x: x.Weight_XS)
+        bkg_dfs[key] = df.assign(weight = lambda x: x.Weight_XS*x.Weight_CSV*x.Weight_GEN_nom)
 
 add_vars = [
     "GenAdd_BB_inacceptance",
@@ -129,7 +169,6 @@ for cat in categories:
         cut_sig_dfs[key] = sig_dfs[key].query(category_cut)[category_vars+["weight"]]
 
     for variable in category_vars:
-        print(variable)
         plot_name = plot_dir + "/{}_{}.pdf".format(category_names[cat], variable)
         plot_name = plot_name.replace("[","_").replace("]","")
 
