@@ -73,14 +73,15 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     # hist signal
     sig_title = sig_key + "*{:.3f}".format(scale_factor)
     sig_hist = rp.Hist( bins, *bin_range, title = sig_title)
-    ps.set_bkg_hist_style(sig_hist,sig_key)
+    ps.set_sig_hist_style(sig_hist,sig_key)
     sig_hist.fill_array(values, weights)
 
     # create canvas
-    canvas = ps.init_canvas(logY = log)
+    canvas = ps.init_canvas()
 
     # draw histograms
     rp.utils.draw([bkg_stack, sig_hist], xtitle = variable, ytitle = "Events", pad = canvas)
+    if log: canvas.cd().SetLogy()
 
     # add legend
     legend = ps.init_legend( bkg_hists+[sig_hist] )

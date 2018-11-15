@@ -19,13 +19,13 @@ categories_dic = {
 
 prenet_targets = [
     #"GenAdd_BB_inacceptance",
-    "GenAdd_B_inacceptance",
+    #"GenAdd_B_inacceptance",
     "GenHiggs_BB_inacceptance",
-    #"GenHiggs_B_inacceptance",
-    #"GenTopHad_B_inacceptance",
+    "GenHiggs_B_inacceptance",
+    "GenTopHad_B_inacceptance",
     "GenTopHad_QQ_inacceptance",
     "GenTopHad_Q_inacceptance",
-    #"GenTopLep_B_inacceptance"
+    "GenTopLep_B_inacceptance"
     ]
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
@@ -44,16 +44,16 @@ for key in categories_dic:
         train_variables     = categories_dic[key][0], 
         prenet_targets      = prenet_targets,
         train_epochs        = 500,
-        early_stopping      = 50,
-        eval_metrics        = ["acc", "mean_squared_error", "mean_squared_logarithmic_error"])
+        early_stopping      = 10,
+        eval_metrics        = ["acc"])#, "mean_squared_error", "mean_squared_logarithmic_error"])
 
 
     dnn_aachen.build_model()
     dnn_aachen.train_models()
     dnn_aachen.eval_model()
     dnn_aachen.plot_metrics()
-    dnn_aachen.plot_prenet_nodes()
-    dnn_aachen.plot_classification_nodes()
+    dnn_aachen.plot_prenet_nodes(log = True)
+    dnn_aachen.plot_classification_nodes(log = True)
     dnn_aachen.plot_confusion_matrix()
     dnn_aachen.plot_input_output_correlation()
 

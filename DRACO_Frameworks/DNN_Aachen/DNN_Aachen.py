@@ -204,7 +204,7 @@ class DNN():
 
         # compile main net
         main_net.compile(
-            loss = self.loss_function,
+            loss = self.loss_function,#"kullback_leibler_divergence",#self.loss_function,
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
             
@@ -446,10 +446,11 @@ class DNN():
             stack = rp.HistStack( [bkg_hist], stacked = True, drawstyle = "HIST E1 X0")
             stack.SetMinimum(1e-4)
 
-            canvas = ps.init_canvas(logY = log)
+            canvas = ps.init_canvas()
             
             rp.utils.draw([stack,sig_hist],
                 xtitle = "prenet node {}".format(node_cls), ytitle = "Events", pad = canvas)
+            if log: canvas.cd().SetLogy()
 
             legend = ps.init_legend([bkg_hist, sig_hist])
 
@@ -512,11 +513,12 @@ class DNN():
             sig_hist.fill_array( sig_values, sig_weights)
             
             # creating canvas
-            canvas = ps.init_canvas(logY = log)
+            canvas = ps.init_canvas()
 
             # drawing histograms
             rp.utils.draw([bkg_stack, sig_hist], 
                 xtitle = node_cls+" Discriminator", ytitle = "Events", pad = canvas)
+            if log: canvas.cd().SetLogy()
             
             # creating legend
             legend = ps.init_legend( bkg_hists+[sig_hist] )
@@ -559,8 +561,8 @@ class DNN():
                 assert( len(var_values) == len(pred_values) )
 
                 plt.hist2d(var_values, pred_values, 
-                    bins = [binning.binning[var]["nbins"], 20],
-                    range = [binning.binning[var]["bin_range"], [0.,1.]])
+                    bins = [min(binning.binning[var]["nbins"],20), 20],
+                    norm = LogNorm())
                 plt.colorbar()
 
                 # calculate correlation value

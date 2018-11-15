@@ -9,8 +9,8 @@ def get_plot_color( cls ):
         "ttbb":  "brown",
         "tt2b":  "darkred",
         "ttb":   "red",
-        "False": "red",
-        "True":  "black"
+        "False": "orange",
+        "True":  "cyan"
         }
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
@@ -49,7 +49,7 @@ def set_data_hist_style( hist, cls ):
 
 
 # create canvas
-def init_canvas( ratiopad = False, logY = False ):
+def init_canvas( ratiopad = False):
     if not ratiopad:
         canvas = rp.Canvas(width = 1024, height = 768)
         canvas.SetTopMargin(0.07)
@@ -61,7 +61,6 @@ def init_canvas( ratiopad = False, logY = False ):
         print("TODO ratiopad")
         canvas = None
 
-    if logY: canvas.cd(1).SetLogy()
     
     return canvas
 

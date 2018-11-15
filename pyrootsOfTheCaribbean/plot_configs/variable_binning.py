@@ -1,5 +1,5 @@
 import numpy as np
-default = 100
+default = 50
 binning = {
 
 "Jet_Pt[0]":		                                    {"nbins": default, "bin_range": [25.,400.]},
