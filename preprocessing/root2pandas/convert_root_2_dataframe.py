@@ -349,6 +349,9 @@ def get_variable_lists():
     # append variables for class labels
     variables += ['GenEvt_I_TTPlusBB', 'GenEvt_I_TTPlusCC']
 
+    # variables for category cutting
+    variables += ["N_Jets", "N_BTagsM"]
+
     # append variables for prenet-targets
     variables += [
         "GenAdd_BB_inacceptance",
@@ -375,9 +378,8 @@ def get_variable_lists():
 
     # variables for triggering ------
     # append variables for category cutting
-    trigger_variables = ["N_Jets", "N_BTagsM"]
     # variables for mcTriggerWeights
-    trigger_variables += [
+    trigger_variables = [
         "N_LooseMuons", 
         "N_TightElectrons", 
         "N_LooseElectrons", 
@@ -421,7 +423,13 @@ ttH = [
 ttbar = [
         {"name":    "TTToSL",
          "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"}
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
+        {"name":    "TTToHad",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
+        {"name":    "TTToLep",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"}
         ]
 
 workdir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files/"
@@ -430,7 +438,7 @@ workdir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files/"
 # base event selection to drop unneccesary events immediately
 base_selection = "\
 ( \
-(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Evt_Odd == 1) \
+(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
 and (\
 (N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
 or \
