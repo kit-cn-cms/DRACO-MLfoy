@@ -76,7 +76,7 @@ class DataFrame(object):
         df = shuffle(df)
 
         # norm variables if wanted
-        unnormed_df = df
+        unnormed_df = df.copy()
         if norm_variables:
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
 

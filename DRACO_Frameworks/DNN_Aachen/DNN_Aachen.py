@@ -204,7 +204,7 @@ class DNN():
 
         # compile main net
         main_net.compile(
-            loss = self.loss_function,#"kullback_leibler_divergence",#self.loss_function,
+            loss = "kullback_leibler_divergence",#self.loss_function,
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
             
@@ -268,6 +268,11 @@ class DNN():
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
 
+        # create checkpoint files
+        cp_path = self.save_path + "/model.ckpt"
+        cp_callback = keras.callbacks.ModelCheckpoint(
+            cp_path, monitor = "val_loss", save_best_only = True)
+
         # train main net
         self.trained_main_net = self.main_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -294,6 +299,13 @@ class DNN():
         out_file = self.save_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
+
+        out_file = self.save_path + "/trained_main_net"
+        sess = keras.backend.get_session()
+        saver = tf.train.Saver()
+        save_path = saver.save(sess, out_file)
+        print("saved checkpoint files to "+str(out_file))
+
 
     def eval_model(self):
         ''' evaluate trained model '''
