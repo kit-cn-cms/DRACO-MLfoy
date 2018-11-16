@@ -22,10 +22,10 @@ prenet_targets = [
     #"GenAdd_B_inacceptance",
     "GenHiggs_BB_inacceptance",
     "GenHiggs_B_inacceptance",
-    "GenTopHad_B_inacceptance",
-    "GenTopHad_QQ_inacceptance",
-    "GenTopHad_Q_inacceptance",
-    "GenTopLep_B_inacceptance"
+    #"GenTopHad_B_inacceptance",
+    #"GenTopHad_QQ_inacceptance",
+    #"GenTopHad_Q_inacceptance",
+    #"GenTopLep_B_inacceptance"
     ]
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
@@ -33,7 +33,7 @@ event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 inPath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files"
 
 for key in categories_dic:
-    outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_"+str(categories_dic[key][1])+"/"
+    outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_KLD_v1_"+str(categories_dic[key][1])+"/"
 
 
     dnn_aachen = DNN_Aachen.DNN(
@@ -44,7 +44,7 @@ for key in categories_dic:
         train_variables     = categories_dic[key][0], 
         prenet_targets      = prenet_targets,
         train_epochs        = 500,
-        early_stopping      = 10,
+        early_stopping      = 20,
         eval_metrics        = ["acc"])#, "mean_squared_error", "mean_squared_logarithmic_error"])
 
 

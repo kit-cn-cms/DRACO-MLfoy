@@ -230,6 +230,12 @@ class DNN():
 
     def train_models(self):
         ''' train prenet first then the main net '''
+        
+        # checkpoint files
+        cp_path = self.save_path + "/checkpoints/"
+        if not os.path.exists(cp_path):
+            os.makedirs(cp_path)
+
 
         # add early stopping if activated
         callbacks = None
@@ -254,24 +260,19 @@ class DNN():
             layer.trainable = False
 
         # save trained prenet model
-        out_file = self.save_path + "/trained_pre_net.h5py"
+        out_file = cp_path + "/trained_pre_net.h5py"
         self.pre_net.save(out_file)
         print("saved trained prenet model at "+str(out_file))
 
         prenet_config = self.pre_net.get_config()
-        out_file = self.save_path +"/trained_pre_net_config"
+        out_file = cp_path +"/trained_pre_net_config"
         with open(out_file, "w") as f:
             f.write( str(prenet_config))
         print("saved prenet model config at "+str(out_file))
 
-        out_file = self.save_path +"/trained_pre_net_weights.h5"
+        out_file = cp_path +"/trained_pre_net_weights.h5"
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
-
-        # create checkpoint files
-        cp_path = self.save_path + "/model.ckpt"
-        cp_callback = keras.callbacks.ModelCheckpoint(
-            cp_path, monitor = "val_loss", save_best_only = True)
 
         # train main net
         self.trained_main_net = self.main_net.fit(
@@ -286,21 +287,21 @@ class DNN():
             )
 
         # save trained model
-        out_file = self.save_path + "/trained_main_net.h5py"
+        out_file = cp_path + "/trained_main_net.h5py"
         self.main_net.save(out_file)
         print("saved trained model at "+str(out_file))
 
         mainnet_config = self.main_net.get_config()
-        out_file = self.save_path + "/trained_main_net_config"
+        out_file = cp_path + "/trained_main_net_config"
         with open(out_file, "w") as f:
             f.write( str(mainnet_config))
         print("saved model config at "+str(out_file))
 
-        out_file = self.save_path +"/trained_main_net_weights.h5"
+        out_file = cp_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
 
-        out_file = self.save_path + "/trained_main_net"
+        out_file = cp_path + "/trained_main_net"
         sess = keras.backend.get_session()
         saver = tf.train.Saver()
         save_path = saver.save(sess, out_file)
