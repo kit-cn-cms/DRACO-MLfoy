@@ -6,7 +6,7 @@ class architecture():
 	def __init__(self):
 		self.sl_4j_3b = {"prenet_layer":	[100,100],
 						 "mainnet_layer":[100,100],
-						 "Dropout":		0.7,
+						 "Dropout":		1.,#0.7,
 						 "L2_Norm":		0.00001,
 						 "batch_size":	5000,
 						 "optimizer":	optimizers.Adam(lr=0.0001),
@@ -16,7 +16,7 @@ class architecture():
 
 		self.sl_5j_3b = {"prenet_layer":	[100,100],
 						 "mainnet_layer":[100],
-						 "Dropout":		0.7,
+						 "Dropout":		1.,#0.7,
 					 	 "L2_Norm":		0.00001,
 						 "batch_size":	5000,
 						 "optimizer":	optimizers.Adam(lr=0.0001),
@@ -26,7 +26,7 @@ class architecture():
 
 		self.sl_6j_3b = {"prenet_layer":	[100,100],
 						 "mainnet_layer":[100,100],
-						 "Dropout":		0.7,
+						 "Dropout":		1.,#0.7,
 						 "L2_Norm":		0.00001,
 						 "batch_size":	5000,
 						 "optimizer":	optimizers.Adam(lr=0.0001),
@@ -36,7 +36,7 @@ class architecture():
 
 	def get_architecture(self, event_category):
 
-		if event_category == "(N_Jets == 6 and N_BTagsM >= 3)":
+		if event_category == "(N_Jets >= 6 and N_BTagsM >= 3)":
 			return self.sl_6j_3b
 		elif event_category == "(N_Jets == 5 and N_BTagsM >= 3)":
 			return self.sl_5j_3b

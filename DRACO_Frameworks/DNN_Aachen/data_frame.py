@@ -19,7 +19,7 @@ class DataFrame(object):
             the dataset is shuffled and split into a test and train sample
                 according to test_percentage
             for better training, the variables can be normed to std(1) and mu(0) '''
-
+        
         # loop over all classes and extract data as well as event weights
         class_dataframes = list()
         for cls in classes:
@@ -78,8 +78,14 @@ class DataFrame(object):
         # norm variables if wanted
         unnormed_df = df.copy()
         if norm_variables:
+            norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
+            for v in train_variables:
+                norm_csv["mu"][v] = unnormed_df[v].mean()
+                norm_csv["std"][v] = unnormed_df[v].std()
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+            self.norm_csv = norm_csv
 
+        self.unsplit_df = df.copy()
         # split test sample
         n_test_samples = int( df.shape[0]*test_percentage )
         self.df_test = df.head(n_test_samples)
@@ -91,6 +97,7 @@ class DataFrame(object):
         self.train_variables = train_variables
         self.prenet_targets = prenet_targets
         self.output_classes = classes
+
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
@@ -123,7 +130,9 @@ class DataFrame(object):
     def get_prenet_test_labels(self, as_matrix = True):
         return self.df_test[ self.prenet_targets ].values
 
-
+    # full sample ----------------------------------
+    def get_full_df(self):
+        return self.unsplit_df[self.train_variables]
 
 
     def hist_train_variables(self, signal_hists = [], n_bins = 20, logscale = True):

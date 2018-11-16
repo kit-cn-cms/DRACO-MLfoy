@@ -76,12 +76,12 @@ all_variables = {
 
     "blr":                      "Evt_blr_ETH",
     "blr_transformed":          "Evt_blr_ETH_transformed",
-    "dank_MEM":                 None,
+    "dank_MEM":                 "MEM",
 }
 
 
 undefined_variables = [
-    "dank_MEM",
+    #"dank_MEM",
     "max_CSV_tags", #already covered
     #"sphericityT_jets",
     #"sphericityT_tags",

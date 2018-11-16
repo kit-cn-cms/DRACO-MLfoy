@@ -2,6 +2,7 @@
 import keras
 import keras.models as models
 import keras.layers as layer
+from keras import backend as K
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib.colors import LogNorm
@@ -77,7 +78,10 @@ class DNN():
         self.eval_metrics = eval_metrics
 
         # load dataset
-        self.data= self._load_datasets()
+        self.data = self._load_datasets()
+        out_file = self.save_path+"/variable_norm.csv"
+        self.data.norm_csv.to_csv(out_file)
+        print("saved variable norms at "+str(out_file))
 
         # dict with aachen architectures for sl analysis
         architecture_1 = architecture()
@@ -100,8 +104,10 @@ class DNN():
             test_percentage     = self.test_percentage,
             norm_variables      = True)
 
+
     def build_default_model(self):
         ''' default Aachen-DNN model as used in the analysis '''
+        K.set_learning_phase(True)
 
         number_of_input_neurons = self.data.n_input_neurons
 
@@ -111,7 +117,7 @@ class DNN():
         l2_regularization_beta      = self.architecture_dic["L2_Norm"]
     
         # build pre net ===========================================================================
-        Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,) )
+        Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,),name="input" )
 
         X = Inputs
         self.layer_list = [X]
@@ -170,7 +176,8 @@ class DNN():
         Y = keras.layers.Dense(
             self.data.n_output_neurons,
             activation = "softmax",
-            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)
+            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
+	        name = "output"
             )(Y)
 
         # define model
@@ -300,6 +307,19 @@ class DNN():
         out_file = cp_path +"/trained_main_net_weights.h5"
         self.main_net.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
+
+        # set model as non trainable
+        for layer in self.pre_net.layers:
+            layer.trainable = False
+        self.pre_net.trainable = False
+
+        for layer in self.main_net.layers:
+            layer.trainable = False
+        self.main_net.trainable = False
+ 
+        K.set_learning_phase(False)
+       
+        self.main_net.summary()
 
         out_file = cp_path + "/trained_main_net"
         sess = keras.backend.get_session()
