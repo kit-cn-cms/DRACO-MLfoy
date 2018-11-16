@@ -1,4 +1,5 @@
 import rootpy.plotting as rp
+import ROOT
 
 # dictionary for colors
 def get_plot_color( cls ):
@@ -9,8 +10,8 @@ def get_plot_color( cls ):
         "ttbb":  "brown",
         "tt2b":  "darkred",
         "ttb":   "red",
-        "False": "orange",
-        "True":  "cyan"
+        "False": "orangered",
+        "True":  "teal"
         }
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
@@ -30,7 +31,7 @@ def set_sig_hist_style( hist, cls ):
     hist.fillstyle = "hollow"
     hist.linestyle = "solid"
     hist.linecolor = get_plot_color(cls)
-    hist.linewidth = 2
+    hist.linewidth = 1
 
 # define style of background histogram
 def set_bkg_hist_style( hist, cls ):
@@ -66,14 +67,14 @@ def init_canvas( ratiopad = False):
 
 # create legend
 def init_legend(hists):
-    legend = rp.Legend(hists, entryheight = 0.03)
-    legend.SetX1NDC(0.90)
-    legend.SetX2NDC(0.99)
-    legend.SetY1NDC(0.90)
-    legend.SetY2NDC(0.99)
+    legend = rp.Legend(hists, entryheight = 0.025)
+    legend.SetX1NDC(0.8)
+    legend.SetX2NDC(1.)
+    legend.SetY1NDC(0.8)
+    legend.SetY2NDC(1.)
     legend.SetBorderSize(0)
     legend.SetLineStyle(0)
-    legend.SetTextSize(0.04)
+    legend.SetTextSize(0.03)
     legend.SetTextFont(42)
     legend.SetFillStyle(0)
     legend.Draw()
@@ -85,3 +86,24 @@ def save_canvas(canvas, save_path, clear_canvas = True):
     canvas.Update()
     canvas.SaveAs(save_path)
     if clear_canvas: canvas.Clear()
+
+
+def CMS_lumi(pad, drawLogo = False, writeExtraText = False):
+    lumi_text = "41.3 fb^{-1} (13 TeV)"
+
+    l = pad.GetLeftMargin()
+    t = pad.GetTopMargin()
+    r = pad.GetRightMargin()
+    b = pad.GetBottomMargin()
+    pad.cd()
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+
+    latex.DrawLatex(l+0.59,1.-t+0.02,lumi_text)
+    
+    pad.Update()
+
+    return pad
+
