@@ -29,7 +29,7 @@ set_session(tf.Session(config=config))
 import data_frame
 import plot_configs.variable_binning as binning
 import plot_configs.plotting_styles as ps
-from Network_architecture import architecture
+import DNN_Architectures as Architecture
 
 class DNN():
     def __init__(self, in_path, save_path,
@@ -84,12 +84,12 @@ class DNN():
         print("saved variable norms at "+str(out_file))
 
         # dict with aachen architectures for sl analysis
-        architecture_1 = architecture()
-        self.architecture_dic = architecture_1.get_architecture(self.event_category)
+        arch_cls = Architecture.Architecture()
+        self.architecture = arch_cls.get_architecture(self.event_category)
 
          # optimizer for training
         if not(optimizer):
-            self.optimizer = self.architecture_dic["optimizer"]
+            self.optimizer = self.architecture["optimizer"]
         else:
             self.optimizer = optimizer
 
@@ -111,10 +111,10 @@ class DNN():
 
         number_of_input_neurons = self.data.n_input_neurons
 
-        number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]
-        dropout                     = self.architecture_dic["Dropout"]
-        activation_function         = self.architecture_dic["activation_function"]
-        l2_regularization_beta      = self.architecture_dic["L2_Norm"]
+        number_of_neurons_per_layer = self.architecture["prenet_layer"]
+        dropout                     = self.architecture["Dropout"]
+        activation_function         = self.architecture["activation_function"]
+        l2_regularization_beta      = self.architecture["L2_Norm"]
     
         # build pre net ===========================================================================
         Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,),name="input" )
@@ -154,7 +154,7 @@ class DNN():
             layer.trainable = False
 
         # build main net ==========================================================================
-        number_of_neurons_per_layer = self.architecture_dic["prenet_layer"]      
+        number_of_neurons_per_layer = self.architecture["prenet_layer"]      
 
         # Create Input/conc layer for second NN
         conc_layer = keras.layers.concatenate(self.layer_list, axis = -1)
@@ -201,7 +201,7 @@ class DNN():
 
         # compile prenet
         pre_net.compile(
-            loss = self.loss_function,
+            loss = self.architecture["prenet_loss"],
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
 
@@ -211,7 +211,7 @@ class DNN():
 
         # compile main net
         main_net.compile(
-            loss = "kullback_leibler_divergence",#self.loss_function,
+            loss = self.architecture["mainnet_loss"],
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
             
@@ -254,7 +254,7 @@ class DNN():
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_prenet_train_labels(),
-            batch_size = self.batch_size,
+            batch_size = self.architecture["batch_size"],
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
@@ -285,7 +285,7 @@ class DNN():
         self.trained_main_net = self.main_net.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
-            batch_size = self.batch_size,
+            batch_size = self.architecture["batch_size"],
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
