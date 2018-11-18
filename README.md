@@ -1,5 +1,7 @@
 # ttH 2017 Analysis (with Aachen DNNs)
-This branch saves the status with which the training of DNNs was performed for the first Status update of the ttH Analysis with 2017 Data
+This branch saves the status with which the training of DNNs was performed for the first status update of the ttHbb Analysis with 2017 Data.
+
+`CMSSW_Version = 9_4_9`
 
 ## preprocessing
 `preprocessing/root2pandas/convert_root_2_dataframe.py`
@@ -36,15 +38,35 @@ abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100
 
 ## training
 top level train script: `train_scripts/train_Aachen_DNN.py [category]`
+
 input variables: `preprocessing/root2pandas/variable_info.py`
+
 net confugurations: `DRACO_Frameworks/DNN_Aachen/DNN_Architectures.py`
 
 ### `4j_ge3t`
 `(N_Jets == 4 and N_BTagsM >= 3)`
 
+```
+event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
+number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712
+```
+
+
 ### `5j_ge3t`
 `(N_Jets == 5 and N_BTagsM >= 3)`
 
+```
+event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
+number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 179916
+```
+
+
+
 ### `ge6j_ge3t`
 `(N_Jets >= 6 and N_BTagsM >= 3)`
+
+```
+event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
+number of events:  274062 | 9713 | 4555 | 7605 | 13804 | 25263 || 335002
+```
 
