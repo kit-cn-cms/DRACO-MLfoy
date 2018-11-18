@@ -38,7 +38,7 @@ inPath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files"
 
 key = sys.argv[1]
 
-outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_KLD_v1_"+str(key)+"/"
+outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_KLD_v2_"+str(key)+"/"
 
 
 dnn_aachen = DNN_Aachen.DNN(
@@ -49,16 +49,17 @@ dnn_aachen = DNN_Aachen.DNN(
     train_variables     = category_vars[key], 
     prenet_targets      = prenet_targets,
     train_epochs        = 500,
-    early_stopping      = 10,
-    eval_metrics        = ["acc"])#, "mean_squared_error", "mean_squared_logarithmic_error"])
+    early_stopping      = 20,
+    eval_metrics        = ["acc"])
 
 
 dnn_aachen.build_model()
 dnn_aachen.train_models()
 dnn_aachen.eval_model()
 dnn_aachen.plot_metrics()
-dnn_aachen.plot_prenet_nodes(log = True)
-dnn_aachen.plot_classification_nodes(log = True)
+dnn_aachen.plot_prenet_nodes()
+dnn_aachen.plot_discriminators()
+dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()
-#dnn_aachen.plot_input_output_correlation()
+dnn_aachen.plot_input_output_correlation()
 

@@ -10,7 +10,8 @@ class DataFrame(object):
                 classes, event_category, 
                 train_variables, prenet_targets,
                 test_percentage = 0.1,
-                norm_variables = False):
+                norm_variables = False,
+                lumi = 41.3):
 
         ''' takes a path to a folder where one h5 per class is located
             the events are cut according to the event_category
@@ -44,6 +45,9 @@ class DataFrame(object):
             if "ttH" in cls: class_weight_scale *= 1.0
             cls_df = cls_df.assign(train_weight = lambda x: class_weight_scale*x.total_weight/weight_sum)
             print("weight sum of train_weight: "+str( sum(cls_df["train_weight"].values) ))
+
+            # add lumi weight
+            cls_df = cls_df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi)
 
             # add data to list of dataframes
             class_dataframes.append( cls_df )
@@ -122,6 +126,8 @@ class DataFrame(object):
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values
+    def get_lumi_weights(self):
+        return self.df_test["lumi_weight"].values 
 
     def get_test_labels(self, as_categorical = True):
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
@@ -130,62 +136,9 @@ class DataFrame(object):
     def get_prenet_test_labels(self, as_matrix = True):
         return self.df_test[ self.prenet_targets ].values
 
+
     # full sample ----------------------------------
     def get_full_df(self):
         return self.unsplit_df[self.train_variables]
-
-
-    def hist_train_variables(self, signal_hists = [], n_bins = 20, logscale = True):
-
-        # loop over variables
-        for var in self.train_variables:
-            plt.figure()
-            
-            # figure out binning
-            max_val = max(self.df_train[var].values)
-            min_val = min(self.df_train[var].values)
-            bin_range = [min_val, max_val]
-
-            # stack backgrounds
-            bkg_values = []
-            bkg_labels = []
-            bkg_weights = []
-            for cls in self.output_classes:
-                if  cls in signal_hists: continue
-                condition = "(class_label == '"+str(cls)+"')"
-                bkg_values.append( self.df_train.query(condition)[var].values )
-                bkg_weights.append( self.df_train.query(condition)["train_weight"].values )
-                bkg_labels.append(cls)
-
-            # plot backgrounds
-            plt.hist( bkg_values, weights = bkg_weights,
-                bins = n_bins, range = bin_range, 
-                label = bkg_labels, stacked = True, histtype = "stepfilled",
-                log = logscale, normed = True)
-
-            n_bkgs = len(bkg_labels)
-
-            # loop over signals
-            for cls in signal_hists:
-                condition = "(class_label == '"+str(cls)+"')"
-                sig_values = self.df_train.query(condition)[var].values
-                sig_weights = self.df_train.query(condition)["train_weight"].values
-
-                # plot signal
-                plt.hist(sig_values, weights = sig_weights,
-                    bins = n_bins, range = bin_range,
-                    label = cls, histtype = "step", 
-                    color = "black", lw = 2, log = logscale, normed = True)
-
-            # annotations
-            plt.legend()
-            plt.grid()
-            plt.xlabel(var)
-            plt.title(self.event_category)
-            # plt.savefig(str(var)+".pdf")
-            
-        # plot all
-        plt.show()
-
 
 

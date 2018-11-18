@@ -29,7 +29,7 @@ set_session(tf.Session(config=config))
 import data_frame
 import plot_configs.variable_binning as binning
 import plot_configs.plotting_styles as ps
-import DNN_Architectures as Architecture
+import DNN_Architecture as Architecture
 
 class DNN():
     def __init__(self, in_path, save_path,
@@ -117,7 +117,9 @@ class DNN():
         l2_regularization_beta      = self.architecture["L2_Norm"]
     
         # build pre net ===========================================================================
-        Inputs = keras.layers.Input( shape = (self.data.n_input_neurons,),name="input" )
+        Inputs = keras.layers.Input( 
+            shape = (self.data.n_input_neurons,),
+            name = "input")
 
         X = Inputs
         self.layer_list = [X]
@@ -219,10 +221,6 @@ class DNN():
         self.pre_net = pre_net
         self.main_net = main_net
 
-        # model summaries
-        self.pre_net.summary()
-        self.main_net.summary()
-
         # save net information
         out_file = self.save_path+"/pre_net_summmary.yml"
         yml_pre_net = self.pre_net.to_yaml()
@@ -319,8 +317,6 @@ class DNN():
  
         K.set_learning_phase(False)
        
-        self.main_net.summary()
-
         out_file = cp_path + "/trained_main_net"
         sess = keras.backend.get_session()
         saver = tf.train.Saver()
@@ -456,8 +452,8 @@ class DNN():
             sig_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
             bkg_values = [out_values[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
 
-            sig_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
-            bkg_weights = [self.data.get_test_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
+            sig_weights = [self.data.get_lumi_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 1]
+            bkg_weights = [self.data.get_lumi_weights()[k] for k in range(len(out_values)) if prenet_labels[k] == 0]
 
             bkg_sig_ratio = 1.*sum(bkg_weights)/sum(sig_weights)
             sig_weights = [w*bkg_sig_ratio for w in sig_weights]
@@ -486,13 +482,15 @@ class DNN():
             if log: canvas.cd().SetLogy()
 
             legend = ps.init_legend([bkg_hist, sig_hist])
+            ps.add_lumi(canvas)
+            ps.add_category_label(canvas, self.event_category)
 
             out_path = self.save_path + "/prenet_output_{}.pdf".format(node_cls)
 
             ps.save_canvas(canvas,out_path)
 
 
-    def plot_classification_nodes(self, log = False):
+    def plot_discriminators(self, log = False):
         ''' plot discriminators for output classes '''
         ps.init_plot_style()
 
@@ -515,7 +513,7 @@ class DNN():
                 # filter values per event class
                 filtered_values = [ out_values[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
-                filtered_weights = [ self.data.get_test_weights()[k] for k in range(len(out_values)) \
+                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
 
                 if i == j:
@@ -555,10 +553,83 @@ class DNN():
             
             # creating legend
             legend = ps.init_legend( bkg_hists+[sig_hist] )
+            ps.add_lumi(canvas)
+            ps.add_category_label(canvas, self.event_category)
 
             # save canvas
             out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
             ps.save_canvas(canvas, out_path)
+
+    def plot_classification(self, log = False):
+        ''' plot all events classified as one category '''
+        ps.init_plot_style()
+    
+        nbins = 20
+        bin_range = [0., 1.]
+
+        # loop over discriminator nodes
+        for i, node_cls in enumerate(self.event_classes):
+            node_index = self.data.class_translation[node_cls]
+
+            # get outputs of node
+            out_values = self.mainnet_predicted_vector[:,i]
+            
+            # fill lists according to class
+            bkg_hists = []
+            weight_integral = 0
+
+            # loop over all classes to fill hist according to predicted class
+            for j, truth_cls in enumerate(self.event_classes):
+                class_index = self.data.class_translation[truth_cls]
+
+                # filter values per event class
+                filtered_values = [ out_values[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == class_index \
+                        and self.predicted_classes[k] == node_index ]
+                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == class_index \
+                        and self.predicted_classes[k] == node_index ]
+                if i == j:
+                    # signal in this node
+                    sig_values = filtered_values
+                    sig_label = str(truth_cls)
+                    sig_weights = filtered_weights
+                else:
+                    # background in this node
+                    weight_integral += sum(filtered_weights)
+                    hist = rp.Hist(nbins, *bin_range, title = str(truth_cls))
+                    ps.set_bkg_hist_style(hist, truth_cls)
+                    hist.fill_array( filtered_values, filtered_weights )
+                    bkg_hists.append(hist)
+
+            # stack backgrounds
+            bkg_stack = rp.HistStack(bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
+            bkg_stack.SetMinimum(1e-4)
+            
+            # plot signal
+            weight_sum = sum(sig_weights)
+            sig_hist = rp.Hist(nbins, *bin_range, title = sig_label)
+            ps.set_sig_hist_style(sig_hist, sig_label)
+            sig_hist.fill_array(sig_values, sig_weights)
+
+            # creatin canvas
+            canvas = ps.init_canvas()
+            
+            # drawing hists
+            rp.utils.draw([bkg_stack, sig_hist],
+                xtitle = "Events predicted as "+node_cls, ytitle = "Events", pad = canvas)
+            if log: canvas.cd().SetLogy()
+
+            # legend
+            legend = ps.init_legend( bkg_hists+[sig_hist] )
+            ps.add_lumi(canvas)
+            ps.add_category_label(canvas, self.event_category)
+            print("S/B = {}".format(weight_sum/weight_integral))
+            # save
+            out_path = self.save_path + "/predictions_{}.pdf".format(node_cls)
+            ps.save_canvas(canvas, out_path)
+                
+
 
     def plot_input_output_correlation(self):
 

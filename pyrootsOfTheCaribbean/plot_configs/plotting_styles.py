@@ -112,6 +112,12 @@ def add_category_label(pad, cat):
         "ge6j_ge3t":    "1 lepton, \geq 6 jets, \geq 3 b-tags",
         "5j_ge3t":      "1 lepton, 5 jets, \geq 3 b-tags",
         "4j_ge3t":      "1 lepton, 4 jets, \geq 3 b-tags",
+        "(N_Jets >= 6 and N_BTagsM >= 3)":      
+                        "1 lepton, \geq 6 jets, \geq 3 b-tags",
+        "(N_Jets == 5 and N_BTagsM >= 3)":      
+                        "1 lepton, 5 jets, \geq 3 b-tags",
+        "(N_Jets == 4 and N_BTagsM >= 3)":    
+                        "1 lepton, 4 jets, \geq 3 b-tags",
         }
 
     l = pad.GetLeftMargin()
