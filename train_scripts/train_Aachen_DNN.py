@@ -2,7 +2,7 @@
 import numpy as np
 import os
 import sys
-
+import socket
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -34,21 +34,25 @@ prenet_targets = [
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
-inPath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files"
+if "naf" in socket.gethostname(): 
+    workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
+else:
+    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
 
 key = sys.argv[1]
 
-outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_KLD_v2_"+str(key)+"/"
+inPath   = workpath + "/AachenDNN_files"
+savepath = workpath + "/AachenDNN_KLD_v2_"+str(key)+"/"
 
 
 dnn_aachen = DNN_Aachen.DNN(
     in_path             = inPath, 
-    save_path           = outpath,		
+    save_path           = savepath,		
     event_classes       = event_classes, 
     event_category      = categories[key],
     train_variables     = category_vars[key], 
     prenet_targets      = prenet_targets,
-    train_epochs        = 500,
+    train_epochs        = 1,
     early_stopping      = 20,
     eval_metrics        = ["acc"])
 
