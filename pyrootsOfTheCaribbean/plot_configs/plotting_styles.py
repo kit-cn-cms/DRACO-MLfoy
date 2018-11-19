@@ -67,7 +67,7 @@ def init_canvas( ratiopad = False):
 
 # create legend
 def init_legend(hists):
-    legend = rp.Legend(hists, entryheight = 0.03)
+    legend = rp.Legend(hists, entryheight = 0.04)
     legend.SetX1NDC(0.9)
     legend.SetX2NDC(1.)
     legend.SetY1NDC(0.5)

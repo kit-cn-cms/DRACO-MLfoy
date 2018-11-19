@@ -13,6 +13,7 @@ class Architecture():
             "optimizer":	        optimizers.Adam(1e-4),
             "activation_function":  "elu",
             "Early_stop_percent":   0.01,
+            "batchNorm":            False,
             }
 
 		self.sl_5j_3b = {
@@ -26,6 +27,7 @@ class Architecture():
             "optimizer":	        optimizers.Adam(1e-4),
             "activation_function":  "elu",
             "Early_stop_percent":   0.01,
+            "batchNorm":            False,
             }
 
 		self.sl_6j_3b = {
@@ -39,6 +41,7 @@ class Architecture():
             "optimizer":	        optimizers.Adam(1e-4),
             "activation_function":  "elu",
             "Early_stop_percent":   0.01,
+            "batchNorm":            False,
             }
 
 	def get_architecture(self, event_category):

@@ -21,8 +21,8 @@ binning = {
 "LooseLepton_Pt[0]":                                    {"nbins": default, "bin_range": [0.,600.]},
 "LooseLepton_Eta[0]":		                            {"nbins": default, "bin_range": [-2.4,2.4]},
 
-"Evt_HT":		                                        {"nbins": default, "bin_range": [0.,2000.]},
-"BDT_common5_input_HT_tag":		                        {"nbins": default , "bin_range": [0.,2000.]},
+"Evt_HT":		                                        {"nbins": default, "bin_range": [0.,1000.]},
+"BDT_common5_input_HT_tag":		                        {"nbins": default , "bin_range": [0.,1000.]},
 
 "Evt_Dr_MinDeltaRJets":		                            {"nbins": default, "bin_range": [0.,5.]},
 "Evt_Dr_MinDeltaRTaggedJets":		                    {"nbins": default, "bin_range": [0.,5.]},
@@ -71,7 +71,7 @@ binning = {
 "Evt_M_JetsAverage":                                    {"nbins": default, "bin_range": [0.,50.]},
 "Evt_M2_TaggedJetsAverage":		                        {"nbins": default, "bin_range": [0.,1000.]},
 
-"N_BTagsT":	                                           	{"nbins": 5, "bin_range": [-0.5,4.5]},
+"N_BTagsT":	                                           	{"nbins": 6, "bin_range": [-0.5,5.5]},
 
 "BDT_common5_input_tagged_dijet_mass_closest_to_125":	{"nbins": default, "bin_range": [0.,400.]},
 

@@ -59,8 +59,8 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     
         bkg_hists.append( hist )
 
-    bkg_stack = rp.HistStack( bkg_hists, stacked = True , drawstyle ="HIST E2 X0")
-    max_val = bkg_stack.GetMaximum()*1.2
+    bkg_stack = rp.HistStack( bkg_hists, stacked = True , drawstyle ="HIST E1 X0")
+    max_val = bkg_stack.GetMaximum()*1.3
     bkg_stack.SetMaximum(max_val)
     bkg_stack.SetMinimum(1e-4)
 
