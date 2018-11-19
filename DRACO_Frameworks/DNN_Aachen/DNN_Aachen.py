@@ -103,7 +103,33 @@ class DNN():
             prenet_targets      = self.prenet_targets,
             test_percentage     = self.test_percentage,
             norm_variables      = True)
+    
+    def load_trained_model(self):
+        ''' load an already trained model '''
+        checkpoint_path = self.save_path + "/checkpoints/trained_main_net.h5py"
+        
+        self.main_net = keras.models.load_model(checkpoint_path)
 
+        self.mainnet_eval = self.main_net.evaluate(
+            self.data.get_test_data(as_matrix = True),
+            self.data.get_test_labels())
+
+        self.mainnet_predicted_vector = self.main_net.predict(
+            self.data.get_test_data(as_matrix = True))
+
+        self.predicted_classes = np.argmax( self.mainnet_predicted_vector, axis = 1)
+
+        # save confusion matrix
+        self.confusion_matrix = confusion_matrix(
+            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+
+        # print evaluations
+        print("mainnet test roc:  {}".format(
+            roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
+        if self.eval_metrics: 
+            print("mainnet test loss: {}".format(self.mainnet_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("mainnet test {}: {}".format(metric, self.mainnet_eval[im+1]))
 
     def build_default_model(self):
         ''' default Aachen-DNN model as used in the analysis '''
@@ -113,6 +139,7 @@ class DNN():
 
         number_of_neurons_per_layer = self.architecture["prenet_layer"]
         dropout                     = self.architecture["Dropout"]
+        batchNorm                   = self.architecture["batchNorm"]
         activation_function         = self.architecture["activation_function"]
         l2_regularization_beta      = self.architecture["L2_Norm"]
     
@@ -138,7 +165,12 @@ class DNN():
                 X = keras.layers.Dropout(dropout)(Dense)
             else:
                 X = Dense 
-        
+            
+            if batchNorm:
+                X = keras.layers.BatchNormalization()(Dense)
+            else:
+                X = Dense    
+                
         # generate output layer
         X = keras.layers.Dense(
             self.data.n_prenet_output_neurons,
@@ -173,6 +205,9 @@ class DNN():
 
             if dropout != 1:
                 Y = keras.layers.Dropout(dropout)(Y)
+
+            if batchNorm:
+                Y = keras.layers.BatchNormalization()(Y)
 
         # generate output layer
         Y = keras.layers.Dense(
@@ -532,6 +567,8 @@ class DNN():
             # stack backgrounds
             bkg_stack = rp.HistStack( bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
             bkg_stack.SetMinimum(1e-4)
+            max_val = bkg_stack.GetMaximum()*1.3
+            bkg_stack.SetMaximum(max_val)          
 
             # plot signal
             weight_sum = sum(sig_weights)
@@ -605,10 +642,16 @@ class DNN():
             # stack backgrounds
             bkg_stack = rp.HistStack(bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
             bkg_stack.SetMinimum(1e-4)
-            
+            max_val = bkg_stack.GetMaximum()*1.3
+            bkg_stack.SetMaximum(max_val)          
+
             # plot signal
             weight_sum = sum(sig_weights)
-            sig_hist = rp.Hist(nbins, *bin_range, title = sig_label)
+            scale_factor = 1.*weight_integral/weight_sum
+            sig_weights = [w*scale_factor for w in sig_weights]
+
+            sig_title = sig_label + "*{:.3f}".format(scale_factor)
+            sig_hist = rp.Hist(nbins, *bin_range, title = sig_title)
             ps.set_sig_hist_style(sig_hist, sig_label)
             sig_hist.fill_array(sig_values, sig_weights)
 

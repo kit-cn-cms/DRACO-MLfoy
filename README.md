@@ -50,7 +50,7 @@ net confugurations: `DRACO_Frameworks/DNN_Aachen/DNN_Architectures.py`
 event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
 number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712
 ```
-
+`ROC AUC of main net: 0.7099`
 
 ### `5j_ge3t`
 `(N_Jets == 5 and N_BTagsM >= 3)`
@@ -59,7 +59,7 @@ number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712
 event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
 number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 179916
 ```
-
+`ROC AUC of main net: 0.7266`
 
 
 ### `ge6j_ge3t`
@@ -69,4 +69,4 @@ number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 179916
 event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
 number of events:  274062 | 9713 | 4555 | 7605 | 13804 | 25263 || 335002
 ```
-
+`ROC AUC of main net: 0.7348`
