@@ -354,14 +354,23 @@ def get_variable_lists():
 
     # append variables for prenet-targets
     variables += [
-        "GenAdd_BB_inacceptance",
-        "GenAdd_B_inacceptance",
-        "GenHiggs_BB_inacceptance",
-        "GenHiggs_B_inacceptance",
-        "GenTopHad_B_inacceptance",
-        "GenTopHad_QQ_inacceptance",
-        "GenTopHad_Q_inacceptance",
-        "GenTopLep_B_inacceptance",
+        "GenAdd_BB_inacceptance_part",
+        "GenAdd_B_inacceptance_part",
+        "GenHiggs_BB_inacceptance_part",
+        "GenHiggs_B_inacceptance_part",
+        "GenTopHad_B_inacceptance_part",
+        "GenTopHad_QQ_inacceptance_part",
+        "GenTopHad_Q_inacceptance_part",
+        "GenTopLep_B_inacceptance_part",
+
+        "GenAdd_BB_inacceptance_jet",
+        "GenAdd_B_inacceptance_jet",
+        "GenHiggs_BB_inacceptance_jet",
+        "GenHiggs_B_inacceptance_jet",
+        "GenTopHad_B_inacceptance_jet",
+        "GenTopHad_QQ_inacceptance_jet",
+        "GenTopHad_Q_inacceptance_jet",
+        "GenTopLep_B_inacceptance_jet",
             ]
     # append variable for train/test splitting
     variables += ["Evt_Odd"]
@@ -412,23 +421,23 @@ def get_variable_lists():
 # location of ttH and ttbar samples
 ttH = [
         {"name":    "ttHbb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
 
         {"name":    "ttHNobb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root"}
         ]
 
 ttbar = [
         {"name":    "TTToSL",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
         {"name":    "TTToHad",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
         {"name":    "TTToLep",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
          "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"}
         ]
 

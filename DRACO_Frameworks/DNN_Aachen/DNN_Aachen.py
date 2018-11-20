@@ -375,8 +375,8 @@ class DNN():
             self.data.get_test_data(as_matrix = True) )
 
         # print evaluations
-        print("prenet test roc:  {}".format(
-            roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
+        #print("prenet test roc:  {}".format(
+        #    roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
         if self.eval_metrics: 
             print("prenet test loss: {}".format(self.prenet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
@@ -403,8 +403,8 @@ class DNN():
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
-        print("mainnet test roc:  {}".format(
-            roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
+        #print("mainnet test roc:  {}".format(
+        #    roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
         if self.eval_metrics: 
             print("mainnet test loss: {}".format(self.mainnet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):

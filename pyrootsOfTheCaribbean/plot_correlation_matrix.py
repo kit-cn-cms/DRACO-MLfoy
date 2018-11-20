@@ -10,6 +10,7 @@ import os
 #import ROOT
 import numpy as np
 import rootpy.plotting as rp
+import matplotlib.pyplot as plt
 
 lumi = 41.3
 
@@ -36,6 +37,8 @@ signals = { "ttH": data_dir + "/ttHbb.h5" }
 plot_dir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files/plots/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
+
+
 
 def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
 
@@ -100,68 +103,60 @@ def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
     ps.save_canvas(canvas, plot_name)
 
 # load dataframes
-bkg_dfs = {}
-sig_dfs = {}
+grand_df = pandas.DataFrame()
 for key in signals:
     print("loading signal "+str(signals[key]))
     with pandas.HDFStore( signals[key], mode = "r" ) as store:
         df = store.select("data")
-        sig_dfs[key] = df.assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi)
+        if grand_df.empty:
+            grand_df = df
+        else:
+            grand_df.append( df )
         
 for key in backgrounds:
     print("loading backgroud "+str(backgrounds[key]))
     with pandas.HDFStore( backgrounds[key], mode = "r" ) as store:
         df = store.select("data")
-        bkg_dfs[key] = df.assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi)
+        grand_df.append( df )
 
-add_vars = [
-    "GenAdd_BB_inacceptance_jet",
-    "GenAdd_B_inacceptance_jet",
-    "GenHiggs_BB_inacceptance_jet",
-    "GenHiggs_B_inacceptance_jet",
-    "GenTopHad_B_inacceptance_jet",
-    "GenTopHad_QQ_inacceptance_jet",
-    "GenTopHad_Q_inacceptance_jet",
-    "GenTopLep_B_inacceptance_jet",
+#grand_df = grand_df.assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi)
 
-    "GenAdd_BB_inacceptance_part",
-    "GenAdd_B_inacceptance_part",
-    "GenHiggs_BB_inacceptance_part",
-    "GenHiggs_B_inacceptance_part",
-    "GenTopHad_B_inacceptance_part",
-    "GenTopHad_QQ_inacceptance_part",
-    "GenTopHad_Q_inacceptance_part",
-    "GenTopLep_B_inacceptance_part",
-    #"Weight_XS",
-    #"Weight_CSV",
-    #"Weight_GEN_nom"
-    ]
 # loop over categories and get list of variables
 for cat in categories:
     print("starting with category "+str(cat))
     category_cut = cat
-    category_vars = categories[cat]+add_vars
+    category_vars = categories[cat]
 
-    cut_sig_dfs = {}
-    cut_bkg_dfs = {}    
 
-    for key in bkg_dfs:
-        cut_bkg_dfs[key] = bkg_dfs[key].query(category_cut)[category_vars+["weight"]]
+    matrix = []
+    cut_df = grand_df.query(category_cut)[category_vars]
+    for v1 in category_vars:
+        line = []
+        for v2 in category_vars:
+            correlation = np.corrcoef( cut_df[v1].values, cut_df[v2].values )[0][1]
+            line.append(correlation)
+            #print("correlation of {} and {}: {}".format(
+            #    v1, v2, correlation))       
 
-    for key in sig_dfs:
-        cut_sig_dfs[key] = sig_dfs[key].query(category_cut)[category_vars+["weight"]]
+        matrix.append(line)
 
-    for variable in category_vars:
-        print(variable)
-        plot_name = plot_dir + "/{}_{}.pdf".format(category_names[cat], variable)
-        plot_name = plot_name.replace("[","_").replace("]","")
-
-        
-        hist_variable(variable, plot_name, cut_bkg_dfs, cut_sig_dfs, plt_title = category_names[cat], log = False)
-        hist_variable(variable, plot_name, cut_bkg_dfs, cut_sig_dfs, plt_title = category_names[cat], log = True)
+    print(matrix)
+    n_variables = len(category_vars)
+    plt.figure(figsize = [15,12])
     
+    y = np.arange(0., n_variables+1, 1)
+    x = np.arange(0., n_variables+1, 1)
+    
+    xn, yn = np.meshgrid(x,y)
 
+    plt.pcolormesh(xn, yn, matrix)
+    plt.colorbar()
+    
+    plt.xlim(0, n_variables)
+    plt.ylim(0, n_variables)
 
+    plt.show()
+    plt.clf()
 
     
     

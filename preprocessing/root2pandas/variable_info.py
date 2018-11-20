@@ -301,4 +301,5 @@ variables_6j_3b = [
 variables_4j_3b = [all_variables[var] for var in variables_4j_3b if not var in undefined_variables]
 variables_5j_3b = [all_variables[var] for var in variables_5j_3b if not var in undefined_variables]
 variables_6j_3b = [all_variables[var] for var in variables_6j_3b if not var in undefined_variables]
-all_variables_list = [all_variables[var] for var in all_variables if not var in undefined_variables]
+all_variables_list = [all_variables[var] for var in all_variables if not var in undefined_variables and not "MEM" in var]
+print(all_variables_list)

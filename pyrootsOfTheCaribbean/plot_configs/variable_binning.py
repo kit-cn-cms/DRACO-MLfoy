@@ -87,6 +87,25 @@ binning = {
 "GenTopHad_QQ_inacceptance":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
 "GenTopHad_Q_inacceptance":		                        {"nbins": 2, "bin_range": [-0.5,1.5]},
 "GenTopLep_B_inacceptance":                             {"nbins": 2, "bin_range": [-0.5,1.5]},
+
+"GenAdd_BB_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenAdd_B_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenHiggs_BB_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenHiggs_B_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_B_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_QQ_inacceptance_jet":		                {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_Q_inacceptance_jet":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopLep_B_inacceptance_jet":                         {"nbins": 2, "bin_range": [-0.5,1.5]},
+
+"GenAdd_BB_inacceptance_part":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenAdd_B_inacceptance_part":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenHiggs_BB_inacceptance_part":		                {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenHiggs_B_inacceptance_part":		                    {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_B_inacceptance_part":		                {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_QQ_inacceptance_part":		                {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopHad_Q_inacceptance_part":		                {"nbins": 2, "bin_range": [-0.5,1.5]},
+"GenTopLep_B_inacceptance_part":                        {"nbins": 2, "bin_range": [-0.5,1.5]},
+
 "Weight_XS":                                            {"nbins": 3, "bin_range": [0.0,0.0005]},
 "Weight_CSV":                                           {"nbins": default, "bin_range": [0.,2.4]},
 "Weight_GEN_nom":                                       {"nbins": 10, "bin_range": [0.,350.]}
