@@ -101,7 +101,7 @@ def add_lumi(pad):
     latex.SetNDC()
     latex.SetTextColor(ROOT.kBlack)
 
-    latex.DrawLatex(l+0.59,1.-t+0.01,lumi_text)
+    latex.DrawLatex(l+0.53,1.-t+0.02,lumi_text)
     
     pad.Update()
 
