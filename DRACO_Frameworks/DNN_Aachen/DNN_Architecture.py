@@ -9,10 +9,10 @@ class Architecture():
             "mainnet_loss":             "kullback_leibler_divergence",
             "Dropout":                  0.30,
             "L2_Norm":                  1e-5,
-            "batch_size":               4096,
+            "batch_size":               5000,
             "optimizer":                optimizers.Adam(1e-4),
             "activation_function":      "elu",
-            "earlystopping_percentage": 0.02,
+            "earlystopping_percentage": 0.01,
             "batchNorm":                False,
             }
 
@@ -23,10 +23,10 @@ class Architecture():
             "mainnet_loss":             "kullback_leibler_divergence",
             "Dropout":                  0.30,
             "L2_Norm":                  1e-5,
-            "batch_size":               4096,
+            "batch_size":               5000,
             "optimizer":                optimizers.Adam(1e-4),
             "activation_function":      "elu",
-            "earlystopping_percentage": 0.02,
+            "earlystopping_percentage": 0.01,
             "batchNorm":                False,
             }
 
@@ -37,10 +37,10 @@ class Architecture():
             "mainnet_loss":             "kullback_leibler_divergence",
             "Dropout":                  0.30,
             "L2_Norm":                  1e-5,
-            "batch_size":               4096,
+            "batch_size":               5000,
             "optimizer":                optimizers.Adam(1e-4),
             "activation_function":      "elu",
-            "earlystopping_percentage": 0.02,
+            "earlystopping_percentage": 0.01,
             "batchNorm":                False,
             }
 

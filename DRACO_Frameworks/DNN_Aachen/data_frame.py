@@ -95,6 +95,11 @@ class DataFrame(object):
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples )
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
+
+        # print some counts
+        print("total events after cuts:  "+str(df.shape[0]))
+        print("events used for training: "+str(self.df_train.shape[0]))
+        print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
 
         # save variable lists

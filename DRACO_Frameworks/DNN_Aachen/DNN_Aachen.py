@@ -32,10 +32,12 @@ import DNN_Architecture as Architecture
 
 
 class EarlyStoppingByLossDiff(keras.callbacks.Callback):
-    def __init__(self, monitor = "loss", value = 0.01, min_epochs = 20, verbose = 0):
+    def __init__(self, monitor = "loss", value = 0.01, min_epochs = 20, patience = 10, verbose = 0):
         super(keras.callbacks.Callback, self).__init__()
         self.val_monitor = "val_"+monitor
         self.train_monitor = monitor
+        self.patience = patience
+        self.n_failed = 0
 
         self.min_epochs = min_epochs
         self.value = value
@@ -52,7 +54,9 @@ class EarlyStoppingByLossDiff(keras.callbacks.Callback):
         if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
             if self.verbose > 0:
                 print("Epoch {}: early stopping threshold reached".format(epoch))
-            self.model.stop_training = True
+            self.n_failed += 1
+            if self.n_failed > self.patience:
+                self.model.stop_training = True
 
 
 
@@ -308,7 +312,8 @@ class DNN():
             callbacks = [EarlyStoppingByLossDiff(
                 monitor = "loss",
                 value = self.architecture["earlystopping_percentage"],
-                min_epochs = 20,
+                min_epochs = 100,
+                patience = 20,
                 verbose = 1)]
             #callbacks = [keras.callbacks.EarlyStopping(
             #    monitor = "val_loss", 
@@ -321,7 +326,7 @@ class DNN():
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
-            validation_split = 0.2,
+            validation_split = 0.25,
             sample_weight = self.data.get_train_weights()
             )
 
@@ -352,7 +357,7 @@ class DNN():
             epochs = self.train_epochs,
             shuffle = True,
             callbacks = callbacks,
-            validation_split = 0.2,
+            validation_split = 0.25,
             sample_weight = self.data.get_train_weights()
             )
 
@@ -503,7 +508,7 @@ class DNN():
     def plot_prenet_nodes(self, log = False):
         ''' plot prenet nodes '''
         pltstyle.init_plot_style()
-        n_bins = 15
+        n_bins = 20
         bin_range = [0.,1.]
 
         for i, node_cls in enumerate(self.prenet_targets):       

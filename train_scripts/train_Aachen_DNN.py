@@ -22,7 +22,7 @@ categories = {
     "ge6j_ge3t": "(N_Jets >= 6 and N_BTagsM >= 3)",
     }
 prenet_targets = [
-    #"GenAdd_BB_inacceptance_part",
+    "GenAdd_BB_inacceptance_part",
     "GenAdd_B_inacceptance_part",
     "GenHiggs_BB_inacceptance_part",
     "GenHiggs_B_inacceptance_part",
@@ -42,7 +42,7 @@ else:
 key = sys.argv[1]
 
 inPath   = workpath + "/AachenDNN_files"
-savepath = workpath + "/AachenDNN_KLD_v2_"+str(key)+"/"
+savepath = workpath + "/AachenDNN_exact_rebuild_"+str(key)+"/"
 
 
 dnn_aachen = DNN_Aachen.DNN(
@@ -54,7 +54,8 @@ dnn_aachen = DNN_Aachen.DNN(
     prenet_targets      = prenet_targets,
     train_epochs        = 500,
     early_stopping      = 20,
-    eval_metrics        = ["acc"])
+    eval_metrics        = ["acc"],
+    test_percentage     = 0.2)
 
 
 dnn_aachen.build_model()

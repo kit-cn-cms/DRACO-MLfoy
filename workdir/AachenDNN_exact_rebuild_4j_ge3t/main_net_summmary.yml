@@ -1,0 +1,210 @@
+backend: !!python/unicode 'tensorflow'
+class_name: Model
+config:
+  input_layers:
+  - [input, 0, 0]
+  layers:
+  - class_name: InputLayer
+    config:
+      batch_input_shape: !!python/tuple [null, 35]
+      dtype: float32
+      name: input
+      sparse: false
+    inbound_nodes: []
+    name: input
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: Dense_0
+      trainable: false
+      units: 100
+      use_bias: true
+    inbound_nodes:
+    - - - input
+        - 0
+        - 0
+        - {}
+    name: Dense_0
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: Dense_1
+      trainable: false
+      units: 100
+      use_bias: true
+    inbound_nodes:
+    - - - Dense_0
+        - 0
+        - 0
+        - {}
+    name: Dense_1
+  - class_name: Dense
+    config:
+      activation: sigmoid
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: dense_1
+      trainable: false
+      units: 8
+      use_bias: true
+    inbound_nodes:
+    - - - Dense_1
+        - 0
+        - 0
+        - {}
+    name: dense_1
+  - class_name: Concatenate
+    config: {axis: -1, name: concatenate_1, trainable: true}
+    inbound_nodes:
+    - - - input
+        - 0
+        - 0
+        - &id001 {}
+      - - Dense_0
+        - 0
+        - 0
+        - *id001
+      - - Dense_1
+        - 0
+        - 0
+        - *id001
+      - - dense_1
+        - 0
+        - 0
+        - *id001
+    name: concatenate_1
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: Dense_main_0
+      trainable: true
+      units: 100
+      use_bias: true
+    inbound_nodes:
+    - - - concatenate_1
+        - 0
+        - 0
+        - {}
+    name: Dense_main_0
+  - class_name: Dropout
+    config: {name: dropout_3, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    inbound_nodes:
+    - - - Dense_main_0
+        - 0
+        - 0
+        - {}
+    name: dropout_3
+  - class_name: Dense
+    config:
+      activation: elu
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: Dense_main_1
+      trainable: true
+      units: 100
+      use_bias: true
+    inbound_nodes:
+    - - - dropout_3
+        - 0
+        - 0
+        - {}
+    name: Dense_main_1
+  - class_name: Dropout
+    config: {name: dropout_4, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    inbound_nodes:
+    - - - Dense_main_1
+        - 0
+        - 0
+        - {}
+    name: dropout_4
+  - class_name: Dense
+    config:
+      activation: softmax
+      activity_regularizer: null
+      bias_constraint: null
+      bias_initializer:
+        class_name: Zeros
+        config: {}
+      bias_regularizer: null
+      kernel_constraint: null
+      kernel_initializer:
+        class_name: VarianceScaling
+        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+      kernel_regularizer:
+        class_name: L1L2
+        config: {l1: 0.0, l2: 9.999999747378752e-06}
+      name: output
+      trainable: true
+      units: 6
+      use_bias: true
+    inbound_nodes:
+    - - - dropout_4
+        - 0
+        - 0
+        - {}
+    name: output
+  name: model_2
+  output_layers:
+  - [output, 0, 0]
+keras_version: 2.2.4
