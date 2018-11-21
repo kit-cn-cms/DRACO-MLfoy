@@ -1,16 +1,18 @@
 import rootpy
 import pandas
+import socket
 import variable_info
+import glob
+import os
+import numpy as np
+import rootpy.plotting as rp
+
+# local imports
 import plot_configs.variable_binning as binning
 import plot_configs.plotting_styles as ps
 ps.init_plot_style()
 
-import glob
-import os
-#import ROOT
-import numpy as np
-import rootpy.plotting as rp
-
+# current integrated lumi
 lumi = 41.3
 
 categories = {
@@ -25,7 +27,16 @@ category_names = {
     "(N_Jets == 4 and N_BTagsM >= 3)": "4j_ge3t",
     }
 
-data_dir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files"
+if "naf" in socket.gethostname():
+    workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
+else:
+    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
+data_dir = workpath+"/AachenDNN_files/"
+plot_dir = workpath+"/AachenDNN_files/plots/"
+if not os.path.exists(plot_dir):
+    os.makedirs(plot_dir)
+
+
 backgrounds = { "ttbb": data_dir + "/ttbb.h5",
                 "tt2b": data_dir + "/tt2b.h5",
                 "ttb":  data_dir + "/ttb.h5",
@@ -33,9 +44,7 @@ backgrounds = { "ttbb": data_dir + "/ttbb.h5",
                 "ttlf": data_dir + "/ttlf.h5"}
 signals = { "ttH": data_dir + "/ttHbb.h5" }
 
-plot_dir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files/plots/"
-if not os.path.exists(plot_dir):
-    os.makedirs(plot_dir)
+
 
 def hist_variable(variable, plot_name, bkgs, sigs, plt_title, log = False):
 

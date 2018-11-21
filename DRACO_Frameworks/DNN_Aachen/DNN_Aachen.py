@@ -1,34 +1,33 @@
 #global imports
+import rootpy.plotting as rp
 import keras
 import keras.models as models
 import keras.layers as layer
 from keras import backend as K
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib.colors import LogNorm
-import matplotlib.pyplot as plt
-import numpy as np
-import rootpy.plotting as rp
-import pandas
-
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-
-import os
+from keras.backend.tensorflow_backend import set_session
+import tensorflow as tf
 
 # Limit gpu usage
-import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-from sklearn.metrics import roc_auc_score
-
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 set_session(tf.Session(config=config))
 
+from matplotlib.colors import LogNorm
+import matplotlib.pyplot as plt
+
+import numpy as np
+import pandas
+
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_auc_score
+
+import os
+
 # local imports
 import data_frame
 import plot_configs.variable_binning as binning
-import plot_configs.plotting_styles as ps
+import plot_configs.plotting_styles as pltstyle
 import DNN_Architecture as Architecture
 
 class DNN():
@@ -375,8 +374,6 @@ class DNN():
             self.data.get_test_data(as_matrix = True) )
 
         # print evaluations
-        #print("prenet test roc:  {}".format(
-        #    roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
         if self.eval_metrics: 
             print("prenet test loss: {}".format(self.prenet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
@@ -403,8 +400,8 @@ class DNN():
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
-        #print("mainnet test roc:  {}".format(
-        #    roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
+        main_roc_score = roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)
+        print("mainnet test roc: {}".format(main_roc_score))
         if self.eval_metrics: 
             print("mainnet test loss: {}".format(self.mainnet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
@@ -474,7 +471,7 @@ class DNN():
 
     def plot_prenet_nodes(self, log = False):
         ''' plot prenet nodes '''
-        ps.init_plot_style()
+        pltstyle.init_plot_style()
         n_bins = 15
         bin_range = [0.,1.]
 
@@ -500,34 +497,34 @@ class DNN():
 
             # plot output
             bkg_hist = rp.Hist(n_bins, *bin_range, title = bkg_label)
-            ps.set_bkg_hist_style( bkg_hist, bkg_label)
+            pltstyle.set_bkg_hist_style( bkg_hist, bkg_label)
             bkg_hist.fill_array( bkg_values, bkg_weights )
 
             sig_hist = rp.Hist(n_bins, *bin_range, title = sig_title)
-            ps.set_sig_hist_style( sig_hist, sig_label )
+            pltstyle.set_sig_hist_style( sig_hist, sig_label )
             sig_hist.fill_array( sig_values, sig_weights )
 
             stack = rp.HistStack( [bkg_hist], stacked = True, drawstyle = "HIST E1 X0")
             stack.SetMinimum(1e-4)
 
-            canvas = ps.init_canvas()
+            canvas = pltstyle.init_canvas()
             
             rp.utils.draw([stack,sig_hist],
                 xtitle = "prenet node {}".format(node_cls), ytitle = "Events", pad = canvas)
             if log: canvas.cd().SetLogy()
 
-            legend = ps.init_legend([bkg_hist, sig_hist])
-            ps.add_lumi(canvas)
-            ps.add_category_label(canvas, self.event_category)
+            legend = pltstyle.init_legend([bkg_hist, sig_hist])
+            pltstyle.add_lumi(canvas)
+            pltstyle.add_category_label(canvas, self.event_category)
 
             out_path = self.save_path + "/prenet_output_{}.pdf".format(node_cls)
 
-            ps.save_canvas(canvas,out_path)
+            pltstyle.save_canvas(canvas,out_path)
 
 
     def plot_discriminators(self, log = False):
         ''' plot discriminators for output classes '''
-        ps.init_plot_style()
+        pltstyle.init_plot_style()
 
         nbins = 20
         bin_range = [0., 1.]
@@ -560,7 +557,7 @@ class DNN():
                     # background in this node
                     weight_integral += sum( filtered_weights )
                     hist = rp.Hist( nbins, *bin_range, title = str(truth_cls))
-                    ps.set_bkg_hist_style(hist, truth_cls)
+                    pltstyle.set_bkg_hist_style(hist, truth_cls)
                     hist.fill_array( filtered_values, filtered_weights )
                     bkg_hists.append(hist)
 
@@ -577,11 +574,11 @@ class DNN():
 
             sig_title = sig_label + "*{:.3f}".format(scale_factor)
             sig_hist = rp.Hist( nbins, *bin_range, title = sig_title)
-            ps.set_sig_hist_style(sig_hist, sig_label)
+            pltstyle.set_sig_hist_style(sig_hist, sig_label)
             sig_hist.fill_array( sig_values, sig_weights)
             
             # creating canvas
-            canvas = ps.init_canvas()
+            canvas = pltstyle.init_canvas()
 
             # drawing histograms
             rp.utils.draw([bkg_stack, sig_hist], 
@@ -589,17 +586,17 @@ class DNN():
             if log: canvas.cd().SetLogy()
             
             # creating legend
-            legend = ps.init_legend( bkg_hists+[sig_hist] )
-            ps.add_lumi(canvas)
-            ps.add_category_label(canvas, self.event_category)
+            legend = pltstyle.init_legend( bkg_hists+[sig_hist] )
+            pltstyle.add_lumi(canvas)
+            pltstyle.add_category_label(canvas, self.event_category)
 
             # save canvas
             out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
-            ps.save_canvas(canvas, out_path)
+            pltstyle.save_canvas(canvas, out_path)
 
     def plot_classification(self, log = False):
         ''' plot all events classified as one category '''
-        ps.init_plot_style()
+        pltstyle.init_plot_style()
     
         nbins = 20
         bin_range = [0., 1.]
@@ -635,7 +632,7 @@ class DNN():
                     # background in this node
                     weight_integral += sum(filtered_weights)
                     hist = rp.Hist(nbins, *bin_range, title = str(truth_cls))
-                    ps.set_bkg_hist_style(hist, truth_cls)
+                    pltstyle.set_bkg_hist_style(hist, truth_cls)
                     hist.fill_array( filtered_values, filtered_weights )
                     bkg_hists.append(hist)
 
@@ -652,11 +649,11 @@ class DNN():
 
             sig_title = sig_label + "*{:.3f}".format(scale_factor)
             sig_hist = rp.Hist(nbins, *bin_range, title = sig_title)
-            ps.set_sig_hist_style(sig_hist, sig_label)
+            pltstyle.set_sig_hist_style(sig_hist, sig_label)
             sig_hist.fill_array(sig_values, sig_weights)
 
             # creatin canvas
-            canvas = ps.init_canvas()
+            canvas = pltstyle.init_canvas()
             
             # drawing hists
             rp.utils.draw([bkg_stack, sig_hist],
@@ -664,13 +661,13 @@ class DNN():
             if log: canvas.cd().SetLogy()
 
             # legend
-            legend = ps.init_legend( bkg_hists+[sig_hist] )
-            ps.add_lumi(canvas)
-            ps.add_category_label(canvas, self.event_category)
+            legend = pltstyle.init_legend( bkg_hists+[sig_hist] )
+            pltstyle.add_lumi(canvas)
+            pltstyle.add_category_label(canvas, self.event_category)
             print("S/B = {}".format(weight_sum/weight_integral))
             # save
             out_path = self.save_path + "/predictions_{}.pdf".format(node_cls)
-            ps.save_canvas(canvas, out_path)
+            pltstyle.save_canvas(canvas, out_path)
                 
 
 
