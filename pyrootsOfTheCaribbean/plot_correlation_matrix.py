@@ -1,6 +1,7 @@
 import pandas
 import glob
 import os
+import sys
 import socket
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +12,10 @@ import variable_info
 import plot_configs.variable_binning as binning
 import plot_configs.plotting_styles as ps
 ps.init_plot_style()
+
+# give 1 as first argument if all correlations should be plotted as scatter plots
+if len(sys.argv) > 1:   plot_correlations = sys.argv[1]
+else:                   plot_correlations = 0
 
 # lumi
 lumi = 41.3
@@ -64,6 +69,25 @@ for key in backgrounds:
 
 #grand_df = grand_df.assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi)
 
+def plot_correlation(var1, var1_name, var2, var2_name, plot_dir, cat):
+    plt.hist2d(var1, var2,
+        bins = [min(binning.binning[var1_name]["nbins"],20),min(binning.binning[var2_name]["nbins"],20)])
+    plt.colorbar()
+
+    plt.title(cat, loc = "left")
+    plt.xlabel(var1_name)
+    plt.ylabel(var2_name)
+
+    cat_dir = plot_dir + "/" + cat
+    if not os.path.exists(cat_dir):
+        os.makedirs(cat_dir)
+    out_path = cat_dir + "/scatter_"+ \
+        str(var1_name.replace("[","_").replace("]",""))+"_vs_"+ \
+        str(var2_name.replace("[","_").replace("]",""))+".pdf"
+    plt.savefig(out_path)
+    print("saved plot at "+out_path)
+    plt.clf()
+
 
 # loop over categories and get list of variables
 for cat in categories:
@@ -78,6 +102,8 @@ for cat in categories:
         line = []
         for v2 in category_vars:
             correlation = np.corrcoef( cut_df[v1].values, cut_df[v2].values )[0][1]
+            if plot_correlations:
+                plot_correlation(cut_df[v1].values, v1, cut_df[v2].values, v2, plot_dir, category_names[cat])
             line.append(correlation)
             #print("correlation of {} and {}: {}".format(
             #    v1, v2, correlation))       
