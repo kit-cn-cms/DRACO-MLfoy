@@ -43,30 +43,54 @@ input variables: `preprocessing/root2pandas/variable_info.py`
 
 net confugurations: `DRACO_Frameworks/DNN_Aachen/DNN_Architectures.py`
 
+                          | `4j_ge3t`  | `5j_ge3t`  | `ge6j_ge3t`
+layers of prenet:         | 100,100    | 100,100    | 100,100
+layers of mainnet:        | 100,100    | 100        | 100,100
+                          |            |            |
+loss of prenet:           | cat_XE     | cat_XE     | cat_XE
+loss of mainnet:          | KLD        | KLD        | KLD
+                          |            |            |
+dropout percentage:       | 0.3        | 0.3        | 0.3
+L2 regularization:        | 1e-5       | 1e-5       | 1e-5
+                          |            |            |
+batchsize:                | 5000       | 5000       | 5000
+optimizer:                | ADAM(1e-4) | ADAM(1e-4) | ADAM(1e-4)
+                          |            |            |
+activation function:      | ELU        | ELU        | ELU
+last activation prenet:   | sigmoid    | sigmoid    | sigmoid
+last activation mainnet:  | softmax    | softmax    | softmax
+                          |            |            |
+earlystopping percentage: | 1%         | 1%         | 1%
+earlystopping patience:   | 20         | 20         | 20
+earlystopping min epochs: | 100        | 100        | 100
+
+
+
 ### `4j_ge3t`
 `(N_Jets == 4 and N_BTagsM >= 3)`
 
 ```
-event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
-number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712
+event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test 
+number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712 || 121627 | 40543 | 40542
 ```
-`ROC AUC of main net: 0.7099`
+`ROC AUC of main net: 0.6952`
+
 
 ### `5j_ge3t`
 `(N_Jets == 5 and N_BTagsM >= 3)`
 
 ```
-event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
-number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 179916
+event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test
+number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 242438 || 145463 | 48488 | 48487
 ```
-`ROC AUC of main net: 0.7266`
+`ROC AUC of main net: 0.7055`
 
 
 ### `ge6j_ge3t`
 `(N_Jets >= 6 and N_BTagsM >= 3)`
 
 ```
-event class   :    ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL
-number of events:  274062 | 9713 | 4555 | 7605 | 13804 | 25263 || 335002
+event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test
+number of events:  274062 | 9713 | 4555 | 7605 | 13804 | 25263 || 335002 || 201001 | 67001 | 67000
 ```
-`ROC AUC of main net: 0.7348`
+`ROC AUC of main net: 0.7210`

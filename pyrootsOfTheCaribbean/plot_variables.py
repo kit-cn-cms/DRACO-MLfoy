@@ -154,6 +154,10 @@ for cat in categories:
     cut_sig_dfs = {}
     cut_bkg_dfs = {}    
 
+    cat_dir = plot_dir + "/shapes_"+str(category_names[cat])+"/"
+    if not os.path.exists(cat_dir):
+        os.makedirs(cat_dir)
+
     for key in bkg_dfs:
         cut_bkg_dfs[key] = bkg_dfs[key].query(category_cut)[category_vars+["weight"]]
 
@@ -162,7 +166,7 @@ for cat in categories:
 
     for variable in category_vars:
         print(variable)
-        plot_name = plot_dir + "/{}_{}.pdf".format(category_names[cat], variable)
+        plot_name = cat_dir + "/{}.pdf".format(variable)
         plot_name = plot_name.replace("[","_").replace("]","")
 
         
