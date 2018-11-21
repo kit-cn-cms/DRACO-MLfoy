@@ -30,6 +30,32 @@ import plot_configs.variable_binning as binning
 import plot_configs.plotting_styles as pltstyle
 import DNN_Architecture as Architecture
 
+
+class EarlyStoppingByLossDiff(keras.callbacks.Callback):
+    def __init__(self, monitor = "loss", value = 0.01, min_epochs = 20, verbose = 0):
+        super(keras.callbacks.Callback, self).__init__()
+        self.val_monitor = "val_"+monitor
+        self.train_monitor = monitor
+
+        self.min_epochs = min_epochs
+        self.value = value
+        self.verbose = verbose
+
+    def on_epoch_end(self, epoch, logs = {}):
+        current_val = logs.get(self.val_monitor)
+        current_train = logs.get(self.train_monitor)
+        
+        if current_val is None or current_train is None:
+            warnings.warn("Early stopping requires {} and {} available".format(
+                self.val_monitor, self.train_monitor), RuntimeWarning)
+
+        if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
+            if self.verbose > 0:
+                print("Epoch {}: early stopping threshold reached".format(epoch))
+            self.model.stop_training = True
+
+
+
 class DNN():
     def __init__(self, in_path, save_path,
                 event_classes, 
@@ -279,9 +305,14 @@ class DNN():
         # add early stopping if activated
         callbacks = None
         if self.early_stopping:
-            callbacks = [keras.callbacks.EarlyStopping(
-                monitor = "val_loss", 
-                patience = self.early_stopping)]
+            callbacks = [EarlyStoppingByLossDiff(
+                monitor = "loss",
+                value = self.architecture["earlystopping_percentage"],
+                min_epochs = 20,
+                verbose = 1)]
+            #callbacks = [keras.callbacks.EarlyStopping(
+            #    monitor = "val_loss", 
+            #    patience = self.early_stopping)]
 
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -400,8 +431,8 @@ class DNN():
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
-        main_roc_score = roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)
-        print("mainnet test roc: {}".format(main_roc_score))
+        self.main_roc_score = roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)
+        print("mainnet test roc: {}".format(self.main_roc_score))
         if self.eval_metrics: 
             print("mainnet test loss: {}".format(self.mainnet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
@@ -671,7 +702,7 @@ class DNN():
                 
 
 
-    def plot_input_output_correlation(self):
+    def plot_input_output_correlation(self, plot = True):
 
         # get input variables from test set TODO get them unnormed
         input_data = self.data.get_test_data(as_matrix = False, normed = False)
@@ -704,26 +735,29 @@ class DNN():
 
                 assert( len(var_values) == len(pred_values) )
 
-                plt.hist2d(var_values, pred_values, 
-                    bins = [min(binning.binning[var]["nbins"],20), 20],
-                    norm = LogNorm())
-                plt.colorbar()
-
                 # calculate correlation value
                 correlation = np.corrcoef(var_values, pred_values)[0][1]
                 print("correlation between {} and {}: {}".format(
                     cls, var, correlation))
 
-                # write correlation value on plot
-                plt.title( correlation, loc = "left")
-                plt.xlabel(var)
-                plt.ylabel(cls+"_predicted")
-
-                out_name = plt_path + "/correlation_{}_{}.pdf".format(cls,var)
-                plt.savefig(out_name.replace("[","_").replace("]",""))
-                plt.clf()
-
                 corr_values[var] = correlation
+
+                if plot:
+                    plt.hist2d(var_values, pred_values, 
+                        bins = [min(binning.binning[var]["nbins"],20), 20],
+                        norm = LogNorm())
+                    plt.colorbar()
+
+
+                    # write correlation value on plot
+                    plt.title( correlation, loc = "left")
+                    plt.xlabel(var)
+                    plt.ylabel(cls+"_predicted")
+
+                    out_name = plt_path + "/correlation_{}_{}.pdf".format(cls,var)
+                    plt.savefig(out_name.replace("[","_").replace("]",""))
+                    plt.clf()
+
 
             # save correlation value to dataframe
             df[cls] = pandas.Series( corr_values )
@@ -771,7 +805,8 @@ class DNN():
 
         plt.xlabel("Predicted")
         plt.ylabel("True")
-    
+        plt.title("ROC-AUC value: {:.4f}".format(self.main_roc_score), loc = "left")
+
         # add textlabel
         for yit in range(n_classes):
             for xit in range(n_classes):

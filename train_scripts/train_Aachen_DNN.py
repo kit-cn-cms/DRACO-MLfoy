@@ -22,7 +22,7 @@ categories = {
     "ge6j_ge3t": "(N_Jets >= 6 and N_BTagsM >= 3)",
     }
 prenet_targets = [
-    "GenAdd_BB_inacceptance_part",
+    #"GenAdd_BB_inacceptance_part",
     "GenAdd_B_inacceptance_part",
     "GenHiggs_BB_inacceptance_part",
     "GenHiggs_B_inacceptance_part",
@@ -65,5 +65,5 @@ dnn_aachen.plot_prenet_nodes()
 dnn_aachen.plot_discriminators()
 dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()
-dnn_aachen.plot_input_output_correlation()
+dnn_aachen.plot_input_output_correlation(plot=False)
 
