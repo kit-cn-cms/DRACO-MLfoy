@@ -89,7 +89,7 @@ def save_canvas(canvas, save_path, clear_canvas = True):
 
 
 def add_lumi(pad):
-    lumi_text = "41.3 fb^{-1} (13 TeV)"
+    lumi_text = "41.5 fb^{-1} (13 TeV)"
 
     l = pad.GetLeftMargin()
     t = pad.GetTopMargin()

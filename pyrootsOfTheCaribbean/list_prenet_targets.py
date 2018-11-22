@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 # current integrated lumi
-lumi = 41.3
+lumi = 41.5
 
 categories = {
     "(N_Jets >= 6 and N_BTagsM >= 3)": variable_info.variables_4j_3b,
