@@ -57,6 +57,10 @@ def read_event(iev, event, applyCuts = True):
     candidates = []
     event_data = {}
 
+    event_data["Evt_Run"] = event.eventAuxiliary().run()
+    event_data["Evt_Lumi"] = event.eventAuxiliary().luminosityBlock()
+    event_data["Evt_ID"] = event.eventAuxiliary().event()
+
     event.getByLabel(muonLabel, muons)
     event.getByLabel(electronLabel, electrons)
     event.getByLabel(photonLabel, photons)
@@ -125,8 +129,23 @@ def get_2dhist( candidates, hdfConfig):
 
     # norm entries between 0 and 1
     maximum = np.max(flattened)
-    flattened = flattened/maximum
+    flattened = [np.uint8(f/maximum*255) for f in flattened]
     return flattened
+
+def passes_cuts(event):
+    ''' determine whether event fulfills the cut criteria '''
+    
+    event.getByLabel(jetLabel, jets)
+    nJets = 0
+    nTags = 0
+    for i,j in enumerate(jets.product()):
+        if abs(j.eta()) < 2.5 and j.pt() > 20:
+            nJets += 1
+            if j.bDiscriminator("pfDeepCSVJetTags:probb")+j.bDiscriminator("pfDeepCSVJetTags:probbb") > 0.45:
+                nTags += 1
+
+    if nJets >= 4 and nTags >=3: return True
+    else: return False
 
 def load_data( inFile, outFile, hdfConfig):
     ''' loading data from a single .root file
@@ -137,10 +156,15 @@ def load_data( inFile, outFile, hdfConfig):
     # init empty data
     evt_data = []
     data = []
+    n_evts_in_file = 0
+    n_evts_in_acc = 0
     for iev, event in enumerate(events):
-        if iev == 15000: break
-        if iev%1000 == 0:
-            print("at event #"+str(iev))
+        n_evts_in_file+=1
+        #if iev > 10: break
+        if not passes_cuts(event): continue
+        n_evts_in_acc += 1
+        if iev%1000 == 0: print("at event #"+str(iev))
+
         #read particle candidates of event
         candidates, event_data = read_event(iev, event)
         # generate 2dhistogram 
@@ -151,19 +175,25 @@ def load_data( inFile, outFile, hdfConfig):
         evt_data.append( event_data )
 
     df = pd.DataFrame.from_records(data)
+    # cast pixels as unsigned integer in [0,255]
+    for col in df.columns:
+        df[col] = df[col].astype(np.uint8)
+
     for key in evt_data[0]:
         values = [evt_data[i][key] for i in range(len(evt_data))]
         df[key] = pd.Series( values, index = df.index )
 
+    print("reindexing")
+    df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
     print("writing data to dataframe")
     df.to_hdf( outFile, key = "data", mode = "w" )
     
     #meta info
     print("saving meta info")
-    evts_in_file = len(list(events))
+    print("{}/{} events in acceptance".format(n_evts_in_acc, n_evts_in_file))
     input_shape = (hdfConfig.imageSize[0], hdfConfig.imageSize[1], hdfConfig.nImages)
 
-    meta_info_dict = {"input_shape": input_shape, "n_events": evts_in_file}
+    meta_info_dict = {"input_shape": input_shape, "n_events": n_evts_in_acc}
 
     meta_info_df = pd.DataFrame.from_dict( meta_info_dict )
     meta_info_df.to_hdf( outFile, key = "meta_info", mode = "a")

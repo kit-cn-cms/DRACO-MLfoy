@@ -1,41 +1,85 @@
 import NAFSubmit
 import os
-
-ttHbb_files = [
-    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_94X/180617_093100/0000/Skim_1.root",
-    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_94X/180617_093100/0000/Skim_2.root",
-    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_94X/180617_093100/0000/Skim_3.root",
-    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_94X/180617_093100/0000/Skim_4.root",
-    ]
+import glob
 
 
-ttZqq_files = [
-    "/pnfs/desy.de/cms/tier2/store/user/pkeicher/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/KIT_tthbb_sl_skims_MC_94X/180618_082211/0000/Skim_1.root",
-    "/pnfs/desy.de/cms/tier2/store/user/pkeicher/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/KIT_tthbb_sl_skims_MC_94X/180618_082211/0000/Skim_2.root",
-    "/pnfs/desy.de/cms/tier2/store/user/pkeicher/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/KIT_tthbb_sl_skims_MC_94X/180618_082211/0000/Skim_3.root",
-    "/pnfs/desy.de/cms/tier2/store/user/pkeicher/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/KIT_tthbb_sl_skims_MC_94X/180618_082211/0000/Skim_4.root",
-    ]
+ttH = [
+        {"name":    "ttHbb",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181019_155115/0000/*.root",},
+
+        {"name":    "ttHNobb",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+         "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181020_135500/0000/*.root",},
+        ]
+
+ttbar = [
+        {"name":    "TTToSL",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181019_154801/0000/*.root",},
+
+        {"name":    "TTToHad",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181019_154333/0000/*.root",},
+
+        {"name":    "TTToLep",
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181019_153955/0000/*.root",}
+        ]
+
+
+def preprocess_single_sample(sample, basedir, data_type, test_run = False):
+    mAOD_files = glob.glob(sample["mAOD"])
+    sample_name = sample["name"]
+    n_files = len(mAOD_files)
+    
+    print("="*100)
+    print("now handling miniAOD files from "+str(sample_name))
+    print("number of files: "+str(n_files))
+    print("="*100)
+
+    shell_scripts = NAFSubmit.writeShellScripts(
+        workdir   = basedir,
+        inFiles   = mAOD_files,
+        nameBase  = sample_name,
+        data_type = data_type,
+        test_run  = test_run)
+    
+    return shell_scripts
+
+
+
+
+
+
+
+
+
 
 # !!! change this !!!
-basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir"
-data_type = "pf_cands" # "cnn_map"
+basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/"
+data_type = "cnn_map"
+test_run = False
 
-print("writing shell scripts for ttH")
-ttH_scripts = NAFSubmit.writeShellScripts( 
-    workdir     = basedir,
-    inFiles     = ttHbb_files, 
-    nameBase    = "ttHbb_pfc",
-    data_type   = data_type)
+scripts_to_submit = []
+for sample in ttH:
+    scripts = preprocess_single_sample( sample, basedir, data_type, test_run = test_run )
+    scripts_to_submit += scripts
 
-print("writing shell scripts for ttZ")
-ttZ_scripts = NAFSubmit.writeShellScripts(
-    workdir     = basedir,
-    inFiles     = ttZqq_files,
-    nameBase    = "ttZqq_pfc",
-    data_type   = data_type)
+for sample in ttbar:
+    scripts = preprocess_single_sample( sample, basedir, data_type, test_run = test_run )
+    scripts_to_submit += scripts
+
+print(len(scripts_to_submit))
+
 
 print("submitting scripts to batch...")
-NAFSubmit.submitToBatch( 
+jobIDs = NAFSubmit.submitToBatch( 
     workdir            = basedir,
-    list_of_shells     = ttH_scripts + ttZ_scripts )
-
+    list_of_shells     = scripts_to_submit )
+NAFSubmit.monitorJobStatus(jobIDs)
