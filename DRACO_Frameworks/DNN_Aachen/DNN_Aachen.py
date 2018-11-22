@@ -750,6 +750,7 @@ class DNN():
                 if plot:
                     plt.hist2d(var_values, pred_values, 
                         bins = [min(binning.binning[var]["nbins"],20), 20],
+                        weights = self.data.get_lumi_weights(),
                         norm = LogNorm())
                     plt.colorbar()
 
@@ -772,8 +773,86 @@ class DNN():
         df.to_hdf(out_path, "correlations")
         print("saved correlation matrix at "+str(out_path))
 
-    def plot_output_output_correlation(self):
-        return
+    def plot_output_output_correlation(self, plot = False):
+        corr_path = self.save_path + "/output_correlations/"
+        if not os.path.exists(corr_path):
+            os.makedirs(corr_path)        
+
+        correlation_matrix = []
+        for i_cls, xcls in enumerate(self.event_classes):
+            correlations = []
+            xvalues = self.mainnet_predicted_vector[:,i_cls]
+
+            for j_cls, ycls in enumerate(self.event_classes):
+                yvalues = self.mainnet_predicted_vector[:,j_cls]                
+
+                corr = np.corrcoef( xvalues, yvalues)[0][1]
+                print("correlation between {} and {}: {}".format(xcls, ycls, corr))
+
+                correlations.append(corr)
+
+                if plot and i_cls < j_cls:
+                    plt.clf()
+                    plt.hist2d( xvalues, yvalues, bins = [20, 20],
+                        weights = self.data.get_lumi_weights(),
+                        norm = LogNorm())
+                    plt.colorbar()
+
+                    plt.title("corr = {}".format(corr), loc = "left")
+                    plt.title(self.event_category, loc = "right")
+
+                    plt.xlabel(xcls+" output node")
+                    plt.ylabel(ycls+" output node")
+
+                    out_name = corr_path + "/correlation_{}_{}.pdf".format(xcls, ycls)
+                    plt.savefig(out_name)
+                                           
+            correlation_matrix.append(correlations)
+
+        # plot correlation matrix
+        n_classes = len(self.event_classes)
+        
+        x = np.arange(0, n_classes+1, 1)
+        y = np.arange(0, n_classes+1, 1)
+
+        xn, yn = np.meshgrid(x,y)
+
+        plt.clf()
+        plt.figure(figsize = [10,10])
+        plt.pcolormesh(xn, yn, correlation_matrix, vmin = -1, vmax = 1)
+        plt.colorbar()
+
+        plt.xlim(0, n_classes)
+        plt.ylim(0, n_classes)
+
+        plt.xlabel("output nodes")
+        plt.ylabel("output nodes")
+
+        plt.title(self.event_category, loc = "right")
+
+        # add textlabel
+        for yit in range(n_classes):
+            for xit in range(n_classes):
+                plt.text(xit+0.5,yit+0.5,
+                    "{:.3f}".format(correlation_matrix[yit][xit]),
+                    horizontalalignment = "center",
+                    verticalalignment = "center")
+
+        ax = plt.gca()
+        ax.set_xticks( np.arange((x.shape[0]-1))+0.5, minor = False)
+        ax.set_yticks( np.arange((y.shape[0]-1))+0.5, minor = False)
+
+        ax.set_xticklabels(self.event_classes)
+        ax.set_yticklabels(self.event_classes)
+
+        ax.set_aspect("equal")
+        
+        out_path = self.save_path + "/output_correlation.pdf"
+        plt.savefig(out_path)
+        print("saved output correlation at "+str(out_path))
+        plt.clf()
+  
+
 
     def plot_confusion_matrix(self, norm_matrix = True):
         ''' generate confusion matrix '''

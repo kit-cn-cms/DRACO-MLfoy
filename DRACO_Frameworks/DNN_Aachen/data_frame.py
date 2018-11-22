@@ -11,7 +11,7 @@ class DataFrame(object):
                 train_variables, prenet_targets,
                 test_percentage = 0.1,
                 norm_variables = False,
-                lumi = 41.3):
+                lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
             the events are cut according to the event_category

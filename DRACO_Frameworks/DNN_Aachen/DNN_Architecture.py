@@ -19,7 +19,7 @@ class Architecture():
         self.sl_5j_3b = {
             "prenet_layer":             [100,100],
             "prenet_loss":              'categorical_crossentropy',
-            "mainnet_layer":            [100],
+            "mainnet_layer":            [100,100],
             "mainnet_loss":             "kullback_leibler_divergence",
             "Dropout":                  0.30,
             "L2_Norm":                  1e-5,
