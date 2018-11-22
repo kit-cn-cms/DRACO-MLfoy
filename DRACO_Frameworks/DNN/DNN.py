@@ -219,7 +219,9 @@ class DNN():
 
         # print evaluations
         #print("prenet test roc:  {}".format(
-        #    roc_auc_score(self.data.get_prenet_test_labels(), self.prenet_predicted_vector)))
+        self.auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        print("Auc-score: {}".format(self.auc_score))
+
         if self.eval_metrics:
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
