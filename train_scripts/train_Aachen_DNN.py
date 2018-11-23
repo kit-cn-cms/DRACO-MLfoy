@@ -22,8 +22,8 @@ categories = {
     "ge6j_ge3t": "(N_Jets >= 6 and N_BTagsM >= 3)",
     }
 prenet_targets = [
-    "GenAdd_BB_inacceptance_part",
-    "GenAdd_B_inacceptance_part",
+    #"GenAdd_BB_inacceptance_part",
+    #"GenAdd_B_inacceptance_part",
     "GenHiggs_BB_inacceptance_part",
     "GenHiggs_B_inacceptance_part",
     "GenTopHad_B_inacceptance_part",
@@ -37,7 +37,7 @@ event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 if "naf" in socket.gethostname(): 
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 
 key = sys.argv[1]
 
@@ -66,5 +66,6 @@ dnn_aachen.plot_prenet_nodes()
 dnn_aachen.plot_discriminators()
 dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()
+dnn_aachen.plot_output_output_correlation(plot=True)
 dnn_aachen.plot_input_output_correlation(plot=False)
 

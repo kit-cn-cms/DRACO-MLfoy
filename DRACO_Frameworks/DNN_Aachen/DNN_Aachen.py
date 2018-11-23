@@ -305,7 +305,6 @@ class DNN():
         if not os.path.exists(cp_path):
             os.makedirs(cp_path)
 
-
         # add early stopping if activated
         callbacks = None
         if self.early_stopping:
@@ -313,11 +312,9 @@ class DNN():
                 monitor = "loss",
                 value = self.architecture["earlystopping_percentage"],
                 min_epochs = 100,
-                patience = 20,
+                patience = 10,
                 verbose = 1)]
-            #callbacks = [keras.callbacks.EarlyStopping(
-            #    monitor = "val_loss", 
-            #    patience = self.early_stopping)]
+
 
         self.trained_pre_net = self.pre_net.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -348,6 +345,16 @@ class DNN():
         out_file = cp_path +"/trained_pre_net_weights.h5"
         self.pre_net.save_weights(out_file)
         print("wrote trained prenet weights to "+str(out_file))
+
+        # add early stopping if activated
+        callbacks = None
+        if self.early_stopping:
+            callbacks = [EarlyStoppingByLossDiff(
+                monitor = "loss",
+                value = self.architecture["earlystopping_percentage"],
+                min_epochs = 100,
+                patience = 20,
+                verbose = 1)]
 
         # train main net
         self.trained_main_net = self.main_net.fit(
