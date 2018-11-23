@@ -6,9 +6,9 @@ def get_plot_color( cls ):
     color_dict = {
         "ttH":   "royalblue",
         "ttlf":  "salmon",
-        "ttcc":  "tomato",
-        "ttbb":  "brown",
-        "tt2b":  "darkred",
+        "ttcc":  "orangered",
+        "ttbb":  "maroon",
+        "tt2b":  "saddlebrown",
         "ttb":   "red",
         "False": "orangered",
         "True":  "teal"
@@ -136,3 +136,23 @@ def add_category_label(pad, cat):
     pad.Update()
 
     #return pad
+
+def add_ROC_value(pad, ROC):
+    l = pad.GetLeftMargin()
+    t = pad.GetTopMargin()
+    r = pad.GetRightMargin()
+    b = pad.GetBottomMargin()
+
+    pad.cd()
+    
+    text = "ROC-AUC = {:.3f}".format(ROC)
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+
+    latex.DrawLatex(l,1.-t+0.02, text)
+
+    pad.Update()
+
+

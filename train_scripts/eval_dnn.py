@@ -2,7 +2,7 @@
 import numpy as np
 import os
 import sys
-
+import socket
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -27,19 +27,25 @@ prenet_targets = [
     #"GenAdd_B_inacceptance",
     "GenHiggs_BB_inacceptance",
     "GenHiggs_B_inacceptance",
-    #"GenTopHad_B_inacceptance",
-    #"GenTopHad_QQ_inacceptance",
-    #"GenTopHad_Q_inacceptance",
-    #"GenTopLep_B_inacceptance"
+    "GenTopHad_B_inacceptance",
+    "GenTopHad_QQ_inacceptance",
+    "GenTopHad_Q_inacceptance",
+    "GenTopLep_B_inacceptance"
     ]
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
-inPath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files"
+if "naf" in socket.gethostname():
+    workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
+else:
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
+
+
+inPath = workpath+"/AachenDNN_files"
 
 key = sys.argv[1]
 
-outpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_KLD_v1_"+str(key)
+outpath = workpath+"/AachenDNN_exact_rebuild_"+str(key)
 checkpoint_path = outpath + "/checkpoints/trained_main_net.h5py"
 
 dnn_aachen = DNN_Aachen.DNN(
@@ -54,5 +60,9 @@ dnn_aachen = DNN_Aachen.DNN(
     eval_metrics        = ["acc"])
 
 dnn_aachen.load_trained_model()
+dnn_aachen.plot_class_differences()
 dnn_aachen.plot_discriminators()
 dnn_aachen.plot_classification()
+dnn_aachen.plot_confusion_matrix()
+#dnn_aachen.plot_output_output_correlation(plot=True)
+#dnn_aachen.plot_input_output_correlation(plot=False)

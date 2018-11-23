@@ -30,7 +30,7 @@ category_names = {
 if "naf" in socket.gethostname():
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 data_dir = workpath+"/AachenDNN_files/"
 plot_dir = workpath+"/AachenDNN_files/plots/"
 if not os.path.exists(plot_dir):
@@ -171,7 +171,7 @@ for cat in categories:
 
         
         hist_variable(variable, plot_name, cut_bkg_dfs, cut_sig_dfs, plt_title = category_names[cat], log = False)
-        hist_variable(variable, plot_name, cut_bkg_dfs, cut_sig_dfs, plt_title = category_names[cat], log = True)
+        #hist_variable(variable, plot_name, cut_bkg_dfs, cut_sig_dfs, plt_title = category_names[cat], log = True)
     
 
 

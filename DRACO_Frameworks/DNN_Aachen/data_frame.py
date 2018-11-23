@@ -67,6 +67,7 @@ class DataFrame(object):
         self.index_classes = [self.class_translation[c] for c in classes]
 
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
+        df["is_ttH"] = pd.Series( [1 if c=="ttHbb" else 0 for c in df["class_label"].values], index = df.index )
 
         # norm weights to mean(1)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
@@ -141,6 +142,8 @@ class DataFrame(object):
     def get_prenet_test_labels(self, as_matrix = True):
         return self.df_test[ self.prenet_targets ].values
 
+    def get_ttH_flag(self):
+        return self.df_test["is_ttH"].values
 
     # full sample ----------------------------------
     def get_full_df(self):

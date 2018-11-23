@@ -1,4 +1,4 @@
-# global imports
+#global imports
 import numpy as np
 import os
 import sys
@@ -42,7 +42,7 @@ else:
 key = sys.argv[1]
 
 inPath   = workpath + "/AachenDNN_files"
-savepath = workpath + "/AachenDNN_exact_rebuild_"+str(key)+"/"
+savepath = workpath + "/AachenDNN_v2_"+str(key)+"/"
 
 
 dnn_aachen = DNN_Aachen.DNN(
@@ -63,6 +63,7 @@ dnn_aachen.train_models()
 dnn_aachen.eval_model()
 dnn_aachen.plot_metrics()
 dnn_aachen.plot_prenet_nodes()
+dnn_aachen.plot_class_differences()
 dnn_aachen.plot_discriminators()
 dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()

@@ -35,7 +35,7 @@ category_names = {
 if "naf" in socket.gethostname():
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 
 data_dir = workpath+"/AachenDNN_files"
 plot_dir = workpath+"/AachenDNN_files/plots/"

@@ -108,7 +108,10 @@ class DNN():
 
         # load dataset
         self.data = self._load_datasets()
-        out_file = self.save_path+"/variable_norm.csv"
+        out_path = self.save_path+"/checkpoints/"
+        if not os.path.exists(out_path):
+            os.makedirs(out_path)
+        out_file = out_path+"/variable_norm.csv"
         self.data.norm_csv.to_csv(out_file)
         print("saved variable norms at "+str(out_file))
 
@@ -153,8 +156,8 @@ class DNN():
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
-        print("mainnet test roc:  {}".format(
-            roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)))
+        self.main_roc_score = roc_auc_score(self.data.get_test_labels(), self.mainnet_predicted_vector)
+        print("mainnet test roc: {}".format(self.main_roc_score))
         if self.eval_metrics: 
             print("mainnet test loss: {}".format(self.mainnet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
@@ -565,17 +568,32 @@ class DNN():
             pltstyle.save_canvas(canvas,out_path)
 
 
-    def plot_discriminators(self, log = False):
+    def plot_discriminators(self, log = False, cut_on_variable = None):
         ''' plot discriminators for output classes '''
         pltstyle.init_plot_style()
 
-        nbins = 20
+        nbins = 50
         bin_range = [0., 1.]
 
+        # get some ttH specific info for plotting
+        ttH_index = self.data.class_translation["ttHbb"]
+        ttH_true_labels = self.data.get_ttH_flag()
+
+        # apply cut to output node value if wanted
+        if cut_on_variable:
+            cut_class = cut_on_variable["class"]
+            cut_value = cut_on_variable["val"]
+
+            cut_index = self.data.class_translation[cut_class]
+            cut_prediction = self.mainnet_predicted_vector[:,cut_index]
+            
         # loop over discriminator nodes
         for i, node_cls in enumerate(self.event_classes):
             # get outputs of node
             out_values = self.mainnet_predicted_vector[:,i]
+
+            # calculate node specific ROC value
+            node_ROC = roc_auc_score(ttH_true_labels, out_values)
 
             # fill lists according to class
             bkg_hists = []
@@ -584,15 +602,24 @@ class DNN():
             # loop over all classes to fill hist according to predicted class
             for j, truth_cls in enumerate(self.event_classes):
                 class_index = self.data.class_translation[truth_cls]
-
+    
                 # filter values per event class
-                filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
-                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                if cut_on_variable:
+                    filtered_values = [ out_values[k] for k in range(len(out_values)) \
+                        if self.data.get_test_labels(as_categorical = False)[k] == class_index \
+                        and cut_prediction[k] <= cut_value]
+                    filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+                        if self.data.get_test_labels(as_categorical = False)[k] == class_index \
+                        and cut_prediction[k] <= cut_value]
+                else:
+                    filtered_values = [ out_values[k] for k in range(len(out_values)) \
+                        if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                    filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+                        if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
+                    
 
-                if i == j:
-                    # signal in this node
+                if j == ttH_index:
+                    # ttH signal
                     sig_values = filtered_values 
                     sig_label = str(truth_cls)
                     sig_weights = filtered_weights
@@ -633,6 +660,9 @@ class DNN():
             pltstyle.add_lumi(canvas)
             pltstyle.add_category_label(canvas, self.event_category)
 
+            # add ROC value to plot
+            pltstyle.add_ROC_value(canvas, node_ROC)
+
             # save canvas
             out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
             pltstyle.save_canvas(canvas, out_path)
@@ -644,6 +674,7 @@ class DNN():
         nbins = 20
         bin_range = [0., 1.]
 
+        ttH_index = self.data.class_translation["ttHbb"]
         # loop over discriminator nodes
         for i, node_cls in enumerate(self.event_classes):
             node_index = self.data.class_translation[node_cls]
@@ -666,7 +697,8 @@ class DNN():
                 filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == class_index \
                         and self.predicted_classes[k] == node_index ]
-                if i == j:
+
+                if j == ttH_index:
                     # signal in this node
                     sig_values = filtered_values
                     sig_label = str(truth_cls)
@@ -712,7 +744,69 @@ class DNN():
             out_path = self.save_path + "/predictions_{}.pdf".format(node_cls)
             pltstyle.save_canvas(canvas, out_path)
                 
+    def plot_class_differences(self, log = False):
+        
+        pltstyle.init_plot_style()
 
+        nbins = 20
+        bin_range = [0.,1.]
+
+        # loop over discriminator nodes
+        for i, node_cls in enumerate(self.event_classes):
+            node_index = self.data.class_translation[node_cls]
+
+            # get outputs of node
+            node_values = self.mainnet_predicted_vector[:,i]
+            filtered_node_values = np.array([node_values[k] for k in range(len(node_values)) \
+                if self.predicted_classes[k] == node_index])
+
+            filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(node_values)) \
+                if self.predicted_classes[k] == node_index]
+
+            histograms = []
+            first = True
+            max_val = 0
+            # loop over other nodes and get those predictions
+            for j, other_cls in enumerate(self.event_classes):
+                if i == j: continue
+                other_index = self.data.class_translation[other_cls]
+
+                other_values = self.mainnet_predicted_vector[:,j]
+                filtered_other_values = np.array([other_values[k] for k in range(len(other_values)) \
+                    if self.predicted_classes[k] == node_index])
+
+                # get difference of predicted node value and other value
+                diff_values = (filtered_node_values - filtered_other_values)/filtered_node_values
+
+                hist = rp.Hist(nbins, *bin_range, title = str(other_cls)+" node", drawstyle = "HIST E1 X0")
+                pltstyle.set_sig_hist_style(hist, other_cls)
+                hist.fill_array(diff_values, filtered_weights)
+                if hist.GetMaximum() > max_val: max_val = hist.GetMaximum()                
+
+                if first:
+                    stack = rp.HistStack([hist], stacked = True)        
+                    first_hist = hist
+                    first = False
+                else:
+                    histograms.append(hist)
+
+            # create canvas
+            canvas = pltstyle.init_canvas()
+            # drawing hists
+            stack.SetMaximum(max_val*1.3)
+            rp.utils.draw([stack]+histograms, pad = canvas,
+                xtitle = "relative difference ("+str(node_cls)+" - X_node)/"+str(node_cls), ytitle = "Events")
+            if log: canvas.cd().SetLogy()
+
+            # legend
+            legend = pltstyle.init_legend( [first_hist]+histograms )
+            pltstyle.add_lumi(canvas)
+            pltstyle.add_category_label(canvas, self.event_category)
+
+            # save
+            out_path = self.save_path + "/node_differences_{}.pdf".format(node_cls)
+            pltstyle.save_canvas(canvas, out_path)
+            
 
     def plot_input_output_correlation(self, plot = True):
 
@@ -758,7 +852,8 @@ class DNN():
                     plt.hist2d(var_values, pred_values, 
                         bins = [min(binning.binning[var]["nbins"],20), 20],
                         weights = self.data.get_lumi_weights(),
-                        norm = LogNorm())
+                        norm = LogNorm(),
+                        cmap = "RdBu")
                     plt.colorbar()
 
 
@@ -802,7 +897,8 @@ class DNN():
                     plt.clf()
                     plt.hist2d( xvalues, yvalues, bins = [20, 20],
                         weights = self.data.get_lumi_weights(),
-                        norm = LogNorm())
+                        norm = LogNorm(),
+                        cmap = "RdBu")
                     plt.colorbar()
 
                     plt.title("corr = {}".format(corr), loc = "left")
