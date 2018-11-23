@@ -23,7 +23,7 @@ category_names = {
 if "naf" in socket.gethostname():
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/storage/c/vanderlinden/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 data_dir = workpath+"/AachenDNN_files/"
 plot_dir = workpath+"/AachenDNN_files/plots/"
 if not os.path.exists(plot_dir):
@@ -66,24 +66,17 @@ for key in backgrounds:
         bkg_dfs[key] = df.assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi)
 
 prenet_targets = [
-    #"GenAdd_BB_inacceptance_jet",
-    #"GenAdd_B_inacceptance_jet",
-    #"GenHiggs_BB_inacceptance_jet",
-    #"GenHiggs_B_inacceptance_jet",
-    #"GenTopHad_B_inacceptance_jet",
-    #"GenTopHad_QQ_inacceptance_jet",
-    #"GenTopHad_Q_inacceptance_jet",
-    #"GenTopLep_B_inacceptance_jet",
-    "GenAdd_BB_inacceptance_part",
-    "GenAdd_B_inacceptance_part",
-    "GenHiggs_BB_inacceptance_part",
-    "GenHiggs_B_inacceptance_part",
-    "GenTopHad_B_inacceptance_part",
-    "GenTopHad_QQ_inacceptance_part",
-    "GenTopHad_Q_inacceptance_part",
-    "GenTopLep_B_inacceptance_part",
+    "GenAdd_BB_inacceptance",
+    "GenAdd_B_inacceptance",
+    "GenHiggs_BB_inacceptance",
+    "GenHiggs_B_inacceptance",
+    "GenTopHad_B_inacceptance",
+    "GenTopHad_QQ_inacceptance",
+    "GenTopHad_Q_inacceptance",
+    "GenTopLep_B_inacceptance",
     ]
 
+prenet_targets = [t+"_part" for t in prenet_targets]
 classes = ["ttH", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
 for cat in categories:
