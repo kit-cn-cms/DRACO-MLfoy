@@ -1,2 +1,0 @@
-model_checkpoint_path: "/ceph/vanderlinden/DRACO-MLfoy/workdir//AachenDNN_exact_rebuild_5j_ge3t//checkpoints//trained_main_net"
-all_model_checkpoint_paths: "/ceph/vanderlinden/DRACO-MLfoy/workdir//AachenDNN_exact_rebuild_5j_ge3t//checkpoints//trained_main_net"
