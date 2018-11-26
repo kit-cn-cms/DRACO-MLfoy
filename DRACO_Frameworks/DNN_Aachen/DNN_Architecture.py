@@ -52,3 +52,5 @@ class Architecture():
             return self.sl_5j_3b
         elif event_category == "(N_Jets == 4 and N_BTagsM >= 3)":
             return self.sl_4j_3b
+        elif event_category == "(N_Jets == 4 and N_BTagsM == 4)":
+            return self.sl_4j_3b

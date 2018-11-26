@@ -11,6 +11,7 @@ class DataFrame(object):
                 train_variables, prenet_targets,
                 test_percentage = 0.1,
                 norm_variables = False,
+                additional_cut = None,
                 lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
@@ -89,6 +90,9 @@ class DataFrame(object):
                 norm_csv["std"][v] = unnormed_df[v].std()
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
             self.norm_csv = norm_csv
+
+        if additional_cut:
+            df.query( additional_cut, inplace = True )
 
         self.unsplit_df = df.copy()
         # split test sample

@@ -72,7 +72,8 @@ class DNN():
                 optimizer = None,
                 loss_function = "categorical_crossentropy",
                 test_percentage = 0.2,
-                eval_metrics = None):
+                eval_metrics = None,
+                additional_cut = None):
 
         # save some information
         
@@ -106,6 +107,9 @@ class DNN():
         # additional metrics for evaluation of training process
         self.eval_metrics = eval_metrics
 
+        # additional cut to be applied after variable norm
+        self.additional_cut = additional_cut
+
         # load dataset
         self.data = self._load_datasets()
         out_path = self.save_path+"/checkpoints/"
@@ -134,7 +138,8 @@ class DNN():
             train_variables     = self.train_variables,
             prenet_targets      = self.prenet_targets,
             test_percentage     = self.test_percentage,
-            norm_variables      = True)
+            norm_variables      = True,
+            additional_cut      = self.additional_cut)
     
     def load_trained_model(self):
         ''' load an already trained model '''
@@ -162,7 +167,19 @@ class DNN():
             print("mainnet test loss: {}".format(self.mainnet_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("mainnet test {}: {}".format(metric, self.mainnet_eval[im+1]))
+    
+    def predict_event_query(self, query ):
+        events = self.data.get_full_df().query( query )
+        print(str(events.shape[0]) + " events matched the query '"+str(query)+"'.")
 
+        for index, row in events.iterrows():
+            print("Index: "+str(index))
+            print("evaluation:")
+            print( self.main_net.predict( np.array([list(row.values)]) ) )
+            print("-"*50)
+
+
+    
     def build_default_model(self):
         ''' default Aachen-DNN model as used in the analysis '''
         K.set_learning_phase(True)
