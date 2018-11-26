@@ -118,6 +118,8 @@ def add_category_label(pad, cat):
                         "1 lepton, 5 jets, \geq 3 b-tags",
         "(N_Jets == 4 and N_BTagsM >= 3)":    
                         "1 lepton, 4 jets, \geq 3 b-tags",
+        "(N_Jets == 4 and N_BTagsM == 4)":    
+                        "1 lepton, 4 jets, 4 b-tags",
         }
 
     l = pad.GetLeftMargin()
