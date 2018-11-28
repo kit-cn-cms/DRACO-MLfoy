@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy as np
 import pandas as pd
 import glob
@@ -78,7 +79,7 @@ def read_event(iev, event, applyCuts = True):
         if applyCuts and (el.pt() < 5): continue
         candidates.append( Candidate(el, "electron") )
         
-    event_data["nLeptons"] = len(candidates)
+    event_data["nLeptons_mAOD"] = len(candidates)
 
     # Photon
     for i,pho in enumerate(photons.product()):
@@ -104,7 +105,7 @@ def read_event(iev, event, applyCuts = True):
         for i2, cand in enumerate(constituents):
             candidates.append( Candidate(cand, "jet_"+str(i)+"_candidate") )
 
-    event_data["nJets"] = nJets
+    event_data["nJets_mAOD"] = nJets
 
     return candidates, event_data
 
@@ -153,17 +154,21 @@ def load_data( inFile, outFile, hdfConfig):
     # initializing events
     events = Events(inFile)
 
+    # determine list of indices from hdfConfig
+    etabins, phibins = hdfConfig.imageSize
+    indices = ["eta{}phi{}".format(eta,phi) for eta in range(etabins) for phi in range(phibins)]
+
     # init empty data
     evt_data = []
     data = []
     n_evts_in_file = 0
     n_evts_in_acc = 0
     for iev, event in enumerate(events):
+        if iev%1000 == 0: print("at event #"+str(iev))
         n_evts_in_file+=1
         #if iev > 10: break
         if not passes_cuts(event): continue
         n_evts_in_acc += 1
-        if iev%1000 == 0: print("at event #"+str(iev))
 
         #read particle candidates of event
         candidates, event_data = read_event(iev, event)
@@ -174,7 +179,7 @@ def load_data( inFile, outFile, hdfConfig):
         # append additional event data to list
         evt_data.append( event_data )
 
-    df = pd.DataFrame.from_records(data)
+    df = pd.DataFrame.from_records(data, columns = indices)
     # cast pixels as unsigned integer in [0,255]
     for col in df.columns:
         df[col] = df[col].astype(np.uint8)
@@ -327,7 +332,76 @@ def prepare_training_sample(sample_dict, outFile, train_pc = 0.5, val_pc = 0.3):
     print("done.")
 
 
+ 
+def add_output_files(sample_dict, out_path):
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+
+    # loop over samples
+    for sample in sample_dict:
+        print("\n\nadding together {} files ...".format(sample))
+        print("="*50)
+    
+        # set path to output file
+        out_file = out_path + "/"+ sample + ".h5"
+        if os.path.exists(out_file):
+            print("removing old h5file ...")
+            os.remove(out_file)
+
+        # count number of events
+        n_total = 0
+
+        # glob input files
+        in_files = glob.glob( sample_dict[sample] )
+        n_files = len(in_files)
+        print("number of input files: {}".format(n_files))
+
+        # initializing loop over files
+        n_entries = 0
+        max_entries = 50000
+        concat_df = pd.DataFrame()
+
+        # loop over input files
+        for i,f in enumerate(in_files):
+            print("({}/{}) loading file {}".format(i+1,n_files,f))
         
+            # open file
+            df = pd.read_hdf(f, key = "data")
+            n_entries += df.shape[0]
+            n_total += df.shape[0]
+
+            # concatenate dataframes
+            if concat_df.empty: concat_df = df
+            else:               concat_df = concat_df.append(df)
+
+            # if number of entries exceeds max threshold, save to output file
+            if (n_entries > max_entries or f == in_files[-1]):
+                print("*"*50)
+                print("max_entries reached ...")
+                with pd.HDFStore(out_file, "a") as store:
+                    store.append("data", concat_df, index = False)
+                print("{} events added to {}".format(n_entries, out_file))
+                n_entries = 0
+                concat_df = pd.DataFrame()
+                print("*"*50)
+    
+        # end of sample printout
+        print("="*50)
+        print("done with {}".format(sample))
+        print("total events: {}".format(n_total))
+    
+        # print adding meta data to file
+        last_file = in_files[-1]
+        meta_df = pd.read_hdf(last_file, "meta_info")
+        meta_df["n_events"] = n_total
+        with pd.HDFStore(out_file, "a") as store:   
+            store.append("meta_info", meta_df, index = False)
+        print("added meta information:")
+        print(meta_df)
+
+    print("done.")
+            
+
 
 
 

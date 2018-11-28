@@ -1,8 +1,15 @@
 import NAFSubmit
 import os
 import glob
+import miniAOD_preprocessing as preproc
+
+# !!! adjustable options !!!
+basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/"
+data_type = "cnn_map" # unused option but needs to be set
+test_run = False
 
 
+# sample definitions
 ttH = [
         {"name":    "ttHbb",
          "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
@@ -32,6 +39,22 @@ ttbar = [
          "mAOD":    "/pnfs/desy.de/cms/tier2/store/user/mwassmer/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/KIT_tthbb_sl_skims_MC_new_pmx_94X/181019_153955/0000/*.root",}
         ]
 
+all_samples = ttH+ttbar
+
+
+
+# =================================================================================================
+def generate_submit_scripts(samples, basedir, data_type, test_run):
+    scripts_to_submit = []
+    for sample in samples:
+        scripts = preprocess_single_sample( sample, basedir, data_type, test_run = test_run )
+        scripts_to_submit += scripts
+
+    print("total number of files: "+str(len(scripts_to_submit)))
+    return scripts_to_submit
+
+
+
 
 def preprocess_single_sample(sample, basedir, data_type, test_run = False):
     mAOD_files = glob.glob(sample["mAOD"])
@@ -52,34 +75,37 @@ def preprocess_single_sample(sample, basedir, data_type, test_run = False):
     
     return shell_scripts
 
+def concat_output_files(samples, out_path):
+    print("concatenate output files ...")
+    out_path = basedir + "/CNN_files"
+
+    sample_dict = {}
+    for sample in samples:
+        name = sample["name"]
+        sample_dict[name] = basedir+"out_files/"+str(name)+"_*.h5"
+
+    for sample in sample_dict:
+        print("{} files: {}".format(sample, sample_dict[sample]))
+
+    preproc.add_output_files(
+        sample_dict = sample_dict,
+        out_path    = out_path)
+# =================================================================================================
 
 
 
 
-
-
-
-
-
-# !!! change this !!!
-basedir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/"
-data_type = "cnn_map"
-test_run = False
-
-scripts_to_submit = []
-for sample in ttH:
-    scripts = preprocess_single_sample( sample, basedir, data_type, test_run = test_run )
-    scripts_to_submit += scripts
-
-for sample in ttbar:
-    scripts = preprocess_single_sample( sample, basedir, data_type, test_run = test_run )
-    scripts_to_submit += scripts
-
-print(len(scripts_to_submit))
-
+'''
+# write one shell script per root file
+shell_scripts = generate_submit_scripts(all_samples, basedir, data_type, test_run)
 
 print("submitting scripts to batch...")
 jobIDs = NAFSubmit.submitToBatch( 
     workdir            = basedir,
-    list_of_shells     = scripts_to_submit )
+    list_of_shells     = shell_scripts )
+# monitor jobs
 NAFSubmit.monitorJobStatus(jobIDs)
+'''
+# concatenate the generated output files
+concat_output_files(all_samples, basedir)
+

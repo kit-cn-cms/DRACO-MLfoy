@@ -28,7 +28,9 @@ def writeShellScripts( workdir, inFiles, nameBase, data_type, test_run = False):
 
     script_list = []
     for iF, inFile in enumerate(inFiles):
-        if test_run and iF > 10: break
+        if test_run and iF > 5: 
+            print("BREAK: only using 5 samples for testrun")
+            break
 
         name = nameBase+"_"+str(iF)
         
