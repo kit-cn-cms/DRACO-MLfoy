@@ -22,8 +22,8 @@ categories = {
     "ge6j_ge3t": "(N_Jets >= 6 and N_BTagsM >= 3)",
     }
 prenet_targets = [
-    "GenAdd_BB_inacceptance_part",
-    "GenAdd_B_inacceptance_part",
+    #"GenAdd_BB_inacceptance_part",
+    #"GenAdd_B_inacceptance_part",
     "GenHiggs_BB_inacceptance_part",
     "GenHiggs_B_inacceptance_part",
     "GenTopHad_B_inacceptance_part",

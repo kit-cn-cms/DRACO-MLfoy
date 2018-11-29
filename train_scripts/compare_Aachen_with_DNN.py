@@ -135,11 +135,13 @@ def plot_confusion_matrix(confusion_matrix,
     print("saved confusion matrix at "+str(out_path))
     plt.clf()
 
+    return confusion_matrix, error_confusion_matrix
+
 
 # Run the dnn and dnn_aachen for num_runs train_samples and store the
 # confusion matrix and the auc score for every run
 
-num_runs = 10
+num_runs = 3
 cm_dnn = []
 cm_dnn_aachen = []
 auc_score_dnn = []
@@ -202,14 +204,15 @@ print("Result cm_dnn: {}".format(result_cm_dnn))
 print("Result cm_dnn_aachen: {}".format(result_cm_dnn_aachen))
 
 
-plot_confusion_matrix(confusion_matrix = result_cm_dnn,
+result_cm_dnn_norm, err_cm_dnn_nomr = plot_confusion_matrix(
+                      confusion_matrix = result_cm_dnn,
                       error_confusion_matrix = dnn_error,
                       xticklabels = dnn.data.classes,
                       yticklabels = dnn.data.classes,
                       save_path = savepath + "confusion_matrix_dnn.pdf",
                       norm_matrix = True)
-
-plot_confusion_matrix(confusion_matrix = result_cm_dnn_aachen,
+result_cm_dnn_aachen_norm, err_cm_dnn_aachen = plot_confusion_matrix(
+                      confusion_matrix = result_cm_dnn_aachen,
                       error_confusion_matrix = dnn_aachen_error,
                       xticklabels = dnn.data.classes,
                       yticklabels = dnn.data.classes,
@@ -217,17 +220,17 @@ plot_confusion_matrix(confusion_matrix = result_cm_dnn_aachen,
                       norm_matrix = True)
 
 # Calculate the confusion matrix of the differences of the two confusion matrices
-result_cm_difference = result_cm_dnn_aachen - result_cm_dnn
+result_cm_difference_nomr = result_cm_dnn_norm - result_cm_dnn_aachen_norm
 
 # Calculate the errorporpagation
-error_difference = np.sqrt(dnn_error**2 + dnn_aachen_error**2)
+error_difference = np.sqrt(err_cm_dnn_nomr**2 + err_cm_dnn_aachen**2)
 
-plot_confusion_matrix(confusion_matrix = result_cm_difference,
+plot_confusion_matrix(confusion_matrix = result_cm_difference_nomr,
                       error_confusion_matrix = error_difference,
                       xticklabels = dnn.data.classes,
                       yticklabels = dnn.data.classes,
                       save_path = savepath + "confusion_matrix_differences.pdf",
-                      norm_matrix = True)
+                      norm_matrix = False)
 
 
 

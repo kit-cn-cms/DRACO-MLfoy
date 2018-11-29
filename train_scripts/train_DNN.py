@@ -14,7 +14,8 @@ import DRACO_Frameworks.DNN.variable_info as variable_info
 category_vars = {
     "4j_ge3t": variable_info.variables_4j_3b,
     "5j_ge3t": variable_info.variables_5j_3b,
-    "ge6j_ge3t": variable_info.variables_6j_3b}
+    "ge6j_ge3t": variable_info.variables_6j_3b
+    }
 categories = {
     "4j_ge3t":   "(N_Jets == 4 and N_BTagsM >= 3)",
     "5j_ge3t":   "(N_Jets == 5 and N_BTagsM >= 3)",
@@ -28,7 +29,7 @@ workpath = "/ceph/hluedemann/DRACO-MLfoy/workdir"
 key = sys.argv[1]
 
 inPath   = workpath + "/train_samples/AachenDNN_files"
-savepath = workpath + "/DNN_"+str(key)+"/"
+savepath = workpath + "/1_DNN_"+str(key)+"/"
 
 
 dnn = DNN.DNN(

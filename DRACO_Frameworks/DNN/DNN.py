@@ -79,6 +79,7 @@ class DNN():
         # load data set
         self.data = self._load_datasets()
         out_file = self.save_path + "/variable_norm.csv"
+        self.data.norm_csv.to_csv(out_file)
         print("saved variabe norms at " + str(out_file))
 
         # architecture of the aarchen net
@@ -104,6 +105,8 @@ class DNN():
 
 
     def build_default_model(self):
+
+        K.set_learning_phase(True)
 
         dropout                     = self.architecture["Dropout"]
         batchNorm                   = self.architecture["batchNorm"]
@@ -164,6 +167,11 @@ class DNN():
     def train_model(self):
         ''' train the model '''
 
+        # checkpoint files
+        cp_path = self.save_path + "/checkpoints/"
+        if not os.path.exists(cp_path):
+            os.makedirs(cp_path)
+
         # add early stopping if activated
         callbacks = None
         if self.early_stopping:
@@ -182,7 +190,7 @@ class DNN():
             validation_split = 0.2,
             sample_weight = self.data.get_train_weights())
 
-        '''
+
         # save trained model
         out_file = cp_path + "/trained_model.h5py"
         self.model.save(out_file)
@@ -193,7 +201,25 @@ class DNN():
         with open(out_file, "w") as f:
             f.write( str(model_config))
         print("saved model config at "+str(out_file))
-        '''
+
+        out_file = cp_path +"/trained_model_weights.h5"
+        self.model.save_weights(out_file)
+        print("wrote trained weights to "+str(out_file))
+
+        # set model as non trainable
+        for layer in self.model.layers:
+            layer.trainable = False
+        self.model.trainable = False
+
+        K.set_learning_phase(False)
+
+        out_file = cp_path + "/trained_model"
+        sess = keras.backend.get_session()
+        saver = tf.train.Saver()
+        save_path = saver.save(sess, out_file)
+        print("saved checkpoint files to "+str(out_file))
+
+
 
     def eval_model(self):
         ''' evaluate trained model '''
@@ -377,4 +403,4 @@ class DNN():
         out_path = self.save_path + "/confusion_matrix.pdf"
         plt.savefig(out_path)
         print("saved confusion matrix at "+str(out_path))
-        plt.clf()
+plt.clf()
