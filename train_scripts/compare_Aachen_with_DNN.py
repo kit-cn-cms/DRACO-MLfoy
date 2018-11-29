@@ -80,12 +80,15 @@ def plot_confusion_matrix(confusion_matrix,
     # norm confusion matrix if wanted
     if norm_matrix:
         cm = np.empty( (n_classes, n_classes), dtype = np.float64 )
+        cm_err = np.empty( (n_classes, n_classes), dtype = np.float64 )
         for yit in range(n_classes):
             evt_sum = float(sum(confusion_matrix[yit,:]))
             for xit in range(n_classes):
                 cm[yit,xit] = confusion_matrix[yit,xit]/evt_sum
+                cm_err[yit,xit] = error_confusion_matrix[yit,xit]/evt_sum
 
         confusion_matrix = cm
+        error_confusion_matrix = cm_err
 
     plt.clf()
 
@@ -136,7 +139,7 @@ def plot_confusion_matrix(confusion_matrix,
 # Run the dnn and dnn_aachen for num_runs train_samples and store the
 # confusion matrix and the auc score for every run
 
-num_runs = 5
+num_runs = 10
 cm_dnn = []
 cm_dnn_aachen = []
 auc_score_dnn = []
