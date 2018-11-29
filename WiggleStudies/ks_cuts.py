@@ -49,12 +49,22 @@ else:
 
 inPath = workpath+"/AachenDNN_files"
 
-key = sys.argv[1]
+try:
+    key = sys.argv[1]
+    smearing = eval(sys.argv[2])
+    if smearing: print("doing smearing (x->x+rnd.normal(0,sigma))")
+    else:        print("doing scaling  (x->x*rnd.normal(1,sigma))")
+except:
+    print("first  argument: JT cagegory")
+    print("second argument: smearing/scaling (1/0)")
+    exit()
 
 outpath = workpath+"/AachenDNN_v2_"+str(key)+"/"
 checkpoint_path = outpath + "/checkpoints/trained_main_net.h5py"
 
-result_dir = "/ceph/vanderlinden/DRACO-MLfoy/WiggleStudies/results/KSscans/"
+result_dir = "/ceph/vanderlinden/DRACO-MLfoy/WiggleStudies/results/KSscans"
+if smearing:    result_dir += "_smearing/"
+else:           result_dir += "_scaling/"
 if not os.path.exists(result_dir):
     os.makedirs(result_dir)
 result_dir += "/"+str(key)+"/"
@@ -109,13 +119,15 @@ for i_node in range(len(event_classes)):
 
 n_samples = 10
 sigma = 0.2
+# smearing/scaling
 def func(x):
-    return x + np.random.normal(0,sigma)
+    if smearing: return x + np.random.normal(0,sigma)
+    else:        return x*np.random.normal(1,sigma)
 
 plot_dir = result_dir + "/KS_cuts_{:.3f}".format(sigma).replace(".","_")
 discrs_after = []
 for _ in range(n_samples):
-    print("generating new smeared predictions ...")
+    print("generating new {} predictions ...".format("smeared" if smearing else "scaled"))
     data_new = data.applymap(func)
 
     prediction_after = dnn_aachen.main_net.predict(data_new.values)

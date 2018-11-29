@@ -50,12 +50,22 @@ else:
 
 inPath = workpath+"/AachenDNN_files"
 
-key = sys.argv[1]
+try:
+    key = sys.argv[1]
+    smearing = eval(sys.argv[2])
+    if smearing: print("doing smearing (x->x+rnd.normal(0,sigma))")
+    else:        print("doing scaling  (x->x*rnd.normal(1,sigma))")
+except:
+    print("first  argument: JT cagegory")
+    print("second argument: smearing/scaling (1/0)")
+    exit()
 
 outpath = workpath+"/AachenDNN_v2_"+str(key)+"/"
 checkpoint_path = outpath + "/checkpoints/trained_main_net.h5py"
 
-result_dir = "/ceph/vanderlinden/DRACO-MLfoy/WiggleStudies/results/KSscans/"
+result_dir = "/ceph/vanderlinden/DRACO-MLfoy/WiggleStudies/results/KSscans"
+if smearing:    result_dir += "_smearing/"
+else:           result_dir += "_scaling/"
 if not os.path.exists(result_dir):
     os.makedirs(result_dir)
 result_dir += "/"+str(key)+"/"
@@ -121,8 +131,8 @@ for sigma in stddevs:
     print("at sigma "+str(sigma))
     # apply some uncertainties to data
     def func(x):
-        return x + np.random.normal(0,sigma)
-
+        if smearing: return x + np.random.normal(0,sigma)
+        else:        return x*np.random.normal(1,sigma)
 
     ks_values = [[] for _ in event_classes]
     for n_iter in range(n_samples):
@@ -146,9 +156,10 @@ for sigma in stddevs:
         ks_per_node[i_node].append(np.mean(ks_values[i_node]))
         ks_std_per_node[i_node].append(np.std(ks_values[i_node]))
 
-plt.figure(figsize = [7,7])
 for i_node in range(len(event_classes)):
     print("plotting hist for node {}".format(i_node))
+    plt.clf()
+    plt.figure(figsize = [7,5])
     
     plt.errorbar( stddevs, ks_per_node[i_node], yerr = ks_std_per_node[i_node], fmt = "o", color = "black")    
 
@@ -158,5 +169,4 @@ for i_node in range(len(event_classes)):
     plt.title(categories[key], loc = "right")
     save_dir = result_dir +"/KS_scan_{}_node.pdf".format( event_classes[i_node])
     plt.savefig(save_dir )
-    plt.show()
-    plt.clf()
+    print("saved plot at {}".format(save_dir))
