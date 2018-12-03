@@ -23,12 +23,11 @@ def ask_yes_no(question):
 
 
 
-def create_datasets(df, class_label, path):
+def create_datasets(df, class_label, out_path):
     ''' write dataset with events of given classlabel to workdir '''
     cut_df = df.query("(class_label == '"+str(class_label)+"')")
     print("creating dataset for class label {} with {} entries".format(class_label, cut_df.shape[0]))
 
-    out_path = path + "/" + str(class_label)+".h5"
     with pd.HDFStore(out_path, "a") as store:
         store.append("data", cut_df, index = False)
 
@@ -85,21 +84,53 @@ def add_class_labels(df, is_ttH = False):
     df.drop(["GenEvt_I_TTPlusBB", "GenEvt_I_TTPlusCC"], axis = 1, inplace = True)
     return df
 
+def add_cnn_variables(df, cnn_df):
+    ''' search cnn file for events in df and add cnn maps to variables '''
+    print("adding CNN maps to dataframe ...")
+    # add entry to dataframe to indicate whether a cnn map is found
+    cnn_df["has_cnn"]   = pd.Series([True]*cnn_df.shape[0], index = cnn_df.index)
+
+    # get dictionary of column datatypes to recast them later
+    cnn_columns = cnn_df.columns.values
+    dtype_dict = {v: cnn_df[v].dtype for v in cnn_columns if not v == "has_cnn"}
+
+    # reset index of dataframe
+    #df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
+
+    # add cnn variables
+    df = df.join(cnn_df, how = "left")
+
+    # only return events where a CNN map has been found
+    new_df = df.query("has_cnn == True")
+    n_evts = new_df.shape[0]
+    n_evts_before = df.shape[0]
+    print("matched {} events with CNN maps".format(n_evts))
+    print("{} events were not matched".format(n_evts_before - n_evts))
+    new_df.drop("has_cnn", axis = 1, inplace = True)
+
+    # recast datatypes to save disk
+    new_df = new_df.astype(dtype = dtype_dict)
+    
+    return new_df
+
+
 def add_mem_variables(df, mem_df, mem_var = "mem_p"):
     ''' search mem file for events in df and add mem values to variables '''
     print("adding MEM to dataframe ...")
     # creating variable with default value
-    df["MEM"] = pd.Series([-1]*df.shape[0], index = df.index)
+    df["memDBp"] = pd.Series([-1]*df.shape[0], index = df.index)
 
     # reset index of dataframe
-    df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
+    #df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
 
     # add mem_var from mem_df
-    df.update( mem_df[mem_var].rename("MEM") )
+    df.update( mem_df[mem_var].rename("memDBp") )
 
     # check if some mems could not be set
-    if not df.query("MEM == -1").empty:
+    if not df.query("memDBp == -1").empty:
         print("ATTENTION: SOME ENTRIES COULD NOT FIND A MATCHING MEM - SET TO -1")
+        df_new = df.query("memDBp != -1")
+        print("{} events found with mem".format(df_new.shape[0]))
     return df
 
 def generate_mem_h5(mem_files, output_mem_h5_file):
@@ -135,7 +166,7 @@ def generate_mem_h5(mem_files, output_mem_h5_file):
 
 
 # =================================================================================================
-def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, additional_selection = None, sel_vars = None, is_ttH = False):
+def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, additional_selection = None, sel_vars = None, is_ttH = False, cnn_map = False):
     ''' create dataframes from files
         - loop over globbed input files
             - load tree
@@ -152,6 +183,15 @@ def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, addit
 
     # get mem dataframe
     mem_df = generate_mem_h5(mem_files, h5_mem_file)
+
+    # load cnn data if needed and determine output path
+    if cnn_map:
+        print("loading cnn dataframe")
+        cnn_df = pd.read_hdf(cnn_map, "data")
+        print("cnn dataframe has {} entries".format(cnn_df.shape[0]))
+        naming = "_cnn.h5"
+    else:
+        naming = "_dnn.h5"
 
     # initializing loop over ntuple files
     n_entries = 0
@@ -200,18 +240,29 @@ def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, addit
             print("max_entrires reached ...")
             # add class labels
             concat_df = add_class_labels(concat_df, is_ttH = is_ttH)
+            # add indexing
+            concat_df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
             # add mem variables
             concat_df = add_mem_variables(concat_df, mem_df)
+            # add cnn variables
+            concat_df = add_cnn_variables(concat_df, cnn_df)
 
             # write data to file
             if is_ttH:
-                create_datasets(concat_df, class_label = "ttHbb", path = workdir)
+                out_path = workdir + "/ttHbb"+naming
+                create_datasets(concat_df, class_label = "ttHbb", out_path = out_path)
             else:
-                create_datasets(concat_df, class_label = "ttbb", path = workdir)
-                create_datasets(concat_df, class_label = "tt2b", path = workdir)
-                create_datasets(concat_df, class_label = "ttb",  path = workdir)
-                create_datasets(concat_df, class_label = "ttcc", path = workdir)
-                create_datasets(concat_df, class_label = "ttlf", path = workdir)
+                out_path = workdir + "/ttbb"+naming
+                create_datasets(concat_df, class_label = "ttbb", out_path = out_path)
+                out_path = workdir + "/tt2b"+naming
+                create_datasets(concat_df, class_label = "tt2b", out_path = out_path)
+                out_path = workdir + "/ttb"+naming
+                create_datasets(concat_df, class_label = "ttb",  out_path = out_path)
+                out_path = workdir + "/ttcc"+naming
+                create_datasets(concat_df, class_label = "ttcc", out_path = out_path)
+                out_path = workdir + "/ttlf"+naming
+                create_datasets(concat_df, class_label = "ttlf", out_path = out_path)
+
             print("*"*50)
             # reset counters
             n_entries = 0
@@ -222,7 +273,7 @@ def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, addit
 
 
 
-def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_selection, workdir, additional_selection, trigger_variables, is_ttH):
+def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_selection, workdir, additional_selection, trigger_variables, is_ttH, add_cnn):
     ''' handle preprocessing of a single file
         - glob files
         - create MEM df or use old MEM df
@@ -237,6 +288,9 @@ def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_sel
     print("now handling ntuples from "+str(sample_name))
     print("location: "+str(ntuple_files))
     print("mems:     "+str(mem_files))
+    if add_cnn: 
+        add_cnn = sample["CNN"]
+        print("CNN maps: "+str(add_cnn))
     print("="*100)
 
     # check if mem file exists and remove if wanted
@@ -258,10 +312,11 @@ def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_sel
         workdir,
         additional_selection,
         trigger_variables,
-        is_ttH)
+        is_ttH,
+        cnn_map = add_cnn)
 
 
-def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection, workdir):
+def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection, workdir, add_cnn = False):
     ''' handle all preprocessing files
         - remove old data
         - get variables
@@ -271,12 +326,14 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
     if not os.path.exists(workdir):
         os.makedirs(workdir)
 
-    old_h5_files = glob.glob(workdir+"/*.h5")
+    if add_cnn: out_path = workdir+"/*_cnn.h5"
+    else:       out_path = workdir+"/*_dnn.h5"
+    old_h5_files = glob.glob(out_path)
     for f in old_h5_files: os.remove(f)
 
     mem_path = workdir + "/MEM/*.h5"
     old_mem_files = glob.glob(mem_path)
-
+    
     # get variable lists
     variables, vecvars, trigger_variables = get_variable_lists()
 
@@ -291,7 +348,8 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
             workdir, 
             additional_selection = None, 
             trigger_variables = trigger_variables, 
-            is_ttH = True)
+            is_ttH = True,
+            add_cnn = add_cnn)
 
     # loop over ttbar files:
     for sample in ttbar_samples:
@@ -304,7 +362,8 @@ def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection,
             workdir, 
             additional_selection = ttbar_selection,
             trigger_variables = trigger_variables, 
-            is_ttH = False)
+            is_ttH = False,
+            add_cnn = add_cnn)
 
 
 # =========================================================
@@ -345,6 +404,8 @@ def get_variable_lists():
     # get variables and dictionary of vector variables
     variables, vecvars = get_vars_and_vecvars(variable_list)
 
+    # mem variable is not in ntuples so remove it from list and add it via mem dataframes
+    if "MEM" in variables: variables.remove("MEM")
     # add some more variables needed
     # append variables for class labels
     variables += ['GenEvt_I_TTPlusBB', 'GenEvt_I_TTPlusCC']
@@ -354,14 +415,22 @@ def get_variable_lists():
 
     # append variables for prenet-targets
     variables += [
-        "GenAdd_BB_inacceptance",
-        "GenAdd_B_inacceptance",
-        "GenHiggs_BB_inacceptance",
-        "GenHiggs_B_inacceptance",
-        "GenTopHad_B_inacceptance",
-        "GenTopHad_QQ_inacceptance",
-        "GenTopHad_Q_inacceptance",
-        "GenTopLep_B_inacceptance",
+        "GenAdd_BB_inacceptance_jet",
+        "GenAdd_B_inacceptance_jet",
+        "GenHiggs_BB_inacceptance_jet",
+        "GenHiggs_B_inacceptance_jet",
+        "GenTopHad_B_inacceptance_jet",
+        "GenTopHad_QQ_inacceptance_jet",
+        "GenTopHad_Q_inacceptance_jet",
+        "GenTopLep_B_inacceptance_jet",
+        "GenAdd_BB_inacceptance_part",
+        "GenAdd_B_inacceptance_part",
+        "GenHiggs_BB_inacceptance_part",
+        "GenHiggs_B_inacceptance_part",
+        "GenTopHad_B_inacceptance_part",
+        "GenTopHad_QQ_inacceptance_part",
+        "GenTopHad_Q_inacceptance_part",
+        "GenTopLep_B_inacceptance_part",
             ]
     # append variable for train/test splitting
     variables += ["Evt_Odd"]
@@ -412,24 +481,31 @@ def get_variable_lists():
 # location of ttH and ttbar samples
 ttH = [
         {"name":    "ttHbb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "CNN":     "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHbb.h5"},
 
         {"name":    "ttHNobb",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root"}
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+         "CNN":     "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHNobb.h5"}
         ]
 
 ttbar = [
         {"name":    "TTToSL",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "CNN":     "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToSL.h5"},
+
         {"name":    "TTToHad",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"},
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "CNN":     "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToHad.h5"},
+
         {"name":    "TTToLep",
-         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root"}
+         "ntuples": "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+         "MEM":     "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+         "CNN":     "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToLep.h5"}
         ]
 
 workdir = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/AachenDNN_files/"
@@ -460,4 +536,4 @@ abs(Weight_scale_variation_muR_2p0_muF_1p0) <= 100 and \
 abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100 \
 )"
 
-preprocess_data(ttH, ttbar, base_selection, ttbar_selection, workdir)
+preprocess_data(ttH, ttbar, base_selection, ttbar_selection, workdir, add_cnn = True)
