@@ -130,7 +130,7 @@ class DNN():
                     i,
                     activation = activation_function,
                     kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)))
-
+            model.add(layer.Dropout(dropout))
 
         # create output layer
         model.add(layer.Dense(self.data.n_output_neurons,

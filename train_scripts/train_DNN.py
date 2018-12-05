@@ -1,4 +1,5 @@
 # global imports
+import rootpy.plotting as rp
 import numpy as np
 import os
 import sys
@@ -29,7 +30,7 @@ workpath = "/ceph/hluedemann/DRACO-MLfoy/workdir"
 key = sys.argv[1]
 
 inPath   = workpath + "/train_samples/AachenDNN_files"
-savepath = workpath + "/1_DNN_"+str(key)+"/"
+savepath = workpath + "/DNN_"+str(key)+"/"
 
 
 dnn = DNN.DNN(
@@ -47,4 +48,5 @@ dnn.train_model()
 dnn.eval_model()
 dnn.plot_metrics()
 #dnn.plot_input_output_correlation()
+
 dnn.plot_confusion_matrix()
