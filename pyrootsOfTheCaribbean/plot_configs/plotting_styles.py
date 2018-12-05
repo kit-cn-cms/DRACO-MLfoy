@@ -4,12 +4,12 @@ import ROOT
 # dictionary for colors
 def get_plot_color( cls ):
     color_dict = {
-        "ttH":   "royalblue",
-        "ttlf":  "salmon",
-        "ttcc":  "orangered",
-        "ttbb":  "maroon",
-        "tt2b":  "saddlebrown",
-        "ttb":   "red",
+        "ttH":   ROOT.kBlue+1,#"royalblue",
+        "ttlf":  ROOT.kRed-7,#"salmon",
+        "ttcc":  ROOT.kRed+1,#"orangered",
+        "ttbb":  ROOT.kRed+3,#"maroon",
+        "tt2b":  ROOT.kRed+2,#"saddlebrown",
+        "ttb":   kRed-2,#"red",
         "False": "orangered",
         "True":  "teal"
         }
