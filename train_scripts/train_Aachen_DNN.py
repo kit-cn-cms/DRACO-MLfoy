@@ -15,7 +15,7 @@ import DRACO_Frameworks.DNN_Aachen.variable_info as variable_info
 category_vars = {
     "4j_ge3t": variable_info.variables_4j_3b,
     "5j_ge3t": variable_info.variables_5j_3b,
-    "ge6j_ge3t": variable_info.variables_6j_3b}            
+    "ge6j_ge3t": variable_info.variables_6j_3b}
 categories = {
     "4j_ge3t":   "(N_Jets == 4 and N_BTagsM >= 3)",
     "5j_ge3t":   "(N_Jets == 5 and N_BTagsM >= 3)",
@@ -34,23 +34,24 @@ prenet_targets = [
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
-if "naf" in socket.gethostname(): 
+if "naf" in socket.gethostname():
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/hluedemann/DRACO-MLfoy/workdir/"
 
 key = sys.argv[1]
 
-inPath   = workpath + "/AachenDNN_files"
-savepath = workpath + "/AachenDNN_v2_"+str(key)+"/"
+inPath   = workpath + "train_samples/AachenDNN_files"
+savepath = workpath + "/AachenDNN_KLD_v2_"+str(key)+"/"
+
 
 
 dnn_aachen = DNN_Aachen.DNN(
-    in_path             = inPath, 
-    save_path           = savepath,		
-    event_classes       = event_classes, 
+    in_path             = inPath,
+    save_path           = savepath,
+    event_classes       = event_classes,
     event_category      = categories[key],
-    train_variables     = category_vars[key], 
+    train_variables     = category_vars[key],
     prenet_targets      = prenet_targets,
     train_epochs        = 500,
     early_stopping      = 20,
@@ -69,4 +70,3 @@ dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()
 dnn_aachen.plot_output_output_correlation(plot=True)
 dnn_aachen.plot_input_output_correlation(plot=False)
-
