@@ -4,12 +4,12 @@ import ROOT
 # dictionary for colors
 def get_plot_color( cls ):
     color_dict = {
-        "ttH":   "royalblue",
-        "ttlf":  "salmon",
-        "ttcc":  "orangered",
-        "ttbb":  "maroon",
-        "tt2b":  "saddlebrown",
-        "ttb":   "red",
+        "ttH":   ROOT.kBlue+1,#"royalblue",
+        "ttlf":  ROOT.kRed-7,#"salmon",
+        "ttcc":  ROOT.kRed+1,#"orangered",
+        "ttbb":  ROOT.kRed+3,#"maroon",
+        "tt2b":  ROOT.kRed+2,#"saddlebrown",
+        "ttb":   kRed-2,#"red",
         "False": "orangered",
         "True":  "teal"
         }
@@ -59,9 +59,23 @@ def init_canvas( ratiopad = False):
         canvas.SetLeftMargin(0.15)
         canvas.SetTicks(1,1)
     else:
-        print("TODO ratiopad")
-        canvas = None
+        canvas = rp.Canvas(width = 1024, height = 1024)
+        canvas.Divide(1,2)
+        canvas.cd(1).SetPad(0.,0.3,1.0,1.0)
+        canvas.cd(1).SetTopMargin(0.07)
+        canvas.cd(1).SetBottomMargin(0.0)
 
+        canvas.cd(2).SetPad(0.,0.0,1.0,0.3)
+        canvas.cd(2).SetTopMargin(0.0)
+        canvas.cd(2).SetBottomMargin(0.4)
+
+        canvas.cd(1).SetRightMargin(0.05)
+        canvas.cd(1).SetLeftMargin(0.15)
+        canvas.cd(1).SetTicks(1,1)
+
+        canvas.cd(2).SetRightMargin(0.05)
+        canvas.cd(2).SetLeftMargin(0.15)
+        canvas.cd(2).SetTicks(1,1)
     
     return canvas
 

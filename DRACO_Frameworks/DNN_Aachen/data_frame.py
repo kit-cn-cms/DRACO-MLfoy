@@ -79,7 +79,7 @@ class DataFrame(object):
         self.n_output_neurons = len(classes)
 
         # shuffle dataframe
-        df = shuffle(df)
+        df = shuffle(df, random_state = 333)
 
         # norm variables if wanted
         unnormed_df = df.copy()
@@ -92,7 +92,9 @@ class DataFrame(object):
             self.norm_csv = norm_csv
 
         if additional_cut:
+            print("events in dataframe before cut "+str(df.shape[0]))
             df.query( additional_cut, inplace = True )
+            print("events in dataframe after cut "+str(df.shape[0]))
 
         self.unsplit_df = df.copy()
         # split test sample

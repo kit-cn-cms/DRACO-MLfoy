@@ -15,12 +15,10 @@ import DRACO_Frameworks.DNN_Aachen.data_frame as data_frame
 
 category_vars = {
     "4j_ge3t": variable_info.variables_4j_3b,
-    "4j_4t": variable_info.variables_4j_3b,
     "5j_ge3t": variable_info.variables_5j_3b,
     "ge6j_ge3t": variable_info.variables_6j_3b}            
 categories = {
     "4j_ge3t":   "(N_Jets == 4 and N_BTagsM >= 3)",
-    "4j_4t":   "(N_Jets == 4 and N_BTagsM == 4)",
     "5j_ge3t":   "(N_Jets == 5 and N_BTagsM >= 3)",
     "ge6j_ge3t": "(N_Jets >= 6 and N_BTagsM >= 3)",
     }
@@ -61,17 +59,18 @@ dnn_aachen = DNN_Aachen.DNN(
     train_epochs        = 500,
     early_stopping      = 20,
     eval_metrics        = ["acc"],
-    additional_cut      = "N_BTagsM == 4")
+    additional_cut      = None)#"N_BTagsM == 3")
 
 dnn_aachen.load_trained_model()
-dnn_aachen.predict_event_query("(Evt_ID == 16706929)")
+#dnn_aachen.predict_event_query("(Evt_ID == 16706929)")
 #dnn_aachen.plot_class_differences()
-#dnn_aachen.plot_discriminators()
-#dnn_aachen.plot_classification()
+dnn_aachen.plot_discriminators()
+dnn_aachen.plot_classification()
 #dnn_aachen.plot_confusion_matrix()
 #dnn_aachen.plot_output_output_correlation(plot=True)
 #dnn_aachen.plot_input_output_correlation(plot=False)
 
+'''
 # search for 4j4t events with ttlf predictions
 data = dnn_aachen.data.get_full_df()
 for i, row in data.iterrows():
@@ -82,3 +81,4 @@ for i, row in data.iterrows():
         print("evaulation:")
         print(ev)
         print("-------------------------------------------------------")
+'''
