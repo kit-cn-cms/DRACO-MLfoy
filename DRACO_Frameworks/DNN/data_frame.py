@@ -11,7 +11,8 @@ class DataFrame(object):
                 train_variables,
                 test_percentage = 0.1,
                 norm_variables = False,
-                lumi = 41.3):
+                additional_cut = None,
+                lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
             the events are cut according to the event_category
@@ -66,6 +67,7 @@ class DataFrame(object):
         self.classes = classes
         self.index_classes = [self.class_translation[c] for c in classes]
 
+        df["is_ttH"] = pd.Series( [1 if c=="ttHbb" else 0 for c in df["class_label"].values], index = df.index )
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
         # norm weights to mean(1)
@@ -76,7 +78,7 @@ class DataFrame(object):
         self.n_output_neurons = len(classes)
 
         # shuffle dataframe
-        df = shuffle(df)
+        df = shuffle(df, random_state = 333)
 
         # norm variables if wanted
         unnormed_df = df.copy()
@@ -88,17 +90,26 @@ class DataFrame(object):
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
             self.norm_csv = norm_csv
 
+        if additional_cut:
+            print("events in dataframe before cut "+str(df.shape[0]))
+            df.query( additional_cut, inplace = True )
+            print("events in dataframe after cut "+str(df.shape[0]))
+
         self.unsplit_df = df.copy()
         # split test sample
         n_test_samples = int( df.shape[0]*test_percentage )
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples )
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
+
+        # print some counts
+        print("total events after cuts:  "+str(df.shape[0]))
+        print("events used for training: "+str(self.df_train.shape[0]))
+        print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
 
         # save variable lists
         self.train_variables = train_variables
-        #self.prenet_targets = prenet_targets
         self.output_classes = classes
 
 
@@ -130,7 +141,8 @@ class DataFrame(object):
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 
-
+    def get_ttH_flag(self):
+        return self.df_test["is_ttH"].values
 
     # full sample ----------------------------------
     def get_full_df(self):

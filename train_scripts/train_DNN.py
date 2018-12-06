@@ -3,6 +3,7 @@ import rootpy.plotting as rp
 import numpy as np
 import os
 import sys
+import socket
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -25,12 +26,15 @@ categories = {
 
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
-workpath = "/ceph/hluedemann/DRACO-MLfoy/workdir"
+if "naf" in socket.gethostname():
+    workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
+else:
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 
 key = sys.argv[1]
 
-inPath   = workpath + "/train_samples/AachenDNN_files"
-savepath = workpath + "/DNN_"+str(key)+"/"
+inPath   = workpath + "/AachenDNN_files"
+savepath = workpath + "/test_DNN_"+str(key)+"/"
 
 
 dnn = DNN.DNN(
@@ -41,12 +45,16 @@ dnn = DNN.DNN(
     train_variables = category_vars[key],
     train_epochs    = 500,
     early_stopping  = 20,
-    eval_metrics    = ["acc"])
+    eval_metrics    = ["acc"],
+    test_percentage = 0.2)
 
 dnn.build_model()
 dnn.train_model()
 dnn.eval_model()
 dnn.plot_metrics()
-#dnn.plot_input_output_correlation()
-
+dnn.plot_class_differences()
+dnn.plot_discriminators()
+dnn.plot_classification()
 dnn.plot_confusion_matrix()
+dnn.plot_output_output_correlation(plot=True)
+#dnn.plot_input_output_correlation(plot=False)

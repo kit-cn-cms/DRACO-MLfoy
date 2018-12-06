@@ -9,7 +9,7 @@ def get_plot_color( cls ):
         "ttcc":  ROOT.kRed+1,#"orangered",
         "ttbb":  ROOT.kRed+3,#"maroon",
         "tt2b":  ROOT.kRed+2,#"saddlebrown",
-        "ttb":   kRed-2,#"red",
+        "ttb":   ROOT.kRed-2,#"red",
         "False": "orangered",
         "True":  "teal"
         }
