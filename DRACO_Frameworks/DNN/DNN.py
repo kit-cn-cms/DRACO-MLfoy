@@ -779,7 +779,7 @@ class DNN():
         plt.xlabel("Predicted")
         plt.ylabel("True")
         plt.title(self.event_category, loc = "right")
-    
+        plt.title("ROC-AUC value: {:.4f}".format(self.roc_auc_score), loc = "left")
         # add textlabel
         for yit in range(n_classes):
             for xit in range(n_classes):
