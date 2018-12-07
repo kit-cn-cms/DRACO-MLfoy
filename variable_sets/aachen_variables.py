@@ -33,7 +33,7 @@ variables_4j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 
@@ -80,7 +80,7 @@ variables_5j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 
@@ -126,12 +126,8 @@ variables_ge6j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 
 all_variables = set(variables_4j_ge3t + variables_5j_ge3t + variables_ge6j_ge3t)
-print("all variables:")
-for v in all_variables:
-    print(v)
-print("-"*30)
