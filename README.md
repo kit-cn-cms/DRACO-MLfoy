@@ -37,11 +37,11 @@ abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100
 ```
 
 ## training
-top level train script: `train_scripts/train_Aachen_DNN.py [category]`
+top level train script: `train_scripts/train_DNN.py [category]`
 
-input variables: `preprocessing/root2pandas/variable_info.py`
+input variables: `variable_sets/aachen_variables.py`
 
-net confugurations: `DRACO_Frameworks/DNN_Aachen/DNN_Architectures.py`
+net confugurations: `DRACO_Frameworks/DNN/DNN_Architectures.py`
 
 ```
                           | 4j_ge3t    | 5j_ge3t    | ge6j_ge3t
