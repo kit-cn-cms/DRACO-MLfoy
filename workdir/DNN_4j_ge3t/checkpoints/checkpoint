@@ -1,0 +1,2 @@
+model_checkpoint_path: "/ceph/vanderlinden/DRACO-MLfoy/workdir//test_DNN_4j_ge3t//checkpoints//trained_model"
+all_model_checkpoint_paths: "/ceph/vanderlinden/DRACO-MLfoy/workdir//test_DNN_4j_ge3t//checkpoints//trained_model"
