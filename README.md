@@ -45,13 +45,10 @@ net confugurations: `DRACO_Frameworks/DNN_Aachen/DNN_Architectures.py`
 
 ```
                           | 4j_ge3t    | 5j_ge3t    | ge6j_ge3t
-layers of prenet:         | 100,100    | 100,100    | 100,100
-layers of mainnet:        | 100,100    | 100        | 100,100
+layers of mainnet:        | 100,100    | 100,100    | 100,100
+loss of mainnet:          | XE         | XE         | XE
                           |            |            |
-loss of prenet:           | cat_XE     | cat_XE     | cat_XE
-loss of mainnet:          | KLD        | KLD        | KLD
-                          |            |            |
-dropout percentage:       | 0.3        | 0.3        | 0.3
+dropout percentage:       | 0.5        | 0.5        | 0.5
 L2 regularization:        | 1e-5       | 1e-5       | 1e-5
                           |            |            |
 batchsize:                | 5000       | 5000       | 5000
@@ -61,9 +58,9 @@ activation function:      | ELU        | ELU        | ELU
 last activation prenet:   | sigmoid    | sigmoid    | sigmoid
 last activation mainnet:  | softmax    | softmax    | softmax
                           |            |            |
-earlystopping percentage: | 1%         | 1%         | 1%
+earlystopping percentage: | 2%         | 2%         | 2%
 earlystopping patience:   | 20         | 20         | 20
-earlystopping min epochs: | 100        | 100        | 100
+earlystopping min epochs: | 50         | 50         | 50
 ```
 
 
@@ -74,7 +71,7 @@ earlystopping min epochs: | 100        | 100        | 100
 event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test 
 number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712 || 121627 | 40543 | 40542
 ```
-`ROC AUC of main net: 0.6952`
+`ROC AUC of main net: 0.6914`
 
 
 ### `5j_ge3t`
@@ -84,7 +81,7 @@ number of events:  103851 | 3540 | 3505 | 8399 | 11895 | 71522 || 202712 || 1216
 event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test
 number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 242438 || 145463 | 48488 | 48487
 ```
-`ROC AUC of main net: 0.7055`
+`ROC AUC of main net: 0.7026`
 
 
 ### `ge6j_ge3t`
@@ -94,4 +91,4 @@ number of events:  169450 | 5626 | 3962 | 8780 | 13042 | 41578 || 242438 || 1454
 event class:       ttH    | ttbb | tt2b | ttb  | ttcc  | ttlf  || TOTAL  || train  | val   | test
 number of events:  274062 | 9713 | 4555 | 7605 | 13804 | 25263 || 335002 || 201001 | 67001 | 67000
 ```
-`ROC AUC of main net: 0.7210`
+`ROC AUC of main net: 0.7186`
