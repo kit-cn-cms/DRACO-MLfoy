@@ -11,12 +11,12 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 import DRACO_Frameworks.DNN.DNN as DNN
-import DRACO_Frameworks.DNN.variable_info as variable_info
+import variable_sets.aachen_variables as variable_set
 
 category_vars = {
-    "4j_ge3t": variable_info.variables_4j_3b,
-    "5j_ge3t": variable_info.variables_5j_3b,
-    "ge6j_ge3t": variable_info.variables_6j_3b
+    "4j_ge3t": variable_set.variables_4j_ge3t,
+    "5j_ge3t": variable_set.variables_5j_ge3t,
+    "ge6j_ge3t": variable_set.variables_ge6j_ge3t
     }
 categories = {
     "4j_ge3t":   "(N_Jets == 4 and N_BTagsM >= 3)",
