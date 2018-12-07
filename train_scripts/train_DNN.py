@@ -34,7 +34,7 @@ else:
 key = sys.argv[1]
 
 inPath   = workpath + "/AachenDNN_files"
-savepath = workpath + "/test_DNN_"+str(key)+"/"
+savepath = workpath + "/DNN_"+str(key)+"/"
 
 
 dnn = DNN.DNN(
@@ -56,5 +56,3 @@ dnn.plot_class_differences()
 dnn.plot_discriminators()
 dnn.plot_classification()
 dnn.plot_confusion_matrix()
-#dnn.plot_output_output_correlation(plot=True)
-#dnn.plot_input_output_correlation(plot=False)
