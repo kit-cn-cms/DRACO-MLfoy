@@ -1,5 +1,10 @@
 print("using top 10 variables - number seven will shock you")
 variables_4j_ge3t = [
+    'CSV[0]',
+    'BDT_common5_input_closest_tagged_dijet_mass',
+    'BDT_common5_input_h2',
+    'BDT_common5_input_sphericity_jets',
+    'LooseLepton_Eta[0]',
     'Jet_Pt[3]',
     'Jet_CSV[1]',
     'Evt_blr_ETH_transformed',
@@ -21,9 +26,7 @@ variables_4j_ge3t = [
 
 
 variables_5j_ge3t = [
-    'BDT_common5_input_max_dR_jj',
-    'Evt_CSV_Min_Tagged',
-    'Evt_HT',
+    'MEM',
     'Evt_Dr_MinDeltaRTaggedJets',
     'CSV[0]',
     'BDT_common5_input_sphericity_jets',
@@ -43,11 +46,6 @@ variables_5j_ge3t = [
 
 
 variables_ge6j_ge3t = [
-    'Evt_M_MinDeltaRLeptonTaggedJet',
-    'BDT_common5_input_transverse_sphericity_jets',
-    'BDT_common5_input_max_dR_bb',
-    'Evt_CSV_Average_Tagged',
-    'BDT_common5_input_closest_tagged_dijet_mass',
     'Evt_CSV_Average',
     'Evt_Dr_MinDeltaRTaggedJets',
     'BDT_common5_input_HT_tag',
