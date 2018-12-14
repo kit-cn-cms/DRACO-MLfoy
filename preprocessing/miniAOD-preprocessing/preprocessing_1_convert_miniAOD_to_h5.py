@@ -95,7 +95,6 @@ def concat_output_files(samples, out_path):
 
 
 
-'''
 # write one shell script per root file
 shell_scripts = generate_submit_scripts(all_samples, basedir, data_type, test_run)
 
@@ -105,7 +104,6 @@ jobIDs = NAFSubmit.submitToBatch(
     list_of_shells     = shell_scripts )
 # monitor jobs
 NAFSubmit.monitorJobStatus(jobIDs)
-'''
 # concatenate the generated output files
 concat_output_files(all_samples, basedir)
 

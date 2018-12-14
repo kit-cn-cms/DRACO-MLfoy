@@ -4,8 +4,8 @@ import numpy as np
 import sys
 
 # pixel size definition
-d_eta = 0.2
-d_phi = 0.2*180./np.pi
+d_eta = 0.1
+d_phi = 0.1*180./np.pi
 # range definitions
 eta_range = [-2.5,2.5]
 phi_range = [-180., 180.]
@@ -20,7 +20,7 @@ hdfConfig = preproc.HDFConfig(
     etaRange    = eta_range,
     phiRange    = phi_range,       
     # pixel intensity linear or logarithmic
-    logNorm     = True)
+    logNorm     = False)
 
 inFile = sys.argv[1]
 outFile = sys.argv[2]
