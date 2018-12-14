@@ -11,7 +11,7 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 import DRACO_Frameworks.DNN.DNN as DNN
-import variable_sets.aachen_variables as variable_set
+import variable_sets.top_10_variables as variable_set
 
 category_vars = {
     "4j_ge3t": variable_set.variables_4j_ge3t,
@@ -34,7 +34,7 @@ else:
 key = sys.argv[1]
 
 inPath   = workpath + "/AachenDNN_files"
-savepath = workpath + "/DNN_"+str(key)+"_topTest/"
+savepath = workpath + "/top10_DNN_"+str(key)+"/"
 
 
 dnn = DNN.DNN(
@@ -52,8 +52,8 @@ dnn.build_model()
 dnn.train_model()
 dnn.eval_model()
 dnn.get_input_weights()
-#dnn.plot_metrics()
-#dnn.plot_class_differences()
-#dnn.plot_discriminators()
-#dnn.plot_classification()
-#dnn.plot_confusion_matrix()
+dnn.plot_metrics()
+dnn.plot_class_differences()
+dnn.plot_discriminators()
+dnn.plot_classification()
+dnn.plot_confusion_matrix()

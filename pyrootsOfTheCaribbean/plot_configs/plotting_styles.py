@@ -23,23 +23,25 @@ def init_plot_style():
     rp.style.set_style(style)
 
 # define style of signal histogram
-def set_sig_hist_style( hist, cls ):
+def set_sig_hist_style( hist, cls, color = None ):
     hist.Sumw2()
     hist.markersize = 0
     hist.drawstyle = "shape"
     hist.legendstyle = "L"
     hist.fillstyle = "hollow"
     hist.linestyle = "solid"
-    hist.linecolor = get_plot_color(cls)
+    if not color: color = get_plot_color(cls)
+    hist.linecolor = color
     hist.linewidth = 2
 
 # define style of background histogram
-def set_bkg_hist_style( hist, cls ):
+def set_bkg_hist_style( hist, cls, color = None ):
     hist.Sumw2()
     hist.markersize = 0
     hist.legendstyle = "F"
     hist.fillstyle = "solid"
-    hist.fillcolor = get_plot_color(cls)
+    if not color: color = get_plot_color(cls)
+    hist.fillcolor = color
     hist.linecolor = "black"
     hist.linewidth = 1
     

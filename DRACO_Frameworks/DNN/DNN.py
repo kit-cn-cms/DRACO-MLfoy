@@ -321,7 +321,27 @@ class DNN():
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
+    def get_input_weights(self):
+        ''' get the weights of the input layer '''
+        first_layer = self.model.layers[0]
+        weights = first_layer.get_weights()[0]
+        self.weight_dict = {}
+        print("getting weights in first layer after training:")
+        for out_weights, variable in zip( weights, self.train_variables ):
+            w_sum = np.sum(np.abs(out_weights))
+            self.weight_dict[variable] = w_sum
 
+        # sort weight dict
+        rank_path = self.save_path + "/variable_ranking.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,weight_sum\n")
+            for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                print("{:50s}: {}".format(key, val))
+                f.write("{},{}\n".format(key,val))
+        print("wrote variable ranking to "+str(rank_path))
+            
+        
+            
 
     def plot_metrics(self):
         ''' plot history of loss function and evaluation metrics '''

@@ -37,14 +37,12 @@ event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 if "naf" in socket.gethostname():
     workpath = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/"
 else:
-    workpath = "/ceph/hluedemann/DRACO-MLfoy/workdir/"
+    workpath = "/ceph/vanderlinden/DRACO-MLfoy/workdir/"
 
 key = sys.argv[1]
 
-inPath   = workpath + "train_samples/AachenDNN_files"
-savepath = workpath + "/AachenDNN_KLD_v2_"+str(key)+"/"
-
-
+inPath   = workpath + "/AachenDNN_files"
+savepath = workpath + "/AachenDNN_"+str(key)+"/"
 
 dnn_aachen = DNN_Aachen.DNN(
     in_path             = inPath,
@@ -68,5 +66,3 @@ dnn_aachen.plot_class_differences()
 dnn_aachen.plot_discriminators()
 dnn_aachen.plot_classification()
 dnn_aachen.plot_confusion_matrix()
-dnn_aachen.plot_output_output_correlation(plot=True)
-dnn_aachen.plot_input_output_correlation(plot=False)
