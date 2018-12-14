@@ -18,6 +18,10 @@ collection of scripts for plotting
 
 lists of input variables used for dnn trainings
 
+## studies
+
+collection of studies
+
 ## train_scripts
 
 collection of top-level scripts for training
