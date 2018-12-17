@@ -167,6 +167,20 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
+    def predict_event_query(self, query ):
+        events = self.data.get_full_df().query( query )
+        print(str(events.shape[0]) + " events matched the query '"+str(query)+"'.")
+
+        for index, row in events.iterrows():
+            print("========== DNN output ==========")
+            print("Event: "+str(index))
+            for var in row.values:
+                print(var)
+            print("-------------------->")
+            output = self.model.predict( np.array([list(row.values)]) )[0]
+            for i, node in enumerate(self.event_classes):
+                print(str(node)+" node: "+str(output[i]))
+            print("-------------------->")
 
 
     def build_default_model(self):
@@ -214,33 +228,6 @@ class DNN():
         model.summary()
 
         return model
-
-        '''
-        # define model
-        model = models.Sequential()
-        # add input layer
-        model.add(layer.Dense(
-            number_of_neurons_per_layer[0],
-            input_dim = number_of_input_neurons,
-            activation = activation_function,
-            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)))
-
-        # loop over all dens layers
-        for n_neurons in number_of_neurons_per_layer[1:]:
-            model.add(layer.Dense(
-                n_neurons,
-                activation = activation_function,
-                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)))
-            model.add(layer.Dropout(dropout))
-
-        # create output layer
-        model.add(layer.Dense(
-            self.data.n_output_neurons,
-            activation = "softmax",
-            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)))
-
-        return model
-        '''
 
     def build_model(self, model = None):
         ''' build a DNN model
