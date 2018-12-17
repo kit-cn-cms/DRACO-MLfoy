@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import pandas
+import json
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -107,16 +108,18 @@ class DNN():
 
         # load data set
         self.data = self._load_datasets()
-        out_path = self.save_path+"/checkpoints/"
-        if not os.path.exists(out_path):
-            os.makedirs(out_path)
-        out_file = out_path + "/variable_norm.csv"
+        self.cp_path = self.save_path+"/checkpoints/"
+        if not os.path.exists(self.cp_path):
+            os.makedirs(self.cp_path)
+        out_file = self.cp_path + "/variable_norm.csv"
         self.data.norm_csv.to_csv(out_file)
         print("saved variabe norms at "+str(out_file))
 
         # dict with architectures for analysis
         arch_cls = Architecture.Architecture()
         self.architecture = arch_cls.get_architecture(self.event_category)
+        self.inputName = "inputLayer"
+        self.outputName = "outputLayer"
 
         # optimizer for training
         if not(optimizer):
@@ -138,7 +141,7 @@ class DNN():
 
     def load_trained_model(self):
         ''' load an already trained model '''
-        checkpoint_path = self.save_path + "/checkpoints/trained_model.h5py"
+        checkpoint_path = self.cp_path + "/trained_model.h5py"
 
         self.model = keras.models.load_model(checkpoint_path)
 
@@ -167,16 +170,52 @@ class DNN():
 
 
     def build_default_model(self):
-
+        ''' default straight forward DNN '''
         K.set_learning_phase(True)
+        number_of_input_neurons     = self.data.n_input_neurons
 
+        number_of_neurons_per_layer = self.architecture["layers"]
         dropout                     = self.architecture["Dropout"]
         batchNorm                   = self.architecture["batchNorm"]
         activation_function         = self.architecture["activation_function"]
         l2_regularization_beta      = self.architecture["L2_Norm"]
-        number_of_input_neurons     = self.data.n_input_neurons
-        number_of_neurons_per_layer = self.architecture["mainnet_layer"]
+        output_activation           = self.architecture["output_activation"]
 
+        Inputs = keras.layers.Input(
+            shape = (number_of_input_neurons,),
+            name  = self.inputName)
+
+        X = Inputs
+        self.layer_list = [X]
+
+        # loop over dense layers
+        for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
+            X = keras.layers.Dense( nNeurons,
+                activation = activation_function,
+                kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
+                name = "DenseLayer_"+str(iLayer)
+                )(X)
+
+            if not dropout == 1:
+                X = keras.layers.Dropout(dropout)(X)
+
+            if batchNorm:
+                X = keras.layers.BatchNormalization()(X)
+
+        # generate output layer
+        X = keras.layers.Dense( self.data.n_output_neurons,
+            activation = output_activation.lower(),
+            kernel_regularizer = keras.regularizers.l2(l2_regularization_beta),
+            name = self.outputName
+            )(X)
+
+        # define model
+        model = models.Model(inputs = [Inputs], outputs = [X])
+        model.summary()
+
+        return model
+
+        '''
         # define model
         model = models.Sequential()
         # add input layer
@@ -201,6 +240,7 @@ class DNN():
             kernel_regularizer = keras.regularizers.l2(l2_regularization_beta)))
 
         return model
+        '''
 
     def build_model(self, model = None):
         ''' build a DNN model
@@ -212,7 +252,7 @@ class DNN():
 
         # compile the model
         model.compile(
-            loss = self.architecture["mainnet_loss"],
+            loss = self.architecture["loss_function"],
             optimizer = self.optimizer,
             metrics = self.eval_metrics)
 
@@ -228,11 +268,6 @@ class DNN():
 
     def train_model(self):
         ''' train the model '''
-
-        # checkpoint files
-        cp_path = self.save_path + "/checkpoints/"
-        if not os.path.exists(cp_path):
-            os.makedirs(cp_path)
 
         # add early stopping if activated
         callbacks = None
@@ -255,18 +290,21 @@ class DNN():
             validation_split = 0.25,
             sample_weight = self.data.get_train_weights())
 
+        self.save_model()
+
+    def save_model(self):
         # save trained model
-        out_file = cp_path + "/trained_model.h5py"
+        out_file = self.cp_path + "/trained_model.h5py"
         self.model.save(out_file)
         print("saved trained model at "+str(out_file))
 
         model_config = self.model.get_config()
-        out_file = cp_path +"/trained_model_config"
+        out_file = self.cp_path +"/trained_model_config"
         with open(out_file, "w") as f:
             f.write( str(model_config))
         print("saved model config at "+str(out_file))
 
-        out_file = cp_path +"/trained_model_weights.h5"
+        out_file = self.cp_path +"/trained_model_weights.h5"
         self.model.save_weights(out_file)
         print("wrote trained weights to "+str(out_file))
 
@@ -277,12 +315,23 @@ class DNN():
 
         K.set_learning_phase(False)
 
-        out_file = cp_path + "/trained_model"
+        out_file = self.cp_path + "/trained_model"
         sess = keras.backend.get_session()
         saver = tf.train.Saver()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
+        # produce json file with configs
+        configs = self.architecture
+        configs["inputName"] = self.inputName
+        configs["outputName"] = self.outputName+"/"+configs["output_activation"]
+        configs = {key: configs[key] for key in configs if not "optimizer" in key}
+        print(configs)
+
+        json_file = self.cp_path + "/net_config.json"
+        with open(json_file, "w") as jf:
+            json.dump(configs, jf, indent = 2, separators = (",", ": "))
+        print("wrote net configs to "+str(json_file))
 
 
     def eval_model(self):
@@ -323,7 +372,7 @@ class DNN():
     # --------------------------------------------------------------------
     def get_input_weights(self):
         ''' get the weights of the input layer '''
-        first_layer = self.model.layers[0]
+        first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
         self.weight_dict = {}
         print("getting weights in first layer after training:")
