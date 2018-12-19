@@ -13,7 +13,8 @@ sys.path.append(basedir)
 from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
 
 # imports with keras
-import DNN_Architecture as Architecture
+import utils.generateJTcut as JTcut
+import achitecture as arch
 import data_frame
 
 import keras
@@ -85,7 +86,9 @@ class DNN():
         # list of classes
         self.event_classes = event_classes
         # name of event category (usually nJet/nTag category)
-        self.event_category = event_category
+        self.JTstring       = event_category
+        self.event_category = JTcut.getJTstring(event_category)
+        self.categoryLabel  = JTcut.getJTlabel(event_category)
 
         # list of input variables
         self.train_variables = train_variables
@@ -122,8 +125,7 @@ class DNN():
             os.makedirs(self.plot_path)
 
         # dict with architectures for analysis
-        arch_cls = Architecture.Architecture()
-        self.architecture = arch_cls.get_architecture(self.event_category)
+        self.architecture = arch.getArchitecture(self.JTstring)
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
@@ -403,7 +405,7 @@ class DNN():
 
             plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
             plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
-            plt.title(self.event_category, loc = "right")
+            plt.title(self.categoryLabel.replace("\\",""), loc = "right")
 
             plt.grid()
             plt.xlabel("epoch")
@@ -429,7 +431,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = "ttHbb",
-            event_category      = self.event_category,
+            event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
             logscale            = log)
 
@@ -453,7 +455,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = "ttHbb",
-            event_category      = self.event_category,
+            event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
             logscale            = log)
 
@@ -551,7 +553,7 @@ class DNN():
                     plt.colorbar()
 
                     plt.title("corr = {}".format(corr), loc = "left")
-                    plt.title(self.event_category, loc = "right")
+                    plt.title(self.categoryLabel, loc = "right")
 
                     plt.xlabel(xcls+" output node")
                     plt.ylabel(ycls+" output node")
@@ -580,7 +582,7 @@ class DNN():
         plt.xlabel("output nodes")
         plt.ylabel("output nodes")
 
-        plt.title(self.event_category, loc = "right")
+        plt.title(self.categoryLabel, loc = "right")
 
         # add textlabel
         for yit in range(n_classes):
@@ -610,7 +612,7 @@ class DNN():
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
             event_classes       = self.event_classes,
-            event_category      = self.event_category,
+            event_category      = self.categoryLabel,
             plotdir             = self.save_path)
 
         plotCM.set_printROCScore(True)

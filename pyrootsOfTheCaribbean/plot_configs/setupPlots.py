@@ -20,24 +20,7 @@ def GetPlotColor( cls ):
     return color_dict[cls]
 
 def GetyTitle():
-    return "Events expected for 41.5 fb^{-1} @ 13 TeV"
-
-
-def GetCategoryLabel(cat):
-    cat_dict = {
-        "ge6j_ge3t":    "1 lepton, \geq 6 jets, \geq 3 b-tags",
-        "5j_ge3t":      "1 lepton, 5 jets, \geq 3 b-tags",
-        "4j_ge3t":      "1 lepton, 4 jets, \geq 3 b-tags",
-        "(N_Jets >= 6 and N_BTagsM >= 3)":
-                        "1 lepton, \geq 6 jets, \geq 3 b-tags",
-        "(N_Jets == 5 and N_BTagsM >= 3)":
-                        "1 lepton, 5 jets, \geq 3 b-tags",
-        "(N_Jets == 4 and N_BTagsM >= 3)":
-                        "1 lepton, 4 jets, \geq 3 b-tags",
-        "(N_Jets == 4 and N_BTagsM == 4)":
-                        "1 lepton, 4 jets, 4 b-tags",
-        }
-    return cat_dict[cat]
+    return "Events expected"
 
 def setupHistogram(
         values, weights, 
@@ -101,7 +84,7 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel):
 
     return cm
 
-def draw2DHistOnCanvas(hist, canvasName, cat, ROC = None):
+def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
@@ -124,7 +107,7 @@ def draw2DHistOnCanvas(hist, canvasName, cat, ROC = None):
     t = canvas.GetTopMargin()
 
     # add category label
-    latex.DrawLatex(l,1.-t+0.01, GetCategoryLabel(cat))
+    latex.DrawLatex(l,1.-t+0.01, catLabel)
 
     # add ROC score if activated
     if ROC:
@@ -283,7 +266,7 @@ def printLumi(pad, ratio = False):
     if ratio:   latex.DrawLatex(l+0.60,1.-t+0.04,lumi_text)
     else:       latex.DrawLatex(l+0.53,1.-t+0.02,lumi_text)
 
-def printCategoryLabel(pad, cat, ratio = False):
+def printCategoryLabel(pad, catLabel, ratio = False):
     pad.cd(1)
     l = pad.GetLeftMargin()
     t = pad.GetTopMargin()
@@ -294,8 +277,8 @@ def printCategoryLabel(pad, cat, ratio = False):
     latex.SetNDC()
     latex.SetTextColor(ROOT.kBlack)
 
-    if ratio:   latex.DrawLatex(l+0.07,1.-t-0.04, GetCategoryLabel(cat))
-    else:       latex.DrawLatex(l+0.02,1.-t-0.06, GetCategoryLabel(cat))
+    if ratio:   latex.DrawLatex(l+0.07,1.-t-0.04, catLabel)
+    else:       latex.DrawLatex(l+0.02,1.-t-0.06, catLabel)
 
 def printROCScore(pad, ROC, ratio = False):
     pad.cd(1)
