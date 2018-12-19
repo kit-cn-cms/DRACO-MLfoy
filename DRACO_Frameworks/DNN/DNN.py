@@ -1,35 +1,36 @@
-#global imports
-import rootpy.plotting as rp
+import os
+import sys
+import numpy as np
+import json
+
+# local imports
+filedir  = os.path.dirname(os.path.realpath(__file__))
+DRACOdir = os.path.dirname(filedir)
+basedir  = os.path.dirname(DRACOdir)
+sys.path.append(basedir)
+
+# import with ROOT
+from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
+
+# imports with keras
+import DNN_Architecture as Architecture
+import data_frame
+
 import keras
 import keras.models as models
 import keras.layers as layer
 from keras import backend as K
-from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import numpy as np
-
-import pandas
-import json
-
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-
-import os
 
 # Limit gpu usage
 import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-from sklearn.metrics import roc_auc_score
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-set_session(tf.Session(config=config))
+K.tensorflow_backend.set_session(tf.Session(config=config))
 
 
-import data_frame
-import plot_configs.variable_binning as binning
-import plot_configs.plotting_styles as pltstyle
-import DNN_Architecture as Architecture
+
 
 class EarlyStoppingByLossDiff(keras.callbacks.Callback):
     def __init__(self, monitor = "loss", value = 0.01, min_epochs = 20, patience = 10, verbose = 0):
@@ -115,6 +116,11 @@ class DNN():
         self.data.norm_csv.to_csv(out_file)
         print("saved variabe norms at "+str(out_file))
 
+        # make plotdir
+        self.plot_path = self.save_path+"/plots/"
+        if not os.path.exists(self.plot_path):
+            os.makedirs(self.plot_path)
+
         # dict with architectures for analysis
         arch_cls = Architecture.Architecture()
         self.architecture = arch_cls.get_architecture(self.event_category)
@@ -155,10 +161,12 @@ class DNN():
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
+        from sklearn.metrics import confusion_matrix
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
+        from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("ROC-AUC score: {}".format(self.roc_auc_score))
 
@@ -303,7 +311,7 @@ class DNN():
         K.set_learning_phase(False)
 
         out_file = self.cp_path + "/trained_model"
-        sess = keras.backend.get_session()
+        sess = K.get_session()
         saver = tf.train.Saver()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
@@ -313,7 +321,6 @@ class DNN():
         configs["inputName"] = self.inputName
         configs["outputName"] = self.outputName+"/"+configs["output_activation"]
         configs = {key: configs[key] for key in configs if not "optimizer" in key}
-        print(configs)
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
@@ -340,10 +347,12 @@ class DNN():
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
+        from sklearn.metrics import confusion_matrix
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
+        from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("ROC-AUC score: {}".format(self.roc_auc_score))
 
@@ -381,7 +390,6 @@ class DNN():
 
     def plot_metrics(self):
         ''' plot history of loss function and evaluation metrics '''
-
         metrics = ["loss"]
         if self.eval_metrics: metrics += self.eval_metrics
 
@@ -408,250 +416,49 @@ class DNN():
             print("saved plot of "+str(metric)+" at "+str(out_path))
 
 
-    def plot_discriminators(self, log = False, cut_on_variable = None):
-        ''' plot discriminators for output classes '''
-        pltstyle.init_plot_style()
 
-        nbins = 50
+    def plot_outputNodes(self, log = False, cut_on_variable = None):
+        ''' plot distribution in outputNodes '''
+        nbins = 20
         bin_range = [0., 1.]
 
-        # get some ttH specific info for plotting
-        ttH_index = self.data.class_translation["ttHbb"]
-        ttH_true_labels = self.data.get_ttH_flag()
+        plotNodes = plottingScripts.plotOutputNodes(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = "ttHbb",
+            event_category      = self.event_category,
+            plotdir             = self.plot_path,
+            logscale            = log)
 
-        # apply cut to output node value if wanted
         if cut_on_variable:
-            cut_class = cut_on_variable["class"]
-            cut_value = cut_on_variable["val"]
+            plotNodes.set_cutVariable(
+                cutClass = cut_on_variable["class"],
+                cutValue = cut_on_variable["value"])
 
-            cut_index = self.data.class_translation[cut_class]
-            cut_prediction = self.model_prediction_vector[:,cut_index]
+        plotNodes.set_printROCScore(True)
+        plotNodes.plot(ratio = False)
 
-        # loop over discriminator nodes
-        for i, node_cls in enumerate(self.event_classes):
-            # get outputs of node
-            out_values = self.model_prediction_vector[:,i]
-
-            # calculate node specific ROC value
-            node_ROC = roc_auc_score(ttH_true_labels, out_values)
-
-            # fill lists according to class
-            bkg_hists = []
-            weight_integral = 0
-
-            # loop over all classes to fill hist according to predicted class
-            for j, truth_cls in enumerate(self.event_classes):
-                class_index = self.data.class_translation[truth_cls]
-
-                # filter values per event class
-                if cut_on_variable:
-                    filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                        if self.data.get_test_labels(as_categorical = False)[k] == class_index \
-                        and cut_prediction[k] <= cut_value]
-                    filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                        if self.data.get_test_labels(as_categorical = False)[k] == class_index \
-                        and cut_prediction[k] <= cut_value]
-                else:
-                    filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                        if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
-                    filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                        if self.data.get_test_labels(as_categorical = False)[k] == class_index ]
-
-
-                if j == ttH_index:
-                    # ttH signal
-                    sig_values = filtered_values
-                    sig_label = str(truth_cls)
-                    sig_weights = filtered_weights
-                else:
-                    # background in this node
-                    weight_integral += sum( filtered_weights )
-                    hist = rp.Hist( nbins, *bin_range, title = str(truth_cls))
-                    pltstyle.set_bkg_hist_style(hist, truth_cls)
-                    hist.fill_array( filtered_values, filtered_weights )
-                    bkg_hists.append(hist)
-
-            # stack backgrounds
-            bkg_stack = rp.HistStack( bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
-            bkg_stack.SetMinimum(1e-4)
-            max_val = bkg_stack.GetMaximum()*1.3
-            bkg_stack.SetMaximum(max_val)
-
-            # plot signal
-            weight_sum = sum(sig_weights)
-            scale_factor = 1.*weight_integral/weight_sum
-            sig_weights = [w*scale_factor for w in sig_weights]
-
-            sig_title = sig_label + "*{:.3f}".format(scale_factor)
-            sig_hist = rp.Hist( nbins, *bin_range, title = sig_title)
-            pltstyle.set_sig_hist_style(sig_hist, sig_label)
-            sig_hist.fill_array( sig_values, sig_weights)
-
-            # creating canvas
-            canvas = pltstyle.init_canvas()
-
-            # drawing histograms
-            rp.utils.draw([bkg_stack, sig_hist],
-                xtitle = node_cls+" Discriminator", ytitle = "Events", pad = canvas)
-            if log: canvas.cd().SetLogy()
-
-            # creating legend
-            legend = pltstyle.init_legend( bkg_hists+[sig_hist] )
-            pltstyle.add_lumi(canvas)
-            pltstyle.add_category_label(canvas, self.event_category)
-
-            # add ROC value to plot
-            pltstyle.add_ROC_value(canvas, node_ROC)
-
-            # save canvas
-            out_path = self.save_path + "/discriminator_{}.pdf".format(node_cls)
-            pltstyle.save_canvas(canvas, out_path)
-
-    def plot_classification(self, log = False):
+    def plot_discriminators(self, log = False):
         ''' plot all events classified as one category '''
+        nbins = 16
+        bin_range = [0.2, 1.]
 
-        pltstyle.init_plot_style()
-        nbins = 20
-        bin_range = [0., 1.]
+        plotDiscrs = plottingScripts.plotDiscriminators(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = "ttHbb",
+            event_category      = self.event_category,
+            plotdir             = self.plot_path,
+            logscale            = log)
 
-        ttH_index = self.data.class_translation["ttHbb"]
-        # loop over discriminator nodes
-        for i, node_cls in enumerate(self.event_classes):
-            node_index = self.data.class_translation[node_cls]
-
-            # get outputs of node
-            out_values = self.model_prediction_vector[:,i]
-
-            # fill lists according to class
-            bkg_hists = []
-            weight_integral = 0
-
-            # loop over all classes to fill hist according to predicted class
-            for j, truth_cls in enumerate(self.event_classes):
-                class_index = self.data.class_translation[truth_cls]
-
-                # filter values per event class
-                filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == class_index \
-                        and self.predicted_classes[k] == node_index ]
-                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == class_index \
-                        and self.predicted_classes[k] == node_index ]
-
-                if j == ttH_index:
-                    # signal in this node
-                    sig_values = filtered_values
-                    sig_label = str(truth_cls)
-                    sig_weights = filtered_weights
-                else:
-                    # background in this node
-                    weight_integral += sum(filtered_weights)
-                    hist = rp.Hist(nbins, *bin_range, title = str(truth_cls))
-                    pltstyle.set_bkg_hist_style(hist, truth_cls)
-                    hist.fill_array( filtered_values, filtered_weights )
-                    bkg_hists.append(hist)
-
-            # stack backgrounds
-            bkg_stack = rp.HistStack(bkg_hists, stacked = True, drawstyle = "HIST E1 X0")
-            bkg_stack.SetMinimum(1e-4)
-            max_val = bkg_stack.GetMaximum()*1.3
-            bkg_stack.SetMaximum(max_val)
-
-            # plot signal
-            weight_sum = sum(sig_weights)
-            scale_factor = 1.*weight_integral/weight_sum
-            sig_weights = [w*scale_factor for w in sig_weights]
-
-            sig_title = sig_label + "*{:.3f}".format(scale_factor)
-            sig_hist = rp.Hist(nbins, *bin_range, title = sig_title)
-            pltstyle.set_sig_hist_style(sig_hist, sig_label)
-            sig_hist.fill_array(sig_values, sig_weights)
-
-            # creatin canvas
-
-            canvas = pltstyle.init_canvas()
-
-            # drawing hists
-            rp.utils.draw([bkg_stack, sig_hist],
-                xtitle = "Events predicted as "+node_cls, ytitle = "Events", pad = canvas)
-            if log: canvas.cd().SetLogy()
-
-            # legend
-            legend = pltstyle.init_legend( bkg_hists+[sig_hist] )
-            pltstyle.add_lumi(canvas)
-            pltstyle.add_category_label(canvas, self.event_category)
-            print("S/B = {}".format(weight_sum/weight_integral))
-            # save
-            out_path = self.save_path + "/predictions_{}.pdf".format(node_cls)
-
-            pltstyle.save_canvas(canvas, out_path)
-
-
-    def plot_class_differences(self, log = False):
-
-        pltstyle.init_plot_style()
-
-        nbins = 20
-        bin_range = [0.,1.]
-
-
-        # loop over discriminator nodes
-        for i, node_cls in enumerate(self.event_classes):
-            node_index = self.data.class_translation[node_cls]
-
-            # get outputs of node
-            node_values = self.model_prediction_vector[:,i]
-            filtered_node_values = np.array([node_values[k] for k in range(len(node_values)) \
-                if self.predicted_classes[k] == node_index])
-
-            filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(node_values)) \
-                if self.predicted_classes[k] == node_index]
-
-            histograms = []
-            first = True
-            max_val = 0
-            # loop over other nodes and get those predictions
-            for j, other_cls in enumerate(self.event_classes):
-                if i == j: continue
-                other_index = self.data.class_translation[other_cls]
-
-                other_values = self.model_prediction_vector[:,j]
-                filtered_other_values = np.array([other_values[k] for k in range(len(other_values)) \
-                    if self.predicted_classes[k] == node_index])
-
-                # get difference of predicted node value and other value
-                diff_values = (filtered_node_values - filtered_other_values)/filtered_node_values
-
-                hist = rp.Hist(nbins, *bin_range, title = str(other_cls)+" node", drawstyle = "HIST E1 X0")
-                pltstyle.set_sig_hist_style(hist, other_cls)
-                hist.fill_array(diff_values, filtered_weights)
-                if hist.GetMaximum() > max_val: max_val = hist.GetMaximum()
-
-                if first:
-                    stack = rp.HistStack([hist], stacked = True)
-                    first_hist = hist
-                    first = False
-                else:
-                    histograms.append(hist)
-
-            # create canvas
-            canvas = pltstyle.init_canvas()
-            # drawing hists
-            stack.SetMaximum(max_val*1.3)
-            rp.utils.draw([stack]+histograms, pad = canvas,
-                xtitle = "relative difference ("+str(node_cls)+" - X_node)/"+str(node_cls), ytitle = "Events")
-            if log: canvas.cd().SetLogy()
-
-            # legend
-            legend = pltstyle.init_legend( [first_hist]+histograms )
-            pltstyle.add_lumi(canvas)
-            pltstyle.add_category_label(canvas, self.event_category)
-
-            # save
-            out_path = self.save_path + "/node_differences_{}.pdf".format(node_cls)
-            pltstyle.save_canvas(canvas, out_path)
-
-
+        plotDiscrs.set_printROCScore(True)
+        plotDiscrs.plot(ratio = False)
 
 
     def plot_input_output_correlation(self, plot = False):
@@ -660,7 +467,7 @@ class DNN():
         input_data = self.data.get_test_data(as_matrix = False, normed = False)
 
         # initialize empty dataframe
-        df = pandas.DataFrame()
+        df = pd.DataFrame()
         plt.figure(figsize = [10,10])
 
         # correlation plot path
@@ -709,7 +516,7 @@ class DNN():
                 corr_values[var] = correlation
 
             # save correlation value to dataframe
-            df[cls] = pandas.Series( corr_values )
+            df[cls] = pd.Series( corr_values )
 
         # save dataframe of correlations
         out_path = self.save_path + "/correlation_matrix.h5"
@@ -797,64 +604,15 @@ class DNN():
         print("saved output correlation at "+str(out_path))
         plt.clf()
 
+    def plot_confusionMatrix(self, norm_matrix = True):
+        ''' plot confusion matrix '''
+        plotCM = plottingScripts.plotConfusionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.event_category,
+            plotdir             = self.save_path)
 
+        plotCM.set_printROCScore(True)
 
-    def plot_confusion_matrix(self, norm_matrix = True):
-        ''' generate confusion matrix '''
-        n_classes = self.confusion_matrix.shape[0]
-
-        # norm confusion matrix if wanted
-        if norm_matrix:
-            cm = np.empty( (n_classes, n_classes), dtype = np.float64 )
-            for yit in range(n_classes):
-                evt_sum = float(sum(self.confusion_matrix[yit,:]))
-                for xit in range(n_classes):
-                    cm[yit,xit] = self.confusion_matrix[yit,xit]/evt_sum
-
-            self.confusion_matrix = cm
-
-        plt.clf()
-
-        plt.figure( figsize = [10,10])
-
-        minimum = np.min( self.confusion_matrix )/(np.pi**2.0 * np.exp(1.0)**2.0)
-        maximum = np.max( self.confusion_matrix )*(np.pi**2.0 * np.exp(1.0)**2.0)
-
-        x = np.arange(0, n_classes+1, 1)
-        y = np.arange(0, n_classes+1, 1)
-
-        xn, yn = np.meshgrid(x,y)
-
-        plt.pcolormesh(xn, yn, self.confusion_matrix,
-            norm = LogNorm( vmin = max(minimum, 1e-6), vmax = min(maximum,1.) ))
-        plt.colorbar()
-
-        plt.xlim(0, n_classes)
-        plt.ylim(0, n_classes)
-
-        plt.xlabel("Predicted")
-        plt.ylabel("True")
-        plt.title(self.event_category, loc = "right")
-        plt.title("ROC-AUC value: {:.4f}".format(self.roc_auc_score), loc = "left")
-        # add textlabel
-        for yit in range(n_classes):
-            for xit in range(n_classes):
-                plt.text(
-                    xit+0.5, yit+0.5,
-                    "{:.3f}".format(self.confusion_matrix[yit, xit]),
-                    horizontalalignment = "center",
-                    verticalalignment = "center")
-
-        plt_axis = plt.gca()
-        plt_axis.set_xticks(np.arange( (x.shape[0] -1)) + 0.5, minor = False )
-        plt_axis.set_yticks(np.arange( (y.shape[0] -1)) + 0.5, minor = False )
-
-        plt_axis.set_xticklabels(self.data.classes)
-        plt_axis.set_yticklabels(self.data.classes)
-
-        plt_axis.set_aspect("equal")
-
-        out_path = self.save_path + "/confusion_matrix.pdf"
-        plt.savefig(out_path)
-        print("saved confusion matrix at "+str(out_path))
-        plt.clf()
+        plotCM.plot(norm_matrix = norm_matrix)
