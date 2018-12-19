@@ -2,7 +2,7 @@ from keras import optimizers
 
 class Architecture():
     def __init__(self):
-        self.sl_4j_3b = {
+        self.sl_4j_ge3t = {
         "layers":                   [100,100],
         "loss_function":            "kullback_leibler_divergence",
         "Dropout":		    0.50,
@@ -15,7 +15,7 @@ class Architecture():
         "batchNorm":                False,
         }
 
-        self.sl_5j_3b = {
+        self.sl_5j_ge3t = {
         "layers":                   [100,100],
         "loss_function":            "kullback_leibler_divergence",
         "Dropout":		    0.50,
@@ -28,7 +28,7 @@ class Architecture():
         "batchNorm":                False,
         }
 
-        self.sl_6j_3b = {
+        self.sl_ge6j_ge3t = {
         "layers":                   [100,100],
         "loss_function":            "kullback_leibler_divergence",
         "Dropout":		    0.50,
@@ -44,8 +44,8 @@ class Architecture():
     def get_architecture(self, event_category):
 
         if event_category == "(N_Jets >= 6 and N_BTagsM >= 3)":
-            return self.sl_6j_3b
+            return self.sl_ge6j_ge3t
         elif event_category == "(N_Jets == 5 and N_BTagsM >= 3)":
-            return self.sl_5j_3b
+            return self.sl_5j_ge3t
         elif event_category == "(N_Jets == 4 and N_BTagsM >= 3)":
-            return self.sl_4j_3b
+            return self.sl_4j_ge3t

@@ -1,9 +1,7 @@
 import pandas as pd
-import numpy as np
-from sklearn.utils import shuffle
 from keras.utils import to_categorical
+from sklearn.utils import shuffle
 
-import matplotlib.pyplot as plt
 
 class DataFrame(object):
     def __init__(self, path_to_input_files,
@@ -25,10 +23,9 @@ class DataFrame(object):
         # loop over all classes and extract data as well as event weights
         class_dataframes = list()
         for cls in classes:
-            class_file = path_to_input_files + "/" + cls + ".h5"
+            class_file = path_to_input_files + "/" + cls + "_dnn.h5"
             print("-"*50)
             print("loading class file "+str(class_file))
-
             with pd.HDFStore( class_file, mode = "r" ) as store:
                 cls_df = store.select("data")
                 print("number of events before selections: "+str(cls_df.shape[0]))
@@ -140,6 +137,9 @@ class DataFrame(object):
     def get_test_labels(self, as_categorical = True):
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
+
+    def get_class_flag(self, class_label):
+        return pd.Series( [1 if c==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
 
     def get_ttH_flag(self):
         return self.df_test["is_ttH"].values
