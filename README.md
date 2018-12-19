@@ -4,9 +4,9 @@ Collection of Machine learning frameworks for DNNs, Regressions, Adversaries, CN
 
 ## ATTENTION
 When working with the combination of
-- `ROOT.__version__ = 6.14/04
-- `keras.__version__ = 2.2.4
-- `pandas.__version__ = 0.23.4
+- `ROOT.__version__ = 6.14/04`
+- `keras.__version__ = 2.2.4`
+- `pandas.__version__ = 0.23.4`
 segmentation violations appear when opening hdf-files with `pandas.read_hdf()` or `pandas.HDFStore()`.
 To circumvent this, first import everything related to `ROOT`, only then start importing things from `keras`.
 
