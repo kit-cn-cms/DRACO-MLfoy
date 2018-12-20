@@ -8,7 +8,7 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 import DRACO_Frameworks.DNN.DNN as DNN
-import variable_sets.top_10_variables as variable_set
+import variable_sets.topVariables_T as variable_set
 
 JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
@@ -16,7 +16,7 @@ variables       = variable_set.variables[JTcategory]
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
 inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN/"
-savepath = basedir+"/workdir/reducedVariables_DNN_"+str(JTcategory)
+savepath = basedir+"/workdir/topVariablesTight_DNN_"+str(JTcategory)
 
 dnn = DNN.DNN(
     in_path         = inPath,
