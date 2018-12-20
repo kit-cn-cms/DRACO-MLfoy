@@ -14,7 +14,7 @@ from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
 
 # imports with keras
 import utils.generateJTcut as JTcut
-import achitecture as arch
+import architecture as arch
 import data_frame
 
 import keras
@@ -405,7 +405,7 @@ class DNN():
 
             plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
             plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
-            plt.title(self.categoryLabel.replace("\\",""), loc = "right")
+            plt.title(self.categoryLabel.replace("\\geq",">="), loc = "right")
 
             plt.grid()
             plt.xlabel("epoch")
@@ -421,8 +421,8 @@ class DNN():
 
     def plot_outputNodes(self, log = False, cut_on_variable = None):
         ''' plot distribution in outputNodes '''
-        nbins = 20
-        bin_range = [0., 1.]
+        nbins = 21
+        bin_range = [0., 0.7]
 
         plotNodes = plottingScripts.plotOutputNodes(
             data                = self.data,
@@ -445,8 +445,8 @@ class DNN():
 
     def plot_discriminators(self, log = False):
         ''' plot all events classified as one category '''
-        nbins = 16
-        bin_range = [0.2, 1.]
+        nbins = 15
+        bin_range = [0.2, 0.7]
 
         plotDiscrs = plottingScripts.plotDiscriminators(
             data                = self.data,

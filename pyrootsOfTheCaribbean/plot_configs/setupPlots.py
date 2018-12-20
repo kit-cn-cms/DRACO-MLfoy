@@ -28,7 +28,8 @@ def setupHistogram(
         xtitle, ytitle, filled = True):
     # define histogram
     histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", nbins, *bin_range)
-    
+    histogram.Sumw2(True)    
+
     for v, w in zip(values, weights):
         histogram.Fill(v, w)
 
@@ -38,21 +39,21 @@ def setupHistogram(
 
     histogram.GetYaxis().SetTitleOffset(1.4)
     histogram.GetXaxis().SetTitleOffset(1.2)
-    histogram.GetYaxis().SetTitleSize(0.05)
-    histogram.GetXaxis().SetTitleSize(0.05)
-    histogram.GetYaxis().SetLabelSize(0.05)
-    histogram.GetXaxis().SetLabelSize(0.05)
+    histogram.GetYaxis().SetTitleSize(0.04)
+    histogram.GetXaxis().SetTitleSize(0.04)
+    histogram.GetYaxis().SetLabelSize(0.04)
+    histogram.GetXaxis().SetLabelSize(0.04)
 
     histogram.SetMarkerColor(color)
 
     if filled:
         histogram.SetLineColor( ROOT.kBlack )
         histogram.SetFillColor( color )
-        histogram.SetLineWidth(2)
+        histogram.SetLineWidth(1)
     else:
         histogram.SetLineColor( color )
         histogram.SetFillColor(0)
-        histogram.SetLineWidth(2)
+        histogram.SetLineWidth(1)
 
     return histogram
 
@@ -118,13 +119,17 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
 
     
 
-def drawHistsOnCanvas(sigHist, bkgHists, plotOptions, canvasName):
+def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
+    if isinstance(sigHists, basestring):
+        sigHists = [sigHists]
+
     canvas = getCanvas(canvasName, plotOptions["ratio"])
 
     # move over/underflow bins into plotrange
     for h in bkgHists:
         moveOverUnderFlow(h)
-    moveOverUnderFlow(sigHist)
+    for h in sigHists:
+        moveOverUnderFlow(h)
     
     # stack Histograms
     bkgHists = [bkgHists[len(bkgHists)-1-i] for i in range(len(bkgHists))]
@@ -148,25 +153,44 @@ def drawHistsOnCanvas(sigHist, bkgHists, plotOptions, canvasName):
     else:
         firstHist.GetYaxis().SetRangeUser(0, yMax*1.5)
     firstHist.GetXaxis().SetTitle(canvasName)
+
     option = "histo"
-    firstHist.DrawCopy(option)
+    firstHist.DrawCopy(option+"E0")
 
     # draw the other histograms
     for h in bkgHists[1:]:
         h.DrawCopy(option+"same")
+
+    # add stat errorbars
+    errorGraph = ROOT.TGraphErrors( firstHist.Clone() )
+    for iBin in range(firstHist.GetNbinsX()):
+        errorGraph.SetPoint(iBin+1, firstHist.GetBinCenter(iBin+1), firstHist.GetBinContent(iBin+1))
+        errorGraph.SetPointError(iBin+1, firstHist.GetBinWidth(iBin+1)/2., firstHist.GetBinError(iBin+1)*10.)
+    errorGraph.SetFillStyle(3354)
+    errorGraph.SetLineColor(ROOT.kBlack)
+    errorGraph.SetFillColor(ROOT.kBlack)
+    canvas.cd(1)
+    # redraw axis
+    firstHist.DrawCopy("axissame")
+
     
-    # draw signal histogram
-    sigHist.DrawCopy(option+"same")
+    # draw signal histograms
+    for sH in sigHists:
+        # draw signal histogram
+        sH.DrawCopy(option+"same")
     
+    errorGraph.Draw("same")
+
     if plotOptions["ratio"]:
         canvas.cd(2)
-        line = sigHist.Clone()
-        line.Divide(sigHist)
-        line.GetYaxis().SetRangeUser(0.5,1.5)
+        line = sigHists[0].Clone()
+        line.Divide(sigHists[0])
+        line.GetYaxis().SetRangeUser(0.,2.)
         line.GetYaxis().SetTitle(plotOptions["ratioTitle"])
 
         line.GetXaxis().SetLabelSize(line.GetXaxis().GetLabelSize()*2.4)
         line.GetYaxis().SetLabelSize(line.GetYaxis().GetLabelSize()*2.4)
+        line.GetXaxis().SetTitle(canvasName)
 
         line.GetXaxis().SetTitleSize(line.GetXaxis().GetTitleSize()*3)
         line.GetYaxis().SetTitleSize(line.GetYaxis().GetTitleSize()*1.5)
@@ -179,12 +203,17 @@ def drawHistsOnCanvas(sigHist, bkgHists, plotOptions, canvasName):
         line.SetLineWidth(1)
         line.SetLineColor(ROOT.kBlack)
         line.DrawCopy("histo")
-        ratioPlot = sigHist.Clone()
-        ratioPlot.Divide(bkgHists[0])
-        ratioPlot.SetTitle(canvasName)
-        ratioPlot.SetLineColor(ROOT.kBlack)
-        ratioPlot.SetLineWidth(ROOT.kBlack)
-        ratioPlot.DrawCopy("sameP")
+        # ratio plots
+        for sigHist in sigHists:
+            ratioPlot = sigHist.Clone()
+            ratioPlot.Divide(bkgHists[0])
+            ratioPlot.SetTitle(canvasName)
+            ratioPlot.SetLineColor(ROOT.kBlack)
+            ratioPlot.SetLineWidth(ROOT.kBlack)
+            ratioPlot.SetMarkerStyle(20)
+            ratioPlot.SetMarkerColor(ROOT.kBlack)
+            ROOT.gStyle.SetErrorX(0)
+            ratioPlot.DrawCopy("sameP")
         canvas.cd(1)
     return canvas
     
@@ -237,10 +266,6 @@ def moveOverUnderFlow(h):
 
 def getLegend():
     legend=ROOT.TLegend(0.75,0.6,0.95,0.9)
-    #legend.SetX1NDC(0.76)
-    #legend.SetX2NDC(0.93)
-    #legend.SetY1NDC(0.9)
-    #legend.SetY2NDC(0.91)
     legend.SetBorderSize(0);
     legend.SetLineStyle(0);
     legend.SetTextFont(42);
