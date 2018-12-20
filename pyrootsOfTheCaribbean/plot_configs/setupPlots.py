@@ -120,7 +120,7 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
     
 
 def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
-    if isinstance(sigHists, basestring):
+    if not isinstance(sigHists, list):
         sigHists = [sigHists]
 
     canvas = getCanvas(canvasName, plotOptions["ratio"])
