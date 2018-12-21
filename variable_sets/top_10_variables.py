@@ -12,7 +12,7 @@ variables_4j_ge3t = [
     'BDT_common5_input_h3',
     'Evt_CSV_Average_Tagged',
     'BDT_common5_input_HT_tag',
-    'MEM',
+    'memDBp',
     'BDT_common5_input_transverse_sphericity_jets',
     'Evt_Dr_MinDeltaRTaggedJets',
     'CSV[1]',
@@ -26,7 +26,7 @@ variables_4j_ge3t = [
 
 
 variables_5j_ge3t = [
-    'MEM',
+    'memDBp',
     'Evt_Dr_MinDeltaRTaggedJets',
     'CSV[0]',
     'BDT_common5_input_sphericity_jets',
@@ -50,7 +50,7 @@ variables_ge6j_ge3t = [
     'Evt_Dr_MinDeltaRTaggedJets',
     'BDT_common5_input_HT_tag',
     'Evt_M2_TaggedJetsAverage',
-    'MEM',
+    'memDBp',
     'Evt_Dr_TaggedJetsAverage',
     'BDT_common5_input_transverse_sphericity_tags',
     'Evt_CSV_Min_Tagged',
@@ -60,7 +60,3 @@ variables_ge6j_ge3t = [
 
 
 all_variables = set(variables_4j_ge3t + variables_5j_ge3t + variables_ge6j_ge3t)
-print("all variables:")
-for v in all_variables:
-    print(v)
-print("-"*30)
