@@ -57,14 +57,22 @@ def setupHistogram(
 
     return histogram
 
-def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel):
+def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
+    # check if errors for matrix are given
+    has_errors = isinstance(errors, np.ndarray)
+    print(has_errors)
+    
+    # init histogram
     cm = ROOT.TH2D("2Dhistogram", "", ncls, 0, ncls, ncls, 0, ncls)
     cm.SetStats(False)
     ROOT.gStyle.SetPaintTextFormat(".3f")
+        
 
     for xit in range(cm.GetNbinsX()):
         for yit in range(cm.GetNbinsY()):
             cm.SetBinContent(xit+1,yit+1, matrix[xit, yit])
+            if has_errors:
+                cm.SetBinError(xit+1,yit+1, errors[xit, yit])
 
     cm.GetXaxis().SetTitle(xtitle)
     cm.GetYaxis().SetTitle(ytitle)
@@ -81,11 +89,11 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel):
 
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
-    cm.SetMarkerSize(2.)
+    cm.SetMarkerSize(1.)
 
     return cm
 
-def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
+def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
@@ -96,7 +104,7 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
 
     # draw histogram
     #ROOT.gStyle.SetPalette(69)
-    hist.DrawCopy("colz text1")
+    hist.DrawCopy("colz text1e")
 
     # setup TLatex
     latex = ROOT.TLatex()
@@ -113,6 +121,8 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None):
     # add ROC score if activated
     if ROC:
         text = "ROC-AUC = {:.3f}".format(ROC)
+        if ROCerr:
+            text += "#pm {:.3f}".format(ROCerr)
         latex.DrawLatex(l+0.47,1.-t+0.01, text)
     
     return canvas
@@ -320,6 +330,19 @@ def printROCScore(pad, ROC, ratio = False):
 
     if ratio:   latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:       latex.DrawLatex(l,1.-t+0.02, text)
+
+def printTitle(pad, title):
+    pad.cd(1)
+    l = pad.GetLeftMargin()
+    t = pad.GetTopMargin()
+    r = pad.GetRightMargin()
+    b = pad.GetBottomMargin()
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+    latex.SetTextSize(0.03)
+    latex.DrawLatex(l, 1.-t+0.06, title)
 
 def saveCanvas(canvas, path):
     canvas.SaveAs(path)

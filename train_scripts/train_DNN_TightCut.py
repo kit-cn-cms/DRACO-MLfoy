@@ -16,7 +16,10 @@ variables       = variable_set.variables[JTcategory]
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
 inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN/"
-savepath = basedir+"/workdir/topVariablesTight_DNN_"+str(JTcategory)
+savepath = basedir+"/workdir/Multi_topVariablesTight_DNN_"+str(JTcategory)
+cmatrix_file = basedir+"/workdir/confusionMatrixData/topVariablesTight_"+str(JTcategory)+".h5"
+if not os.path.exists(os.path.dirname(cmatrix_file)):
+    os.makedirs(os.path.dirname(cmatrix_file))
 
 dnn = DNN.DNN(
     in_path         = inPath,
@@ -32,10 +35,11 @@ dnn = DNN.DNN(
 dnn.build_model()
 dnn.train_model()
 dnn.eval_model()
-dnn.get_input_weights()
-dnn.plot_metrics()
+#dnn.get_input_weights()
+#dnn.plot_metrics()
 
 # plotting 
-dnn.plot_confusionMatrix(norm_matrix = True)
-dnn.plot_outputNodes()
-dnn.plot_discriminators()
+dnn.save_confusionMatrix(location = cmatrix_file, save_roc = True)
+#dnn.plot_confusionMatrix(norm_matrix = True)
+#dnn.plot_outputNodes()
+#dnn.plot_discriminators()
