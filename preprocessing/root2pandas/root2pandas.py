@@ -7,19 +7,40 @@ import os
 import shutil 
 import matplotlib.pyplot as plt
 
-import variable_info
+
+
+class EventCategories:
+    def __init__(self):
+        self.categories = {}
+
+    def addCategory(self, name, selection = None):
+        self.categories[name] = selection
+
+    def getSelections(self):
+        selections = []
+        for cat in self.categories:
+            if self.categories[cat]:
+                selections.append(self.categories[cat])
+        return selections
+
 
 class Sample:
-    def __init__(self, sampleName, ntuples, selections = None, MEMs = None, CNNmaps = None):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, CNNmaps = None):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
+        self.categories = categories
         self.MEMs       = MEMs
         self.CNNmaps    = CNNmaps
+    
+    def printInfo(self):
+        print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
+        print("\tntuples: {}".format(self.ntuples))
+        print("\tselections: {}".format(self.selections))
 
 
 class Dataset:
-    def __init__(self, outputdir, naming = "", addCNNmap = False, addMEM = False):
+    def __init__(self, outputdir, naming = "", addCNNmap = False, addMEM = False, maxEntries = 50000):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
@@ -27,10 +48,12 @@ class Dataset:
         # settings for dataset
         self.addCNNmap  = addCNNmap
         self.addMEM     = addMEM
+        self.maxEntries = maxEntries
 
         # default values for some configs
         self.baseSelection  = None
         self.samples        = {}
+        self.variables      = []
     
     def addBaseSelection(self, selection):
         self.baseSelection = selection
@@ -40,480 +63,324 @@ class Dataset:
         self.samples[kwargs["sampleName"]] = Sample(**kwargs)
 
 
-    
+    # ====================================================================
+    # variable handling
+    def addVariables(self, variables):
+        print("adding {} variables.".format(len(variables)))
+        self.variables += variables
+        self.variables = list(set(self.variables))
 
+        # mem variable is not in ntuples so remove it from list and add it via mem dataframes
+        if "memDBp" in self.variables: self.variables.remove("memDBp")
 
+    def gatherTriggerVariables(self):
+        # search for all trigger strings
+        self.trigger = []
 
+        # search in base selection string
+        if self.baseSelection:
+            self.trigger.append(self.baseSelection)
 
-def ask_yes_no(question):
-    yes = ['yes','y', 'ye', '']
-    no = ['no','n']
+        for key in self.samples:
+            # search in additional selection strings
+            if self.samples[key].selections:
+                self.trigger.append(self.samples[key].selections)
+            # search in event category selection strings
+            self.trigger += self.samples[key].categories.getSelections()
 
-    print(question)
-    choice = raw_input().lower()
-    if choice in yes:  return True
-    elif choice in no: return False
-    else: 
-        print("please respond with 'yes' or 'no'")
-        return ask_yes_no(question)
+        self.trigger = list(set(self.trigger))
 
+        # scan trigger strings for variable names
+        self.triggerVariables = []
+        for triggerstring in self.trigger:
+            self.triggerVariables += self.searchVariablesInTriggerString( triggerstring )
 
+        self.triggerVariables = list(set(self.triggerVariables))
 
+        # select variables that only appear in triggerVariables to remove them before saving the final dataframes
+        self.removedVariables = [v for v in self.triggerVariables if not v in self.variables]
 
-
-
-def create_datasets(df, class_label, out_path):
-    ''' write dataset with events of given classlabel to workdir '''
-    cut_df = df.query("(class_label == '"+str(class_label)+"')")
-    print("creating dataset for class label {} with {} entries".format(class_label, cut_df.shape[0]))
-
-    with pd.HDFStore(out_path, "a") as store:
-        store.append("data", cut_df, index = False)
-
-def create_mem_dataset(df, out_path):
-    ''' write mem variables to workdir '''
-    # reset index of dataframe
-    df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
-
-    # append data to file
-    with pd.HDFStore(out_path, "a") as store:
-        store.append("MEM_data", df, index = False)
-
-def apply_cut(df, condition, additional_condition, drop_variables = None):
-    ''' apply cut to data
-        optionally drop variables from dataframe if it is not needed anymore '''
-    
-    # cut by given condition
-    cut_df = df.query(condition)
-    # apply additional condition if neccesary
-    if additional_condition:
-        cut_df = cut_df.query(additional_condition)
-
-    # drop cut variables if not further specified
-    if drop_variables:
-        cut_df.drop(drop_variables, axis = 1, inplace = True)
-    return cut_df
-
-def add_class_labels(df, is_ttH = False):
-    ''' add column of class labels for higgs and ttbar events '''
-    print("adding class labels to df...")
-
-    if is_ttH:
-        df["class_label"] = pd.Series( ["ttHbb"]*df.shape[0], index = df.index )
-    else:
-        # split ttbar processes
-        ttbb_df = df.query("(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-        ttbb_df["class_label"] = pd.Series( ["ttbb"]*ttbb_df.shape[0], index = ttbb_df.index )
-
-        tt2b_df = df.query("(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
-        tt2b_df["class_label"] = pd.Series( ["tt2b"]*tt2b_df.shape[0], index = tt2b_df.index )
-
-        ttb_df = df.query("(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
-        ttb_df["class_label"] = pd.Series( ["ttb"]*ttb_df.shape[0], index = ttb_df.index )
-
-        ttcc_df = df.query("(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
-        ttcc_df["class_label"] = pd.Series( ["ttcc"]*ttcc_df.shape[0], index = ttcc_df.index )
-
-        ttlf_df = df.query("(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-        ttlf_df["class_label"] = pd.Series( ["ttlf"]*ttlf_df.shape[0], index = ttlf_df.index )
-
-        # concatenate them
-        df = pd.concat( [ttbb_df, tt2b_df, ttb_df, ttcc_df, ttlf_df] )
-    
-    df.drop(["GenEvt_I_TTPlusBB", "GenEvt_I_TTPlusCC"], axis = 1, inplace = True)
-    return df
-
-def add_cnn_variables(df, cnn_df):
-    ''' search cnn file for events in df and add cnn maps to variables '''
-    print("adding CNN maps to dataframe ...")
-    # add entry to dataframe to indicate whether a cnn map is found
-    cnn_df["has_cnn"]   = pd.Series([True]*cnn_df.shape[0], index = cnn_df.index)
-
-    # get dictionary of column datatypes to recast them later
-    cnn_columns = cnn_df.columns.values
-    dtype_dict = {v: cnn_df[v].dtype for v in cnn_columns if not v == "has_cnn"}
-
-    # reset index of dataframe
-    #df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
-
-    # add cnn variables
-    df = df.join(cnn_df, how = "left")
-
-    # only return events where a CNN map has been found
-    new_df = df.query("has_cnn == True")
-    n_evts = new_df.shape[0]
-    n_evts_before = df.shape[0]
-    print("matched {} events with CNN maps".format(n_evts))
-    print("{} events were not matched".format(n_evts_before - n_evts))
-    new_df.drop("has_cnn", axis = 1, inplace = True)
-
-    # recast datatypes to save disk
-    new_df = new_df.astype(dtype = dtype_dict)
-    
-    return new_df
-
-
-def add_mem_variables(df, mem_df, mem_var = "mem_p"):
-    ''' search mem file for events in df and add mem values to variables '''
-    print("adding MEM to dataframe ...")
-    # creating variable with default value
-    df["memDBp"] = pd.Series([-1]*df.shape[0], index = df.index)
-
-    # reset index of dataframe
-    #df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
-
-    # add mem_var from mem_df
-    df.update( mem_df[mem_var].rename("memDBp") )
-
-    # check if some mems could not be set
-    if not df.query("memDBp == -1").empty:
-        print("ATTENTION: SOME ENTRIES COULD NOT FIND A MATCHING MEM - SET TO -1")
-        n_entries_before = df.shape[0]
-        df = df.query("memDBp != -1")
-        print("{} events found without mem".format(n_entries_before - df.shape[0]))
-    return df
-
-def generate_mem_h5(mem_files, output_mem_h5_file):
-    ''' generate and load mem lookup table '''
-    mem_vars = ["event", "lumi", "run", "mem_p"]
-
-    print("-"*50)
-    if isinstance(mem_files, basestring):
-        print("using old mem file")
-        mem_h5_file = mem_files    
-    else:
-        for mf in mem_files:
-            print("loading mem file "+str(mf))
-            # open root file
-            with root.open(mf) as rf:
-                # get tree
-                tree = rf["tree"]
-
-                # convert tree to dataframe but only extract the variables needed
-                df = tree.pandas.df(mem_vars)
-
-                # save data
-                create_mem_dataset(df, output_mem_h5_file)
-                mem_h5_file = output_mem_h5_file
-    
-    print("saved all mem variables for chosen process")
-    print("reopening concatenated dataframe")
-    with pd.HDFStore(mem_h5_file, "r") as store:
-        mem_df = store.select("MEM_data")
-    print("-"*50)
-    
-    return mem_df
-
-
-# =================================================================================================
-def process_files(files, mem_files, mem_name, vars, vecvars, sel, workdir, additional_selection = None, sel_vars = None, is_ttH = False, cnn_map = False):
-    ''' create dataframes from files
-        - loop over globbed input files
-            - load tree
-            - create dataframe
-            - manage vector variables 
-            - apply trigger and eventselection cuts 
-            - write data to output directory '''
-
-    # determine mem file location
-    mem_path = workdir + "/MEM/"
-    if not os.path.exists(mem_path):
-        os.makedirs(mem_path)
-    h5_mem_file = mem_path + "/" + str(mem_name) +".h5"
-
-    # get mem dataframe
-    mem_df = generate_mem_h5(mem_files, h5_mem_file)
-
-    # load cnn data if needed and determine output path
-    if cnn_map:
-        print("loading cnn dataframe")
-        cnn_df = pd.read_hdf(cnn_map, "data")
-        print("cnn dataframe has {} entries".format(cnn_df.shape[0]))
-        naming = "_cnn.h5"
-    else:
-        naming = "_dnn.h5"
-
-    # initializing loop over ntuple files
-    n_entries = 0
-    max_entries = 50000
-    concat_df = pd.DataFrame()
-    n_files = len(files)
-
-    # loop over files
-    for i_file, f in enumerate(files):
-        print("({}/{}) loading file {}".format(i_file+1,n_files,f))
-        # open root file
-        with root.open(f) as rf:
-            # get MVATree
-            tree = rf["MVATree"]
-    
-            # convert tree to dataframe but only extract the variables needed
-            df = tree.pandas.df(vars)
-
-            # handle vector variables, loop over them
-            for vecvar in vecvars:
-                # load dataframe with vector variable
-                vec_df = tree.pandas.df(vecvar)
-
-                # loop over indices in vecvar list
-                for idx in vecvars[vecvar]:
-                    # slice the index
-                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-                    # define name for column in df
-                    col_name = str(vecvar)+"["+str(idx)+"]"
-                    # append column to original dataframe
-                    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
-
-        # apply event selection
-        df = apply_cut(df, sel, additional_selection, drop_variables = sel_vars + ["Evt_Odd"])
-
-        # concat dfs
-        if concat_df.empty: concat_df = df
-        else:               concat_df = concat_df.append(df)
+        # add trigger variables to variable list
+        self.addVariables(self.triggerVariables)
         
-        # add entries to counter
-        n_entries += df.shape[0]
+    def searchVariablesInTriggerString(self, string):
+        # split trigger string into smaller bits
+        splitters = [")", "(", "==", ">=", ">=", ">", "<", "="]
 
-        # if number of entries exceeds max threshold, add labels and mem and save dataframe
-        if (n_entries > max_entries or f == files[-1]):
-            print("*"*50)
-            print("max_entrires reached ...")
-            # add class labels
-            concat_df = add_class_labels(concat_df, is_ttH = is_ttH)
-            # add indexing
-            concat_df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
-            # add mem variables
-            concat_df = add_mem_variables(concat_df, mem_df)
-            # add cnn variables
-            if cnn_map:
-                concat_df = add_cnn_variables(concat_df, cnn_df)
+        candidates = string.split(" ")
+        for splt in splitters:
+            candidates = [item for c in candidates for item in c.split(splt)]
 
-            # write data to file
-            if is_ttH:
-                out_path = workdir + "/ttHbb"+naming
-                create_datasets(concat_df, class_label = "ttHbb", out_path = out_path)
-            else:
-                out_path = workdir + "/ttbb"+naming
-                create_datasets(concat_df, class_label = "ttbb", out_path = out_path)
-                out_path = workdir + "/tt2b"+naming
-                create_datasets(concat_df, class_label = "tt2b", out_path = out_path)
-                out_path = workdir + "/ttb"+naming
-                create_datasets(concat_df, class_label = "ttb",  out_path = out_path)
-                out_path = workdir + "/ttcc"+naming
-                create_datasets(concat_df, class_label = "ttcc", out_path = out_path)
-                out_path = workdir + "/ttlf"+naming
-                create_datasets(concat_df, class_label = "ttlf", out_path = out_path)
+        # remove some entries
+        remove_entries = ["", "and", "or", "abs"]
+        for entry in remove_entries:
+            candidates = [c for c in candidates if not c == entry]
 
-            print("*"*50)
-            # reset counters
-            n_entries = 0
-            concat_df = pd.DataFrame()
+        # remove numbers
+        candidates = [c for c in candidates if not c.replace(".","",1).isdigit()]
 
-    print("done.")
+        # the remaining candidates should be variables
+        return candidates
 
+    def searchVectorVariables(self):
+        # list for variables
+        variables = []
+        # dictionary for vector variables
+        vector_variables = {}
 
-
-
-def preprocess_single_sample(sample, old_mem_files, variables, vecvars, base_selection, workdir, additional_selection, trigger_variables, is_ttH, add_cnn):
-    ''' handle preprocessing of a single file
-        - glob files
-        - create MEM df or use old MEM df
-        - call function to create df for that file '''
-
-    ntuple_files = glob.glob(sample["ntuples"])
-    mem_files    = glob.glob(sample["MEM"])
-    sample_name  = sample["name"]
-    mem_name     = sample_name+"_MEM"
-
-    print("="*100)
-    print("now handling ntuples from "+str(sample_name))
-    print("location: "+str(ntuple_files))
-    print("mems:     "+str(mem_files))
-    if add_cnn: 
-        add_cnn = sample["CNN"]
-        print("CNN maps: "+str(add_cnn))
-    print("="*100)
-
-    # check if mem file exists and remove if wanted
-    for f in old_mem_files:
-        if mem_name in f:
-            print("found old MEM file in directory: "+str(f))
-            if ask_yes_no("should the old MEM file be used?"):
-                mem_files = f
-            else: os.remove(f)
-
-    # process those files
-    process_files(
-        ntuple_files,
-        mem_files,
-        mem_name,
-        variables,
-        vecvars,
-        base_selection,
-        workdir,
-        additional_selection,
-        trigger_variables,
-        is_ttH,
-        cnn_map = add_cnn)
-
-
-def preprocess_data(ttH_samples, ttbar_samples, base_selection, ttbar_selection, workdir, add_cnn = False):
-    ''' handle all preprocessing files
-        - remove old data
-        - get variables
-        - loop over all ttH and ttbar samples '''
-
-    # remove old h5 files
-    if not os.path.exists(workdir):
-        os.makedirs(workdir)
-
-    if add_cnn: out_path = workdir+"/*_cnn.h5"
-    else:       out_path = workdir+"/*_dnn.h5"
-    old_h5_files = glob.glob(out_path)
-    for f in old_h5_files: os.remove(f)
-
-    mem_path = workdir + "/MEM/*.h5"
-    old_mem_files = glob.glob(mem_path)
-    
-    # get variable lists
-    variables, vecvars, trigger_variables = get_variable_lists()
-
-    # loop over ttH files:
-    for sample in ttH_samples:
-        preprocess_single_sample(
-            sample, 
-            old_mem_files, 
-            variables, 
-            vecvars, 
-            base_selection, 
-            workdir, 
-            additional_selection = "(Evt_Odd == 1)", 
-            trigger_variables = trigger_variables, 
-            is_ttH = True,
-            add_cnn = add_cnn)
-
-    # loop over ttbar files:
-    for sample in ttbar_samples:
-        preprocess_single_sample(
-            sample, 
-            old_mem_files, 
-            variables, 
-            vecvars, 
-            base_selection, 
-            workdir, 
-            additional_selection = ttbar_selection,
-            trigger_variables = trigger_variables, 
-            is_ttH = False,
-            add_cnn = add_cnn)
-
-
-# =========================================================
-# handle vector variables:
-def get_vars_and_vecvars(varlist):
-    # list for variables
-    variables = []
-    # dictionary for vector variables
-    vector_variables = {}
-
-    # loop over variables in list
-    for var in varlist:
-
-        # search for index in name (dummyvar[index])
-        found_vector_variable = re.search("\[\d+?\]$", var)
-        # append variable to list if not a vector variable
-        if not found_vector_variable:
-            variables.append(var)
-        # add index information to dictionary if it is a vector variable
-        else:
+        # loop over variables in list
+        for var in self.variables:
+            # search for index in name (dummyvar[index])
+            found_vector_variable = re.search("\[\d+?\]$", var)
+            # append variable to list if not a vector variable
+            if not found_vector_variable:
+                variables.append(var)
+                continue
+            
+            # handle vector variable
             index = found_vector_variable.group(0)
             var_name = var[:-len(index)]
             var_index = int(index[1:-1])
+
+            # add variable with index to vector_variables dictionary
             if var_name in vector_variables:
                 vector_variables[var_name].append( var_index )
             else:
                 vector_variables[var_name] = [var_index]
+
+        self.variables = variables
+        self.vector_variables = vector_variables
+
+    # ====================================================================
+
+    def runPreprocessing(self):
+        # add variables for triggering and event category selection
+        self.gatherTriggerVariables()
+
+        # search for vector variables in list of variables and handle them separately
+        self.searchVectorVariables()
+
+        # remove old files
+        old_files = glob.glob(self.outputdir+"*"+self.naming+".h5")
+        for f in old_files:
+            os.remove(f)
+
+        if self.addMEM:
+            # generate MEM path
+            self.memPath = self.outputdir + "/MEM/"
+            # remove old mem files
+            old_mem_files = glob.glob(self.memPath+"/*.h5")
+            for f in old_mem_files:
+                os.remove(f)
+            if not os.path.exists(self.memPath):
+                os.makedirs(self.memPath)
+
+        # start loop over all samples to preprocess them
+        for key in self.samples:
+            self.processSample(self.samples[key])
+            print("done.")
+
+    def processSample(self, sample):
+        # print sample info
+        sample.printInfo()
+
+        # collect ntuple files
+        ntuple_files = sorted(glob.glob(sample.ntuples))
+        
+        # collect mem files
+        if self.addMEM:
+            mem_files = glob.glob(sample.MEMs)
+            mem_df = self.generateMEMdf(mem_files, sample.sampleName)
+        
+        if self.addCNNmap:
+            print("loading CNN maps "+str(sample.CNNmaps))
+            with pd.HDFStore(sample.CNNmaps, "r") as store:
+                cnn_df = store.select("data")
+            print("cnn dataframe has {} entries.".format(cnn_df.shape[0]))
+
+        # initialize loop over ntuple files
+        n_entries = 0
+        concat_df = pd.DataFrame()
+        n_files = len(ntuple_files)
+
+        # loop over files
+        for iFile, f in enumerate(ntuple_files):
+            print("({}/{}) loading file {}".format(iFile+1,n_files,f))
+
+            # open root file
+            with root.open(f) as rf:
+                # get MVATree
+                tree = rf["MVATree"]
+
+                # convert tree to dataframe but only extract the variables needed
+                df = tree.pandas.df(self.variables)
+
+                # handle vector variables, loop over them
+                for vecvar in self.vector_variables:
+                    # load dataframe with vector variable
+                    vec_df = tree.pandas.df(vecvar)
+
+                    # loop over inices in vecvar list
+                    for idx in self.vector_variables[vecvar]:
+                        # slice the index
+                        idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                        # define name for column in df
+                        col_name = str(vecvar)+"["+str(idx)+"]"
+                        # append column to original dataframe
+                        df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+
+            # apply event selection
+            df = self.applySelections(df, sample.selections)
+
+            # concatenate dataframes
+            if concat_df.empty: concat_df = df
+            else: concat_df = concat_df.append(df)
+
+            # count entries so far
+            n_entries += df.shape[0]
+
+            # if number of entries exceeds max threshold, add labels and mem and save dataframe
+            if (n_entries > self.maxEntries or f == ntuple_files[-1]):
+                print("*"*50)
+                print("max entries reached ...")
+                # add class labels
+                concat_df = self.addClassLabels(concat_df, sample.categories.categories)
+
+                # add indexing
+                concat_df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
+
+                # add MEM variables
+                if self.addMEM:
+                    concat_df = self.addMEMVariable(concat_df, mem_df)
+
+                # add CNN maps
+                if self.addCNNmap:
+                    concat_df = self.addCNNmaps(concat_df, cnn_df)
+
+                # remove trigger variables
+                concat_df = self.removeTriggerVariables(concat_df)
+
+                # write data to file
+                self.createDatasets(concat_df, sample.categories.categories)
+                print("*"*50)
+
+                # reset counters
+                n_entries = 0
+                concat_df = pd.DataFrame()
+
+        
+
+    # ====================================================================
+    
+    def generateMEMdf(self, files, sampleName):
+        ''' generate and load mem lookuptable '''
+        memVariables = ["event", "lumi", "run", "mem_p"]
+        outputFile = self.memPath+"/"+sampleName+"_MEM.h5"
+        print("-"*50)
+        for f in files:
+            print("loading mem file "+str(f))
+            # open root file
+            with root.open(f) as rf:
+                # get tree
+                tree = rf["tree"]
+
+                # convert tree to df but only extract the variables needed
+                df = tree.pandas.df(memVariables)
+
+                # set index
+                df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
+
+                # save data
+                with pd.HDFStore(outputFile, "a") as store:
+                    store.append("MEM_data", df, index = False)
+                del df                
+
+        # load the generated MEM file
+        with pd.HDFStore(outputFile, "r") as store:
+            df = store.select("MEM_data")
+        print("-"*50)
+
+        return df
+
+    def applySelections(self, df, sampleSelection):
+        if self.baseSelection:
+            df = df.query(self.baseSelection)
+        if sampleSelection:
+            df = df.query(sampleSelection)
+
+        return df
+
+    def addClassLabels(self, df, categories):
+        print("adding class labels to df ...")
+        split_dfs = []
+        for key in categories:
+            if categories[key]:
+                tmp_df = df.query(categories[key])
+            else:
+                tmp_df = df
+            tmp_df["class_label"] = pd.Series([key]*tmp_df.shape[0], index = tmp_df.index)
+            split_dfs.append(tmp_df)
             
-    return variables, vector_variables
+        # concatenate the split dataframes again
+        df = pd.concat(split_dfs)
+        return df
+        
+    def addMEMVariable(self, df, memdf):
+        print("adding MEM to dataframe ...")
+        # create variable with default value
+        df["memDBp"] = pd.Series([-1]*df.shape[0], index = df.index)
+    
+        # add mem variable
+        df.update( memdf["mem_p"].rename("memDBp") )
 
+        # check if some mems could not be set
+        if not df.query("memDBp == -1").empty:
+            print("ATTENTION: SOME ENTRIES COULD NOT FIND A MATCHING MEM - SET TO -1")
+            entries_before = df.shape[0]
+            df = df.query("memDBp != -1")
+            entries_after = df.shape[0]
+            print("    lost {}/{} events".format(entries_after, entries_before))
+            print("    we will only save events with mem...")
+        return df       
 
-def get_variable_lists():
-    ''' define which variables to load '''
+    def addCNNmaps(self, df, cnn_df):
+        print("adding CNN maps to dataframe ...")
+        # add entry to dataframe to indicate whether a cnn map is found
+        cnn_df["has_cnn"] = pd.Series([True]*cnn_df.shape[0], index = cnn_df.index)
 
-    # import variable infos
-    variable_list = variable_info.all_variables_list
+        # get dictionary of column datatypes to recast them later
+        cnn_columns = cnn_df.columns.values
+        dtype_dict = {v: cnn_df[v].dtype for v in cnn_columns if not v == "has_cnn"}
 
-    # get variables and dictionary of vector variables
-    variables, vecvars = get_vars_and_vecvars(variable_list)
+        # add cnn variables
+        df = df.join(cnn_df, how = "left")
 
-    # mem variable is not in ntuples so remove it from list and add it via mem dataframes
-    if "MEM" in variables: variables.remove("MEM")
-    # add some more variables needed
-    # append variables for class labels
-    variables += ['GenEvt_I_TTPlusBB', 'GenEvt_I_TTPlusCC']
+        # only return events where a CNN map has been found
+        entries_before = df.shape[0]
+        df = df.query("has_cnn == True")
+        events_after = df.shape[0]
+        print("matched {}/{} events with CNN maps".format(entries_after, entries_before))
+        
+        # remove variable
+        df = df.drop("has_cnn", axis = 1, inplace = True)
 
-    # variables for category cutting
-    variables += ["N_Jets", "N_BTagsM"]
+        # recast datatypes to save disk
+        df = df.astype(dtype = dtype_dict)
 
-    # append variables for prenet-targets
-    variables += [
-        "GenAdd_BB_inacceptance_part",
-        "GenAdd_B_inacceptance_part",
-        "GenHiggs_BB_inacceptance_part",
-        "GenHiggs_B_inacceptance_part",
-        "GenTopHad_B_inacceptance_part",
-        "GenTopHad_QQ_inacceptance_part",
-        "GenTopHad_Q_inacceptance_part",
-        "GenTopLep_B_inacceptance_part",
-        "GenAdd_BB_inacceptance_jet",
-        "GenAdd_B_inacceptance_jet",
-        "GenHiggs_BB_inacceptance_jet",
-        "GenHiggs_B_inacceptance_jet",
-        "GenTopHad_B_inacceptance_jet",
-        "GenTopHad_QQ_inacceptance_jet",
-        "GenTopHad_Q_inacceptance_jet",
-        "GenTopLep_B_inacceptance_jet",
-            ]
-    # append variable for train/test splitting
-    variables += ["Evt_Odd"]
+        return df
 
-    # variables for weighting events
-    variables += [
-        "Weight_XS", 
-        "Weight_CSV", 
-        #"Weight_DeepCSV", # not existing
-        "Weight_GEN_nom"]
+    def removeTriggerVariables(self, df):
+        df.drop(self.removedVariables, axis = 1, inplace = True)
+        return df
 
-    # append variables for MEM matching
-    variables += ["Evt_ID", "Evt_Run", "Evt_Lumi"]
+    def createDatasets(self, df, categories):
+        for key in categories:
+            outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            
+            # create dataframe for category
+            cat_df = df.query("(class_label == \""+str(key)+"\")")
+            print("creating dataset for class label {} with {} entries".format(key, cat_df.shape[0]))
 
-    # variables for triggering ------
-    # append variables for category cutting
-    # variables for mcTriggerWeights
-    trigger_variables = [
-        "N_LooseMuons", 
-        "N_TightElectrons", 
-        "N_LooseElectrons", 
-        "N_TightMuons",    
-        "Triggered_HLT_Ele35_WPTight_Gsf_vX", 
-        "Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX",
-        "Muon_Pt",
-        "Triggered_HLT_IsoMu27_vX",
-        "Evt_Pt_MET",
-        ]
+            with pd.HDFStore(outFile, "a") as store:
+                store.append("data", cat_df, index = False)
 
-    # additional ttbar triggers
-    trigger_variables += [
-        "Weight_scale_variation_muR_0p5_muF_0p5",
-        "Weight_scale_variation_muR_0p5_muF_1p0",
-        "Weight_scale_variation_muR_0p5_muF_2p0",
-        "Weight_scale_variation_muR_1p0_muF_0p5",
-        "Weight_scale_variation_muR_1p0_muF_1p0",
-        "Weight_scale_variation_muR_1p0_muF_2p0",
-        "Weight_scale_variation_muR_2p0_muF_0p5",
-        "Weight_scale_variation_muR_2p0_muF_1p0",
-        "Weight_scale_variation_muR_2p0_muF_2p0"
-        ]
-    variables += trigger_variables
-    # --------------------------------------------------------
-    return variables, vecvars, trigger_variables
-# =========================================================
