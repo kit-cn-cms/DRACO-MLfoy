@@ -9,6 +9,42 @@ import matplotlib.pyplot as plt
 
 import variable_info
 
+class Sample:
+    def __init__(self, sampleName, ntuples, selections = None, MEMs = None, CNNmaps = None):
+        self.sampleName = sampleName
+        self.ntuples    = ntuples
+        self.selections = selections
+        self.MEMs       = MEMs
+        self.CNNmaps    = CNNmaps
+
+
+class Dataset:
+    def __init__(self, outputdir, naming = "", addCNNmap = False, addMEM = False):
+        # settings for paths
+        self.outputdir  = outputdir
+        self.naming     = naming
+        
+        # settings for dataset
+        self.addCNNmap  = addCNNmap
+        self.addMEM     = addMEM
+
+        # default values for some configs
+        self.baseSelection  = None
+        self.samples        = {}
+    
+    def addBaseSelection(self, selection):
+        self.baseSelection = selection
+
+    def addSample(self, **kwargs):
+        print("adding sample: "+str(kwargs["sampleName"]))
+        self.samples[kwargs["sampleName"]] = Sample(**kwargs)
+
+
+    
+
+
+
+
 def ask_yes_no(question):
     yes = ['yes','y', 'ye', '']
     no = ['no','n']
@@ -20,6 +56,9 @@ def ask_yes_no(question):
     else: 
         print("please respond with 'yes' or 'no'")
         return ask_yes_no(question)
+
+
+
 
 
 
@@ -129,8 +168,9 @@ def add_mem_variables(df, mem_df, mem_var = "mem_p"):
     # check if some mems could not be set
     if not df.query("memDBp == -1").empty:
         print("ATTENTION: SOME ENTRIES COULD NOT FIND A MATCHING MEM - SET TO -1")
-        df_new = df.query("memDBp != -1")
-        print("{} events found with mem".format(df_new.shape[0]))
+        n_entries_before = df.shape[0]
+        df = df.query("memDBp != -1")
+        print("{} events found without mem".format(n_entries_before - df.shape[0]))
     return df
 
 def generate_mem_h5(mem_files, output_mem_h5_file):
