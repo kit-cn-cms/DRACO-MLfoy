@@ -8,7 +8,7 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 import DRACO_Frameworks.DNN.DNN as DNN
-import variable_sets.top_10_variables as variable_set
+import variable_sets.topVariables_L as variable_set
 
 JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
@@ -16,7 +16,10 @@ variables       = variable_set.variables[JTcategory]
 event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 
 inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN/"
-savepath = basedir+"/workdir/reducedVariables_DNN_"+str(JTcategory)
+savepath = basedir+"/workdir/Multi_topVariablesLoose_DNN_"+str(JTcategory)
+cmatrix_file = basedir+"/workdir/confusionMatrixData/topVariablesLoose_"+str(JTcategory)+".h5"
+if not os.path.exists(os.path.dirname(cmatrix_file)):
+    os.makedirs(os.path.dirname(cmatrix_file))
 
 dnn = DNN.DNN(
     in_path         = inPath,
@@ -32,10 +35,11 @@ dnn = DNN.DNN(
 dnn.build_model()
 dnn.train_model()
 dnn.eval_model()
-dnn.get_input_weights()
-dnn.plot_metrics()
+#dnn.get_input_weights()
+#dnn.plot_metrics()
 
 # plotting 
-dnn.plot_confusionMatrix(norm_matrix = True)
-dnn.plot_outputNodes()
-dnn.plot_discriminators()
+dnn.save_confusionMatrix(location = cmatrix_file, save_roc = True)
+#dnn.plot_confusionMatrix(norm_matrix = True)
+#dnn.plot_outputNodes()
+#dnn.plot_discriminators()

@@ -22,6 +22,7 @@ import keras.models as models
 import keras.layers as layer
 from keras import backend as K
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Limit gpu usage
 import tensorflow as tf
@@ -363,8 +364,16 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
-
-
+    def save_confusionMatrix(self, location, save_roc):
+        ''' save confusion matrix as a line in output file '''
+        flattened_matrix = self.confusion_matrix.flatten()
+        labels = ["{}_in_{}_node".format(pred, true) for true in self.event_classes for pred in self.event_classes]
+        data = {label: [float(flattened_matrix[i])] for i, label in enumerate(labels)}
+        data["ROC"] = [float(self.roc_auc_score)]
+        df = pd.DataFrame.from_dict(data)
+        with pd.HDFStore(location, "a") as store:
+            store.append("data", df, index = False)
+        print("saved confusion matrix at "+str(location))
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
