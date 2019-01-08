@@ -263,6 +263,10 @@ class DNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
+        # save initialization of weights in first layer
+        first_layer = self.model.layers[1]
+        self.initial_weights = first_layer.get_weights()[0]
+
 
     def train_model(self):
         ''' train the model '''
@@ -377,6 +381,26 @@ class DNN():
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
+    def rank_input_features(self):
+        ''' rank input features according to most squared heuristic '''
+        first_layer = self.model.layers[1]
+        weights = first_layer.get_weights()[0]
+
+        self.rank_dict = {}
+        print("getting most squared variable ranking")
+        for iVar, var in enumerate(self.train_variables):
+            rank_value = sum([(weights[iVar][i]-self.initial_weights[iVar][i])**2 for i in range(len(weights[iVar]))])
+            self.rank_dict[var] = rank_value
+
+        # sort rank dict
+        rank_path = self.save_path + "/variable_ranking.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,rank\n")
+            for key, val in sorted(self.rank_dict.iteritems(), key = lambda (k,v): (v,k)):
+                print("{:50s}: {}".format(key,val))
+                f.write("{},{}\n".format(key,val))
+        print("wrote variable ranking to "+str(rank_path))
+
     def get_input_weights(self):
         ''' get the weights of the input layer '''
         first_layer = self.model.layers[1]
@@ -388,13 +412,13 @@ class DNN():
             self.weight_dict[variable] = w_sum
 
         # sort weight dict
-        rank_path = self.save_path + "/variable_ranking.csv"
+        rank_path = self.save_path + "/absolute_weight_sum.csv"
         with open(rank_path, "w") as f:
             f.write("variable,weight_sum\n")
             for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
                 print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
-        print("wrote variable ranking to "+str(rank_path))
+        print("wrote weight ranking to "+str(rank_path))
             
         
             

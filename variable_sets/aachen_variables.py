@@ -1,4 +1,5 @@
-variables_4j_ge3t = [
+variables = {}
+variables["4j_ge3t"] = [
     'Jet_Pt[0]',
     'Jet_CSV[0]',
     'Jet_Eta[1]',
@@ -33,11 +34,11 @@ variables_4j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'MEM',
+    'memDBp',
     ]
 
 
-variables_5j_ge3t = [
+variables["5j_ge3t"] = [
     'Jet_Pt[0]',
     'Jet_Eta[0]',
     'Jet_CSV[0]',
@@ -80,11 +81,11 @@ variables_5j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'MEM',
+    'memDBp',
     ]
 
 
-variables_ge6j_ge3t = [
+variables["ge6j_ge3t"] = [
     'Jet_Eta[0]',
     'Jet_CSV[0]',
     'Jet_Eta[1]',
@@ -126,8 +127,8 @@ variables_ge6j_ge3t = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'MEM',
+    'memDBp',
     ]
 
+all_variables = set( [v for key in variables for v in variables[key] ] )
 
-all_variables = set(variables_4j_ge3t + variables_5j_ge3t + variables_ge6j_ge3t)
