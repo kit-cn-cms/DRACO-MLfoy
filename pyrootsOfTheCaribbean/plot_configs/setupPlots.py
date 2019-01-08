@@ -6,6 +6,7 @@ import numpy as np
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
+        "ttZ":   ROOT.kBlue+4,
         "ttH":   ROOT.kBlue+1,
         "ttlf":  ROOT.kRed-7,
         "ttcc":  ROOT.kRed+1,
@@ -53,7 +54,7 @@ def setupHistogram(
     else:
         histogram.SetLineColor( color )
         histogram.SetFillColor(0)
-        histogram.SetLineWidth(1)
+        histogram.SetLineWidth(2)
 
     return histogram
 
@@ -187,7 +188,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     # draw signal histograms
     for sH in sigHists:
         # draw signal histogram
-        sH.DrawCopy(option+"same")
+        sH.DrawCopy(option+" E0 same")
     
     errorGraph.Draw("same")
 
@@ -285,8 +286,8 @@ def getLegend():
 
 
 
-def printLumi(pad, ratio = False):
-    lumi_text = "41.5 fb^{-1} (13 TeV)"
+def printLumi(pad, lumi = 41.5, ratio = False):
+    lumi_text = str(lumi)+" fb^{-1} (13 TeV)"
 
     pad.cd(1)
     l = pad.GetLeftMargin()

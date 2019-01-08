@@ -6,7 +6,7 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
-import variable_sets.dnnVariableSet as variable_set
+import variable_sets.ttZ_allVariables as variable_set
 
 
 
@@ -23,8 +23,6 @@ or \
 
 
 # define other additional selections
-ttH_selection = "(Evt_Odd == 1)"
-
 ttbar_selection = "(\
 abs(Weight_scale_variation_muR_0p5_muF_0p5) <= 100 and \
 abs(Weight_scale_variation_muR_0p5_muF_1p0) <= 100 and \
@@ -39,6 +37,9 @@ abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100 \
 
 
 # define output classes
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZ", selection = None)
+
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH", selection = None)
 
@@ -52,10 +53,10 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = "/nfs/dust/cms/user/vdlinden/MLfoy/workdir/DNNInputFiles/",
-    naming      = "_dnn",
+    outputdir   = "/nfs/dust/cms/user/vdlinden/ttZ_2019/datasamples/DNN",
+    naming      = "",
     addCNNmap   = False,
-    addMEM      = True)
+    addMEM      = False)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
@@ -68,47 +69,39 @@ dataset.addBaseSelection(base_selection)
 
 # add samples to dataset
 dataset.addSample(
+    sampleName  = "ttZqq",
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_v2/*nominal*.root",
+    categories  = ttZ_categories)
+
+dataset.addSample(
     sampleName  = "ttHbb",
-    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttH_categories,
-    selections  = ttH_selection,
-    MEMs        = "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
-    CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHbb.h5")
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttH_categories)
     
 dataset.addSample(
     sampleName  = "ttHNobb",
-    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttH_categories,
-    selections  = ttH_selection,
-    MEMs        = "/nfs/dust/cms/user/vdlinden/MEM_2017/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-    CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHNobb.h5")
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttH_categories)
 
 
 
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
-    CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToSL.h5")
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttbar_categories)
+    #selections  = ttbar_selection)
 
 dataset.addSample(
     sampleName  = "TTToHad",
-    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = "/nfs/dust/cms/user/vdlinden/MEM_2017/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
-    CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToHad.h5")
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttbar_categories)
+    #selections  = ttbar_selection)
 
 dataset.addSample(
     sampleName  = "TTToLep",
-    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = "/nfs/dust/cms/user/vdlinden/MEM_2017/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
-    CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToLep.h5")
-
+    ntuples     = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttbar_categories)
+    #selections  = ttbar_selection)
 
 
 # initialize variable list 
