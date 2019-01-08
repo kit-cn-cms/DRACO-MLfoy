@@ -20,7 +20,7 @@ def GetPlotColor( cls ):
     return color_dict[cls]
 
 def GetyTitle():
-    return "arbitrary unit"
+    return "Events expected"
 
 def setupHistogram(
         values, weights, 
@@ -142,9 +142,9 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         moveOverUnderFlow(h)
     
     # stack Histograms
-    #bkgHists = [bkgHists[len(bkgHists)-1-i] for i in range(len(bkgHists))]
-    #for i in range(len(bkgHists)-1, 0, -1):
-    #    bkgHists[i-1].Add(bkgHists[i])
+    bkgHists = [bkgHists[len(bkgHists)-1-i] for i in range(len(bkgHists))]
+    for i in range(len(bkgHists)-1, 0, -1):
+        bkgHists[i-1].Add(bkgHists[i])
 
     # figure out plotrange
     canvas.cd(1)
@@ -169,7 +169,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
 
     # draw the other histograms
     for h in bkgHists[1:]:
-        h.DrawCopy(option+"sameE0")
+        h.DrawCopy(option+"same")
 
     # add stat errorbars
     errorGraph = ROOT.TGraphErrors( firstHist.Clone() )
@@ -187,9 +187,9 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     # draw signal histograms
     for sH in sigHists:
         # draw signal histogram
-        sH.DrawCopy(option+"sameE0")
+        sH.DrawCopy(option+"same")
     
-    errorGraph.Draw("sameE0")
+    errorGraph.Draw("same")
 
     if plotOptions["ratio"]:
         canvas.cd(2)
@@ -214,14 +214,14 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         line.SetLineColor(ROOT.kBlack)
         line.DrawCopy("histo")
         # ratio plots
-        for i,sigHist in enumerate(bkgHists):
+        for sigHist in sigHists:
             ratioPlot = sigHist.Clone()
-            ratioPlot.Divide(sigHists[0])
+            ratioPlot.Divide(bkgHists[0])
             ratioPlot.SetTitle(canvasName)
-            ratioPlot.SetLineColor(i+1)
+            ratioPlot.SetLineColor(ROOT.kBlack)
             ratioPlot.SetLineWidth(ROOT.kBlack)
             ratioPlot.SetMarkerStyle(20)
-            ratioPlot.SetMarkerColor(i+1)
+            ratioPlot.SetMarkerColor(ROOT.kBlack)
             ROOT.gStyle.SetErrorX(0)
             ratioPlot.DrawCopy("sameP")
         canvas.cd(1)

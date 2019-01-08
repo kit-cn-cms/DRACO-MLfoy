@@ -35,7 +35,7 @@ variables["4j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 
@@ -82,7 +82,7 @@ variables["5j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 
@@ -128,7 +128,7 @@ variables["ge6j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    'MEM',
     ]
 
 

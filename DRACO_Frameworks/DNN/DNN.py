@@ -148,9 +148,13 @@ class DNN():
             norm_variables      = True,
             additional_cut      = self.additional_cut)
 
-    def load_trained_model(self):
+    def load_trained_model(self, path_to_DNN=None):
+      
         ''' load an already trained model '''
-        checkpoint_path = self.cp_path + "/trained_model.h5py"
+        if path_to_DNN:
+            checkpoint_path = path_to_DNN +"/trained_model.h5py"
+        else:
+            checkpoint_path = self.save_path + "/checkpoints/trained_model.h5py"
 
         self.model = keras.models.load_model(checkpoint_path)
 
@@ -330,6 +334,31 @@ class DNN():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
+    def eval_model_custom_dataset(self, dataset_path, classes, name=None):
+        self.data_frames_custom = []
+        self.outputvectors_custom = []
+        for i in dataset_path:
+            custom_Dataframe=data_frame.DataFrame(path_to_input_files = i,
+                                                  classes             = classes,
+                                                  event_category      = self.event_category,
+                                                  train_variables     = self.train_variables,
+                                                  test_percentage     = self.test_percentage,
+                                                  norm_variables      = True,
+                                                  additional_cut      = self.additional_cut)
+            self.data_frames_custom.append(custom_Dataframe)
+            model_eval_custom = self.model.evaluate(
+                custom_Dataframe.get_test_data(as_matrix = True),
+                custom_Dataframe.get_test_labels())
+
+            # save history of eval metrics
+
+            # save predicitons
+            model_prediction_vector_custom = self.model.predict(
+                custom_Dataframe.get_test_data(as_matrix = True) )
+            self.outputvectors_custom.append(model_prediction_vector_custom)
+            # save predicted classes with argmax
+           
+
 
     def eval_model(self):
         ''' evaluate trained model '''
@@ -451,6 +480,34 @@ class DNN():
 
         plotNodes.set_printROCScore(True)
         plotNodes.plot(ratio = False)
+
+
+
+    def plot_ttbb(self, log = False, cut_on_variable = None):
+        ''' plot distribution in outputNodes '''
+        nbins = 21
+        bin_range = [0., 0.7]
+
+        plotNodes = plottingScripts.plotDiscriminatorsComparison_ttbb(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = "ttHbb",
+            event_category      = self.categoryLabel,
+            plotdir             = self.plot_path,
+            logscale            = log,
+            ttbb_dataset        =self.data_frames_custom, 
+            ttbb_prediction_vector=self.outputvectors_custom)
+
+        if cut_on_variable:
+            plotNodes.set_cutVariable(
+                cutClass = cut_on_variable["class"],
+                cutValue = cut_on_variable["value"])
+
+        plotNodes.set_printROCScore(True)
+        plotNodes.plot(ratio = True)
 
     def plot_discriminators(self, log = False):
         ''' plot all events classified as one category '''
