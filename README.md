@@ -10,6 +10,21 @@ When working with the combination of
 segmentation violations appear when opening hdf-files with `pandas.read_hdf()` or `pandas.HDFStore()`.
 To circumvent this, first import everything related to `ROOT`, only then start importing things from `keras`.
 
+## workflow in a nutshell
+1. Preprocess input data:
+    - to create input features you need data in the ntuple format, these get converted into hdf5 dataframes
+    - create a list of input features in `variable_sets/` (look at the README for structural advice)
+    - adjust settings in `preprocessing/root2pandas/preprocessing.py` 
+    - execute it on the NAF (tested with `CMSSW_9_4_9`)
+    - this creates one dataset for each event category you specified in `preprocessing.py`, copy these datasets to your GPU machine
+2. Setup training:
+    - move to directory `train_scripts/` and create a config script for your training (for simple DNN training adjust `train_scripts/DNN_template.py`)
+    - for the jet-tag categories `4j_ge3t`, `5j_ge3t`, `ge6j_ge3t` default net architectures and settings are defined in `DRACO_Frameworks/DNN/architecture.py`
+3. Execute training:
+    - adjust settings to network structure in `DRACO_Frameworks/DNN/architecture.py` or give a selfbuilt model as an argument to `dnn.build_model()`
+    - execute the trainig script with your jet-tag category as a first argument
+    - after completion of the script you can look at results in the specified output directory
+
 
 ## preprocessing
 
