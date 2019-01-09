@@ -39,7 +39,7 @@ ttH_selection = "(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH", selection = None)
+ttH_categories.addCategory("ttHbb", selection = None)
 
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
