@@ -11,11 +11,20 @@ import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
-    def __init__(self, sampleName, sampleFile, signalSample = False):
+    def __init__(self, sampleName, sampleFile, signalSample = False, plotColor = None):
         self.sampleName = sampleName
         self.sampleFile = sampleFile
         self.isSignal   = signalSample
         
+        self.plotColor  = plotColor
+        if self.plotColor == None:
+            try:
+                self.plotColor = setup.GetPlotColor(self.sampleName)
+                
+            except:
+                print("no color for sample chosen + sample not in color dictionary")
+                self.plotColor = 1
+
         self.load()
         self.cut_data   = {}
 
@@ -42,6 +51,7 @@ class variablePlotter:
         self.add_vars       = list(add_vars)        
 
         self.samples        = {}
+        self.ordered_stack  = []
         self.categories     = []
 
         # handle options
@@ -58,6 +68,8 @@ class variablePlotter:
     def addSample(self, **kwargs):
         print("adding sample: "+str(kwargs["sampleName"]))
         self.samples[kwargs["sampleName"]] = Sample(**kwargs)
+        if not self.samples[kwargs["sampleName"]].isSignal:
+            self.ordered_stack.append(kwargs["sampleName"])
 
     def addCategory(self, category):
         print("adding category: {}".format(category))
@@ -117,9 +129,8 @@ class variablePlotter:
         weightIntegral = 0
 
         # loop over bachgrounds and fill hists
-        for key in self.samples:
-            sample = self.samples[key]
-            if sample.isSignal: continue
+        for sampleName in self.ordered_stack:
+            sample = self.samples[sampleName]
 
             # get weights
             weights = sample.cut_data[cat]["weight"].values
@@ -131,7 +142,7 @@ class variablePlotter:
                 weights     = weights,
                 nbins       = bins,
                 bin_range   = bin_range,
-                color       = setup.GetPlotColor(sample.sampleName),
+                color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
                 ytitle      = setup.GetyTitle(),
                 filled      = True)
@@ -143,6 +154,10 @@ class variablePlotter:
         sigLabels = []
         sigScales = []
         
+        # if not background was added, the weight integral is equal to 0
+        if weightIntegral == 0:
+            self.options["scaleSignal"] = 1   
+
         # loop over signals and fill hists
         for key in self.samples:
             sample = self.samples[key]
@@ -163,7 +178,7 @@ class variablePlotter:
                 weights     = weights,
                 nbins       = bins,
                 bin_range   = bin_range,
-                color       = setup.GetPlotColor(sample.sampleName),
+                color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
                 ytitle      = setup.GetyTitle(),
                 filled      = False)
