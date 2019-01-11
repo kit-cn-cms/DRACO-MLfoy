@@ -16,7 +16,7 @@ import plot_configs.setupPlots as setup
 
 
 class plotDiscriminators:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
@@ -28,6 +28,7 @@ class plotDiscriminators:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.plot_nonTrainData = plot_nonTrainData
 
         self.signalIndex       = self.data.class_translation[self.signal_class]
         self.signalFlag        = self.data.get_class_flag(self.signal_class)
@@ -55,6 +56,38 @@ class plotDiscriminators:
             bkgLabels = []
             weightIntegral = 0
 
+            sig_values = []
+            sig_labels = []
+            sig_weights = []
+
+            # if non-train data plotting is enabled, add the histograms here
+            if self.plot_nonTrainData:
+                for sample in self.data.non_train_samples:
+                    values = sample.prediction_vector[:,i]
+                    filtered_values = [ values[k] for k in range(len(values)) \
+                        if sample.predicted_classes[k] == nodeIndex]
+                    filtered_weights = [ sample.lumi_weights[k] for k in range(len(values)) \
+                        if sample.predicted_classes[k] == nodeIndex]
+                
+                    if sample.signalSample:
+                        sig_values.append(filtered_values)
+                        sig_labels.append(sample.label)
+                        sig_weights.append(filtered_weights)
+                    else:
+                        histogram = setup.setupHistogram(
+                            values    = filtered_values,
+                            weights   = filtered_weights,
+                            nbins     = self.nbins,
+                            bin_range = self.bin_range,
+                            color     = setup.GetPlotColor(sample.label),
+                            xtitle    = str(sample.label)+" at "+str(node_cls)+" node",
+                            ytitle    = setup.GetyTitle(),
+                            filled    = True)
+
+                        bkgHists.append(histogram)
+                        bkgLabels.append(sample.label)
+
+
             # loop over all classes to fill hists according to truth level class
             for j, truth_cls in enumerate(self.event_classes):
                 classIndex = self.data.class_translation[truth_cls]
@@ -70,9 +103,9 @@ class plotDiscriminators:
 
                 if j == self.signalIndex:
                     # signal histogram
-                    sig_values  = filtered_values
-                    sig_label   = str(truth_cls)
-                    sig_weights = filtered_weights
+                    sig_values.append(filtered_values)
+                    sig_labels.append(str(truth_cls))
+                    sig_weights.append(filtered_weights)
                 else:
                     # background histograms
                     weightIntegral += sum(filtered_weights)
@@ -89,36 +122,44 @@ class plotDiscriminators:
                     
                     bkgHists.append( histogram )
                     bkgLabels.append( truth_cls )
-            # setup signal histogram
-            sigHist = setup.setupHistogram(
-                values    = sig_values,
-                weights   = sig_weights,
-                nbins     = self.nbins,
-                bin_range = self.bin_range,
-                color     = setup.GetPlotColor(sig_label),
-                xtitle    = str(sig_label)+" at "+str(node_cls)+" node",
-                ytitle    = setup.GetyTitle(),
-                filled    = False)
-            # set signal histogram linewidth
-            sigHist.SetLineWidth(3)
+    
+            sigHists = []
+            scaleFactors = []
+            for iSig in range(len(sig_labels)):
+                # setup signal histogram
+                sigHist = setup.setupHistogram(
+                    values    = sig_values[iSig],
+                    weights   = sig_weights[iSig],
+                    nbins     = self.nbins,
+                    bin_range = self.bin_range,
+                    color     = setup.GetPlotColor(sig_labels[iSig]),
+                    xtitle    = str(sig_labels[iSig])+" at "+str(node_cls)+" node",
+                    ytitle    = setup.GetyTitle(),
+                    filled    = False)
 
-            # set scalefactor
-            scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
-            sigHist.Scale(scaleFactor)
+                # set signal histogram linewidth
+                sigHist.SetLineWidth(3)
+
+                # set scalefactor
+                scaleFactor = weightIntegral/(sum(sig_weights[iSig])+1e-9)
+                sigHist.Scale(scaleFactor)
+                sigHists.append(sigHist)
+                scaleFactors.append(scaleFactor)
 
             plotOptions = {
                 "ratio":      ratio,
                 "ratioTitle": "#frac{scaled Signal}{Background}",
                 "logscale":   self.logscale}
             canvas = setup.drawHistsOnCanvas(
-                sigHist, bkgHists, plotOptions, 
+                sigHists, bkgHists, plotOptions, 
                 canvasName = node_cls+" final discriminator")
 
             # setup legend
             legend = setup.getLegend()
 
             # add signal entry
-            legend.AddEntry(sigHist, sig_label+" x {:4.0f}".format(scaleFactor), "L")
+            for i, h in enumerate(sigHists):
+                legend.AddEntry(h, sig_labels[i]+" x {:4.0f}".format(scaleFactors[i]), "L")
 
             # add background entries
             for i, h in enumerate(bkgHists):
@@ -159,7 +200,8 @@ class plotDiscriminators:
 
 
 class plotOutputNodes:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
+        df = pd.concat(samples)
         self.data              = data
         self.prediction_vector = prediction_vector
         self.event_classes     = event_classes
@@ -169,6 +211,7 @@ class plotOutputNodes:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.plot_nonTrainData = plot_nonTrainData
 
         self.signalIndex       = self.data.class_translation[self.signal_class]
         self.signalFlag        = self.data.get_class_flag(self.signal_class)

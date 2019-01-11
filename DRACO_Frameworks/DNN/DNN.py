@@ -64,29 +64,29 @@ class EarlyStoppingByLossDiff(keras.callbacks.Callback):
 
 class DNN():
 
-    def __init__(self, in_path, save_path,
-                event_classes,
-                event_category,
-                train_variables,
-                batch_size = 5000,
-                train_epochs = 500,
-                early_stopping = 10,
-                optimizer = None,
-                loss_function = "categorical_crossentropy",
-                test_percentage = 0.2,
-                eval_metrics = None,
-                additional_cut = None,
-                sample_naming = "_dnn.h5"):
+    def __init__(self, 
+            save_path,
+            input_samples,
+            event_category,
+            train_variables,
+            batch_size      = 5000,
+            train_epochs    = 500,
+            early_stopping  = 10,
+            optimizer       = None,
+            loss_function   = "categorical_crossentropy",
+            test_percentage = 0.2,
+            eval_metrics    = None,
+            additional_cut  = None):
 
         # save some information
-        # path to input files
-        self.in_path = in_path
+        # list of samples to load into dataframe
+        self.input_samples = input_samples
+
         # output directory for results
         self.save_path = save_path
         if not os.path.exists(self.save_path):
             os.makedirs( self.save_path )
-        # list of classes
-        self.event_classes = event_classes
+
         # name of event category (usually nJet/nTag category)
         self.JTstring       = event_category
         self.event_category = JTcut.getJTstring(event_category)
@@ -112,11 +112,11 @@ class DNN():
         # additional cuts to be applied after variable norm
         self.additional_cut = additional_cut
 
-        # naming of the input files
-        self.sample_naming = sample_naming
-
         # load data set
         self.data = self._load_datasets()
+        self.event_classes = self.data.output_classes
+
+        # save variable norm
         self.cp_path = self.save_path+"/checkpoints/"
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
@@ -144,14 +144,14 @@ class DNN():
         ''' load data set '''
 
         return data_frame.DataFrame(
-            path_to_input_files = self.in_path,
-            classes             = self.event_classes,
+            input_samples       = self.input_samples,
             event_category      = self.event_category,
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
             norm_variables      = True,
-            additional_cut      = self.additional_cut,
-            sample_naming       = self.sample_naming)
+            additional_cut      = self.additional_cut)
+
+        
 
     def load_trained_model(self):
         ''' load an already trained model '''
@@ -373,6 +373,17 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
+        # evaluate non trainiable data
+        print("loading non trainable data")
+        self.data.get_non_train_samples()
+        if len(self.data.non_train_samples) == 0:
+            print("... no additional data found")
+
+        for sample in self.data.non_train_samples:
+            sample.addPrediction( self.model, self.train_variables )
+                
+        
+
     def save_confusionMatrix(self, location, save_roc):
         ''' save confusion matrix as a line in output file '''
         flattened_matrix = self.confusion_matrix.flatten()
@@ -457,7 +468,7 @@ class DNN():
 
 
 
-    def plot_outputNodes(self, log = False, cut_on_variable = None):
+    def plot_outputNodes(self, log = False, cut_on_variable = None, plot_nonTrainData = False):
         ''' plot distribution in outputNodes '''
         nbins = 21
         bin_range = [0., 0.7]
@@ -471,7 +482,8 @@ class DNN():
             signal_class        = "ttHbb",
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
-            logscale            = log)
+            logscale            = log,
+            plot_nonTrainData   = plot_nonTrainData)
 
         if cut_on_variable:
             plotNodes.set_cutVariable(
@@ -481,7 +493,7 @@ class DNN():
         plotNodes.set_printROCScore(True)
         plotNodes.plot(ratio = False)
 
-    def plot_discriminators(self, log = False):
+    def plot_discriminators(self, log = False, plot_nonTrainData = False):
         ''' plot all events classified as one category '''
         nbins = 15
         bin_range = [0.2, 0.7]
@@ -495,7 +507,8 @@ class DNN():
             signal_class        = "ttHbb",
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
-            logscale            = log)
+            logscale            = log,
+            plot_nonTrainData   = plot_nonTrainData)
 
         plotDiscrs.set_printROCScore(True)
         plotDiscrs.plot(ratio = False)
