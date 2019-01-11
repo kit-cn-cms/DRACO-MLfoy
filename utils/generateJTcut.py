@@ -36,7 +36,7 @@ def getJTstring(cat):
 
     string += ")"
 
-    print("generated JTstring: '"+string+"'.")
+    #print("generated JTstring: '"+string+"'.")
     return string
 
 
@@ -74,5 +74,5 @@ def getJTlabel(cat):
         ntags  =  tags[:-1]
     string += " "+ntags+" b-tags"
 
-    print("generated JTlabel: '"+string+"'.")
+    #print("generated JTlabel: '"+string+"'.")
     return string

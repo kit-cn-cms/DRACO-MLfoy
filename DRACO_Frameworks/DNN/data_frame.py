@@ -16,7 +16,6 @@ class DataFrame(object):
         ''' takes a path to a folder where one h5 per class is located
             the events are cut according to the event_category
             variables in train_variables are used as input variables
-            variables in prenet_targets are used as classes for the pre net
             the dataset is shuffled and split into a test and train sample
                 according to test_percentage
             for better training, the variables can be normed to std(1) and mu(0) '''
@@ -65,13 +64,15 @@ class DataFrame(object):
         self.classes = classes
         self.index_classes = [self.class_translation[c] for c in classes]
 
+        # add flag for ttH to dataframe
         df["is_ttH"] = pd.Series( [1 if c=="ttHbb" else 0 for c in df["class_label"].values], index = df.index )
+        # add index labelling to dataframe
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
         # norm weights to mean(1)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
 
-        # save some meta data about net
+        # save some meta data about network
         self.n_input_neurons = len(train_variables)
         self.n_output_neurons = len(classes)
 
