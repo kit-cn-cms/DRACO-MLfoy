@@ -26,7 +26,7 @@ event_classes = ["ttHbb", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"newJEC_allVariables_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"newJEC_goodVariables_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
