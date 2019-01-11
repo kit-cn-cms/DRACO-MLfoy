@@ -10,6 +10,7 @@ class DataFrame(object):
                 test_percentage = 0.1,
                 norm_variables = False,
                 additional_cut = None,
+                sample_naming = "_dnn.h5"
                 lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
@@ -22,7 +23,7 @@ class DataFrame(object):
         # loop over all classes and extract data as well as event weights
         class_dataframes = list()
         for cls in classes:
-            class_file = path_to_input_files + "/" + cls + "_dnn.h5"
+            class_file = path_to_input_files + "/" + cls + sample_naming
             print("-"*50)
             print("loading class file "+str(class_file))
             with pd.HDFStore( class_file, mode = "r" ) as store:
