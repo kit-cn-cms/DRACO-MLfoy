@@ -28,7 +28,9 @@ naming = "_dnn_oldJEC.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True)
+# during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
+#       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
+input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True, normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")

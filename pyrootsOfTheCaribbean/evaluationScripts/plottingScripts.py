@@ -42,6 +42,7 @@ class plotDiscriminators:
     def plot(self, ratio = False):
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
+            print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
             nodeIndex = self.data.class_translation[node_cls]
 
             # get output values of this node
@@ -68,7 +69,9 @@ class plotDiscriminators:
                         if sample.predicted_classes[k] == nodeIndex]
                     filtered_weights = [ sample.lumi_weights[k] for k in range(len(values)) \
                         if sample.predicted_classes[k] == nodeIndex]
-                
+                    print("{} events in discriminator: {}\t(Integral: {})".format(sample.label, len(filtered_values), sum(filtered_weights)))
+
+
                     if sample.signalSample:
                         sig_values.append(filtered_values)
                         sig_labels.append(sample.label)
@@ -100,6 +103,8 @@ class plotDiscriminators:
                 filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
                     and self.predicted_classes[k] == nodeIndex]
+
+                print("{} events in discriminator: {}\t(Integral: {})".format(truth_cls, len(filtered_values), sum(filtered_weights)))
 
                 if j == self.signalIndex:
                     # signal histogram
