@@ -24,7 +24,7 @@ variables       = variable_set.variables[JTcategory]
 inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
 
 # naming for input files
-naming = "_dnn_oldJEC.h5"
+naming = "_dnn_newJEC.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -41,7 +41,7 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"oldJEC_allVariables_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"newJEC_allVariables_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(

@@ -111,9 +111,6 @@ class DNN():
         # additional cuts to be applied after variable norm
         self.additional_cut = additional_cut
 
-        # naming of the input files
-        self.sample_naming = sample_naming
-
         # load data set
         self.data = self._load_datasets()
         self.event_classes = self.data.output_classes
@@ -151,8 +148,7 @@ class DNN():
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
             norm_variables      = True,
-            additional_cut      = self.additional_cut,
-            sample_naming       = self.sample_naming)
+            additional_cut      = self.additional_cut)
 
         
 
