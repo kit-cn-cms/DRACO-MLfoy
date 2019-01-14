@@ -4,9 +4,10 @@ from keras.utils import to_categorical
 from sklearn.utils import shuffle
 
 class Sample:
-    def __init__(self, path, label, isTrainSample = True, signalSample = False):
+    def __init__(self, path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
         self.path = path
         self.label = label
+        self.normalization_weight = normalization_weight
         self.isTrainSample = isTrainSample
         self.signalSample = signalSample
         
@@ -30,7 +31,8 @@ class Sample:
         print("weight sum of train_weight: "+str( sum(df["train_weight"].values) ))
 
         # add lumi weight
-        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi)
+        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
+        print("yield (sum of weights): {}".format(df["lumi_weight"].sum()))
 
         self.data = df
         print("-"*50)
@@ -40,6 +42,7 @@ class Sample:
         self.prediction_vector = model.predict(
             self.data[train_variables].values)
         
+        print("total number of events in sample: "+str(self.data.shape[0]))
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1 )
 
         self.lumi_weights = self.data["lumi_weight"].values
@@ -49,9 +52,9 @@ class InputSamples:
         self.input_path = input_path
         self.samples = []
 
-    def addSample(self, sample_path, label, isTrainSample = True, signalSample = False):
+    def addSample(self, sample_path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
         path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(path, label, isTrainSample, signalSample) )
+        self.samples.append( Sample(path, label, normalization_weight, isTrainSample, signalSample) )
         
 
 class DataFrame(object):
