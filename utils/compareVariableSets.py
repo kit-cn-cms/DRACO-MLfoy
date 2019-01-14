@@ -13,8 +13,8 @@ import variable_sets.goodVariables as set1
 #import variable_sets.topVariables_L as set1
 #set2_name = "pre christmas tight cut variables"
 #import variable_sets.topVariables_T as set2
-set2_name = "pre christmas good variables"
-import variable_sets.topVariables as set2
+set2_name = "pre christmas tight cut variables"
+import variable_sets.topVariables_T as set2
 
 vars1 = set1.variables
 vars2 = set2.variables
@@ -44,7 +44,4 @@ for key in vars1:
 
     print("\n\tcommon variables")
     for v in common: print(v)
-
-
-
 

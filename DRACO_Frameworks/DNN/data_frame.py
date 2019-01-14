@@ -1,16 +1,71 @@
 import pandas as pd
+import numpy as np
 from keras.utils import to_categorical
 from sklearn.utils import shuffle
 
+class Sample:
+    def __init__(self, path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
+        self.path = path
+        self.label = label
+        self.normalization_weight = normalization_weight
+        self.isTrainSample = isTrainSample
+        self.signalSample = signalSample
+        
+
+    def load_dataframe(self, event_category, lumi):
+        print("-"*50)
+        print("loading sample file "+str(self.path))
+        with pd.HDFStore( self.path, mode = "r" ) as store:
+            df = store.select("data")
+            print("number of events before selections: "+str(df.shape[0]))
+
+        # apply event category cut
+        df.query(event_category, inplace = True)
+        print("number of events after selections:  "+str(df.shape[0]))
+
+        # add event weight
+        df = df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
+
+        weight_sum = sum(df["total_weight"].values)
+        df = df.assign(train_weight = lambda x: x.total_weight/weight_sum)
+        print("weight sum of train_weight: "+str( sum(df["train_weight"].values) ))
+
+        # add lumi weight
+        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
+        print("yield (sum of weights): {}".format(df["lumi_weight"].sum()))
+
+        self.data = df
+        print("-"*50)
+        
+
+    def addPrediction(self, model, train_variables):
+        self.prediction_vector = model.predict(
+            self.data[train_variables].values)
+        
+        print("total number of events in sample: "+str(self.data.shape[0]))
+        self.predicted_classes = np.argmax( self.prediction_vector, axis = 1 )
+
+        self.lumi_weights = self.data["lumi_weight"].values
+
+class InputSamples:
+    def __init__(self, input_path):
+        self.input_path = input_path
+        self.samples = []
+
+    def addSample(self, sample_path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
+        path = self.input_path + "/" + sample_path
+        self.samples.append( Sample(path, label, normalization_weight, isTrainSample, signalSample) )
+        
 
 class DataFrame(object):
-    def __init__(self, path_to_input_files,
-                classes, event_category,
+    def __init__(self,
+                input_samples,
+                event_category,
                 train_variables,
                 test_percentage = 0.1,
                 norm_variables = False,
                 additional_cut = None,
-                sample_naming = "_dnn.h5"
+                sample_naming = "_dnn.h5",
                 lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
@@ -19,62 +74,44 @@ class DataFrame(object):
             the dataset is shuffled and split into a test and train sample
                 according to test_percentage
             for better training, the variables can be normed to std(1) and mu(0) '''
+        self.event_category = event_category
+        self.lumi = lumi
 
-        # loop over all classes and extract data as well as event weights
-        class_dataframes = list()
-        for cls in classes:
-            class_file = path_to_input_files + "/" + cls + sample_naming
-            print("-"*50)
-            print("loading class file "+str(class_file))
-            with pd.HDFStore( class_file, mode = "r" ) as store:
-                cls_df = store.select("data")
-                print("number of events before selections: "+str(cls_df.shape[0]))
-
-            # apply event category cut
-            cls_df.query(event_category, inplace = True)
-            self.event_category = event_category
-            print("number of events after selections:  "+str(cls_df.shape[0]))
-
-            # add event weight
-            cls_df = cls_df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
-
-            weight_sum = sum(cls_df["total_weight"].values)
-            class_weight_scale = 1.
-            if "ttH" in cls: class_weight_scale *= 1.0
-            cls_df = cls_df.assign(train_weight = lambda x: class_weight_scale*x.total_weight/weight_sum)
-            print("weight sum of train_weight: "+str( sum(cls_df["train_weight"].values) ))
-
-            # add lumi weight
-            cls_df = cls_df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi)
-
-            # add data to list of dataframes
-            class_dataframes.append( cls_df )
-            print("-"*50)
-
+        # loop over all input samples and load dataframe
+        train_samples = []
+        for sample in input_samples.samples:
+            sample.load_dataframe(self.event_category, self.lumi)
+            if sample.isTrainSample:
+                train_samples.append(sample.data)
+        
         # concatenating all dataframes
-        df = pd.concat( class_dataframes )
-        del class_dataframes
+        df = pd.concat( train_samples )
+        del train_samples
 
         # add class_label translation
         index = 0
         self.class_translation = {}
-        for cls in classes:
-            self.class_translation[cls] = index
+        self.classes = []
+        for sample in input_samples.samples:
+            if not sample.isTrainSample: continue
+            self.class_translation[sample.label] = index
+            self.classes.append(sample.label)
             index += 1
-        self.classes = classes
-        self.index_classes = [self.class_translation[c] for c in classes]
+        self.index_classes = [self.class_translation[c] for c in self.classes]
 
         # add flag for ttH to dataframe
-        df["is_ttH"] = pd.Series( [1 if c=="ttHbb" else 0 for c in df["class_label"].values], index = df.index )
+        df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
         # add index labelling to dataframe
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
+        print(df["class_label"])
+        print(df["index_label"])
 
         # norm weights to mean(1)
-        df["train_weight"] = df["train_weight"]*df.shape[0]/len(classes)
+        df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
 
         # save some meta data about network
         self.n_input_neurons = len(train_variables)
-        self.n_output_neurons = len(classes)
+        self.n_output_neurons = len(self.classes)
 
         # shuffle dataframe
         df = shuffle(df, random_state = 333)
@@ -109,8 +146,21 @@ class DataFrame(object):
 
         # save variable lists
         self.train_variables = train_variables
-        self.output_classes = classes
+        self.output_classes = self.classes
+        self.input_samples = input_samples
 
+        # init non trainable samples
+        self.non_train_samples = None
+
+    def get_non_train_samples(self):
+        # get samples with flag 'isTrainSample == False' and load those
+        samples = []
+        for sample in self.input_samples.samples:
+            if sample.isTrainSample: continue
+            sample.data[self.train_variables] = (sample.data[self.train_variables] - self.norm_csv["mu"])/(self.norm_csv["std"])
+            samples.append(sample)
+        self.non_train_samples = samples
+        
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):

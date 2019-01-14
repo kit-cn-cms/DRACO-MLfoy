@@ -1,4 +1,3 @@
-
 variables = {}
 variables["4j_ge3t"] = [
     'Jet_Pt[0]',
@@ -131,5 +130,5 @@ variables["ge6j_ge3t"] = [
     'memDBp',
     ]
 
-
 all_variables = set( [v for key in variables for v in variables[key] ] )
+
