@@ -339,7 +339,7 @@ class Dataset:
             entries_before = df.shape[0]
             df = df.query("memDBp != -1")
             entries_after = df.shape[0]
-            print("    lost {}/{} events".format(entries_after, entries_before))
+            print("    lost {}/{} events".format(entries_before-entries_after, entries_before))
             print("    we will only save events with mem...")
         return df       
 
