@@ -60,8 +60,8 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v5/"
-memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
+ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/"
+memPath = "/nfs/dust/cms/user/vdlinden/MEM_2017/"
 
 
 # add samples to dataset
