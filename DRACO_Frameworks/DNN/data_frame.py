@@ -65,7 +65,6 @@ class DataFrame(object):
                 test_percentage = 0.1,
                 norm_variables = False,
                 additional_cut = None,
-                sample_naming = "_dnn.h5",
                 lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
