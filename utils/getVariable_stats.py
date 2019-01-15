@@ -24,9 +24,10 @@ for cat in jtcategories:
     variables = {}
     for ranking in rankings:
         csv = pd.read_csv(ranking, header = 0, sep = ",")
+        sum_of_weights = csv["weight_sum"].sum()
         for row in csv.iterrows():
             if not row[1][0] in variables: variables[row[1][0]] = []
-            variables[row[1][0]].append(row[1][1])
+            variables[row[1][0]].append(row[1][1]/sum_of_weights)
 
 
     mean_dict = {}
@@ -45,6 +46,8 @@ for cat in jtcategories:
 
     plt.figure(figsize = [10,10])
     plt.errorbar(mean, val, xerr = std, fmt = "o")
+    plt.xlim([0.,0.07])
+    plt.grid()
     plt.yticks(val, var)
     plt.title(cat)
     plt.xlabel("mean of sum of input weights")
