@@ -11,11 +11,12 @@ import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
-    def __init__(self, sampleName, sampleFile, signalSample = False, plotColor = None):
+    def __init__(self, sampleName, sampleFile, signalSample = False, plotColor = None, apply_cut = True):
         self.sampleName = sampleName
         self.sampleFile = sampleFile
         self.isSignal   = signalSample
-        
+        self.applyCut   = apply_cut
+
         self.plotColor  = plotColor
         if self.plotColor == None:
             try:
@@ -33,6 +34,11 @@ class Sample:
             self.data = store.select("data")
 
     def cutData(self, cut, variables, lumi_scale):
+        if not self.applyCut:
+            self.cut_data[cut] = self.data
+            self.cut_data[cut]["weight"] = pandas.Series([lumi_scale for _ in range(self.cut_data[cut].shape[0])])
+            return
+
         # cut events according to JT category
         category_cut = JTcut.getJTstring(cut)
 
@@ -75,6 +81,12 @@ class variablePlotter:
         print("adding category: {}".format(category))
         self.categories.append(category)
 
+    def getAllVariables(self):
+        variables = []
+        for key in self.samples:
+            variables = list(self.samples[key].data.columns.values)
+        variables = list(set(variables+self.add_vars))
+        return variables
 
     def plot(self):
         # loop over categories and get list of variables
@@ -85,8 +97,12 @@ class variablePlotter:
             if not os.path.exists(cat_dir):
                 os.makedirs(cat_dir)
 
-            # load list of variables from variable set
-            variables = self.variable_set.variables[cat] + self.add_vars
+            # if no variable_set is given, plot all variables in samples
+            if self.variable_set == None:
+                variables = self.getAllVariables()
+            else:
+                # load list of variables from variable set
+                variables = self.variable_set.variables[cat] + self.add_vars
 
             # filter events according to JT category
             for key in self.samples:
