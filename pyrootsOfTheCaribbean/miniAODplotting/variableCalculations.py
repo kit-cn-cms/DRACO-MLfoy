@@ -21,6 +21,8 @@ vertices,       vertexLabel         = Handle("std::vector<reco::Vertex>"),      
 verticesScore                       = Handle("edm::ValueMap<float>")
 gen_jets,       gen_jetLabel        = Handle("std::vector<reco::GenJet>"),      "ak4GenJets"#"slimmedGenJets"
 genParticles,   genParticle_Label   = Handle("std::vector<reco::GenParticle>"), "prunedGenParticles"
+genInfo,        genInfoLabel        = Handle("GenEventInfoProduct"),            "generator"
+
 
 
 class Candidate:
@@ -88,8 +90,19 @@ def print_info(obj ):
         obj.pdgId(), obj.pt(), obj.eta(), obj.phi(), obj.numberOfDaughters(), obj.numberOfMothers())
 
 class Event:
-    def __init__(self, event_type = "ttH"):
+    def __init__(self, event, event_type = "ttH"):
+        self.run = event.eventAuxiliary().run()
+        self.lumi = event.eventAuxiliary().luminosityBlock()
+        self.ID = event.eventAuxiliary().event()
+
         self.event_type = event_type
+
+    def addJT(self, njets, ntags):
+        self.njets = njets
+        self.ntags = ntags
+
+    def addWeight(self, w):
+        self.genWeight = w
 
     def addHadTop(self, obj):
         self.hadronic_top = obj
@@ -117,30 +130,31 @@ class Event:
 
     def genObjDictionary(self):
         objects = {}
-        objects["hadTop"] = [self.hadronic_top]
-        objects["lepTop"] = [self.leptonic_top]
+        objects["hadTop"] = self.hadronic_top
+        objects["lepTop"] = self.leptonic_top
         
-        objects["hadB"] = [self.hadronic_bquark]
-        objects["lepB"] = [self.leptonic_bquark]
+        objects["hadB"] = self.hadronic_bquark
+        objects["lepB"] = self.leptonic_bquark
 
-        objects["Lepton"] = [self.lepton]
+        objects["Lepton"] = self.lepton
 
-        objects["Boson"] = [self.boson]
+        objects["Boson"] = self.boson
+        objects["BosonB1"] = self.boson_bquark1
+        objects["BosonB2"] = self.boson_bquark2
+
         objects["BosonB"] = [self.boson_bquark1, self.boson_bquark2]
-
         objects["B"] = [self.boson_bquark1, self.boson_bquark2, self.hadronic_bquark, self.leptonic_bquark]
         self.objects = objects
 
     def passesCuts(self):
         for key in self.objects:
             for obj in self.objects[key]:
-                if obj.eta() == -22760.31640625:
-                    print("what the actual fuck")
                 if not type(obj) == ROOT.reco.GenParticle:
                     print(type(obj))
                     return False
                 if obj.eta() > 5. or obj.eta() < -5.: return False
                 if obj.phi() > 5. or obj.phi() < -5.: return False
+                #if obj.pt() < 10: return False
         return True
 
     def printEventInfo(self):
@@ -159,34 +173,41 @@ class Event:
             id=int(obj.pdgId()), eta=obj.eta(), phi=obj.phi(), pt=int(obj.pt()), mass=int(obj.mass()))
 
     def get_dEta(self, obj1, obj2):
-        detas = []
-        for o1 in self.objects[obj1]:
-            for o2 in self.objects[obj2]:
-                detas.append( np.abs(o1.eta() - o2.eta()) )
-        return detas
+        return np.abs(self.objects[obj1].eta() - self.objects[obj2].eta())
 
     def get_dPhi(self, obj1, obj2):
-        dphis = []
-        for o1 in self.objects[obj1]:
-            for o2 in self.objects[obj2]:
-                dphis.append( np.abs(o1.phi() - o2.phi()) )
-        return dphis
+        dphi = np.abs(self.objects[obj1].phi() - self.objects[obj2].phi())
+        if dphi > np.pi: dphi -= np.pi
+        if dphi > np.pi: print("but why")
+        return dphi
 
     def get_dR(self, obj1, obj2):
-        drs = []
-        for o1 in self.objects[obj1]:
-            for o2 in self.objects[obj2]:
-                drs.append( np.sqrt( (o1.phi()-o2.phi())**2 + (o1.eta()-o2.eta())**2 ) )
-        return drs
+        return np.sqrt( self.get_dEta(obj1, obj2)**2 + self.get_dPhi(obj1, obj2)**2 )
+ 
+    def get_pT(self, obj):
+        return self.objects[obj].pt()
+    
+    def get_eta(self, obj):
+        return self.objects[obj].eta()
+
+    def get_phi(self, obj):
+        return self.objects[obj].phi()
 
 def readGenEvent(iev, event, event_type = "ttH"):
     event.getByLabel(jetLabel, jets)
+
+    # get generator info
+    event.getByLabel(genInfoLabel, genInfo)
+    genInfoProduct = genInfo.product()
+    genWeight = genInfoProduct.weight()
+
+    # get JT 
     n_jets = 0
     n_tags = 0
     for i,j in enumerate(jets.product()):
         if j.pt() < 20. or j.eta() > 2.4: continue
         n_jets += 1
-        if j.bDiscriminator("pfDeepCSVJetTags:probb")+j.bDiscriminator("pfDeepCSVJetTags:probbb") > 0.45:
+        if j.bDiscriminator("pfDeepCSVJetTags:probb")+j.bDiscriminator("pfDeepCSVJetTags:probbb") > 0.48:
             n_tags += 1
     if n_jets < 4: return None
     if n_tags < 3: return None
@@ -207,6 +228,7 @@ def readGenEvent(iev, event, event_type = "ttH"):
         top_b = find_particle(top_daughters, id = 5)
     except:
         return None
+
     try: 
         topbar_bbar = find_particle(topbar_daughters, id = -5)
     except:
@@ -253,7 +275,10 @@ def readGenEvent(iev, event, event_type = "ttH"):
     else:
         return None
 
-    evt = Event(event_type)
+    evt = Event(event, event_type)
+
+    evt.addJT(n_jets, n_tags)
+    evt.addWeight(genWeight)
 
     # hadronic top
     evt.addHadTop(had_top)
@@ -270,11 +295,13 @@ def readGenEvent(iev, event, event_type = "ttH"):
     evt.addBosonB2(boson_b2)
 
     evt.genObjDictionary()
+
     if not evt.passesCuts():
         del evt
         return None
 
     return evt
+
 # particle searching functions
 def find_particle(particles, id):
     ''' find particle candidate via id

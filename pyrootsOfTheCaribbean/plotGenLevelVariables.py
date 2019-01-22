@@ -10,10 +10,10 @@ import variable_sets.dnnVariableSet as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/nfs/dust/cms/user/vdlinden/MLfoy/pyrootsOfTheCaribbean/miniAODGenLevelData/"
+data_dir = "/nfs/dust/cms/user/vdlinden/MLfoy/workdir/miniAODGenLevelData/"
 
 # output location of plots
-plot_dir = "/nfs/dust/cms/user/vdlinden/MLfoy/pyrootsOfTheCaribbean/miniAODGenLevelData/plots/"
+plot_dir = data_dir+"/plots/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -22,7 +22,7 @@ plotOptions = {
     "ratio":        False,
     "logscale":     False,
     "scaleSignal":  -1,
-    "lumiScale":    1
+    "lumiScale":    1.0
     }
 #   scaleSignal:
 #   -1:     scale to background Integral
@@ -60,6 +60,8 @@ plotter.addSample(
 
 # add JT categories
 plotter.addCategory("ge4j_ge3t")
-
+plotter.addCategory("4j_ge3t")
+plotter.addCategory("5j_ge3t")
+plotter.addCategory("ge6j_ge3t")
 # perform plotting routine
 plotter.plot()

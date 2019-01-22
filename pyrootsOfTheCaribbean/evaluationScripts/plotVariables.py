@@ -1,6 +1,7 @@
 import os
 import sys
 import pandas
+import numpy as np
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(os.path.dirname(filedir))
@@ -36,7 +37,7 @@ class Sample:
     def cutData(self, cut, variables, lumi_scale):
         if not self.applyCut:
             self.cut_data[cut] = self.data
-            self.cut_data[cut]["weight"] = pandas.Series([lumi_scale for _ in range(self.cut_data[cut].shape[0])])
+            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi_scale)
             return
 
         # cut events according to JT category
@@ -122,7 +123,6 @@ class variablePlotter:
                     plot_name   = plot_name,
                     cat         = cat)
 
-
     def histVariable(self, variable, plot_name, cat):
         # get number of bins and binrange from config filea
         bins = binning.getNbins(variable)
@@ -150,11 +150,17 @@ class variablePlotter:
 
             # get weights
             weights = sample.cut_data[cat]["weight"].values
-            weightIntegral += sum(weights)
+            # get values
+            values = sample.cut_data[cat][variable].values
 
+            #weights = [weights[i] for i in range(len(weights)) if not np.isnan(values[i])]
+            #values =  [values[i]  for i in range(len(values))  if not np.isnan(values[i])]
+
+            weightIntegral += sum(weights)
+        
             # setup histogram
             hist = setup.setupHistogram(
-                values      = sample.cut_data[cat][variable].values,
+                values      = values,
                 weights     = weights,
                 nbins       = bins,
                 bin_range   = bin_range,
@@ -208,7 +214,7 @@ class variablePlotter:
         # init canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, self.options,   
-            canvasName = cat+"_"+variable)
+            canvasName = variable)
 
         # setup legend
         legend = setup.getLegend()

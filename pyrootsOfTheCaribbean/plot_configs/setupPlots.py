@@ -165,7 +165,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         canvas.SetLogy()
     else:
         firstHist.GetYaxis().SetRangeUser(0, yMax*1.5)
-    firstHist.GetXaxis().SetTitle(canvasName)
+    firstHist.GetXaxis().SetTitle(generateLatexLabel(canvasName))
 
     option = "histo"
     firstHist.DrawCopy(option+"E0")
@@ -351,3 +351,56 @@ def saveCanvas(canvas, path):
     canvas.SaveAs(path)
     canvas.SaveAs(path.replace(".pdf",".png"))
     canvas.Clear()
+
+
+def generateLatexLabel(name):
+    # remove starters
+    starts = ["Evt_", "BDT_common5_input_"]
+    for s in starts:
+        if name.startswith(s):
+            name = name[len(s):]
+
+    # replace stuff
+    name = name.replace("Dr","#DeltaR")
+    name = name.replace("dR","#DeltaR")
+    name = name.replace("deltaR","#DeltaR")
+    name = name.replace("eta", "#eta")
+    name = name.replace("Eta", "#eta")
+    name = name.replace("d#eta","#Delta#eta")
+    name = name.replace("phi", "#phi")
+    name = name.replace("Phi", "#phi")
+    name = name.replace("d#phi","#Delta#phi")
+    name = name.replace("pT", "p_{T}")
+    name = name.replace("_BosonB1_","(b_{H/Z},")
+    name = name.replace("_BosonB2_","(b_{H/Z},")
+    name = name.replace("_hadB_","(b_{had},")
+    name = name.replace("_lepB_","(b_{lep},")
+    name = name.replace("_Lepton_","(lep,")
+
+    name = name.replace("_BosonB1","(b_{H/Z}),")
+    name = name.replace("_BosonB2","(b_{H/Z}),")
+    name = name.replace("_hadB","(b_{had}),")
+    name = name.replace("_lepB","(b_{lep}),")
+    name = name.replace("_Lepton","(lep),")
+
+    name = name.replace("BosonB1","b_{H/Z})")
+    name = name.replace("BosonB2","b_{H/Z})")
+    name = name.replace("hadB","b_{had})")
+    name = name.replace("lepB","b_{lep})")
+    name = name.replace("Lepton","lep)")
+    
+    return name
+
+
+
+
+
+
+
+
+
+
+
+
+
+

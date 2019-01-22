@@ -99,7 +99,7 @@ def monitorJobStatus(jobIDs = None):
     errorcount = 0
     print("checking job status in condor_q ...")
 
-    command = ["condor_q", "-name", "bird-htc-sched02.desy.de"]
+    command = ["condor_q", "-name", "bird-htc-sched12.desy.de"]
     if jobIDs:
         command += jobIDs
         command = [str(c) for c in command]
