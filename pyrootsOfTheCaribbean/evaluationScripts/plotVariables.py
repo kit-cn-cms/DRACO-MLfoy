@@ -22,7 +22,6 @@ class Sample:
         if self.plotColor == None:
             try:
                 self.plotColor = setup.GetPlotColor(self.sampleName)
-                
             except:
                 print("no color for sample chosen + sample not in color dictionary")
                 self.plotColor = 1
@@ -33,9 +32,10 @@ class Sample:
     def load(self):
         with pandas.HDFStore(self.sampleFile, mode = "r") as store:
             self.data = store.select("data")
+        print("\tnevents: {}".format(self.data.shape[0]))
 
     def cutData(self, cut, variables, lumi_scale):
-        if not self.applyCut:
+        if not self.applyCut or cut in ["inclusive", "SL"]:
             self.cut_data[cut] = self.data
             self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi_scale)
             return
@@ -66,7 +66,9 @@ class variablePlotter:
             "ratio":        False,
             "ratioTitle":   None,
             "logscale":     False,
-            "scaleSignal":  -1}
+            "scaleSignal":  -1,
+            "KSscore":      False}
+
         for key in plotOptions:
             defaultOptions[key] = plotOptions[key]
         self.options = defaultOptions
@@ -109,7 +111,7 @@ class variablePlotter:
             for key in self.samples:
                 self.samples[key].cutData(cat, variables, self.options["lumiScale"])
 
-            # loop over all variables and perform plot
+            # loop over all variables and perform plot each time
             for variable in variables:
                 print("plotting variable: {}".format(variable))
 
@@ -124,7 +126,7 @@ class variablePlotter:
                     cat         = cat)
 
     def histVariable(self, variable, plot_name, cat):
-        # get number of bins and binrange from config filea
+        # get number of bins and binrange from config file
         bins = binning.getNbins(variable)
         bin_range = binning.getBinrange(variable)
 
@@ -144,7 +146,7 @@ class variablePlotter:
         bkgLabels = []
         weightIntegral = 0
 
-        # loop over bachgrounds and fill hists
+        # loop over backgrounds and fill hists
         for sampleName in self.ordered_stack:
             sample = self.samples[sampleName]
 
@@ -218,9 +220,16 @@ class variablePlotter:
 
         # setup legend
         legend = setup.getLegend()
-        # add signal entries
+        # add signal entriesa
         for iSig in range(len(sigHists)):
-            legend.AddEntry(sigHists[iSig], sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig]), "L")
+            labelstring = sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig])
+
+            # add KS score to label if activated
+            if self.options["KSscore"]:
+                labelstring="#splitline{"+labelstring+"}{KSscore = %.3f}"%(setup.calculateKSscore(bkgHists[0],sigHists[iSig]))
+
+            legend.AddEntry(sigHists[iSig], labelstring, "L")
+
         # add background entries
         for iBkg in range(len(bkgHists)):
             legend.AddEntry(bkgHists[iBkg], bkgLabels[iBkg], "F")

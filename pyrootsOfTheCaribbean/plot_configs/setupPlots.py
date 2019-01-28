@@ -198,17 +198,17 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         canvas.cd(2)
         line = sigHists[0].Clone()
         line.Divide(sigHists[0])
-        line.GetYaxis().SetRangeUser(0.,2.)
+        line.GetYaxis().SetRangeUser(0.5,1.5)
         line.GetYaxis().SetTitle(plotOptions["ratioTitle"])
 
         line.GetXaxis().SetLabelSize(line.GetXaxis().GetLabelSize()*2.4)
-        line.GetYaxis().SetLabelSize(line.GetYaxis().GetLabelSize()*2.4)
-        line.GetXaxis().SetTitle(canvasName)
+        line.GetYaxis().SetLabelSize(line.GetYaxis().GetLabelSize()*2.2)
+        line.GetXaxis().SetTitle(generateLatexLabel(canvasName))
 
         line.GetXaxis().SetTitleSize(line.GetXaxis().GetTitleSize()*3)
-        line.GetYaxis().SetTitleSize(line.GetYaxis().GetTitleSize()*1.5)
+        line.GetYaxis().SetTitleSize(line.GetYaxis().GetTitleSize()*2.5)
 
-        line.GetYaxis().SetTitleOffset(0.9)
+        line.GetYaxis().SetTitleOffset(0.5)
         line.GetYaxis().SetNdivisions(505)
         for i in range(line.GetNbinsX()+1):
             line.SetBinContent(i, 1)
@@ -220,11 +220,11 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         for sigHist in sigHists:
             ratioPlot = sigHist.Clone()
             ratioPlot.Divide(bkgHists[0])
-            ratioPlot.SetTitle(canvasName)
-            ratioPlot.SetLineColor(ROOT.kBlack)
-            ratioPlot.SetLineWidth(ROOT.kBlack)
+            ratioPlot.SetTitle(generateLatexLabel(canvasName))
+            ratioPlot.SetLineColor(sigHist.GetLineColor())
+            ratioPlot.SetLineWidth(1)
             ratioPlot.SetMarkerStyle(20)
-            ratioPlot.SetMarkerColor(ROOT.kBlack)
+            ratioPlot.SetMarkerColor(sigHist.GetMarkerColor())
             ROOT.gStyle.SetErrorX(0)
             ratioPlot.DrawCopy("sameP")
         canvas.cd(1)
@@ -286,6 +286,8 @@ def getLegend():
     legend.SetFillStyle(0);
     return legend
 
+def calculateKSscore(stack, sig):
+    return stack.KolmogorovTest(sig)
 
 
 def printLumi(pad, lumi = 41.5, ratio = False):
@@ -353,7 +355,10 @@ def saveCanvas(canvas, path):
     canvas.Clear()
 
 
+
+
 def generateLatexLabel(name):
+    ''' try to make plot label nicer '''
     # remove starters
     starts = ["Evt_", "BDT_common5_input_"]
     for s in starts:
@@ -364,33 +369,39 @@ def generateLatexLabel(name):
     name = name.replace("Dr","#DeltaR")
     name = name.replace("dR","#DeltaR")
     name = name.replace("deltaR","#DeltaR")
+    name = name.replace("dY","#Deltay")
     name = name.replace("eta", "#eta")
     name = name.replace("Eta", "#eta")
     name = name.replace("d#eta","#Delta#eta")
+    name = name.replace("th#eta","#theta")
+    name = name.replace("dTh#eta","#Delta#theta")
+    name = name.replace("cos#theta","cos#theta")
+    name = name.replace("dcosTh#eta","#Deltacos#theta")
     name = name.replace("phi", "#phi")
     name = name.replace("Phi", "#phi")
     name = name.replace("d#phi","#Delta#phi")
-    name = name.replace("pT", "p_{T}")
-    name = name.replace("_BosonB1_","(b_{H/Z},")
-    name = name.replace("_BosonB2_","(b_{H/Z},")
-    name = name.replace("_hadB_","(b_{had},")
-    name = name.replace("_lepB_","(b_{lep},")
-    name = name.replace("_Lepton_","(lep,")
+    name = name.replace("mass","M")
 
-    name = name.replace("_BosonB1","(b_{H/Z}),")
-    name = name.replace("_BosonB2","(b_{H/Z}),")
-    name = name.replace("_hadB","(b_{had}),")
-    name = name.replace("_lepB","(b_{lep}),")
-    name = name.replace("_Lepton","(lep),")
-
-    name = name.replace("BosonB1","b_{H/Z})")
-    name = name.replace("BosonB2","b_{H/Z})")
-    name = name.replace("hadB","b_{had})")
-    name = name.replace("lepB","b_{lep})")
-    name = name.replace("Lepton","lep)")
+    names = [
+            ["ttbar","t#bar{t}"],
+            ["BosonB1","b_{H/Z}"],
+            ["BosonB2","b_{H/Z}"],
+            ["hadTop","t_{had}"],
+            ["lepTop","t_{lep}"],
+            ["hadB","b_{had}"],
+            ["lepB","b_{lep}"],
+            ["Lepton","l"],
+            ["Boson","X_{H/Z}"],
+            ]
+    for n in names:
+        name = name.replace("_"+n[0]+"_","("+n[1]+",")
+    for n in names:
+        name = name.replace("_"+n[0],"("+n[1]+")")
+    for n in names:
+        name = name.replace(n[0],n[1]+")")
     
+    name = name.replace("pT", "p_{T}")
     return name
-
 
 
 
