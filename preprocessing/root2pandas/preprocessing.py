@@ -41,6 +41,9 @@ ttH_selection = "(Evt_Odd == 1)"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZbb", selection = None)
+
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
@@ -51,8 +54,8 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/DNN_ttH_2017/",
-    naming      = "_dnn_newJEC",
+    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN/",
+    naming      = "_dnn",
     addCNNmap   = False,
     addMEM      = True)
 
@@ -60,7 +63,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v5/"
+ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5_forDNN/"
 memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 
@@ -81,7 +84,19 @@ dataset.addSample(
     MEMs        = memPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHNobb.h5")
 
+dataset.addSample(
+    sampleName  = "ttZqq",
+    ntuples     = ntuplesPath.replace("_forDNN","")+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_v2/*.root",
+    categories  = ttZ_categories,
+    selections  = ttH_selection,
+    MEMs        = memPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
 
+dataset.addSample(
+    sampleName  = "ttZll",
+    ntuples     = ntuplesPath.replace("_forDNN","")+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root",
+    categories  = ttZ_categories,
+    selections  = ttH_selection,
+    MEMs        = memPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
 
 dataset.addSample(
     sampleName  = "TTToSL",
