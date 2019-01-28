@@ -19,6 +19,7 @@ jtcategories = ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"]
 
 
 for cat in jtcategories:
+    print("\n\n"+cat+"\n\n")
     file_dir = basedir+"/workdir/"+input_dir+"_"+cat+"/run*/absolute_weight_sum.csv"
     rankings = glob.glob(file_dir)
     variables = {}
@@ -43,6 +44,7 @@ for cat in jtcategories:
         var.append(v)
         mean.append(m)
         std.append( np.std(variables[v]) )
+        print(v,m)
 
     plt.figure(figsize = [10,10])
     plt.errorbar(mean, val, xerr = std, fmt = "o")
