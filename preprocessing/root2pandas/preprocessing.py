@@ -23,17 +23,17 @@ or \
 
 
 # define other additional selections
-ttbar_selection = "(\
-abs(Weight_scale_variation_muR_0p5_muF_0p5) <= 100 and \
-abs(Weight_scale_variation_muR_0p5_muF_1p0) <= 100 and \
-abs(Weight_scale_variation_muR_0p5_muF_2p0) <= 100 and \
-abs(Weight_scale_variation_muR_1p0_muF_0p5) <= 100 and \
-abs(Weight_scale_variation_muR_1p0_muF_1p0) <= 100 and \
-abs(Weight_scale_variation_muR_1p0_muF_2p0) <= 100 and \
-abs(Weight_scale_variation_muR_2p0_muF_0p5) <= 100 and \
-abs(Weight_scale_variation_muR_2p0_muF_1p0) <= 100 and \
-abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100 \
-)"
+#ttbar_selection = "(\
+#abs(Weight_scale_variation_muR_0p5_muF_0p5) <= 100 and \
+#abs(Weight_scale_variation_muR_0p5_muF_1p0) <= 100 and \
+#abs(Weight_scale_variation_muR_0p5_muF_2p0) <= 100 and \
+#abs(Weight_scale_variation_muR_1p0_muF_0p5) <= 100 and \
+#abs(Weight_scale_variation_muR_1p0_muF_1p0) <= 100 and \
+#abs(Weight_scale_variation_muR_1p0_muF_2p0) <= 100 and \
+#abs(Weight_scale_variation_muR_2p0_muF_0p5) <= 100 and \
+#abs(Weight_scale_variation_muR_2p0_muF_1p0) <= 100 and \
+#abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100 \
+#)"
 
 ttH_selection = "(Evt_Odd == 1)"
 
@@ -51,8 +51,8 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/DNN_ttH_2017/",
-    naming      = "_dnn_newJEC",
+    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN/",
+    naming      = "dnn",
     addCNNmap   = False,
     addMEM      = True)
 
@@ -70,7 +70,7 @@ dataset.addSample(
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttH_categories,
     selections  = ttH_selection,
-    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHbb.h5")
     
 dataset.addSample(
@@ -81,30 +81,42 @@ dataset.addSample(
     MEMs        = memPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHNobb.h5")
 
+dataset.addSample(
+    sampleName  = "ttZqq",
+    ntuples     = ntuplesPath.replace("_forDNN","")+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_v2/*nominal*.root",
+    categories  = ttZ_categories,
+    selections  = ttH_selection,
+    MEMs        = memPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
 
+dataset.addSample(
+    sampleName  = "ttZll",
+    ntuples     = ntuplesPath.replace("_forDNN","")+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    categories  = ttZ_categories,
+    selections  = ttH_selection,
+    MEMs        = memPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
 
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+    selections  = None,#ttbar_selection,
+    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToSL.h5")
 
 dataset.addSample(
     sampleName  = "TTToHad",
     ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = memPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+    selections  = None,#ttbar_selection,
+    MEMs        = memPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToHad.h5")
 
 dataset.addSample(
     sampleName  = "TTToLep",
     ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
-    selections  = ttbar_selection,
-    MEMs        = memPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_MEM/*.root",
+    selections  = None,#ttbar_selection,
+    MEMs        = memPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*.root",
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/TTToLep.h5")
 
 # initialize variable list 
