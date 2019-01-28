@@ -9,10 +9,10 @@ import variable_sets.dnnVariableSet as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
+data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ/"
 
 # output location of plots
-plot_dir = "/ceph/vanderlinden/ttH_2017/plots/newJEC/"
+plot_dir = "/ceph/vanderlinden/ttZ_2019/plots/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -45,6 +45,11 @@ plotter = variablePlotter(
 plotter.addSample(
     sampleName      = "ttH",
     sampleFile      = data_dir+"/ttHbb_dnn.h5",
+    signalSample    = True)
+
+plotter.addSample(
+    sampleName      = "ttZ",
+    sampleFile      = data_dir+"/ttZbb_dnn.h5",
     signalSample    = True)
 
 plotter.addSample(
