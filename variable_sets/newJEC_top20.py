@@ -1,10 +1,10 @@
 variables = {}
 variables["4j_ge3t"] = [
+    "Jet_CSV[3]",
+    "CSV[1]",
+    "Evt_M_MinDeltaRLeptonTaggedJet",
     "N_BTagsT",
-    "BDT_common5_input_transverse_sphericity_tags",
-    "Evt_Dr_MinDeltaRLeptonJet",
     "Jet_Pt[0]",
-    "BDT_common5_input_h2",
     "BDT_common5_input_dev_from_avg_disc_btags",
     "BDT_common5_input_closest_tagged_dijet_mass",
     "BDT_common5_input_sphericity_jets",
@@ -25,14 +25,14 @@ variables["4j_ge3t"] = [
 
 
 variables["5j_ge3t"] = [
-    "BDT_common5_input_h2",
+    "BDT_common5_input_max_dR_jj",
+    "CSV[1]",
+    "Jet_Pt[1]",
     "N_BTagsT",
     "Evt_Dr_MinDeltaRLeptonTaggedJet",
     "BDT_common5_input_sphericity_jets",
     "Jet_Pt[2]",
-    "Evt_Dr_MinDeltaRTaggedJets",
     "BDT_common5_input_closest_tagged_dijet_mass",
-    "BDT_common5_input_transverse_sphericity_tags",
     "BDT_common5_input_sphericity_tags",
     "Evt_blr_ETH",
     "Jet_Pt[0]",
@@ -50,16 +50,16 @@ variables["5j_ge3t"] = [
 
 
 variables["ge6j_ge3t"] = [
+    "Evt_JetPtOverJetE",
+    "Evt_Dr_MinDeltaRTaggedJets",
+    "Evt_Dr_TaggedJetsAverage",
+    "Jet_CSV[0]",
     "BDT_common5_input_closest_tagged_dijet_mass",
-    "BDT_common5_input_pt_all_jets_over_E_all_jets_tags",
-    "BDT_common5_input_transverse_sphericity_jets",
-    "BDT_common5_input_transverse_sphericity_tags",
     "Evt_M_MinDeltaRLeptonTaggedJet",
     "CSV[1]",
     "BDT_common5_input_sphericity_jets",
     "BDT_common5_input_dev_from_avg_disc_btags",
     "N_BTagsT",
-    "BDT_common5_input_sphericity_tags",
     "Evt_blr_ETH",
     "Evt_Deta_TaggedJetsAverage",
     "Evt_M2_TaggedJetsAverage",
