@@ -21,10 +21,10 @@ JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
 
 # absolute path to folder with input dataframes
-inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
+inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ/"
 
 # naming for input files
-naming = "_dnn_newJEC.h5"
+naming = "_dnn.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -36,12 +36,12 @@ input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-#input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
+input_samples.addSample("ttZbb"+naming, label = "ttZ", isTrainSample = False, normalization_weight = 2., signalSample = True)
 
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"newJEC_allVariables_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"ttZStudies_allVariables_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
