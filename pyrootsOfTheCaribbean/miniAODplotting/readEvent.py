@@ -238,7 +238,7 @@ class Event:
 
 def readEvent(iev, event, XSWeight = 1., event_type = "ttH"):
     ''' read information of a single event '''
-    if not event_type in ["ttH", "ttHbb", "ttZ", "ttZll", "ttZqq"]:
+    if not event_type in ["ttH", "ttHbb", "ttZ", "ttZll", "ttZqq", "ttZJets"]:
         print("special cases for event_type {} have not yet been implemented".format(event_type))
 
     # intialize event class
@@ -261,7 +261,7 @@ def readEvent(iev, event, XSWeight = 1., event_type = "ttH"):
         #evt.getHiggs(event)
         #evt.getHiggsBBSystem(event)
     # read Z system
-    if event_type in ["ttZ", "ttZll", "ttZqq"]:
+    if event_type in ["ttZ", "ttZll", "ttZqq", "ttZJets"]:
         evt.getBoson(event, bosonID = 23)
         #evt.getZ(event)
 

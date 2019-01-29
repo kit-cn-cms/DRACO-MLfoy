@@ -67,9 +67,15 @@ plotter.addSample(
     plotColor       = ROOT.kRed,
     apply_cut       = False)
 
+plotter.addSample(
+    sampleName      = "ttZJets",
+    sampleFile      = data_dir+"/ttZJets.h5",
+    signalSample    = True,
+    plotColor       = ROOT.kGreen,
+    apply_cut       = False)
 
 # add JT categories
-plotter.addCategory("inclusive")
+plotter.addCategory("SL")
 #plotter.addCategory("ge4j_ge3t")
 #plotter.addCategory("4j_ge3t")
 #plotter.addCategory("5j_ge3t")

@@ -44,7 +44,7 @@ def getJTlabel(cat):
     # jtstring is '(ge)[NJets]j_(ge)[NTags]t'
     # output format is '1 lepton, (\geq) 6 jets, (\geq) 3 b-tags'
     if cat == "inclusive": return "inclusive"
-    if cat == "SL": return "semi leptonic t#bar{t}"
+    if cat == "SL": return "semileptonic t#bar{t}"
     jtstring_config = "'(ge)[NJets]j_(ge)[NTags]t'"
     jets, tags = cat.split("_")
 

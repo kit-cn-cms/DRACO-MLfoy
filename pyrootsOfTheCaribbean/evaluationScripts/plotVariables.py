@@ -249,3 +249,144 @@ class variablePlotter:
 
                         
 
+
+class variablePlotter2D:
+    def __init__(self, output_dir, variable_set, add_vars, plotOptions = {}):
+        self.output_dir     = output_dir
+        self.variable_set   = variable_set
+        self.add_vars       = list(add_vars)        
+
+        self.samples        = {}
+        self.ordered_stack  = []
+        self.categories     = []
+
+        # handle options
+        defaultOptions = {
+            "logscale":     False,
+            "lumiScale":    1,
+            }
+
+        for key in plotOptions:
+            defaultOptions[key] = plotOptions[key]
+        self.options = defaultOptions
+        
+
+    def addSample(self, **kwargs):
+        print("adding sample: "+str(kwargs["sampleName"]))
+        self.samples[kwargs["sampleName"]] = Sample(**kwargs)
+        if not self.samples[kwargs["sampleName"]].isSignal:
+            self.ordered_stack.append(kwargs["sampleName"])
+
+    def addCategory(self, category):
+        print("adding category: {}".format(category))
+        self.categories.append(category)
+
+    def getAllVariables(self, cat):
+        single_variables = self.variable_set.variables[cat]
+        variable_pairs = self.add_vars
+        for i, v1 in enumerate(single_variables):
+            for j, v2 in enumerate(single_variables):
+                if j<=i: continue
+                variable_pairs.append([v1,v2])
+        return variable_pairs
+
+    def plot(self):
+        # loop over categories and get list of variables
+        for cat in self.categories:
+            print("starting with category {}".format(cat))
+
+            cat_dir = self.output_dir+"/"+cat+"/"
+            if not os.path.exists(cat_dir):
+                os.makedirs(cat_dir)
+            # if no variable_set is given, plot all variables in samples
+            if self.variable_set == None:
+                variable_pairs = self.add_vars
+            else:
+                # load list of variables from variable set
+                variable_pairs = self.getAllVariables(cat)
+
+            variables = list(set([v[0] for v in variable_pairs]+[v[1] for v in variable_pairs]))
+            # filter events according to JT category
+            for key in self.samples:
+                self.samples[key].cutData(cat, variables, self.options["lumiScale"])
+
+            # loop over all variables and perform plot each time
+            for variables in variable_pairs:
+                print("plotting variables: {} vs {}".format(variables[0],variables[1]))
+
+                for key in self.samples:
+                    # generate plot output name
+                    plot_name = cat_dir + "/{}_vs_{}_{}.pdf".format(
+                        variables[0],
+                        variables[1],
+                        key.replace("(","").replace(")",""),
+                        )
+                    plot_name = plot_name.replace("[","_").replace("]","")
+                        
+                    # generate plot
+                    self.histVariables2D(
+                        vX          = variables[0],
+                        vY          = variables[1],
+                        plot_name   = plot_name,
+                        sample      = key,
+                        cat         = cat)
+
+    def histVariables2D(self, vX, vY, plot_name, sample, cat):
+
+        # get number of bins and binrange from config file
+        binsX = binning.getNbins(vX)
+        binsY = binning.getNbins(vY)
+        rangeX = binning.getBinrange(vX)
+        rangeY = binning.getBinrange(vY)
+
+        # check if bin_range was found
+        if not rangeX:
+            maxValue = max(self.samples[sample].cut_data[cat][vX].values)
+            minValue = min(self.samples[sample].cut_data[cat][vX].values)
+            config_string = "variables[\""+vX+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
+            with open("new_variable_configs.txt", "a") as f:
+                f.write(config_string)
+            rangeX = [minValue, maxValue]
+
+        if not rangeY:
+            maxValue = max(self.samples[sample].cut_data[cat][vY].values)
+            minValue = min(self.samples[sample].cut_data[cat][vY].values)
+            config_string = "variables[\""+vY+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
+            with open("new_variable_configs.txt", "a") as f:
+                f.write(config_string)
+            rangeY = [minValue, maxValue]
+
+
+        # fill hist
+        weights = self.samples[sample].cut_data[cat]["weight"].values
+        valuesX = self.samples[sample].cut_data[cat][vX].values
+        valuesY = self.samples[sample].cut_data[cat][vY].values
+
+        hist = setup.setupHistogram2D(
+            valuesX     = valuesX,
+            valuesY     = valuesY,
+            weights     = weights,
+            binsX       = binsX,
+            binsY       = binsY,
+            rangeX      = rangeX,
+            rangeY      = rangeY,
+            titleX      = vX,
+            titleY      = vY)
+
+        canvas = setup.drawHistOnCanvas2D(
+            hist        = hist,
+            canvasName  = vX+"_vs_"+vY,
+            catLabel    = JTcut.getJTlabel(cat),
+            sampleName  = sample)
+
+        # add lumi and category to plot
+        setup.printLumi(canvas, lumi = self.options["lumiScale"], twoDim = True)
+
+        # save canvas
+        setup.saveCanvas(canvas, plot_name)
+
+
+
+
+                        
+

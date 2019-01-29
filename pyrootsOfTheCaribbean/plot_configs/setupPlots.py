@@ -58,6 +58,24 @@ def setupHistogram(
 
     return histogram
 
+def setupHistogram2D(valuesX, valuesY, weights, binsX, binsY, rangeX, rangeY, titleX, titleY):
+    
+    hist = ROOT.TH2D("2dhistogram", "", 
+        binsX, rangeX[0], rangeX[1], 
+        binsY, rangeY[0], rangeY[1])
+    hist.SetStats(False)
+    hist.Sumw2(True)
+
+    for vx, vy, w in zip(valuesX, valuesY, weights):
+        hist.Fill(vx, vy, w)
+
+    hist.GetXaxis().SetTitle(generateLatexLabel(titleX))
+    hist.GetYaxis().SetTitle(generateLatexLabel(titleY))
+
+    # TODO fill overflow bins
+    return hist
+
+
 def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     # check if errors for matrix are given
     has_errors = isinstance(errors, np.ndarray)
@@ -93,6 +111,35 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.SetMarkerSize(1.)
 
     return cm
+
+def drawHistOnCanvas2D(hist, canvasName, catLabel, sampleName):
+    # init canvas
+    canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
+    canvas.SetTopMargin(0.15)
+    canvas.SetBottomMargin(0.15)
+    canvas.SetRightMargin(0.15)
+    canvas.SetLeftMargin(0.15)
+
+    # draw histogram
+    #ROOT.gStyle.SetPalette(69)
+    draw_option = "colz"
+    hist.DrawCopy(draw_option)
+
+    # setup TLatex
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+    latex.SetTextSize(0.03)
+
+    l = canvas.GetLeftMargin()
+    t = canvas.GetTopMargin()
+
+    # add category label
+    latex.DrawLatex(l+0.02,1.-t-0.03, catLabel)
+    # add sample name
+    latex.DrawLatex(l,1.-t+0.01, sampleName)
+
+    return canvas
 
 def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
     # init canvas
@@ -290,7 +337,7 @@ def calculateKSscore(stack, sig):
     return stack.KolmogorovTest(sig)
 
 
-def printLumi(pad, lumi = 41.5, ratio = False):
+def printLumi(pad, lumi = 41.5, ratio = False, twoDim = False):
     lumi_text = str(lumi)+" fb^{-1} (13 TeV)"
 
     pad.cd(1)
@@ -303,7 +350,8 @@ def printLumi(pad, lumi = 41.5, ratio = False):
     latex.SetNDC()
     latex.SetTextColor(ROOT.kBlack)
     
-    if ratio:   latex.DrawLatex(l+0.60,1.-t+0.04,lumi_text)
+    if twoDim:  latex.DrawLatex(l+0.40,1.-t+0.01,lumi_text)
+    elif ratio: latex.DrawLatex(l+0.60,1.-t+0.04,lumi_text)
     else:       latex.DrawLatex(l+0.53,1.-t+0.02,lumi_text)
 
 def printCategoryLabel(pad, catLabel, ratio = False):
@@ -392,6 +440,7 @@ def generateLatexLabel(name):
             ["lepB","b_{lep}"],
             ["Lepton","l"],
             ["Boson","X_{H/Z}"],
+            ["ttX","t#bar{t}X"],
             ]
     for n in names:
         name = name.replace("_"+n[0]+"_","("+n[1]+",")
