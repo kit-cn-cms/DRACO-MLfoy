@@ -1,4 +1,5 @@
 # global imports
+import optparse
 import os
 import sys
 import pandas as pd
@@ -12,15 +13,18 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-
-input_dir = sys.argv[1]
+# parse options
+parser = optparse.OptionParser(usage="%prog [options] file")
+parser.add_option("-d", "--directory", dest = "input_dir", metavar = "INPUTDIR",
+    help = "name of input directory which contains the weight files at '...workdir/INPUTDIR_CAT/run*/absolute_weight_sum.csv'")
+parser.add_option("-o", "--output", dest = "output_dir", metavar = "OUTDIR", default = filedir,
+    help = "directory for output plots")
+(opts, args) = parser.parse_args()
 
 jtcategories = ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"]
-
-
 for cat in jtcategories:
     print("\n\n"+cat+"\n\n")
-    file_dir = basedir+"/workdir/"+input_dir+"_"+cat+"/run*/absolute_weight_sum.csv"
+    file_dir = basedir+"/workdir/"+opts.input_dir+"_"+cat+"/run*/absolute_weight_sum.csv"
     rankings = glob.glob(file_dir)
     variables = {}
     for ranking in rankings:
@@ -54,5 +58,7 @@ for cat in jtcategories:
     plt.title(cat)
     plt.xlabel("mean of sum of input weights")
     plt.tight_layout()
-    plt.savefig("weight_sums_"+cat+".pdf")
+    plot_dir = opts.output_dir+"/"+opts.input_dir+"_weight_sums_"+cat+".pdf"
+    plt.savefig(plot_dir)
+    print("saved plot at {}".format(plot_dir))
     plt.clf() 
