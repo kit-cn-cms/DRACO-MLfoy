@@ -114,18 +114,24 @@ def write_single_script(i, f, out_dir, file_dir, sample, XSWeight):
     out_file += str(sample)+"_"+str(i)+".h5"
 
     # write script
-    script =  "#!/bin/bash\n"
-    # export proxy for externally stored mAOD files
-    script += "export X509_USER_PROXY=/nfs/dust/cms/user/vdlinden/VOMSPROXY/vomsproxy\n"
-    # init cmssw
-    script += "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch \n"
-    script += "source $VO_CMS_SW_DIR/cmsset_default.sh \n"
-    script += "export SCRAM_ARCH="+os.environ['SCRAM_ARCH']+"\n"
-    script += "cd /nfs/dust/cms/user/vdlinden/CMSSW/CMSSW_9_2_4/src\n"
-    script += "eval `scram runtime -sh`\n"
-    script += "cd - \n"
-    # call python script
-    script += "python "+str(python_file)+" "+str(f)+" "+str(out_file)+" "+str(sample)+" "+str(XSWeight)+"\n"
+    script = """
+#!/bin/bash
+export X509_USER_PROXY=/nfs/dust/cms/user/vdlinden/VOMSPROXY/vomsproxy
+export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
+source $VO_CMS_SW_DIR/cmsset_default.sh
+export SCRAM_ARCH={arch}
+cd /nfs/dust/cms/user/vdlinden/CMSSW/CMSSW_9_2_4/src
+eval `scram runtime -sh`
+cd - 
+rm {out_file}
+python {python_file} {f} {out_file} {sample} {XSWeight}
+    """.format(
+        arch        = os.environ['SCRAM_ARCH'],
+        python_file = python_file,
+        out_file    = out_file,
+        f           = f,
+        sample      = sample,
+        XSWeight    = str(XSWeight))
 
     # save shell file
     with open(shell_path, "w") as shf:

@@ -441,6 +441,7 @@ def generateLatexLabel(name):
             ["Lepton","l"],
             ["Boson","X_{H/Z}"],
             ["ttX","t#bar{t}X"],
+            ["fn","(X,t_{had})(X,t_{lep})"],
             ]
     for n in names:
         name = name.replace("_"+n[0]+"_","("+n[1]+",")
