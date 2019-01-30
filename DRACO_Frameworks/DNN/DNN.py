@@ -393,29 +393,10 @@ class DNN():
         with pd.HDFStore(location, "a") as store:
             store.append("data", df, index = False)
         print("saved confusion matrix at "+str(location))
+
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
-    def rank_input_features(self):
-        ''' rank input features according to most squared heuristic '''
-        first_layer = self.model.layers[1]
-        weights = first_layer.get_weights()[0]
-
-        self.rank_dict = {}
-        print("getting most squared variable ranking")
-        for iVar, var in enumerate(self.train_variables):
-            rank_value = sum([(weights[iVar][i]-self.initial_weights[iVar][i])**2 for i in range(len(weights[iVar]))])
-            self.rank_dict[var] = rank_value
-
-        # sort rank dict
-        rank_path = self.save_path + "/variable_ranking.csv"
-        with open(rank_path, "w") as f:
-            f.write("variable,rank\n")
-            for key, val in sorted(self.rank_dict.iteritems(), key = lambda (k,v): (v,k)):
-                print("{:50s}: {}".format(key,val))
-                f.write("{},{}\n".format(key,val))
-        print("wrote variable ranking to "+str(rank_path))
-
     def get_input_weights(self):
         ''' get the weights of the input layer '''
         first_layer = self.model.layers[1]
@@ -492,7 +473,7 @@ class DNN():
         plotNodes.set_printROCScore(True)
         plotNodes.plot(ratio = False)
 
-    def plot_discriminators(self, log = False, plot_nonTrainData = False):
+    def plot_discriminators(self, log = False, plot_nonTrainData = False, signal_class = "ttHbb"):
         ''' plot all events classified as one category '''
         nbins = 15
         bin_range = [0.2, 0.7]
@@ -503,7 +484,7 @@ class DNN():
             event_classes       = self.event_classes,
             nbins               = nbins,
             bin_range           = bin_range,
-            signal_class        = "ttHbb",
+            signal_class        = signal_class,
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
             logscale            = log,

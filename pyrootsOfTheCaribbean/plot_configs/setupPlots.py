@@ -17,6 +17,7 @@ def GetPlotColor( cls ):
         "True":  "teal"
         }
 
+    if "ttZ" in cls: cls = "ttZ"
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
 
