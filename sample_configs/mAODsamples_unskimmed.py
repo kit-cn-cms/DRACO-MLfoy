@@ -229,7 +229,7 @@ def get_ttHbb(whatToGet):
     else: exit("sample_config getter function not called with a valid argument ({})".format(whatToGet))
 
 
-    def get_ttZJets(whatToGet):
+def get_ttZJets(whatToGet):
     if whatToGet == "samples":
         return ["root://xrootd-cms.infn.it//"+str(i) for i in [
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/98EEAAB6-D6AB-E811-9446-0242AC1C0503.root",
