@@ -5,12 +5,14 @@ import glob
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(filedir)
+sys.path.append(basedir)
 
 import miniAODplotting.sampleProcessor as processor
 import miniAODplotting.NAFSubmit as NAFSubmit
 import sample_configs.mAODsamples_unskimmed as sampleConfig
 
 samples = {}
+'''
 samples["ttZJets"] = {
     "data":     sampleConfig.get_ttZJets("samples"),
     "XSWeight": sampleConfig.get_ttZJets("XSWeight")}
@@ -22,7 +24,7 @@ samples["ttZll"] = {
 samples["ttZqq"] = {
     "data":     sampleConfig.get_ttZqq("samples"),
     "XSWeight": sampleConfig.get_ttZqq("XSWeight")}
-
+'''
 samples["ttHbb"] = {
     "data":     sampleConfig.get_ttHbb("samples"),
     "XSWeight": sampleConfig.get_ttHbb("XSWeight")}

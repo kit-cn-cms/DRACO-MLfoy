@@ -59,6 +59,23 @@ class Event:
         self.variables["N_Jets"] = nJets
         self.variables["N_BTagsM"] = nTags
 
+    def getLeptonCounter(self, event):
+        event.getByLabel(muonLabel, muons)
+        event.getByLabel(electronLabel, electrons)
+
+        # TODO add real selection
+        nLooseLeptons = 0
+        for i, e in enumerate(electrons.product()):
+            if  e.pt() > 15. and abs(e.eta()) < 2.4:
+                nLooseLeptons += 1
+
+        for i, m in enumerate(muons.product()):
+            if m.pt() > 15. and abs(m.eta()) < 2.4:
+                nLooseLeptons += 1
+
+        self.variables["N_LooseLeptons"] = nLooseLeptons
+
+
     def getAdditionalJets(self, event):
         # TODO
         nJets = 0
@@ -246,6 +263,9 @@ def readEvent(iev, event, XSWeight = 1., event_type = "ttH"):
 
     # read jet tag
     evt.getJetTagInfo(event) 
+    if evt.ERROR: return evt
+
+    evt.getLeptonCounter(event)
     if evt.ERROR: return evt
 
     #evt.getAdditionalJets(event)
