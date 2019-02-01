@@ -116,7 +116,7 @@ def write_single_script(i, f, out_dir, file_dir, sample, XSWeight):
     # write script
     script = """
 #!/bin/bash
-export X509_USER_PROXY=/nfs/dust/cms/user/vdlinden/VOMSPROXY/vomsproxy
+export X509_USER_PROXY={proxy}
 export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch
 source $VO_CMS_SW_DIR/cmsset_default.sh
 export SCRAM_ARCH={arch}
@@ -126,6 +126,7 @@ cd -
 rm {out_file}
 python {python_file} {f} {out_file} {sample} {XSWeight}
     """.format(
+        proxy       = os.environ['X509_USER_PROXY'],
         arch        = os.environ['SCRAM_ARCH'],
         python_file = python_file,
         out_file    = out_file,
