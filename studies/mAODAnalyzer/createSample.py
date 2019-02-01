@@ -37,17 +37,13 @@ if not os.path.exists(output_dir):
 outfile = output_dir+"/{}.h5".format(opts.samplename)
 
 # create shell scripts
-shellscripts, output_parts = sampleProcessor.generate_submit_scripts(samples, output_dir, filedir)
+shellscripts, output_parts = sampleProcessor.generate_submit_scripts(samples, output_dir, opts.samplename, filedir)
 
-submit = True
-if len(sys.argv) > 1:
-    if sys.argv[1] == "--noSubmit":
-        submit = False
         
 # submit them to naf
-if submit:
+if opts.submit:
     jobids = NAFSubmit.submitToBatch(output_dir, shellscripts)
     NAFSubmit.monitorJobStatus(jobids)
 
-sampleProcessor.concat_samples(output_parts, outfile)
+sampleProcessor.concat_samples(output_parts, output_dir, opts.samplename)
 

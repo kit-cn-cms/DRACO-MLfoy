@@ -18,7 +18,7 @@ genParticles,   genParticleLabel    = Handle("std::vector<reco::GenParticle>"), 
 
 
 
-def generate_submit_scripts(samples, output_dir, file_dir):
+def generate_submit_scripts(samples, output_dir, name, file_dir):
     ''' loop over all the samples and create a shellscript for submission to NAF '''
     python_file = file_dir+"/analyzeSingleSample.py"
 
@@ -26,14 +26,14 @@ def generate_submit_scripts(samples, output_dir, file_dir):
     output_files = []
     # get all specified samples
     for i, s in enumerate(samples):
-        shell_path, output_file = write_single_script(i, s, output_dir, python_file)
+        shell_path, output_file = write_single_script(i, s, output_dir, name, python_file)
         shellscripts.append(shell_path)
         output_files.append(output_file)
 
     return shellscripts, output_files
 
     
-def write_single_script(i, s, output_dir, python_file):
+def write_single_script(i, s, output_dir, name, python_file):
     shell_dir = output_dir + "/shell_scripts/"
     if not os.path.exists(shell_dir):
         os.makedirs(shell_dir)
@@ -41,8 +41,8 @@ def write_single_script(i, s, output_dir, python_file):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    shell_path = shell_dir+"/analyzeSample_part_{}.sh".format(i)
-    out_file = out_dir+"/sample_part_{}.h5".format(i)
+    shell_path = shell_dir+"/{}_part_{}.sh".format(name, i)
+    out_file = out_dir+"/{}_part_{}.h5".format(name, i)
 
     script = """
 #!/bin/bash
@@ -70,19 +70,27 @@ python {python_file} {s} {out_file}
     print("wrote shell script "+str(shell_path))
     return shell_path, out_file
 
-def concat_samples(output_parts, outfile):
+def concat_samples(output_parts, output_dir, name):
     ''' concatenate all the single files produced by NAF jobs '''
+    outfile = output_dir+"/{}.h5".format(name)
+    print("removing old file...")
+    if os.path.exists(outfile):
+        os.remove(outfile)
+
     for iPart, p in enumerate(output_parts):
         print("({}/{}) adding file {}".format(iPart+1,len(output_parts),p))
 
-        # load part file
-        with pd.HDFStore(p, mode = "r") as store:
-            df = store.select("data")
-        print("\t{} events.".format(df.shape[0]))
+        try:
+            # load part file
+            with pd.HDFStore(p, mode = "r") as store:
+                df = store.select("data")
+            print("\t{} events.".format(df.shape[0]))
+            # save to concatenated file
+            with pd.HDFStore(outfile, mode = "a") as store:
+                store.append("data", df, index = False)
+        except:
+            print("error when loading h5 file - does not exist")
 
-        # save to concatenated file
-        with pd.HDFStore(outfile, mode = "a") as store:
-            store.append("data", df, index = False)
 
 
 def analyze(sample, output_dir):
