@@ -35,11 +35,14 @@ or \
 #abs(Weight_scale_variation_muR_2p0_muF_2p0) <= 100 \
 #)"
 
-ttH_selection = "(Evt_Odd == 1)"
+ttH_selection = None#"(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
+
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZbb", selection = None)
 
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
@@ -54,15 +57,15 @@ dataset = root2pandas.Dataset(
     outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN/",
     naming      = "dnn",
     addCNNmap   = False,
-    addMEM      = True)
+    addMEM      = False)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_forDNN_v4/"
+ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5_forDNN/"
+ttZntuples = "/nfs/dust/cms/user/vdlinden/ttZ_2019/ntuples_v1/"
 memPath = "/nfs/dust/cms/user/vdlinden/MEM_2017/"
-
 
 # add samples to dataset
 dataset.addSample(
@@ -82,6 +85,12 @@ dataset.addSample(
     CNNmaps     = "/nfs/dust/cms/user/vdlinden/DRACO-MLfoy/workdir/miniAOD_files/CNN_files/ttHNobb.h5")
 
 dataset.addSample(
+    sampleName  = "ttZJets",
+    ntuples     = ttZntuples+"/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/*nominal*.root",
+    categories  = ttZ_categories,
+    selections  = ttH_selection)
+'''
+dataset.addSample(
     sampleName  = "ttZqq",
     ntuples     = ntuplesPath.replace("_forDNN","")+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_v2/*nominal*.root",
     categories  = ttZ_categories,
@@ -94,7 +103,7 @@ dataset.addSample(
     categories  = ttZ_categories,
     selections  = ttH_selection,
     MEMs        = memPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
-
+'''
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
