@@ -34,7 +34,7 @@ variables["4j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    #'memDBp',
     ]
 
 
@@ -81,7 +81,7 @@ variables["5j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    #'memDBp',
     ]
 
 
@@ -127,7 +127,7 @@ variables["ge6j_ge3t"] = [
     'CSV[1]',
     'Evt_blr_ETH',
     'Evt_blr_ETH_transformed',
-    'memDBp',
+    #'memDBp',
     ]
 
 all_variables = set( [v for key in variables for v in variables[key] ] )

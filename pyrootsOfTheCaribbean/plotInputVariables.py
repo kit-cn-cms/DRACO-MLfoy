@@ -1,3 +1,4 @@
+import ROOT
 import os
 import sys
 # local imports
@@ -9,10 +10,11 @@ import variable_sets.dnnVariableSet as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
+data_dir = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN/"
+#data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
 
 # output location of plots
-plot_dir = "/ceph/vanderlinden/ttH_2017/plots/newJEC/"
+plot_dir = basedir+"/workdir/inputVariables/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -45,27 +47,39 @@ plotter = variablePlotter(
 plotter.addSample(
     sampleName      = "ttH",
     sampleFile      = data_dir+"/ttHbb_dnn.h5",
+    plotColor       = ROOT.kBlue+1,
+    signalSample    = True)
+
+plotter.addSample(
+    sampleName      = "ttZ",
+    sampleFile      = data_dir+"/ttZbb_dnn.h5",
+    plotColor       = ROOT.kGreen+1,
     signalSample    = True)
 
 plotter.addSample(
     sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb_dnn.h5")
+    sampleFile      = data_dir+"/ttbb_dnn.h5",
+    plotColor       = ROOT.kRed+3)
 
 plotter.addSample(
     sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b_dnn.h5")
+    sampleFile      = data_dir+"/tt2b_dnn.h5",
+    plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
     sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb_dnn.h5")
+    sampleFile      = data_dir+"/ttb_dnn.h5",
+    plotColor       = ROOT.kRed-2)
 
 plotter.addSample(
     sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc_dnn.h5")
+    sampleFile      = data_dir+"/ttcc_dnn.h5",
+    plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
     sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf_dnn.h5")
+    sampleFile      = data_dir+"/ttlf_dnn.h5",
+    plotColor       = ROOT.kRed-7)
 
 
 
