@@ -25,7 +25,7 @@ def calculateVariables(evt):
     #   'lepTop':   leptonically (t->b(W->lnu)) decaying top quark
     #   'lepB':     b quark from leptonic top decay
     #   'hadB':     b quark from hadronci top decay
-    objects = ["Lepton", "hadTop", "lepTop", "hadB", "lepB"]
+    objects = ["Lepton", "hadTop", "lepTop", "hadB", "lepB", "Boson"]
 
     # loop over all the objects
     for i, obj1 in enumerate(objects):
@@ -38,8 +38,8 @@ def calculateVariables(evt):
         # rapidity
         event_data["y_{}".format(obj1)] =           [evt.get_y(obj1)]
         # cosine of azimuth angle
-        event_data["theta_{}".format(obj1)] =       [evt.get_theta(obj1)]
-        event_data["costheta_{}".format(obj1)] =    [evt.get_costheta(obj1)]
+        #event_data["theta_{}".format(obj1)] =       [evt.get_theta(obj1)]
+        #event_data["costheta_{}".format(obj1)] =    [evt.get_costheta(obj1)]
         # polar angle
         event_data["phi_{}".format(obj1)] =         [evt.get_phi(obj1)]
         # mass of particle
@@ -53,8 +53,8 @@ def calculateVariables(evt):
             # rapidity difference
             event_data["dY_{}_{}".format(obj1,obj2)] =          [evt.get_dY(obj1,obj2)]
             # difference in cosine of azimuth angle
-            event_data["dTheta_{}_{}".format(obj1,obj2)] =      [evt.get_dTheta(obj1,obj2)]
-            event_data["dcosTheta_{}_{}".format(obj1,obj2)] =   [evt.get_dcosTheta(obj1,obj2)]
+            #event_data["dTheta_{}_{}".format(obj1,obj2)] =      [evt.get_dTheta(obj1,obj2)]
+            #event_data["dcosTheta_{}_{}".format(obj1,obj2)] =   [evt.get_dcosTheta(obj1,obj2)]
             # difference in polar angle
             event_data["dPhi_{}_{}".format(obj1,obj2)] =        [evt.get_dPhi(obj1,obj2)]
             # spacial difference in R = sqrt(dEta^2+dPhi^2)
@@ -67,20 +67,19 @@ def calculateVariables(evt):
     event_data["pT_{}".format("ttbar")] =       [ttbar.Pt()]
     event_data["eta_{}".format("ttbar")] =      [ttbar.Eta()]
     event_data["y_{}".format("ttbar")] =        [ttbar.Rapidity()]
-    event_data["theta_{}".format("ttbar")] =    [ttbar.Theta()]
-    event_data["costheta_{}".format("ttbar")] = [np.cos(ttbar.Theta())]
+    #event_data["theta_{}".format("ttbar")] =    [ttbar.Theta()]
+    #event_data["costheta_{}".format("ttbar")] = [np.cos(ttbar.Theta())]
     event_data["phi_{}".format("ttbar")] =      [ttbar.Phi()]
-    event_data["mass_{}".format("ttbar")] =     [ttbar.M()]
+    #event_data["mass_{}".format("ttbar")] =     [ttbar.M()]
 
-    '''
     # get the boson (H/Z)
     boson = evt.objects["Boson"].p4()
 
     # save kinematic differences between Boson and ttbar system
     deta = np.abs(boson.Eta()-ttbar.Eta())
     event_data["dEta_{}_{}".format("Boson","ttbar")] =      [deta]
-    event_data["dTheta_{}_{}".format("Boson","ttbar")] =    [np.abs(boson.Theta() - ttbar.Theta())]
-    event_data["dcosTheta_{}_{}".format("Boson","ttbar")] = [np.abs(np.cos(boson.Theta())-np.cos(ttbar.Theta()))]
+    #event_data["dTheta_{}_{}".format("Boson","ttbar")] =    [np.abs(boson.Theta() - ttbar.Theta())]
+    #event_data["dcosTheta_{}_{}".format("Boson","ttbar")] = [np.abs(np.cos(boson.Theta())-np.cos(ttbar.Theta()))]
     event_data["dY_{}_{}".format("Boson","ttbar")] =        [np.abs(boson.Rapidity()-ttbar.Rapidity())]
     dphi = np.abs(boson.Phi()-ttbar.Phi())
     if dphi > np.pi: dphi = 2.*np.pi-dphi
@@ -94,19 +93,17 @@ def calculateVariables(evt):
     event_data["pT_{}".format("ttX")] =       [ttX.Pt()]
     event_data["eta_{}".format("ttX")] =      [ttX.Eta()]
     event_data["y_{}".format("ttX")] =        [ttX.Rapidity()]
-    event_data["theta_{}".format("ttX")] =    [ttX.Theta()]
-    event_data["costheta_{}".format("ttX")] = [np.cos(ttX.Theta())]
+    #event_data["theta_{}".format("ttX")] =    [ttX.Theta()]
+    #event_data["costheta_{}".format("ttX")] = [np.cos(ttX.Theta())]
     event_data["phi_{}".format("ttX")] =      [ttX.Phi()]
-    event_data["mass_{}".format("ttX")] =     [ttX.M()]
-    '''
+    #event_data["mass_{}".format("ttX")] =     [ttX.M()]
 
-    '''
     # save some extra fancy variables
     event_data["dEta_fn"] =     [np.sqrt( evt.get_dEta("Boson","hadTop")*evt.get_dEta("Boson","lepTop") )]
     event_data["dY_fn"] =       [np.sqrt( evt.get_dY("Boson","hadTop")*evt.get_dY("Boson","lepTop") )]
     event_data["dR_fn"] =       [np.sqrt( evt.get_dR("Boson","hadTop")*evt.get_dR("Boson","lepTop")  )]
     event_data["dPhi_fn"] =     [np.sqrt( evt.get_dPhi("Boson","hadTop")*evt.get_dPhi("Boson","lepTop") )]
-    '''
+
     
 
     # create dataframe-type dictionary from variables

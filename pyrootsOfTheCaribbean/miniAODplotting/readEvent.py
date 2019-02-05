@@ -316,7 +316,6 @@ def readEvent(iev, event, XSWeight = 1., event_type = "ttH"):
     evt.getSLTTSystem(event)
     if evt.ERROR: return evt
 
-    '''
     ## read higgs system
     if event_type in ["ttH","ttHbb"]:
         evt.getBoson(event, bosonID = 25)
@@ -330,7 +329,7 @@ def readEvent(iev, event, XSWeight = 1., event_type = "ttH"):
 
     if event_type in ["ttSL"]:
         evt.getBoson(event, bosonID = 21)
-    '''
+
     return evt
 
     

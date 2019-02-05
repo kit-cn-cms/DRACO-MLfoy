@@ -177,7 +177,8 @@ python {python_file} {f} {out_file} {sample} {XSWeight}
 
 def concat_samples(sample_parts, path):
     ''' concatenate all the single files produced by NAF jobs '''
-    
+
+    non_existing_files = []    
     # loop over the samples
     for sample in sample_parts:
         print("concatenating for sample "+str(sample))
@@ -185,10 +186,17 @@ def concat_samples(sample_parts, path):
 
         # generate output path of concatenated data file
         out_file = path + "/" + sample + ".h5"
+        if os.path.exists(out_file):
+            os.remove(out_file)
 
         # start concatenating procedure
         for iPart, p in enumerate(parts):
             print("({}/{}) adding file {}".format(iPart+1,len(parts),p))
+
+            if not os.path.exists(p):
+                non_existing_files.append(p)
+                print("!!! file does not exist !!!")
+                continue
 
             # load part file
             with pd.HDFStore(p, mode = "r") as store:
@@ -199,7 +207,9 @@ def concat_samples(sample_parts, path):
             with pd.HDFStore(out_file, mode = "a") as store:
                 store.append("data", df, index = False)
             
-
+    if len(non_existing_files) > 0:
+        print("the following files did not exist:")
+        for f in non_existing_files: print(f)
 
 
 

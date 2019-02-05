@@ -31,7 +31,7 @@ class Sample:
 
     def load(self):
         with pandas.HDFStore(self.sampleFile, mode = "r") as store:
-            self.data = store.select("data")
+            self.data = store.select("data", stop = 1000000)
         print("\tnevents: {}".format(self.data.shape[0]))
 
     def cutData(self, cut, variables, lumi_scale):

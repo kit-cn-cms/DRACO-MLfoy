@@ -24,7 +24,7 @@ plotOptions = {
     }
 
 # list of variables to plot
-objects = ["ttbar", "Lepton", "hadTop", "hadB", "ttX", "lepTop", "lepB", "Boson"]
+objects = ["Lepton", "hadTop", "hadB", "lepTop", "lepB"]
 
 variables = [
     ]+[
@@ -57,13 +57,18 @@ plotter.addSample(
     apply_cut       = False)
 '''
 plotter.addSample(
-    sampleName      = "ttZ(ll)",
-    sampleFile      = data_dir+"/ttZll.h5",
+    sampleName      = "ttZJets",
+    sampleFile      = data_dir+"/ttZJets.h5",
     apply_cut       = False)
 
+#plotter.addSample(
+#    sampleName      = "ttH(bb)",
+#    sampleFile      = data_dir+"/ttHbb.h5",
+#    apply_cut       = False)
+
 plotter.addSample(
-    sampleName      = "ttH(bb)",
-    sampleFile      = data_dir+"/ttHbb.h5",
+    sampleName      = "ttbar",
+    sampleFile      = data_dir+"/ttSL.h5",
     apply_cut       = False)
 
 

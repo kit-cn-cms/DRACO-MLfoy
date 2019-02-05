@@ -24,16 +24,16 @@ samples["ttZqq"] = {
     "data":     sampleConfig.get_ttZqq("samples"),
     "XSWeight": sampleConfig.get_ttZqq("XSWeight")}
 
-#samples["ttHbb"] = {
-#    "data":     sampleConfig.get_ttHbb("samples"),
-#    "XSWeight": sampleConfig.get_ttHbb("XSWeight")}
+samples["ttHbb"] = {
+    "data":     sampleConfig.get_ttHbb("samples"),
+    "XSWeight": sampleConfig.get_ttHbb("XSWeight")}
 
-#samples["ttSL"] = {
-#    "data":     sampleConfig.get_ttSL("samples"),
-#    "XSWeight": sampleConfig.get_ttSL("XSWeight")}
+samples["ttSL"] = {
+    "data":     sampleConfig.get_ttSL("samples"),
+    "XSWeight": sampleConfig.get_ttSL("XSWeight")}
 
 # output directory
-output_dir = basedir + "/workdir/miniAODGenLevelData/ttZSystem/"
+output_dir = basedir + "/workdir/miniAODGenLevelData/ttbarSystem/"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 

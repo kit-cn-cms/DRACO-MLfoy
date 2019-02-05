@@ -53,12 +53,12 @@ plotter.addSample(
     plotColor       = ROOT.kYellow,
     apply_cut       = False)
 
-plotter.addSample(
-    sampleName      = "ttZ(ll)",
-    sampleFile      = data_dir+"/ttZll.h5",
-    signalSample    = True,
-    plotColor       = ROOT.kBlack,
-    apply_cut       = False)
+#plotter.addSample(
+#    sampleName      = "ttZ(ll)",
+#    sampleFile      = data_dir+"/ttZll.h5",
+#    signalSample    = True,
+#    plotColor       = ROOT.kBlack,
+#    apply_cut       = False)
 
 plotter.addSample(
     sampleName      = "ttH(bb)",
@@ -72,6 +72,13 @@ plotter.addSample(
     sampleFile      = data_dir+"/ttZJets.h5",
     signalSample    = True,
     plotColor       = ROOT.kGreen,
+    apply_cut       = False)
+
+plotter.addSample(
+    sampleName      = "ttbar",
+    sampleFile      = data_dir+"/ttSL.h5",
+    signalSample    = True,
+    plotColor       = ROOT.kOrange,
     apply_cut       = False)
 
 # add JT categories
