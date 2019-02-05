@@ -25,7 +25,7 @@ def calculateVariables(evt):
     #   'lepTop':   leptonically (t->b(W->lnu)) decaying top quark
     #   'lepB':     b quark from leptonic top decay
     #   'hadB':     b quark from hadronci top decay
-    objects = ["Boson", "Lepton", "hadTop", "lepTop", "hadB", "lepB"]
+    objects = ["Lepton", "hadTop", "lepTop", "hadB", "lepB"]
 
     # loop over all the objects
     for i, obj1 in enumerate(objects):
@@ -72,6 +72,7 @@ def calculateVariables(evt):
     event_data["phi_{}".format("ttbar")] =      [ttbar.Phi()]
     event_data["mass_{}".format("ttbar")] =     [ttbar.M()]
 
+    '''
     # get the boson (H/Z)
     boson = evt.objects["Boson"].p4()
 
@@ -97,13 +98,15 @@ def calculateVariables(evt):
     event_data["costheta_{}".format("ttX")] = [np.cos(ttX.Theta())]
     event_data["phi_{}".format("ttX")] =      [ttX.Phi()]
     event_data["mass_{}".format("ttX")] =     [ttX.M()]
+    '''
 
+    '''
     # save some extra fancy variables
     event_data["dEta_fn"] =     [np.sqrt( evt.get_dEta("Boson","hadTop")*evt.get_dEta("Boson","lepTop") )]
     event_data["dY_fn"] =       [np.sqrt( evt.get_dY("Boson","hadTop")*evt.get_dY("Boson","lepTop") )]
     event_data["dR_fn"] =       [np.sqrt( evt.get_dR("Boson","hadTop")*evt.get_dR("Boson","lepTop")  )]
     event_data["dPhi_fn"] =     [np.sqrt( evt.get_dPhi("Boson","hadTop")*evt.get_dPhi("Boson","lepTop") )]
-
+    '''
     
 
     # create dataframe-type dictionary from variables

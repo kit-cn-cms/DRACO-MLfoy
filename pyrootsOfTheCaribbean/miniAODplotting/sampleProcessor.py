@@ -30,15 +30,39 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
     print("processing {}".format(sample))
     # loading events from file via FWlite 
     events = Events(sample)
+    n_events = events.size()
+    print("total number of events in file: {}".format(n_events))
 
     dfs = []
+    
+
+    addb = 0
+    semilep = 0
+    addb_and_sl = 0
+
+    fromProton = 0
+    fromGluon = 0
+    fromOtherMother = 0
+    gluonAndProton = 0
+
     # start event loop
     for iev, event in enumerate(events):
         if iev%1000==0: print("#{}".format(iev))
         
         # read all the things from event which is specified in readEvent
         evt = readEvent.readEvent(iev, event, XSWeight, event_type = sample_type)
-        # 'evt' is returned as NONE if some objects could not be found/the event doesnt pass some cuts
+        if evt.hasAddBQuarks: 
+            addb += 1
+            if evt.fromProton:
+                fromProton += 1
+            if evt.fromGluon:
+                fromGluon += 1
+            if evt.fromProton and evt.fromGluon:
+                gluonAndProton += 1
+            if evt.otherMother:
+                fromOtherMother += 1
+        if evt.isSemilep: semilep += 1
+        if evt.hasAddBQuarks and evt.isSemilep: addb_and_sl += 1
         if not evt.passesCuts(): continue
 
         # calculate variables defined in variableCalculations
@@ -46,7 +70,15 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
         
         # add the variable dictionary (in DataFrame format) to that temporary list
         dfs.append(event_df)
-    
+        
+    print("number of events with additional B: {}".format(addb))
+    print("\tof which {} add b pairs come from protons".format(fromProton))
+    print("\tof which {} add b pairs come from gluons".format(fromGluon))
+    print("\tof which {} events have both".format(gluonAndProton))
+    print("\tof which {} are from other mothers".format(fromOtherMother))
+    print("semilep events: {}".format(semilep))
+    print("semilep and additional b: {}".format(addb_and_sl))
+
     # concatenate dataframes
     df = pd.concat(dfs)
     print("number of events passing cuts n stuff: {}".format(df.shape[0]))

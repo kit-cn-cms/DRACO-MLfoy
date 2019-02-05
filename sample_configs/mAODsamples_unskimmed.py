@@ -18,6 +18,15 @@ def get_ttZll(whatToGet):
         return "/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1"
     else: exit("sample_config getter function not called with a valid argument ({})".format(whatToGet))
 
+def get_ttSL(whatToGet):
+    if whatToGet == "samples":
+        return glob.glob("/pnfs/desy.de/cms/tier2/store/mc/RunIIFall17MiniAODv2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/*/*.root")
+    if whatToGet == "XSWeight":
+        return 2.77574356775E-05
+    if whatToGet == "name":
+        return "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1"
+    else: exit("sample_config getter function not called with a valid argument ({})".format(whatToGet))
+
 
 def get_ttZqq(whatToGet):
     if whatToGet == "samples":
@@ -430,7 +439,7 @@ def get_ttZJets(whatToGet):
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/AC967013-F3AB-E811-8E84-0242AC1C0503.root",
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/9AE05881-C9AB-E811-A99C-0242AC1C0503.root",
 
-
+        '''
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/FED6820E-C3AA-E811-92ED-3417EBE47C5E.root",
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/FCF4913E-A0A9-E811-B007-D4AE52E948A6.root",
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/FCF2010E-C6AA-E811-B244-002590E7DF2A.root",
@@ -630,9 +639,10 @@ def get_ttZJets(whatToGet):
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/0232420C-99A9-E811-9227-A0369FE2C16A.root",
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/00D7A40D-91AA-E811-A13E-D4AE52E90FA0.root",
         "/store/mc/RunIIFall17MiniAODv2/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/40000/004C0168-5BAA-E811-A68A-0CC47A7C3430.root",
+        '''
         ]]
     if whatToGet == "XSWeight": 
-        return 1e-5
+        return 5.58514283917e-05
     if whatToGet == "name":     
         return "/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14"
     else: exit("sample_config getter function not called with a valid argument ({})".format(whatToGet))
