@@ -37,10 +37,6 @@ output_dir = basedir + "/workdir/miniAODGenLevelData/ttbarSystem/"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# remove old hdf5 files
-h5_files = glob.glob(output_dir+"/*.h5")
-for f in h5_files: os.remove(f)
-
 # create shell scripts
 shellscripts, sample_parts = processor.generate_submit_scripts(samples, output_dir, filedir)
 
