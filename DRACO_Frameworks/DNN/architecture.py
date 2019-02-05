@@ -3,7 +3,7 @@ from keras import optimizers
 architecture = {}
 
 architecture["4j_ge3t"] = {
-    "layers":                   [100,100,100],
+    "layers":                   [100,100],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.50,
     "L2_Norm":                  1e-5,
@@ -16,7 +16,7 @@ architecture["4j_ge3t"] = {
     }
 
 architecture["5j_ge3t"] = {
-    "layers":                   [100,100,100],
+    "layers":                   [100,100],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.50,
     "L2_Norm":                  1e-5,
@@ -29,7 +29,7 @@ architecture["5j_ge3t"] = {
     }
 
 architecture["ge6j_ge3t"] = {
-    "layers":                   [100,100,100],
+    "layers":                   [100,100],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.50,
     "L2_Norm":                  1e-5,
