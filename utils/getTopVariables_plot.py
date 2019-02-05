@@ -19,11 +19,14 @@ parser.add_option("-d", "--directory", dest = "input_dir", metavar = "INPUTDIR",
     help = "name of input directory which contains the weight files at '...workdir/INPUTDIR_CAT/run*/absolute_weight_sum.csv'")
 parser.add_option("-o", "--output", dest = "output_dir", metavar = "OUTDIR", default = filedir,
     help = "directory for output plots")
+parser.add_option("-n", "--nVariables", dest = "nvars", metavar = "NVARIABLES", default = 100,
+    help = "number of variables to print")
 (opts, args) = parser.parse_args()
 
 jtcategories = ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"]
+filestring = "variables = {}\n"
 for cat in jtcategories:
-    print("\n\n"+cat+"\n\n")
+    filestring += "\nvariables[\""+cat+"\"] = [\n"
     file_dir = basedir+"/workdir/"+opts.input_dir+"_"+cat+"/run*/absolute_weight_sum.csv"
     rankings = glob.glob(file_dir)
     variables = {}
@@ -36,19 +39,21 @@ for cat in jtcategories:
 
 
     mean_dict = {}
-    for v in variables: mean_dict[v] = np.median(variables[v])
+    for v in variables: mean_dict[v] = np.mean(variables[v])
     var = []
     val = []
     mean = []
     std = []
     i = 0
+    max_vars = len(variables)
     for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
         i += 1
         val.append(i)
         var.append(v)
         mean.append(m)
         std.append( np.std(variables[v]) )
-        print(v,m)
+        if max_vars-i < int(opts.nvars):
+            filestring += "    '"+v+"',\n"
 
     plt.figure(figsize = [10,10])
     plt.errorbar(mean, val, xerr = std, fmt = "o")
@@ -62,3 +67,10 @@ for cat in jtcategories:
     plt.savefig(plot_dir)
     print("saved plot at {}".format(plot_dir))
     plt.clf() 
+    filestring += "    ]\n\n"
+
+filestring += "all_variables = set( [v for key in variables for v in variables[key] ] )"
+
+print("-"*50)
+print("top {} variables for variable_set file:\n".format(opts.nvars))
+print(filestring)
