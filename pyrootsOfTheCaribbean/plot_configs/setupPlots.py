@@ -160,7 +160,10 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
             yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
     
     # draw the first histogram
-    firstHist = bkgHists[0]
+    if len(bkgHists) == 0:
+        firstHist = sigHists[0]
+    else:
+        firstHist = bkgHists[0]
     if plotOptions["logscale"]:
         firstHist.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
         canvas.SetLogy()

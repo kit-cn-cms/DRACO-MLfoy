@@ -5,11 +5,11 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-import variable_sets.dnnVariableSet as variable_set
+import variable_sets.allVariables as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ/"
+data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZJets/"
 
 # output location of plots
 plot_dir = "/ceph/vanderlinden/ttZ_2019/plots/"
