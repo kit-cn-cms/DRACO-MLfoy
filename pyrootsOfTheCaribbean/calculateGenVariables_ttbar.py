@@ -8,7 +8,7 @@ sys.path.append(filedir)
 sys.path.append(basedir)
 
 import miniAODplotting.sampleProcessor as processor
-import miniAODplotting.NAFSubmit as NAFSubmit
+import utils.NAFSubmit as NAFSubmit
 import sample_configs.mAODsamples_unskimmed as sampleConfig
 
 samples = {}

@@ -8,7 +8,7 @@ studiesdir = os.path.dirname(filedir)
 basedir = os.path.dirname(studiesdir)
 sys.path.append(basedir)
 
-import pyrootsOfTheCaribbean.miniAODplotting.NAFSubmit as NAFSubmit
+import utils.NAFSubmit as NAFSubmit
 import sample_configs.mAODsamples_unskimmed as sampleConfig
 import sampleProcessor
 
