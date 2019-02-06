@@ -1,9 +1,13 @@
+import sys
 import os
+import glob
 import numpy as np
 import subprocess 
 import stat
 import re
 import time
+import optparse
+
 
 def submitToBatch(workdir, list_of_shells ):
     ''' submit the list of shell script to the NAF batch system '''
@@ -19,8 +23,7 @@ def submitToBatch(workdir, list_of_shells ):
     return [jobID]
 
 def writeArrayScript(workdir, files):
-    shellpath = workdir + "/shell_scripts"
-    path = shellpath+"/arraySubmit.sh"
+    path = workdir+"/arraySubmit.sh"
 
     code = """
 #!/bin/bash
@@ -44,9 +47,8 @@ echo "$SGE_TASK_ID"
 
 
 def writeSubmitScript(workdir, arrayScript, nScripts):
-    shellpath = workdir + "/shell_scripts"
-    path = shellpath+"/submitScript.sub"
-    logdir = shellpath+"/logs"
+    path = workdir+"/submitScript.sub"
+    logdir = workdir+"/logs"
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
@@ -143,3 +145,61 @@ def monitorJobStatus(jobIDs = None):
 
     print("all jobs are finished - exiting monitorJobStatus")
     return
+
+
+
+
+if __name__ == "__main__":
+    parser = optparse.OptionParser(usage="%prog [options] files")
+    parser.add_option("-f","--folder", dest = "folder", default = None, metavar = "FOLDER",
+        help = "Specify relative path to a folder from which all files are to be submitted.")
+    
+    parser.add_option("-p","--pattern", dest = "pattern", default = None, metavar = "'PATTERN'",
+        help = "Specify a pattern to match files in FOLDER, e.g. '_test'.")
+
+    parser.add_option("-m","--monitorStatus", action = "store_true", dest = "monitorStatus", default = False, metavar = "MONITORSTATUS",
+        help = "Monitor the job status after submission with 'condor_q' until all jobs are done.")
+
+    parser.add_option("-o","--outputdir", dest = "outputdir", default = os.path.dirname(os.path.realpath(__file__)), metavar = "OUTPUTDIR",
+        help = "Path to output directory for log files and submit scripts (relative or absolute).")
+
+    (opts, args) = parser.parse_args()
+
+    
+    # get files to submit
+    if opts.folder:
+        filepath = opts.folder+"/*.sh"
+        submit_files = glob.glob(filepath)
+    else:
+        submit_files = [f for f in args if f.endswith(".sh")]
+
+
+    # check for naming pattern
+    if opts.pattern:
+        print(opts.pattern)
+        submit_files = [f for f in submit_files if opts.pattern in f]
+
+    # print list of files to submit
+    print("-"*40)
+    print("number of files to submit: {}".format(len(submit_files)))
+    for f in submit_files: print("    {}".format(f))
+    print("-"*40)
+
+    
+    # setup workdir
+    workdir = opts.outputdir+"/"
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
+    print("output directory for logfiles, etc: {}".format(workdir))
+
+
+    # submit to batch
+    jobIDs = submitToBatch(workdir, submit_files)
+    print("submitted jobs with IDs: {}".format(jobIDs))
+    
+    # monitor job status
+    if opts.monitorStatus:
+        monitorJobStatus(jobIDs)
+
+    print("done.")
+
