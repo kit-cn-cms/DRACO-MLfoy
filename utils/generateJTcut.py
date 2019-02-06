@@ -1,80 +1,76 @@
 def getJTstring(cat):
     # jtstring is '(ge)[NJets]j_(ge)[NTags]t'
     # output format is '(N_Jets (>=/==) [NJets] and N_BTagsM (>=/==) [NTags])'
-    jtstring_config = "'(ge)[NJets]j_(ge)[NTags]t'"
-    jets, tags = cat.split("_")
 
-    string = "(N_Jets"
+    string_parts = cat.split("_")
+    
+    cutstring = "("
+    for part in string_parts:
+        if part.endswith("l"):
+            cutstring += "N_LooseLeptons"
+        elif part.endswith("j"):
+            cutstring += "N_Jets"
+        elif part.endswith("t"):
+            cutstring += "N_BTagsM"
+        else:
+            print("invalid format of category substring '{}' - IGNORING".format(part))
+            continue
 
-    # get jetstring
-    if not jets.endswith("j"):
-        print("JTstring has to be of format: "+jtstring_config)
-        print("at the moment it is:          "+cat)
-        exit()
+        if part.startswith("ge"):
+            cutstring += " >= "+part[2:-1]
+        elif part.startswith("le"):
+            cutstring += " <= "+part[2:-1]
+        else:
+            cutstring += " == "+part[:-1]
+        
+        if not part == string_parts[-1]:
+            cutstring += " and "
+    
+    cutstring += ")"
 
-    if jets.startswith("ge"): 
-        njets  =  jets[2:-1]
-        string += " >= "+njets
-    else:
-        njets  =  jets[:-1]
-        string += " == "+njets
-
-    string += " and N_BTagsM"
-
-    # get tagstring
-    if not tags.endswith("t"):
-        print("JTstring has to be of format: "+jtstring_config)
-        print("at the moment it is:          "+cat)
-        exit()
-
-    if tags.startswith("ge"):
-        ntags  =  tags[2:-1]
-        string += " >= "+ntags
-    else:
-        ntags  =  tags[:-1]
-        string += " == "+ntags
-
-    string += ")"
-
-    #print("generated JTstring: '"+string+"'.")
-    return string
+    return cutstring
 
 
 def getJTlabel(cat):
     # jtstring is '(ge)[NJets]j_(ge)[NTags]t'
     # output format is '1 lepton, (\geq) 6 jets, (\geq) 3 b-tags'
-    if cat == "inclusive": return "inclusive"
-    if cat == "SL": return "semileptonic t#bar{t}"
-    jtstring_config = "'(ge)[NJets]j_(ge)[NTags]t'"
-    jets, tags = cat.split("_")
 
-    string = "1 lepton,"
+    # special labels:
+    if cat == "inclusive":  return "inclusive"
+    if cat == "SL":         return "semileptonic t#bar{t}"
 
-    # get jetstring
-    if not jets.endswith("j"):
-        print("JTstring has to be of format: "+jtstring_config)
-        print("at the moment it is:          "+cat)
-        exit()
+    string_parts = cat.split("_")
 
-    if jets.startswith("ge"):
-        njets  =  jets[2:-1]
-        string += " \geq"
-    else:
-        njets  =  jets[:-1]
-    string += " "+njets+" jets,"
+    cutstring = ""
+    for part in string_parts:
+        partstring = ""
+        if part.startswith("ge"):
+            n = part[2:-1]
+            partstring += "\geq "
+        elif part.startswith("le"):
+            n = part[2:-1]
+            partstring += "\leq "
+        else:
+            n = part[:-1]
+            partstring += ""
+        partstring += n
 
-    # get tagstring
-    if not tags.endswith("t"):
-        print("JTstring has to be of format: "+jtstring_config)
-        print("at the moment it is:          "+cat)
-        exit()
 
-    if tags.startswith("ge"):
-        ntags  =  tags[2:-1]
-        string += " \geq"
-    else:
-        ntags  =  tags[:-1]
-    string += " "+ntags+" b-tags"
+        if part.endswith("l"):
+            partstring += " lepton"
+        elif part.endswith("j"):
+            partstring += " jet"
+        elif part.endswith("t"):
+            partstring += " b-tag"
+        else:
+            print("invalid format of category substring '{}' - IGNORING".format(part))
+            continue
 
-    #print("generated JTlabel: '"+string+"'.")
-    return string
+        # plural
+        if int(n)>1: partstring += "s"
+
+        if not part == string_parts[-1]:
+            partstring += ", "
+        cutstring += partstring
+
+    return cutstring
