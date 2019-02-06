@@ -6,7 +6,7 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
-import variable_sets.dnnVariableSet as variable_set
+import variable_sets.ntuplesVariables as variable_set
 
 
 
@@ -54,7 +54,7 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN/",
+    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN_v2/",
     naming      = "dnn",
     addCNNmap   = False,
     addMEM      = False)
@@ -63,7 +63,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5_forDNN/"
+ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
 ttZntuples = "/nfs/dust/cms/user/vdlinden/ttZ_2019/ntuples_v1/"
 memPath = "/nfs/dust/cms/user/vdlinden/MEM_2017/"
 
