@@ -25,7 +25,7 @@ def calculateVariables(evt):
     #   'lepTop':   leptonically (t->b(W->lnu)) decaying top quark
     #   'lepB':     b quark from leptonic top decay
     #   'hadB':     b quark from hadronci top decay
-    objects = ["Lepton", "hadTop", "lepTop", "hadB", "lepB", "Boson"]
+    objects = ["Boson", "Lepton", "hadTop", "lepTop", "hadB", "lepB"]
 
     # loop over all the objects
     for i, obj1 in enumerate(objects):
