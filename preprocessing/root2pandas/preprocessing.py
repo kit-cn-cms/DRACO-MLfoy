@@ -6,7 +6,7 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
-import variable_sets.ntuplesVariables as variable_set
+import variable_sets.ntuplesVariablesWithIndex as variable_set
 
 
 
