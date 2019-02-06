@@ -24,14 +24,14 @@ def writeArrayScript(workdir, files):
 
     code = """
 #!/bin/bash
-subtasklist = (
-{tasks}
+subtasklist=(
+%(tasks)s
 )
 thescript=${subtasklist[$SGE_TASK_ID]}
 echo "${thescript}"
 echo "$SGE_TASK_ID"
 . $thescript
-    """.format(tasks = "\n".join(files))
+    """ % ({"tasks":"\n".join(files)})
 
     with open(path, "w") as f:
         f.write(code)
@@ -50,15 +50,14 @@ def writeSubmitScript(workdir, arrayScript, nScripts):
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
-code = """
+    code = """
 universe = vanilla
 executable = /bin/zsh
 arguments = {arg}
 error  = {dir}/submitScript.$(Cluster)_$(ProcId).err
 log    = {dir}/submitScript.$(Cluster)_$(ProcId).log
 output = {dir}/submitScript.$(Cluster)_$(ProcId).out
-Queue Environment From (
-    """.format(
+Queue Environment From (""".format(
         arg = arrayScript,
         dir = logdir)
     for taskID in range(nScripts):
