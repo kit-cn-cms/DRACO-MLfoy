@@ -5,23 +5,24 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-import variable_sets.allVariables as variable_set
+import variable_sets.ntuplesVariablesWithIndex as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZJets/"
+data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ_v2/"
 
 # output location of plots
-plot_dir = "/ceph/vanderlinden/ttZ_2019/plots/"
+plot_dir = "/ceph/vanderlinden/ttZ_2019/plots_ttZ/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
 # plotting options
 plotOptions = {
-    "ratio":        False,
+    "ratio":        True,
     "logscale":     False,
     "scaleSignal":  -1,
-    "lumiScale":    1
+    "lumiScale":    1,
+    "KSscore":      True,
     }
 #   scaleSignal:
 #   -1:     scale to background Integral
@@ -44,13 +45,19 @@ plotter = variablePlotter(
 # add samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttHbb_dnn.h5",
-    signalSample    = True)
+    sampleFile      = data_dir+"/ttH_dnn.h5",
+    signalSample    = False)
 
 plotter.addSample(
     sampleName      = "ttZ",
-    sampleFile      = data_dir+"/ttZbb_dnn.h5",
+    sampleFile      = data_dir+"/ttZ_dnn.h5",
     signalSample    = True)
+
+'''
+plotter.addSample(
+    sampleName      = "ttbar",
+    sampleFile      = data_dir+"/ttbar_dnn.h5",
+    signalSample    = False)
 
 plotter.addSample(
     sampleName      = "ttbb",
@@ -71,14 +78,14 @@ plotter.addSample(
 plotter.addSample(
     sampleName      = "ttlf",
     sampleFile      = data_dir+"/ttlf_dnn.h5")
-
+'''
 
 
 # add JT categories
 plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
-#plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
