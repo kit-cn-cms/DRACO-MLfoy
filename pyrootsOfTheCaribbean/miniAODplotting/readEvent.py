@@ -21,7 +21,7 @@ verticesScore                       = Handle("edm::ValueMap<float>")
 genJets,        genJetLabel         = Handle("std::vector<reco::GenJet>"),      "slimmedGenJets"
 genParticles,   genParticleLabel    = Handle("std::vector<reco::GenParticle>"), "prunedGenParticles"
 genInfo,        genInfoLabel        = Handle("GenEventInfoProduct"),            "generator"
-
+lheInfo,        lheInfoLabel        = Handle("LHEEventProduct"),                "externalLHEProducer"
 #genHadrons,     genHadronLabel      = Handle("std::vector<reco::GenParticle>"), "genBHadPlusMothers"
 
 
@@ -38,7 +38,16 @@ class Event:
         # save weights
         self.variables["Weight_XS"]  = XSWeight
         event.getByLabel(genInfoLabel, genInfo)
-        self.variables["Weight_GEN_nom"] = genInfo.product().weight()
+        self.variables["Weight_GEN_nom_alt"] = genInfo.product().weight()
+        #self.variables["genInfoWeight0"] = genInfo.product().weights()[0]
+        #self.variables["genInfoWeight1"] = genInfo.product().weights()[1]
+        event.getByLabel(lheInfoLabel, lheInfo)
+        self.variables["Weight_LHE"] = lheInfo.product().weights()[0].wgt
+        self.variables["Weight_CentralLHE"] = lheInfo.product().originalXWGTUP()
+        self.variables["Weight_GEN_nom"] = lheInfo.product().weights()[0].wgt/lheInfo.product().originalXWGTUP()
+
+        
+        
 
         # save event type
         self.event_type = event_type
