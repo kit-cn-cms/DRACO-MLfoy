@@ -11,7 +11,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 # specify which variable set to use
-import variable_sets.allVariables as variable_set
+import variable_sets.ntuplesVariablesWithIndex as variable_set
 
 # when executing the script give the jet-tag category as a first argument
 # (ge)[nJets]j_(ge)[nTags]t
@@ -21,7 +21,7 @@ JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
 
 # absolute path to folder with input dataframes
-inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZJets/"
+inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ_v2/"
 
 # naming for input files
 naming = "_dnn.h5"
@@ -30,15 +30,15 @@ naming = "_dnn.h5"
 input_samples = df.InputSamples(inPath)
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-#input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True)
+input_samples.addSample("ttZbb"+naming, label = "ttZbb", signalSample = True)
+input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-input_samples.addSample("ttZbb"+naming, label = "ttZbb", signalSample = True)
 
-multi_dir = basedir+"/workdir/"+"multi_ttZ_allVariables_no_ttH_"+str(JTcategory)+"/"
+multi_dir = basedir+"/workdir/"+"multi_ttZ_allVariables_with_ttH_"+str(JTcategory)+"/"
 
 for i in range(int(sys.argv[2])):
     # path to output directory (adjust NAMING)
