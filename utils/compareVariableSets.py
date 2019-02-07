@@ -44,3 +44,4 @@ for key in vars1:
 
     print("\n\tcommon variables")
     for v in common: print(v)
+

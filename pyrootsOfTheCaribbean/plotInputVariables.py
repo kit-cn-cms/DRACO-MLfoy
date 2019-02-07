@@ -1,3 +1,4 @@
+import ROOT
 import os
 import sys
 # local imports
@@ -48,9 +49,11 @@ plotter.addSample(
     sampleFile      = data_dir+"/ttH_dnn.h5",
     signalSample    = False)
 
+
 plotter.addSample(
     sampleName      = "ttZ",
-    sampleFile      = data_dir+"/ttZ_dnn.h5",
+    sampleFile      = data_dir+"/ttZbb_dnn.h5",
+    plotColor       = ROOT.kGreen+1,
     signalSample    = True)
 
 '''
@@ -61,19 +64,23 @@ plotter.addSample(
 
 plotter.addSample(
     sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb_dnn.h5")
+    sampleFile      = data_dir+"/ttbb_dnn.h5",
+    plotColor       = ROOT.kRed+3)
 
 plotter.addSample(
     sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b_dnn.h5")
+    sampleFile      = data_dir+"/tt2b_dnn.h5",
+    plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
     sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb_dnn.h5")
+    sampleFile      = data_dir+"/ttb_dnn.h5",
+    plotColor       = ROOT.kRed-2)
 
 plotter.addSample(
     sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc_dnn.h5")
+    sampleFile      = data_dir+"/ttcc_dnn.h5",
+    plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
     sampleName      = "ttlf",
@@ -85,7 +92,7 @@ plotter.addSample(
 plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
-plotter.addCategory("ge4j_ge3t")
+#plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
