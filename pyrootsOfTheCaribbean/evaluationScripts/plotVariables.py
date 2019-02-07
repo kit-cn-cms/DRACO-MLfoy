@@ -180,7 +180,7 @@ class variablePlotter:
         
         # if not background was added, the weight integral is equal to 0
         if weightIntegral == 0:
-            self.options["scaleSignal"] = 1   
+            self.options["scaleSignal"] = 0   
 
         # loop over signals and fill hists
         for key in self.samples:
@@ -189,10 +189,11 @@ class variablePlotter:
 
             # get weights
             weights = sample.cut_data[cat]["weight"].values
-
             # determine scale factor
             if self.options["scaleSignal"] == -1:
                 scaleFactor = weightIntegral/(sum(weights)+1e-9)
+            elif self.options["scaleSignal"] == 0:
+                scaleFactor = (1./(sum(weights)+1e-9))
             else:
                 scaleFactor = float(self.options["scaleSignal"])
 
