@@ -75,7 +75,8 @@ class DNN():
             loss_function   = "categorical_crossentropy",
             test_percentage = 0.2,
             eval_metrics    = None,
-            additional_cut  = None):
+            additional_cut  = None,
+            use_pca         = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -111,6 +112,9 @@ class DNN():
         # additional cuts to be applied after variable norm
         self.additional_cut = additional_cut
 
+        # option for principle component analysis
+        self.PCA = use_pca
+
         # load data set
         self.data = self._load_datasets()
         self.event_classes = self.data.output_classes
@@ -139,6 +143,7 @@ class DNN():
         else:
             self.optimizer = optimizer
 
+        
     def _load_datasets(self):
         ''' load data set '''
 
@@ -148,6 +153,7 @@ class DNN():
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
             norm_variables      = True,
+            use_pca             = self.PCA,
             additional_cut      = self.additional_cut)
 
         
