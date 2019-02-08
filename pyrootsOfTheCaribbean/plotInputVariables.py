@@ -99,4 +99,4 @@ plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
-plotter.plot()
+plotter.plot(saveKSValues = True)

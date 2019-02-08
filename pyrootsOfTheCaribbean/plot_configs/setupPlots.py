@@ -27,8 +27,9 @@ def GetyTitle():
 
 def setupHistogram(
         values, weights, 
-        nbins, bin_range, color,
-        xtitle, ytitle, filled = True):
+        nbins, bin_range,
+        xtitle, ytitle, 
+        color = ROOT.kBlack, filled = True):
     # define histogram
     histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", nbins, *bin_range)
     histogram.Sumw2(True)    
