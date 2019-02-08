@@ -103,9 +103,11 @@ class variablePlotter:
             # if no variable_set is given, plot all variables in samples
             if self.variable_set == None:
                 variables = self.getAllVariables()
+            # load list of variables from variable set
+            elif cat in self.variable_set.variables:
+                variables = list(set(self.variable_set.variables[cat] + self.add_vars))
             else:
-                # load list of variables from variable set
-                variables = self.variable_set.variables[cat] + self.add_vars
+                variables = list(set(self.variable_set.variables + self.add_vars))
 
             # filter events according to JT category
             for key in self.samples:

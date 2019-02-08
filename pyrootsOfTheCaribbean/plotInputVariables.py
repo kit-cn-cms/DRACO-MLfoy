@@ -1,6 +1,7 @@
 import ROOT
 import os
 import sys
+import ROOT
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
@@ -20,6 +21,7 @@ if not os.path.exists(plot_dir):
 # plotting options
 plotOptions = {
     "ratio":        True,
+    "ratioTitle":   "#frac{ttZ}{ttH}",
     "logscale":     False,
     "scaleSignal":  -1,
     "lumiScale":    1,
@@ -46,7 +48,8 @@ plotter = variablePlotter(
 # add samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttH_dnn.h5",
+    sampleFile      = data_dir+"/ttHbb_dnn.h5",
+    plotColor       = ROOT.kOrange,
     signalSample    = False)
 
 
@@ -92,7 +95,7 @@ plotter.addSample(
 plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
-#plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
