@@ -38,12 +38,12 @@ class Event:
         # save weights
         self.variables["Weight_XS"]  = XSWeight
         event.getByLabel(genInfoLabel, genInfo)
-        self.variables["Weight_GEN_nom_alt"] = genInfo.product().weight()
+        #self.variables["Weight_GEN_nom_alt"] = genInfo.product().weight()
         #self.variables["genInfoWeight0"] = genInfo.product().weights()[0]
         #self.variables["genInfoWeight1"] = genInfo.product().weights()[1]
         event.getByLabel(lheInfoLabel, lheInfo)
-        self.variables["Weight_LHE"] = lheInfo.product().weights()[0].wgt
-        self.variables["Weight_CentralLHE"] = lheInfo.product().originalXWGTUP()
+        #self.variables["Weight_LHE"] = lheInfo.product().weights()[0].wgt
+        #self.variables["Weight_CentralLHE"] = lheInfo.product().originalXWGTUP()
         self.variables["Weight_GEN_nom"] = lheInfo.product().weights()[0].wgt/lheInfo.product().originalXWGTUP()
 
         
@@ -176,12 +176,14 @@ class Event:
             self.objects["hadTop"] = topbar 
             self.objects["lepTop"] = top
             self.objects["hadB"]   = topbar_bbar
+            self.objects["hadW"]   = topbar_W
             self.objects["lepB"]   = top_b
         elif is_leptonic_W(topbar_W) and not is_leptonic_W(top_W):
             self.objects["Lepton"] = get_lepton(topbar_W)
             self.objects["hadTop"] = top
             self.objects["lepTop"] = topbar
             self.objects["hadB"]   = top_b
+            self.objects["hadW"]   = top_W
             self.objects["lepB"]   = topbar_bbar
         else:
             #print("this event is not semileptonic or has (W->tau nu) decay")

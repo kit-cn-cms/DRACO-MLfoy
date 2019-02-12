@@ -412,6 +412,13 @@ def generateLatexLabel(name):
     for s in starts:
         if name.startswith(s):
             name = name[len(s):]
+    
+    if name.startswith("com_"):
+        split = name.split("_")
+        name = "_".join(split[2:])+" in "+split[1]+" c.o.m. system"
+
+    if name == "N_LooseLeptons":
+        return "N(LooseLeptons)"
 
     # replace stuff
     name = name.replace("Dr","#DeltaR")
@@ -428,7 +435,10 @@ def generateLatexLabel(name):
     name = name.replace("phi", "#phi")
     name = name.replace("Phi", "#phi")
     name = name.replace("d#phi","#Delta#phi")
+    name = name.replace("dXi","#Delta#xi")
     name = name.replace("mass","M")
+    name = name.replace("P","p")
+    name = name.replace("HA","helicity angle cos#theta*")
 
     names = [
             ["ttbar","t#bar{t}"],
@@ -437,8 +447,9 @@ def generateLatexLabel(name):
             ["hadTop","t_{had}"],
             ["lepTop","t_{lep}"],
             ["hadB","b_{had}"],
+            ["hadW","W_{had}"],
             ["lepB","b_{lep}"],
-            ["Lepton","l"],
+            ["Lepton","lep"],
             ["Boson","X_{H/Z}"],
             ["ttX","t#bar{t}X"],
             ["fn","(X,t_{had})(X,t_{lep})"],
@@ -448,7 +459,10 @@ def generateLatexLabel(name):
     for n in names:
         name = name.replace("_"+n[0],"("+n[1]+")")
     for n in names:
-        name = name.replace(n[0],n[1]+")")
+        if " "+n[0]+" " in name:
+            name = name.replace(n[0],n[1])
+        else:
+            name = name.replace(n[0],n[1]+")")
     
     name = name.replace("pT", "p_{T}")
     return name

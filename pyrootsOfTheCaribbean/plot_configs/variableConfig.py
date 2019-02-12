@@ -385,6 +385,28 @@ variables["dPhi_fn"]            = Variable(bin_range = [0.0,np.pi])
 variables["dR_fn"]            = Variable(bin_range = [0.0,6.])
 variables["dY_fn"]            = Variable(bin_range = [0.0,4.])
 
+variables["HA_Lepton"]          = Variable(bin_range = [-1.,1.])
+variables["com_hadTop_pT_hadB"]         = Variable(bin_range = [0.,90.])
+variables["dXi_hadTop_lepTop"]          = Variable(bin_range = [0.,np.pi])
+variables["com_hadTop_costheta_hadB"]           = Variable(bin_range = [-1.,1.])
+variables["com_hadTop_pT_hadW"]         = Variable(bin_range = [0.,90.])
+variables["dXi_lepTop_lepB"]            = Variable(bin_range = [0.,np.pi])
+variables["com_ttbar_pT_hadTop"]            = Variable(bin_range = [0.,700.])
+variables["HA_hadB"]            = Variable(bin_range = [-1.,1.])
+variables["dXi_Lepton_hadB"]            = Variable(bin_range = [0.,np.pi])
+variables["com_hadTop_P_hadB"]          = Variable(bin_range = [0.,90.])
+variables["dXi_Lepton_lepTop"]          = Variable(bin_range = [0.,np.pi])
+variables["com_ttbar_pT_lepTop"]            = Variable(bin_range = [0.,700.])
+variables["dXi_hadB_lepB"]          = Variable(bin_range = [0.,np.pi])
+variables["com_hadTop_P_hadW"]          = Variable(bin_range = [40.,80.])
+variables["com_lepTop_pT_Lepton"]           = Variable(bin_range = [0.,90.])
+variables["dXi_hadTop_hadB"]            = Variable(bin_range = [0.,np.pi])
+variables["com_hadTop_theta_hadB"]          = Variable(bin_range = [0.,np.pi])
+variables["HA_lepB"]            = Variable(bin_range = [-1.,1.])
+variables["HA_hadB_lepB"]           = Variable(bin_range = [-1.,1.])
+variables["com_lepTop_pT_lepB"]         = Variable(bin_range = [0.,90.])
+
+
 def getNbins(variable):
     if variable in variables:
         return variables[variable].nbins
