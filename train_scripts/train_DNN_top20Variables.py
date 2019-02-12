@@ -11,7 +11,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 # specify which variable set to use
-import variable_sets.dnnVariableSet as variable_set
+import variable_sets.newJEC_top20 as variable_set
 
 # when executing the script give the jet-tag category as a first argument
 # (ge)[nJets]j_(ge)[nTags]t
@@ -21,10 +21,10 @@ JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
 
 # absolute path to folder with input dataframes
-inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ/"
+inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
 
 # naming for input files
-naming = "_dnn.h5"
+naming = "_dnn_newJEC.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -36,12 +36,12 @@ input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-input_samples.addSample("ttZbb"+naming, label = "ttZ", isTrainSample = False, normalization_weight = 2., signalSample = True)
+#input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
 
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"ttZStudies_allVariables_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"newJEC_top20Variables_2Layers_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(

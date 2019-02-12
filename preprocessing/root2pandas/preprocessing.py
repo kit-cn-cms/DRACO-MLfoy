@@ -63,6 +63,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
+
 ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
 ttZntuples = "/nfs/dust/cms/user/vdlinden/ttZ_2019/ntuples_v1/"
 memPath = "/nfs/dust/cms/user/vdlinden/MEM_2017/"
@@ -103,7 +104,9 @@ dataset.addSample(
     categories  = ttZ_categories,
     selections  = ttH_selection,
     MEMs        = memPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
+
 '''
+
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",

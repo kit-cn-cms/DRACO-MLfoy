@@ -150,6 +150,9 @@ class plotDiscriminators:
                 sigHist.Scale(scaleFactor)
                 sigHists.append(sigHist)
                 scaleFactors.append(scaleFactor)
+                
+                figure_of_merit = get_FOM(sum(sig_weights[iSig]), weightIntegral)
+                print("figure of merit for {}: {}".format(sig_labels[iSig], figure_of_merit))
 
             plotOptions = {
                 "ratio":      ratio,
@@ -191,7 +194,18 @@ class plotDiscriminators:
         os.system(cmd)
 
 
+def get_FOM(S, B):
+    return np.sqrt( 2.*( (S+B)*np.log(1.+1.*S/B)-S))
 
+def get_FOM_with_uncert(name, S, B, sB = 0.2):
+    sB*=B
+    term1 = (S+B)*np.log(
+        ( (S+B)*(B+sB**2) )/( B**2+(S+B)*sB**2 ) 
+        )
+    term2 = (B**2/sB**2)*np.log(
+        1+( sB**2*S )/( B*(B+sB**2) )
+        )
+    return np.sqrt(2.*(term1-term2))
 
 
 
