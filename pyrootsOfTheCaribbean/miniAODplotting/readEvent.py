@@ -110,7 +110,8 @@ class Event:
         if addJets >= 2:
             self.hasAddBQuarks = True
             for p in additionalBList:
-                if p.mother().pdgId() == 2212:
+                if p.mother().pdgId() in [23,25]: continue
+                elif p.mother().pdgId() == 2212:
                     if p.mother().pt() == 0.: #abs(p.mother().eta()) > 10:
                         self.fromProton = True
                     else:

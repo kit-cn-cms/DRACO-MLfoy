@@ -27,21 +27,21 @@ parser.add_option("--onlyConcat",dest="onlyConcat",action="store_true",default=F
 
 
 samples = {}
-#samples["ttZJets"] = {
-#    "data":     sampleConfig.get_ttZJets("samples"),
-#    "XSWeight": sampleConfig.get_ttZJets("XSWeight")}
+samples["ttZJets"] = {
+    "data":     sampleConfig.get_ttZJets("samples"),
+    "XSWeight": sampleConfig.get_ttZJets("XSWeight")}
 
-#samples["ttZll"] = {
-#    "data":     sampleConfig.get_ttZll("samples"),
-#    "XSWeight": sampleConfig.get_ttZll("XSWeight")}
+samples["ttZll"] = {
+    "data":     sampleConfig.get_ttZll("samples"),
+    "XSWeight": sampleConfig.get_ttZll("XSWeight")}
 
-#samples["ttZqq"] = {
-#    "data":     sampleConfig.get_ttZqq("samples"),
-#    "XSWeight": sampleConfig.get_ttZqq("XSWeight")}
+samples["ttZqq"] = {
+    "data":     sampleConfig.get_ttZqq("samples"),
+    "XSWeight": sampleConfig.get_ttZqq("XSWeight")}
 
-#samples["ttHbb"] = {
-#    "data":     sampleConfig.get_ttHbb("samples"),
-#    "XSWeight": sampleConfig.get_ttHbb("XSWeight")}
+samples["ttHbb"] = {
+    "data":     sampleConfig.get_ttHbb("samples"),
+    "XSWeight": sampleConfig.get_ttHbb("XSWeight")}
 
 samples["ttSL"] = {
     "data":     sampleConfig.get_ttSL("samples"),
@@ -52,8 +52,17 @@ output_dir = basedir + "/workdir/"+opts.out_dir+"/"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
+variableProcessors = [
+    "ttbarAngles",
+    "ttbarAngularDifferences_FullAngles",
+    "ttbarAngularDifferences_LeptonBottom",
+    "ttbarAngularDifferences_TopDecays",
+    "ttbarHelicityVariables"
+    #"ttXAngles",
+    ]
+
 # create shell scripts
-shellscripts, sample_parts = processor.generate_submit_scripts(samples, output_dir, filedir)
+shellscripts, sample_parts = processor.generate_submit_scripts(samples, output_dir, filedir, variableProcessors)
 
 # submit them to naf
 if opts.doSubmit and not opts.onlyConcat:

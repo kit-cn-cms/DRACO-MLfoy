@@ -13,12 +13,20 @@ ROOT.FWLiteEnabler.enable()
 
 # load FWlite python libraries
 from DataFormats.FWLite import Handle, Events
-import variableCalculations
+filedir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(filedir+"/variableProcessors/")
 import readEvent
 import copy
+import importlib
 
-
-def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
+def importProcessors(processors):
+    modules = []
+    for processor in processors:
+        print("loading {}".format(processor))
+        modules.append( importlib.import_module(processor) )
+    return modules
+    
+def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1., processors = []):
     ''' 
     process a single sample
         - sample:       path to root file (mAOD-type)
@@ -26,24 +34,24 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
         - sample_type:  what type of sample (ttH/ttZ/ttZll/ttZqq/ttHbb/...)
         - XSWeight:     cross section weight for that sample (used for normalization of plots)   
     '''
+    variableProcessors = importProcessors(processors)
 
-    print("processing {}".format(sample))
     # loading events from file via FWlite 
     events = Events(sample)
     n_events = events.size()
     print("total number of events in file: {}".format(n_events))
 
     dfs = []
-    
 
-    addb = 0
-    semilep = 0
-    addb_and_sl = 0
-
-    fromProton = 0
-    fromGluon = 0
+    # counters for bookkeeping stuff
+    addb            = 0
+    semilep         = 0
+    addb_and_sl     = 0
+    fromProton      = 0
+    fromGluon       = 0
     fromOtherMother = 0
-    gluonAndProton = 0
+    gluonAndProton  = 0
+
 
     # start event loop
     for iev, event in enumerate(events):
@@ -51,6 +59,8 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
         
         # read all the things from event which is specified in readEvent
         evt = readEvent.readEvent(iev, event, XSWeight, event_type = sample_type)
+
+        # counters
         if evt.hasAddBQuarks: 
             addb += 1
             if evt.fromProton:
@@ -63,10 +73,19 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
                 fromOtherMother += 1
         if evt.isSemilep: semilep += 1
         if evt.hasAddBQuarks and evt.isSemilep: addb_and_sl += 1
+
+        # check if event passes baseline cuts
         if not evt.passesCuts(): continue
 
-        # calculate variables defined in variableCalculations
-        event_df = variableCalculations.calculateVariables(copy.deepcopy(evt))
+
+
+
+        # calculate variables in variable processors
+        for module in variableProcessors:
+            module.calculateVariables(evt)
+
+        event_df = pd.DataFrame.from_dict(copy.deepcopy(evt).variables)
+        #event_df = variableCalculations.calculateVariables(copy.deepcopy(evt))
         
         # add the variable dictionary (in DataFrame format) to that temporary list
         dfs.append(event_df)
@@ -93,7 +112,7 @@ def processSample(sample, out_path, sample_type = "ttH", XSWeight = 1.):
 
 
 
-def generate_submit_scripts(sample_dict, out_dir, filedir):
+def generate_submit_scripts(sample_dict, out_dir, filedir, variableProcessors):
     ''' loop over all the samples in the sample dictionary and create a shellscript for submission to NAF '''
 
     shellscripts = []
@@ -111,14 +130,14 @@ def generate_submit_scripts(sample_dict, out_dir, filedir):
         outputs = []
         # loop over the files and write the shell script
         for i, f in enumerate(files):
-            shell_path, output_file = write_single_script(i, f, out_dir, filedir, sample, XSWeight)
+            shell_path, output_file = write_single_script(i, f, out_dir, filedir, sample, XSWeight, variableProcessors)
             shellscripts.append(shell_path)
             outputs.append(output_file)
         sample_parts[sample] = outputs
 
     return shellscripts, sample_parts
 
-def write_single_script(i, f, out_dir, file_dir, sample, XSWeight):
+def write_single_script(i, f, out_dir, file_dir, sample, XSWeight, variableProcessors):
     ''' 
     write a shell script for submission to NAF batch system
         - i:        some index for naming
@@ -156,8 +175,7 @@ cd /nfs/dust/cms/user/vdlinden/CMSSW/CMSSW_9_2_4/src
 eval `scram runtime -sh`
 cd - 
 rm {out_file}
-python {python_file} {f} {out_file} {sample} {XSWeight}
-    """.format(
+python {python_file} -f {f} -o {out_file} -s {sample} -w {XSWeight} """.format(
         proxy       = os.environ['X509_USER_PROXY'],
         arch        = os.environ['SCRAM_ARCH'],
         python_file = python_file,
@@ -166,6 +184,8 @@ python {python_file} {f} {out_file} {sample} {XSWeight}
         sample      = sample,
         XSWeight    = str(XSWeight))
 
+    script+= " ".join(variableProcessors)
+    
     # save shell file
     with open(shell_path, "w") as shf:
         shf.write(script)
