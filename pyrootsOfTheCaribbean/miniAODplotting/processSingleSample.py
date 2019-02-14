@@ -32,7 +32,7 @@ processor.processSample(
     sample      = opts.path_to_sample,
     out_path    = opts.output_path,
     sample_type = opts.sample_type,
-    XSWeight    = opts.cross_section_weight,
+    XSWeight    = float(opts.cross_section_weight),
     processors  = args)
 
 
