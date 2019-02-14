@@ -421,9 +421,12 @@ def generateLatexLabel(name):
     if name.startswith("com_"):
         split = name.split("_")
         name = "_".join(split[2:])+" in "+split[1]+" c.o.m. system"
+    if name.startswith("HF_"):
+        split = name.split("_")
+        name = "_".join(split[1:])+" in helicity frame"
 
-    if name == "N_LooseLeptons":
-        return "N(LooseLeptons)"
+    if name.startswith("N_"):
+        return "N("+name[2:]+")"
 
     # replace stuff
     name = name.replace("Dr","#DeltaR")
@@ -440,6 +443,7 @@ def generateLatexLabel(name):
     name = name.replace("phi", "#phi")
     name = name.replace("Phi", "#phi")
     name = name.replace("d#phi","#Delta#phi")
+    name = name.replace("dcosXi","cos#Delta#xi")
     name = name.replace("dXi","#Delta#xi")
     name = name.replace("mass","M")
     name = name.replace("P","p")

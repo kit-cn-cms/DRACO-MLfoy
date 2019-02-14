@@ -12,11 +12,12 @@ import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
-    def __init__(self, sampleName, sampleFile, signalSample = False, plotColor = None, apply_cut = True):
+    def __init__(self, sampleName, sampleFile, signalSample = False, plotColor = None, apply_cut = True, maxEntries = None):
         self.sampleName = sampleName
         self.sampleFile = sampleFile
         self.isSignal   = signalSample
         self.applyCut   = apply_cut
+        self.stop       = None if not maxEntries else int(maxEntries)
 
         self.plotColor  = plotColor
         if self.plotColor == None:
@@ -31,8 +32,10 @@ class Sample:
 
     def load(self):
         with pandas.HDFStore(self.sampleFile, mode = "r") as store:
-            self.data = store.select("data", stop = 1000000)
+            self.data = store.select("data", stop = self.stop)
         print("\tnevents: {}".format(self.data.shape[0]))
+        # hack
+        self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
 
     def cutData(self, cut, variables, lumi_scale):
         if not self.applyCut or cut in ["inclusive", "SL"]:
@@ -52,10 +55,11 @@ class Sample:
         
 
 class variablePlotter:
-    def __init__(self, output_dir, variable_set, add_vars, plotOptions = {}):
+    def __init__(self, output_dir, variable_set, add_vars, max_entries = None, plotOptions = {}):
         self.output_dir     = output_dir
         self.variable_set   = variable_set
         self.add_vars       = list(add_vars)        
+        self.max_entries    = max_entries
 
         self.samples        = {}
         self.ordered_stack  = []
@@ -76,6 +80,7 @@ class variablePlotter:
 
     def addSample(self, **kwargs):
         print("adding sample: "+str(kwargs["sampleName"]))
+        kwargs["maxEntries"] = self.max_entries
         self.samples[kwargs["sampleName"]] = Sample(**kwargs)
         if not self.samples[kwargs["sampleName"]].isSignal:
             self.ordered_stack.append(kwargs["sampleName"])
@@ -91,7 +96,7 @@ class variablePlotter:
         variables = list(set(variables+self.add_vars))
         return variables
 
-    def plot(self):
+    def plot(self, ignored_variables = []):
         # loop over categories and get list of variables
         for cat in self.categories:
             print("starting with category {}".format(cat))
@@ -113,6 +118,7 @@ class variablePlotter:
 
             # loop over all variables and perform plot each time
             for variable in variables:
+                if variable in ignored_variables: continue
                 print("plotting variable: {}".format(variable))
 
                 # generate plot output name

@@ -406,6 +406,11 @@ variables["HA_lepB"]            = Variable(bin_range = [-1.,1.])
 variables["HA_hadB_lepB"]           = Variable(bin_range = [-1.,1.])
 variables["com_lepTop_pT_lepB"]         = Variable(bin_range = [0.,90.])
 
+variables["com_ttbar_dEta_hadTop_lepTop"]           = Variable(bin_range = [0.,8.])
+variables["HF_dPhi_hadB_lepB"]          = Variable(bin_range = [0.,np.pi])
+variables["HF_dEta_hadB_lepB"]          = Variable(bin_range = [0.,5.])
+variables["HF_dXi_hadB_lepB"]           = Variable(bin_range = [0.,np.pi])
+
 
 def getNbins(variable):
     if variable in variables:

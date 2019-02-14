@@ -13,7 +13,7 @@ from evaluationScripts.plotVariables import variablePlotter
 
 parser = optparse.OptionParser(usage="%prog [options]")
 parser.add_option("-i","--input",dest="input_dir",metavar="INPUT",
-    default = "/miniAODGenLevelData/ttbarSystem/",
+    default = "/miniAODGenLevelData/ttbar/",
     help = "input directory relative to workdir")
 parser.add_option("-p","--plots",dest="plot_dir",metavar="PLOTDIR",
     default = "/plots/",
@@ -24,6 +24,8 @@ parser.add_option("--logScale",dest="logscale",action="store_true",default=False
     help = "use logarithmic y-axis")
 parser.add_option("--writeKS",dest="ksscore",action="store_true",default=False,metavar="KSSCORE",
     help = "write KS scores on the canvas")
+parser.add_option("-m","--maxEvents",dest="max_events",default=None,metavar="MAXEVENTS",
+    help = "maximum number of events per sample")
 (opts, args) = parser.parse_args()
 
 
@@ -55,12 +57,17 @@ plotOptions = {
 additional_variables = [
     ]
 
+ignoredVariables = [
+    "Weight_XS",
+    "Weight_GEN_nom",
+    ]
 
 # initialize plotter
 plotter = variablePlotter(
     output_dir      = plot_dir,
     variable_set    = None,
     add_vars        = additional_variables,
+    max_entries     = opts.max_events,
     plotOptions     = plotOptions
     )
 
@@ -69,14 +76,15 @@ plotter.addSample(
     sampleName      = "ttZ(qq)",
     sampleFile      = data_dir+"/ttZqq.h5",
     signalSample    = False,
-    plotColor       = ROOT.kYellow)
+    plotColor       = ROOT.kYellow,
+    apply_cut       = True)
 
 #plotter.addSample(
 #    sampleName      = "ttZ(ll)",
 #    sampleFile      = data_dir+"/ttZll.h5",
 #    signalSample    = True,
 #    plotColor       = ROOT.kBlack,
-#    apply_cut       = False)
+#    apply_cut       = True)
 
 plotter.addSample(
     sampleName      = "ttH(bb)",
@@ -89,7 +97,7 @@ plotter.addSample(
 #    sampleFile      = data_dir+"/ttZJets.h5",
 #    signalSample    = True,
 #    plotColor       = ROOT.kGreen,
-#    apply_cut       = False)
+#    apply_cut       = True)
 
 plotter.addSample(
     sampleName      = "ttbar",
@@ -99,11 +107,12 @@ plotter.addSample(
 
 # add JT categories
 plotter.addCategory("SL")
-plotter.addCategory("ge5j_ge2t")
-plotter.addCategory("ge4j_ge3t")
+#plotter.addCategory("ge5j_ge2t")
+#plotter.addCategory("ge4j_ge3t")
 plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
 
+
 # perform plotting routine
-plotter.plot()
+plotter.plot(ignoredVariables)
