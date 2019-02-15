@@ -185,7 +185,9 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
 def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
-
+    if not isinstance(bkgHists, list):
+        bkgHists = [bkgHists]
+    
     canvas = getCanvas(canvasName, plotOptions["ratio"])
 
     # move over/underflow bins into plotrange
