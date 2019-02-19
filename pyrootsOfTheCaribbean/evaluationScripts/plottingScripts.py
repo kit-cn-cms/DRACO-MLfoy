@@ -214,10 +214,6 @@ def get_FOM_with_uncert(name, S, B, sB = 0.2):
 
 
 
-
-
-
-
 class plotOutputNodes:
     def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
         df = pd.concat(samples)
@@ -356,6 +352,228 @@ class plotOutputNodes:
         cmd = "pdfunite "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
         print(cmd)
         os.system(cmd)
+
+
+
+class plotReconstruction:
+    def __init__(self, sample, variables, nbins, bin_range, event_category, plotdir, logscale):
+        self.sample             = sample
+        self.variables          = variables
+        self.nbins              = nbins
+        self.bin_range          = bin_range
+        self.event_category     = event_category
+        self.plotdir            = plotdir
+        self.logscale           = logscale
+
+    def plot(self, ratio = False):
+        for i, v in enumerate(self.variables):
+            weights = self.sample.lumi_weights
+            
+            # define original distribution as background hist
+            bkgHist = setup.setupHistogram(
+                values          = self.sample.input_values[:,i],
+                weights         = weights,
+                nbins           = self.nbins,
+                bin_range       = self.bin_range,
+                color           = ROOT.kRed,
+                xtitle          = str(v)+" input",
+                ytitle          = setup.GetyTitle(),
+                filled          = True)
+
+            sigHist = setup.setupHistogram(
+                values          = self.sample.prediction_vector[:,i],
+                weights         = weights,
+                nbins           = self.nbins,
+                bin_range       = self.bin_range,
+                color           = ROOT.kBlack,
+                xtitle          = str(v)+" reco",
+                ytitle          = setup.GetyTitle(),
+                filled          = False)
+
+            sigHist.SetLineWidth(3)
+            plotOptions = {
+                "ratio":      ratio,
+                "ratioTitle": "#frac{reco}{original}",
+                "logscale":   self.logscale}
+
+            canvas = setup.drawHistsOnCanvas(
+                sigHist, bkgHist, plotOptions,
+                canvasName = str(v))
+
+            # setup legend
+            legend = setup.getLegend()
+
+            legend.AddEntry(bkgHist, self.sample.label+" orig.", "F")
+            legend.AddEntry(sigHist, self.sample.label+" reco.", "L")
+
+            # draw legend
+            legend.Draw("same")
+
+            # add lumi and category to plot
+            setup.printLumi(canvas, ratio = plotOptions["ratio"])
+            setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+
+            out_path = self.plotdir+"/reconstruction_"+str(v)+".pdf"
+            setup.saveCanvas(canvas, out_path)
+
+        workdir = os.path.dirname(self.plotdir[:-1])
+        cmd = "pdfunite "+str(self.plotdir)+"/reconstruction_*.pdf "+str(workdir)+"/variableReconstructions.pdf"
+        print(cmd)
+        os.system(cmd)
+
+
+
+class plotLoss:
+    def __init__(self, train_sample, other_samples, loss_function, variables, nbins, bin_range, event_category, plotdir, logscale = False):
+        self.train_sample      = train_sample
+        self.other_samples     = other_samples
+        self.loss_function     = loss_function
+        self.variables         = variables
+        self.nbins             = nbins
+        self.bin_range         = bin_range
+        self.event_category    = event_category
+        self.plotdir           = plotdir
+        self.logscale          = logscale
+
+    def plot_nodes(self, ratio = False):
+        for i, v in enumerate(self.variables):
+
+            bkgHists = []
+            bkgLabels = []
+            weightIntegral = 0
+
+            for sample in self.other_samples:
+                weights = sample.lumi_weights
+                values = sample.lossMatrix[:,i]
+
+                hist = setup.setupHistogram(
+                    values = values,
+                    weights = weights,
+                    nbins = self.nbins,
+                    bin_range = self.bin_range,
+                    color = setup.GetPlotColor(sample.label),
+                    xtitle = str(v)+" "+str(sample.label)+" loss",
+                    ytitle = setup.GetyTitle(),
+                    filled = True)
+
+                bkgHists.append(hist)
+                bkgLabels.append(sample.label)
+                weightIntegral += sum(weights)
+
+            # get sing histogram
+            sig_weights = self.train_sample.lumi_weights
+
+            sigHist = setup.setupHistogram(
+                values = self.train_sample.lossMatrix[:,i],
+                weights = sig_weights,
+                nbins = self.nbins,
+                bin_range = self.bin_range,
+                color = setup.GetPlotColor(self.train_sample.label),
+                xtitle = str(v)+" "+str(self.train_sample.label)+" loss",
+                ytitle = setup.GetyTitle(),
+                filled = False)
+            sigHist.SetLineWidth(3)
+            scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
+            sigHist.Scale(scaleFactor)
+
+            plotOptions = {
+                "ratio":      ratio,
+                "ratioTitle": "#frac{scaled Signal}{Background}",
+                "logscale":   self.logscale}
+            
+            canvas = setup.drawHistsOnCanvas(
+                sigHist, bkgHists, plotOptions,
+                canvasName = self.loss_function+" at "+str(v))
+
+            # setup legend
+            legend = setup.getLegend()
+
+            for i, h in enumerate(bkgHists):
+                legend.AddEntry(h, bkgLabels[i], "F")
+            legend.AddEntry(sigHist, self.train_sample.label+" x {:4.0f}".format(scaleFactor), "L")
+
+            # draw legend
+            legend.Draw("same")
+
+            # add lumi and category to plot
+            setup.printLumi(canvas, ratio = plotOptions["ratio"])
+            setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+
+            out_path = self.plotdir+"/lossValues_"+str(v)+".pdf"
+            setup.saveCanvas(canvas, out_path)
+
+        workdir = os.path.dirname(self.plotdir[:-1])
+        cmd = "pdfunite "+str(self.plotdir)+"/lossValues_*.pdf "+str(workdir)+"/lossDiscriminators.pdf"
+        print(cmd)
+        os.system(cmd)
+
+    def plot_mean(self, ratio = False):
+
+        bkgHists = []
+        bkgLabels = []
+        weightIntegral = 0
+        
+        for sample in self.other_samples:
+            weights = sample.lumi_weights
+            values = sample.lossVector
+
+            hist = setup.setupHistogram(
+                values    = values,
+                weights   = weights,
+                nbins     = self.nbins,
+                bin_range = self.bin_range,
+                color     = setup.GetPlotColor(sample.label),
+                xtitle    = str(sample.label)+" loss",
+                ytitle    = setup.GetyTitle(),
+                filled    = True)
+
+            # save hist
+            bkgHists.append(hist)
+            bkgLabels.append(sample.label)
+            weightIntegral += sum(weights)
+
+        # get sig histogram (trained sample)
+        sig_weights = self.train_sample.lumi_weights        
+
+        sigHist = setup.setupHistogram(
+            values    = self.train_sample.lossVector,
+            weights   = sig_weights,
+            nbins     = self.nbins,
+            bin_range = self.bin_range,
+            color     = setup.GetPlotColor(self.train_sample.label),
+            xtitle    = str(self.train_sample.label)+" loss",
+            ytitle    = setup.GetyTitle(),
+            filled    = False)
+        sigHist.SetLineWidth(3)
+        scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
+        sigHist.Scale(scaleFactor)
+
+        plotOptions = {
+            "ratio":      ratio,
+            "ratioTitle": "#frac{scaled Signal}{Background}",
+            "logscale":   self.logscale}
+
+        canvas = setup.drawHistsOnCanvas(
+            sigHist, bkgHists, plotOptions, 
+            canvasName = self.loss_function)
+
+        # setup legend
+        legend = setup.getLegend()
+
+        for i, h in enumerate(bkgHists):
+            legend.AddEntry(h, bkgLabels[i], "F")
+        legend.AddEntry(sigHist, self.train_sample.label+" x {:4.0f}".format(scaleFactor), "L")
+
+        # draw legend
+        legend.Draw("same")
+
+        # add lumi and category to plot
+        setup.printLumi(canvas, ratio = plotOptions["ratio"])
+        setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+
+        workdir = os.path.dirname(self.plotdir[:-1])
+        out_path = workdir+"/lossValues.pdf"
+        setup.saveCanvas(canvas, out_path)
 
 
 

@@ -21,6 +21,8 @@ parser.add_option("-o", "--output", dest = "output_dir", metavar = "OUTDIR", def
     help = "directory for output plots")
 parser.add_option("-n", "--nVariables", dest = "nvars", metavar = "NVARIABLES", default = 100,
     help = "number of variables to print")
+parser.add_option("-m", "--maxValue", dest = "maxval", metavar = "MAXVAL", default = 0.05,
+    help = "maximum x-value in plots")
 (opts, args) = parser.parse_args()
 
 jtcategories = ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"]
@@ -55,9 +57,9 @@ for cat in jtcategories:
         if max_vars-i < int(opts.nvars):
             filestring += "    '"+v+"',\n"
 
-    plt.figure(figsize = [10,10])
+    plt.figure(figsize = [10,int(len(mean)/5.)])
     plt.errorbar(mean, val, xerr = std, fmt = "o")
-    plt.xlim([0.,0.07])
+    plt.xlim([0.,float(opts.maxval)])
     plt.grid()
     plt.yticks(val, var)
     plt.title(cat)

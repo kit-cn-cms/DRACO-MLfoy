@@ -27,8 +27,9 @@ def GetyTitle():
 
 def setupHistogram(
         values, weights, 
-        nbins, bin_range, color,
-        xtitle, ytitle, filled = True):
+        nbins, bin_range,
+        xtitle, ytitle, 
+        color = ROOT.kBlack, filled = True):
     # define histogram
     histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", nbins, *bin_range)
     histogram.Sumw2(True)    
@@ -184,7 +185,9 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
 def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
-
+    if not isinstance(bkgHists, list):
+        bkgHists = [bkgHists]
+    
     canvas = getCanvas(canvasName, plotOptions["ratio"])
 
     # move over/underflow bins into plotrange

@@ -96,7 +96,7 @@ class variablePlotter:
         variables = list(set(variables+self.add_vars))
         return variables
 
-    def plot(self, ignored_variables = []):
+    def plot(self, ignored_variables = [], saveKSValues = False):
         # loop over categories and get list of variables
         for cat in self.categories:
             print("starting with category {}".format(cat))
@@ -104,13 +104,19 @@ class variablePlotter:
             cat_dir = self.output_dir+"/"+cat+"/"
             if not os.path.exists(cat_dir):
                 os.makedirs(cat_dir)
+        
+            if saveKSValues:
+                ks_file = self.output_dir+"/"+cat+"_KSvalues.csv"
+                ks_dict = {}
 
             # if no variable_set is given, plot all variables in samples
             if self.variable_set == None:
                 variables = self.getAllVariables()
-            else:
-                # load list of variables from variable set
+            # load list of variables from variable set
+            elif cat in self.variable_set.variables:
                 variables = self.variable_set.variables[cat] + self.add_vars
+            else:
+                variables = self.variable_set.all_variables + self.add_vars
 
             # filter events according to JT category
             for key in self.samples:
@@ -126,12 +132,23 @@ class variablePlotter:
                 plot_name = plot_name.replace("[","_").replace("]","")
                     
                 # generate plot
-                self.histVariable(
+                histInfo = self.histVariable(
                     variable    = variable,
                     plot_name   = plot_name,
                     cat         = cat)
 
+                if saveKSValues:
+                    ks_dict[variable] = histInfo["KSScore"]
+
+            if saveKSValues:
+                with open(ks_file, "w") as f:
+                    for key, value in sorted(ks_dict.iteritems(), key = lambda (k,v): (v,k)):
+                        f.write("{},{}\n".format(key, value))
+
+
     def histVariable(self, variable, plot_name, cat):
+        histInfo = {}
+
         # get number of bins and binrange from config file
         bins = binning.getNbins(variable)
         bin_range = binning.getBinrange(variable)
@@ -147,6 +164,9 @@ class variablePlotter:
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
             bin_range = [minValue, maxValue]
+
+        histInfo["nbins"] = bins
+        histInfo["range"] = bin_range
 
         bkgHists = []
         bkgLabels = []
@@ -187,6 +207,8 @@ class variablePlotter:
         # if not background was added, the weight integral is equal to 0
         if weightIntegral == 0:
             self.options["scaleSignal"] = 0   
+
+        histInfo["bkgYield"] = weightIntegral
 
         # loop over signals and fill hists
         for key in self.samples:
@@ -233,8 +255,10 @@ class variablePlotter:
 
             # add KS score to label if activated
             if self.options["KSscore"]:
-                labelstring="#splitline{"+labelstring+"}{KSscore = %.3f}"%(setup.calculateKSscore(bkgHists[0],sigHists[iSig]))
-
+                KSscore = setup.calculateKSscore(bkgHists[0],sigHists[iSig])
+                labelstring="#splitline{"+labelstring+"}{KSscore = %.3f}"%(KSscore)
+                histInfo["KSScore"] = KSscore
+                
             legend.AddEntry(sigHists[iSig], labelstring, "L")
 
         # add background entries
@@ -250,8 +274,8 @@ class variablePlotter:
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)
-
-
+    
+        return histInfo
 
 
                         
