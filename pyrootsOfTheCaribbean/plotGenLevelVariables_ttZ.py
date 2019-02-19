@@ -60,6 +60,37 @@ additional_variables = [
 ignoredVariables = [
     "Weight_XS",
     "Weight_GEN_nom",
+    "N_BTagsM",
+    "N_Jets",
+    "N_LooseLeptons",
+
+    "phi_Boson",
+    "phi_hadB",
+    "phi_hadTop",
+    "phi_lepB",
+    "phi_Lepton",
+    "phi_lepTop",
+    "phi_ttbar",
+    "phi_ttX",
+
+    "theta_Boson",
+    "theta_hadB",
+    "theta_hadTop",
+    "theta_lepB",
+    "theta_Lepton",
+    "theta_lepTop",
+    "theta_ttbar",
+    "theta_ttX",
+
+    "costheta_Boson",
+    "costheta_hadB",
+    "costheta_hadTop",
+    "costheta_lepB",
+    "costheta_Lepton",
+    "costheta_lepTop",
+    "costheta_ttbar",
+    "costheta_ttX",
+    
     ]
 
 # initialize plotter
