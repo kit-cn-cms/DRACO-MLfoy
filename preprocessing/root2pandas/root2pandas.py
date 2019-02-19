@@ -77,6 +77,27 @@ class Dataset:
         # mem variable is not in ntuples so remove it from list and add it via mem dataframes
         if "memDBp" in self.variables: self.variables.remove("memDBp")
 
+    def addAllVariablesNoIndex(self):
+        ''' open up a root file and figure out variables automatically 
+            dont consider indices separately, write them as subentry '''
+        test_sample = self.samples[list(self.samples.keys())[0]]
+        test_file = list(glob.glob(test_sample.ntuples))[0]
+        print("using test file {} to figure out variables.".format(test_file))
+        with root.open(test_file) as f:
+            tree = f["MVATree"]
+            df = tree.pandas.df()
+            variables = list(df.columns)
+
+        self.addVariables(variables)
+    
+    def removeVariables(self, variables):
+        n_removed = 0
+        for v in variables:
+            if v in self.variables:
+                self.variables.remove(v)
+                n_removed += 1
+        print("removed {} variables from list.".format(n_removed))
+
     def gatherTriggerVariables(self):
         # search for all trigger strings
         self.trigger = []
@@ -157,13 +178,18 @@ class Dataset:
 
     # ====================================================================
 
-    def runPreprocessing(self):
+    def runPreprocessing(self, figureOutVectors):
+        self.figureOutVectors = figureOutVectors
+
         # add variables for triggering and event category selection
         self.gatherTriggerVariables()
 
         # search for vector variables in list of variables and handle them separately
         self.searchVectorVariables()
 
+        print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
+
+        for v in self.variables: print(v)
         # remove old files
         old_files = glob.glob(self.outputdir+"*"+self.naming+".h5")
         for f in old_files:
@@ -204,7 +230,7 @@ class Dataset:
 
         # initialize loop over ntuple files
         n_entries = 0
-        concat_df = pd.DataFrame()
+        dataframes = []
         n_files = len(ntuple_files)
 
         # loop over files
@@ -214,31 +240,63 @@ class Dataset:
             # open root file
             with root.open(f) as rf:
                 # get MVATree
-                tree = rf["MVATree"]
+                try:
+                    tree = rf["MVATree"]
+                except:
+                    print("could not open MVATree in ROOT file")
+                    continue
 
-                # convert tree to dataframe but only extract the variables needed
-                df = tree.pandas.df(self.variables)
+                if not self.figureOutVectors:
+                    # convert tree to dataframe but only extract the variables needed
+                    df = tree.pandas.df(self.variables)
 
-                # handle vector variables, loop over them
-                for vecvar in self.vector_variables:
-                    # load dataframe with vector variable
-                    vec_df = tree.pandas.df(vecvar)
+                    # handle vector variables, loop over them
+                    for vecvar in self.vector_variables:
+                        # load dataframe with vector variable
+                        vec_df = tree.pandas.df(vecvar)
 
-                    # loop over inices in vecvar list
-                    for idx in self.vector_variables[vecvar]:
-                        # slice the index
-                        idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-                        # define name for column in df
-                        col_name = str(vecvar)+"["+str(idx)+"]"
-                        # append column to original dataframe
-                        df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+                        # loop over inices in vecvar list
+                        for idx in self.vector_variables[vecvar]:
+                            # slice the index
+                            idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                            # define name for column in df
+                            col_name = str(vecvar)+"["+str(idx)+"]"
+                            # append column to original dataframe
+                            df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+                else:
+                    # initialize dataframe with id variables
+                    df = tree.pandas.df(["Evt_Run", "Evt_Lumi", "Evt_ID"])
 
+                    # loop over all variables
+                    for var in self.variables:
+                        # id variables are already covered
+                        if var in ["Evt_Run", "Evt_Lumi", "Evt_ID"]: continue
+
+                        # get data
+                        var_df = tree.pandas.df(var)
+
+                        # if variable istn vectorlike just add it to the dataframe
+                        if not "subentry" in var_df.index.names:
+                            df = df.join(var_df)
+                            continue
+                            
+                        # figure out indices of variable
+                        indices = list(var_df.index.levels[1])
+                        
+                        # add one variable per index
+                        for idx in indices:
+                            if idx > 10: continue
+                            df = df.join( var_df[var].loc[:,idx], rsuffix = "[{}]".format(idx) )
+            
+                        # rename first entry for consistency and drop it
+                        df[var+"[0]"] = df[var]
+                        df.drop(var, axis = 1, inplace = True)
+                        
             # apply event selection
             df = self.applySelections(df, sample.selections)
-
-            # concatenate dataframes
-            if concat_df.empty: concat_df = df
-            else: concat_df = concat_df.append(df)
+        
+            # add to list of dataframes
+            dataframes.append(df)
 
             # count entries so far
             n_entries += df.shape[0]
@@ -247,6 +305,9 @@ class Dataset:
             if (n_entries > self.maxEntries or f == ntuple_files[-1]):
                 print("*"*50)
                 print("max entries reached ...")
+                concat_df = pd.concat(dataframes)
+                dataframes = []
+
                 # add class labels
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
@@ -270,7 +331,7 @@ class Dataset:
 
                 # reset counters
                 n_entries = 0
-                concat_df = pd.DataFrame()
+                del concat_df
 
         
 
@@ -387,4 +448,3 @@ class Dataset:
 
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
-
