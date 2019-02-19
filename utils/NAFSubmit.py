@@ -1,59 +1,14 @@
+import sys
 import os
+import glob
 import numpy as np
 import subprocess 
 import stat
 import re
 import time
+import optparse
 
-def writeShellScripts( workdir, inFiles, nameBase, data_type, test_run = False):
-    ''' write shell script to execute 'preprocessing_single_file.py'
-        to process a single root file '''
 
-    shellpath = workdir + "/shell_scripts"
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    if data_type == "pf_cands":
-        single_file_path = dir_path + "/preprocessing_pf_candidates.py"
-    elif data_type == "cnn_map":
-        single_file_path = dir_path + "/preprocessing_cnn_map.py"
-    else:
-        print("choose viable data_type")
-        exit()
-
-    if not os.path.exists(shellpath):
-        os.makedirs(shellpath)
-
-    outpath = workdir + "/out_files"
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
-
-    script_list = []
-    for iF, inFile in enumerate(inFiles):
-        if test_run and iF > 5: 
-            print("BREAK: only using 5 samples for testrun")
-            break
-
-        name = nameBase+"_"+str(iF)
-        
-        script =  "#!/bin/bash\n"
-        script += "export VO_CMS_SW_DIR=/cvmfs/cms.cern.ch \n"
-        script += "source $VO_CMS_SW_DIR/cmsset_default.sh \n"
-        script += "export SCRAM_ARCH="+os.environ['SCRAM_ARCH']+"\n"
-        script += "cd /nfs/dust/cms/user/vdlinden/CMSSW/CMSSW_9_2_4/src\n"
-        script += "eval `scram runtime -sh`\n"
-        script += "cd - \n"
-        script += "python "+str(single_file_path)+" "+str(inFile)+" "+str(outpath)+"/"+str(name)+".h5\n"
-
-        save_path = shellpath+"/"+str(name)+".sh"
-        with open(save_path, "w") as f:
-            f.write(script)
-
-        st = os.stat(save_path)
-        os.chmod(save_path, st.st_mode | stat.S_IEXEC)
-        print("wrote shell script "+str(save_path))
-        script_list.append( save_path )
- 
-    return script_list
-       
 def submitToBatch(workdir, list_of_shells ):
     ''' submit the list of shell script to the NAF batch system '''
 
@@ -68,18 +23,18 @@ def submitToBatch(workdir, list_of_shells ):
     return [jobID]
 
 def writeArrayScript(workdir, files):
-    shellpath = workdir + "/shell_scripts"
-    path = shellpath+"/arraySubmit.sh"
+    path = workdir+"/arraySubmit.sh"
 
-    code = "#!/bin/bash\n"
-    code+= "subtasklist=(\n"
-    for f in files:
-        code += f+"\n"
-    code += ")\n"
-    code += "thescript=${subtasklist[$SGE_TASK_ID]}\n"
-    code += "echo \"${thescript}\"\n"
-    code += "echo \"$SGE_TASK_ID\"\n"
-    code += ". $thescript"
+    code = """
+#!/bin/bash
+subtasklist=(
+%(tasks)s
+)
+thescript=${subtasklist[$SGE_TASK_ID]}
+echo "${thescript}"
+echo "$SGE_TASK_ID"
+. $thescript
+    """ % ({"tasks":"\n".join(files)})
 
     with open(path, "w") as f:
         f.write(code)
@@ -92,20 +47,21 @@ def writeArrayScript(workdir, files):
 
 
 def writeSubmitScript(workdir, arrayScript, nScripts):
-    shellpath = workdir + "/shell_scripts"
-    path = shellpath+"/submitScript.sub"
-    logdir = shellpath+"/logs"
+    path = workdir+"/submitScript.sub"
+    logdir = workdir+"/logs"
     if not os.path.exists(logdir):
         os.makedirs(logdir)
 
-    code = "universe = vanilla\n"
-    code +="executable = /bin/zsh\n"
-    code +="arguments = " + arrayScript + "\n"
-    #code +="request_memory = 10000M\n"
-    code +="error = "+logdir+"/submitScript.$(Cluster)_$(ProcId).err\n"
-    code +="log = "+logdir+"/submitScript.$(Cluster)_$(ProcId).log\n"
-    code +="output = "+logdir+"/submitScript.$(Cluster)_$(ProcId).out\n"
-    code +="Queue Environment From (\n"
+    code = """
+universe = vanilla
+executable = /bin/zsh
+arguments = {arg}
+error  = {dir}/submitScript.$(Cluster)_$(ProcId).err
+log    = {dir}/submitScript.$(Cluster)_$(ProcId).log
+output = {dir}/submitScript.$(Cluster)_$(ProcId).out
+Queue Environment From (""".format(
+        arg = arrayScript,
+        dir = logdir)
     for taskID in range(nScripts):
         code += "\"SGE_TASK_ID="+str(taskID+1)+"\"\n"
     code += ")"
@@ -117,7 +73,7 @@ def writeSubmitScript(workdir, arrayScript, nScripts):
     return path
 
 def condorSubmit(submitPath):
-    submitCommand = "condor_submit -terse -name bird-htc-sched02.desy.de " + submitPath
+    submitCommand = "condor_submit -terse -name bird-htc-sched12.desy.de " + submitPath
     print("submitting:")
     print(submitCommand)
     tries = 0
@@ -148,7 +104,7 @@ def monitorJobStatus(jobIDs = None):
     errorcount = 0
     print("checking job status in condor_q ...")
 
-    command = ["condor_q", "-name", "bird-htc-sched02.desy.de"]
+    command = ["condor_q", "-name", "bird-htc-sched12.desy.de"]
     if jobIDs:
         command += jobIDs
         command = [str(c) for c in command]
@@ -189,3 +145,61 @@ def monitorJobStatus(jobIDs = None):
 
     print("all jobs are finished - exiting monitorJobStatus")
     return
+
+
+
+
+if __name__ == "__main__":
+    parser = optparse.OptionParser(usage="%prog [options] files")
+    parser.add_option("-f","--folder", dest = "folder", default = None, metavar = "FOLDER",
+        help = "Specify relative path to a folder from which all files are to be submitted.")
+    
+    parser.add_option("-p","--pattern", dest = "pattern", default = None, metavar = "'PATTERN'",
+        help = "Specify a pattern to match files in FOLDER, e.g. '_test'.")
+
+    parser.add_option("-m","--monitorStatus", action = "store_true", dest = "monitorStatus", default = False, metavar = "MONITORSTATUS",
+        help = "Monitor the job status after submission with 'condor_q' until all jobs are done.")
+
+    parser.add_option("-o","--outputdir", dest = "outputdir", default = os.path.dirname(os.path.realpath(__file__)), metavar = "OUTPUTDIR",
+        help = "Path to output directory for log files and submit scripts (relative or absolute).")
+
+    (opts, args) = parser.parse_args()
+
+    
+    # get files to submit
+    if opts.folder:
+        filepath = opts.folder+"/*.sh"
+        submit_files = glob.glob(filepath)
+    else:
+        submit_files = [f for f in args if f.endswith(".sh")]
+
+
+    # check for naming pattern
+    if opts.pattern:
+        print(opts.pattern)
+        submit_files = [f for f in submit_files if opts.pattern in f]
+
+    # print list of files to submit
+    print("-"*40)
+    print("number of files to submit: {}".format(len(submit_files)))
+    for f in submit_files: print("    {}".format(f))
+    print("-"*40)
+
+    
+    # setup workdir
+    workdir = opts.outputdir+"/"
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
+    print("output directory for logfiles, etc: {}".format(workdir))
+
+
+    # submit to batch
+    jobIDs = submitToBatch(workdir, submit_files)
+    print("submitted jobs with IDs: {}".format(jobIDs))
+    
+    # monitor job status
+    if opts.monitorStatus:
+        monitorJobStatus(jobIDs)
+
+    print("done.")
+

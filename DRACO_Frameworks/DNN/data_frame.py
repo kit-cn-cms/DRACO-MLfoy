@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from keras.utils import to_categorical
 from sklearn.utils import shuffle
+from sklearn.decomposition import PCA
 
 class Sample:
     def __init__(self, path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
@@ -64,8 +65,8 @@ class DataFrame(object):
                 train_variables,
                 test_percentage = 0.1,
                 norm_variables = False,
+                use_pca = False,
                 additional_cut = None,
-                sample_naming = "_dnn.h5",
                 lumi = 41.5):
 
         ''' takes a path to a folder where one h5 per class is located
@@ -103,8 +104,6 @@ class DataFrame(object):
         df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
         # add index labelling to dataframe
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
-        print(df["class_label"])
-        print(df["index_label"])
 
         # norm weights to mean(1)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
@@ -132,6 +131,29 @@ class DataFrame(object):
             print("events in dataframe after cut "+str(df.shape[0]))
 
         self.unsplit_df = df.copy()
+
+        # perform PCA if activated
+        if use_pca:
+            # set the PCA tolerance
+            pca = PCA(.95)
+            # calculate principle components
+            principal_components = pca.fit_transform( df.loc[:,train_variables].values )
+
+            # define new variable names
+            n_new_variables = principal_components.shape[1]
+            train_variables = ["PC%i"%i for i in range(n_new_variables)]
+            print("number of components after PCA: {}".format(n_new_variables))
+            print("variance info:")
+            print(pca.explained_variance_ratio_)
+            self.n_input_neurons = n_new_variables
+
+            # transform new data to dataframe
+            principal_df = pd.DataFrame(data = principal_components, columns = train_variables, index = df.index)
+
+            # add labels 
+            df = pd.concat([principal_df, df[["is_ttH","index_label","train_weight","total_weight","lumi_weight","class_label"]]], axis=1)
+            print(df)
+
         # split test sample
         n_test_samples = int( df.shape[0]*test_percentage )
         self.df_test = df.head(n_test_samples)

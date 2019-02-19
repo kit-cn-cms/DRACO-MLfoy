@@ -1,6 +1,12 @@
-import NAFSubmit
 import os
+import sys
 import glob
+# local imports
+filedir = os.path.dirname(os.path.realpath(__file__))
+preprocdir = os.path.dirname(filedir)
+basedir = os.path.dirname(preprocdir)
+sys.path.append(basedirdir)
+import utils.NAFSubmit as NAFSubmit
 import miniAOD_preprocessing as preproc
 
 # !!! adjustable options !!!

@@ -44,7 +44,11 @@ class Dataset:
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
-        
+       
+        # generating output dir
+        if not os.path.exists(self.outputdir):
+            os.makedirs(self.outputdir)
+ 
         # settings for dataset
         self.addCNNmap  = addCNNmap
         self.addMEM     = addMEM

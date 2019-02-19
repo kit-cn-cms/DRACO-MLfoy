@@ -6,7 +6,7 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
-import variable_sets.ntuplesVariablesWithIndex as variable_set
+import variable_sets.dnnVariableSet as variable_set
 
 
 
@@ -39,29 +39,24 @@ ttH_selection = None#"(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttHbb", selection = None)
+ttH_categories.addCategory("ttH", selection = None)
 
 ttZ_categories = root2pandas.EventCategories()
-ttZ_categories.addCategory("ttZbb", selection = None)
+ttZ_categories.addCategory("ttZ", selection = None)
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+ttbar_categories.addCategory("ttbar", selection = None)
 
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN_v2/",
+    outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/unsplit_ttbar/",
     naming      = "dnn",
     addCNNmap   = False,
     addMEM      = False)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
-
 
 
 ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
@@ -104,9 +99,7 @@ dataset.addSample(
     categories  = ttZ_categories,
     selections  = ttH_selection,
     MEMs        = memPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*.root")
-
 '''
-
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
