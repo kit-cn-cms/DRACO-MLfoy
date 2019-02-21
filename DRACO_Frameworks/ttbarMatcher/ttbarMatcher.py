@@ -27,6 +27,59 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 K.tensorflow_backend.set_session(tf.Session(config=config))
 
+def get_indices(variable_list, particles):
+    indices = []
+    for p in particles:
+        eIdx = variable_list.index(p+"_E")
+        xIdx = variable_list.index(p+"_Px")
+        yIdx = variable_list.index(p+"_Py")
+        zIdx = variable_list.index(p+"_Pz")
+        indices.append([eIdx, xIdx, yIdx, zIdx])
+    print(indices)
+    return indices
+
+
+# implementation of customary mass fitting loss
+def mass_reconstruction(y_true, y_pred, indices, feature_scaling):
+    # idices is a list of lists containing indices of four vectors in y vectors
+    f_true = K.flatten(y_true*feature_scaling)
+    f_pred = K.flatten(y_pred*feature_scaling)
+    loss_value = 0.     
+    for particle in indices:
+        tru_e  = f_true[particle[0]]
+        tru_e2 = K.square(tru_e)
+        tru_x  = f_true[particle[1]]
+        tru_x2 = K.square(tru_x)
+        tru_y  = f_true[particle[2]]
+        tru_y2 = K.square(tru_y)
+        tru_z  = f_true[particle[3]]
+        tru_z2 = K.square(tru_z)
+
+        tru_m = K.sqrt(tru_e2 - tru_x2 - tru_y2 - tru_z2)
+
+        pre_e  = f_pred[particle[0]]
+        pre_e2 = K.square(pre_e)
+        pre_x  = f_pred[particle[1]]
+        pre_x2 = K.square(pre_x)
+        pre_y  = f_pred[particle[2]]
+        pre_y2 = K.square(pre_y)
+        pre_z  = f_pred[particle[3]]
+        pre_z2 = K.square(pre_z)
+
+        pre_m = K.sqrt(pre_e2 - pre_x2 - pre_y2 - pre_z2)
+
+        loss_value += K.square(tru_m - pre_m) + K.square(tru_e - pre_e) + K.square(tru_x - pre_x) + K.square(tru_y - pre_y) + K.square(tru_z - pre_z)
+    return loss_value 
+
+
+
+def mschrode_kit_cool_loss(indices, feature_scaling = 1., mode = 1):
+    if mode == 1:
+        def loss(y_true, y_pred):
+            return mass_reconstruction(y_true, y_pred, indices, feature_scaling)
+    else:
+        exit("no valid mode for massive loss")
+    return loss
 
 
 
@@ -58,10 +111,11 @@ class EarlyStoppingByLossDiff(keras.callbacks.Callback):
                 self.model.stop_training = True
 
 class BigChungusGenerator(object):
-    def __init__(self, data, inputs, targets, save_targets = False):
+    def __init__(self, data, inputs, targets, shuffle = True, save_targets = False):
         self.data = data
         self.max_entries = self.data.shape[0]
-        
+        self.shuffle = shuffle        
+
         self.inputs = inputs
         self.targets = targets
 
@@ -102,7 +156,10 @@ class BigChungusGenerator(object):
                 else:
                     variables += self.inputs.objectVariables[obj["name"]]
 
-            train_x = shuffle(evt[variables].values.reshape((-1,int(evt["sequence_length"]),self.inputs.nVariables)))
+            train_x = evt[variables].values.reshape((-1,int(evt["sequence_length"]),self.inputs.nVariables))
+            if self.shuffle:
+                train_x = shuffle(train_x)
+
             train_y = evt[self.targets.targetVariables].values.reshape((-1,self.targets.nTargets))
             if self.save_targets: self.targetValues.append(train_y)
 
@@ -117,7 +174,7 @@ class BigChungusGenerator(object):
 
 
 class ttbarMatcher():
-    def __init__(self, save_path, input_samples, input_features, target_features, feature_scaling = 1000., val_percentage = 0.2, test_percentage = 0.2, n_epochs = 50):
+    def __init__(self, save_path, input_samples, input_features, target_features, loss_function = "mean_squared_error", shuffle_inputs = True, feature_scaling = 1000., val_percentage = 0.2, test_percentage = 0.2, n_epochs = 50):
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
@@ -134,24 +191,31 @@ class ttbarMatcher():
         self.targets = target_features
         self.feature_scaling = feature_scaling
 
+        self.shuffle_inputs = shuffle_inputs
+
+        self.loss_function = loss_function
+
         # load data set
         self.data = self._load_datasets()
 
         self.train_chungus = BigChungusGenerator(
             self.data.df_train,
             self.inputs,
-            self.targets)
+            self.targets,
+            shuffle = self.shuffle_inputs)
 
         self.val_chungus = BigChungusGenerator(
             self.data.df_val,
             self.inputs,
-            self.targets)
+            self.targets,
+            shuffle = self.shuffle_inputs)
 
         self.test_chungus = BigChungusGenerator(
             self.data.df_test,
             self.inputs,
             self.targets,
-            save_targets = True)
+            save_targets = True,
+            shuffle = self.shuffle_inputs)
 
         # hyper parameters
         self.n_epochs = n_epochs
@@ -174,9 +238,13 @@ class ttbarMatcher():
 
         neurons = 100
         model.add( layer.LSTM(
-            units = neurons,
+            units = 200,
             input_shape = (None, self.inputs.nVariables),
             #activation = "linear",
+            return_sequences = True))
+        
+        model.add( layer.LSTM(
+            units = 200,
             return_sequences = True))
 
         model.add( layer.LSTM(
@@ -194,9 +262,23 @@ class ttbarMatcher():
             print("Loading default model")
             model = self.build_default_model()
 
+        # loss function
+        if "mschrode_kit_cool_loss" in self.loss_function:
+            four_vector_indices = get_indices(
+                variable_list = self.targets.targetVariables,
+                particles     = self.targets.objects                
+                )
+
+            if self.loss_function == "mschrode_kit_cool_loss":
+                mode = 1
+            else:
+                mode = int(self.loss_function.split("#")[-1])
+
+            self.loss_function = mschrode_kit_cool_loss(four_vector_indices, self.feature_scaling, mode = mode)
+
         # compile the model
         model.compile(
-            loss = "mean_squared_error",
+            loss = self.loss_function,
             optimizer = "ADAM")
 
         # save the model
