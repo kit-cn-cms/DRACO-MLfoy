@@ -1,3 +1,6 @@
+from ROOT import PyConfig, gROOT
+PyConfig.IgnoreCommandLineOptions = True
+gROOT.SetBatch(True)
 import os
 import sys
 import ROOT
@@ -100,7 +103,7 @@ plotter.addSample(
 #    apply_cut       = True)
 
 plotter.addSample(
-    sampleName      = "ttbar",
+    sampleName      = "ttSL",
     sampleFile      = data_dir+"/ttSL.h5",
     signalSample    = True,
     plotColor       = ROOT.kBlack)

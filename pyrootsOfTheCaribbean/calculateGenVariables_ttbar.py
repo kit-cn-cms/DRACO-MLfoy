@@ -57,8 +57,8 @@ variableProcessors = [
     "ttbarAngularDifferences_FullAngles",
     "ttbarAngularDifferences_LeptonBottom",
     "ttbarAngularDifferences_TopDecays",
-    "ttbarHelicityVariables"
-    #"ttXAngles",
+    #"ttbarHelicityVariables"
+    "ttXAngles",
     ]
 
 # create shell scripts
