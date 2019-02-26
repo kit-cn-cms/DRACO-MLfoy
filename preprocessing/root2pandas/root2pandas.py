@@ -178,7 +178,7 @@ class Dataset:
 
     # ====================================================================
 
-    def runPreprocessing(self, figureOutVectors):
+    def runPreprocessing(self, figureOutVectors = False):
         self.figureOutVectors = figureOutVectors
 
         # add variables for triggering and event category selection
