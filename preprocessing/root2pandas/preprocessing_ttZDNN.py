@@ -13,7 +13,7 @@ import variable_sets.ttXRecoVariables as variable_set
 # define a base event selection which is applied for all Samples
 base_selection = "\
 ( \
-(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
+(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0. and genTTX_M_TopLep > 0.) \
 and (\
 (N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
 or \
@@ -45,6 +45,9 @@ ttH_categories.addCategory("ttHbb", selection = None)
 
 ttZ_categories = root2pandas.EventCategories()
 ttZ_categories.addCategory("ttZbb", selection = None)
+
+ttZJets_categories = root2pandas.EventCategories()
+ttZJets_categories.addCategory("ttZJets", selection = None)
 
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
@@ -110,6 +113,12 @@ dataset.addSample(
     ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
     selections  = ttbar_selection)
+
+dataset.addSample(
+    sampleName  = "ttZJets",
+    ntuples     = ntuplesPath+"/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/*nominal*.root",
+    categories  = ttZJets_categories,
+    selections  = ttZ_selection)
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
