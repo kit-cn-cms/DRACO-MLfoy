@@ -412,6 +412,82 @@ variables["HF_dEta_hadB_lepB"]          = Variable(bin_range = [0.,5.])
 variables["HF_dXi_hadB_lepB"]           = Variable(bin_range = [0.,np.pi])
 
 
+variables["genTTX_DeltaEta_BHad_BLep"]          = Variable(bin_range = [0.,5.])
+variables["genTTX_DeltaEta_BHad_Lepton"]            = Variable(bin_range = [0.,5.])
+variables["genTTX_DeltaEta_TopHad_TopLep"]          = Variable(bin_range = [0.,5.])
+
+variables["genTTX_DeltaPhi_BHad_BLep"]          = Variable(bin_range = [0.,np.pi])
+variables["genTTX_DeltaPhi_BHad_Lepton"]            = Variable(bin_range = [0.,np.pi])
+variables["genTTX_DeltaPhi_TopHad_TopLep"]          = Variable(bin_range = [0.,np.pi])
+
+variables["genTTX_DeltaTheta_BHad_BLep"]            = Variable(bin_range = [0.,2.5])
+variables["genTTX_DeltaTheta_BHad_Lepton"]          = Variable(bin_range = [0.,2.5])
+variables["genTTX_DeltaTheta_TopHad_TopLep"]            = Variable(bin_range = [0.,3.])
+
+variables["genTTX_Eta_BHad"]            = Variable(bin_range = [-3.,3.])
+variables["genTTX_Eta_BLep"]            = Variable(bin_range = [-3.,3.])
+variables["genTTX_Eta_Lepton"]          = Variable(bin_range = [-2.5,2.5])
+variables["genTTX_Eta_TopHad"]          = Variable(bin_range = [-5.,5.])
+variables["genTTX_Eta_TopLep"]          = Variable(bin_range = [-5.,5.])
+variables["genTTX_Eta_WHad"]            = Variable(bin_range = [-5.,5.])
+variables["genTTX_Eta_WLep"]            = Variable(bin_range = [-5.,5.])
+
+variables["genTTX_Theta_BHad"]          = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_BLep"]          = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_Lepton"]            = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_TopHad"]            = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_TopLep"]            = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_WHad"]          = Variable(bin_range = [0.,np.pi])
+variables["genTTX_Theta_WLep"]          = Variable(bin_range = [0.,np.pi])
+
+variables["genTTX_pT_BHad"]         = Variable(bin_range = [0.,300.])
+variables["genTTX_pT_BLep"]         = Variable(bin_range = [0.,300.])
+variables["genTTX_pT_Lepton"]           = Variable(bin_range = [0.,300.])
+variables["genTTX_pT_TopHad"]           = Variable(bin_range = [0.,600.])
+variables["genTTX_pT_TopLep"]           = Variable(bin_range = [0.,600.])
+variables["genTTX_pT_WHad"]         = Variable(bin_range = [0.,400.])
+variables["genTTX_pT_WLep"]         = Variable(bin_range = [0.,400.])
+
+variables["recoTTX_DeltaEta_BHad_BLep"]         = Variable(bin_range = [0.,5.])
+variables["recoTTX_DeltaEta_BHad_Lepton"]           = Variable(bin_range = [0.,5.])
+variables["recoTTX_DeltaEta_TopHad_TopLep"]         = Variable(bin_range = [0.,5.])
+
+variables["recoTTX_DeltaPhi_BHad_BLep"]         = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_DeltaPhi_BHad_Lepton"]           = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_DeltaPhi_TopHad_TopLep"]         = Variable(bin_range = [0.,np.pi])
+
+variables["recoTTX_DeltaTheta_BHad_BLep"]           = Variable(bin_range = [0.,2.5])
+variables["recoTTX_DeltaTheta_BHad_Lepton"]         = Variable(bin_range = [0.,2.5])
+variables["recoTTX_DeltaTheta_TopHad_TopLep"]           = Variable(bin_range = [0.,3.])
+
+variables["recoTTX_Eta_BHad"]           = Variable(bin_range = [-3.,3.])
+variables["recoTTX_Eta_BLep"]           = Variable(bin_range = [-3.,3.])
+variables["recoTTX_Eta_Lepton"]         = Variable(bin_range = [-2.5,2.5])
+variables["recoTTX_Eta_TopHad"]         = Variable(bin_range = [-5.,5.])
+variables["recoTTX_Eta_TopLep"]         = Variable(bin_range = [-5.,5.])
+variables["recoTTX_Eta_WHad"]           = Variable(bin_range = [-5.,5.])
+variables["recoTTX_Eta_WLep"]           = Variable(bin_range = [-5.,5.])
+
+variables["recoTTX_Theta_BHad"]         = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_BLep"]         = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_Lepton"]           = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_TopHad"]           = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_TopLep"]           = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_WHad"]         = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_Theta_WLep"]         = Variable(bin_range = [0.,np.pi])
+
+variables["recoTTX_pT_BHad"]            = Variable(bin_range = [0.,300.])
+variables["recoTTX_pT_BLep"]            = Variable(bin_range = [0.,300.])
+variables["recoTTX_pT_Lepton"]          = Variable(bin_range = [0.,300.])
+variables["recoTTX_pT_TopHad"]          = Variable(bin_range = [0.,600.])
+variables["recoTTX_pT_TopLep"]          = Variable(bin_range = [0.,600.])
+variables["recoTTX_pT_WHad"]            = Variable(bin_range = [0.,400.])
+variables["recoTTX_pT_WLep"]            = Variable(bin_range = [0.,400.])
+
+
+
+
+
 def getNbins(variable):
     if variable in variables:
         return variables[variable].nbins
