@@ -428,6 +428,11 @@ def generateLatexLabel(name):
         split = name.split("_")
         name = "_".join(split[1:])+" in helicity frame"
 
+    if name.startswith("genTTX"):
+        name = name.replace("genTTX_", "generator level ")
+    if name.startswith("recoTTX"):
+        name = name.replace("recoTTX_", "reconstructed ")
+
     if name.startswith("N_"):
         return "N("+name[2:]+")"
 
@@ -435,17 +440,27 @@ def generateLatexLabel(name):
     name = name.replace("Dr","#DeltaR")
     name = name.replace("dR","#DeltaR")
     name = name.replace("deltaR","#DeltaR")
+
     name = name.replace("dY","#Deltay")
+
     name = name.replace("eta", "#eta")
     name = name.replace("Eta", "#eta")
     name = name.replace("d#eta","#Delta#eta")
+    name = name.replace("Delta#eta","#Delta#eta")
+
     name = name.replace("th#eta","#theta")
+    name = name.replace("Th#eta","#theta")
     name = name.replace("dTh#eta","#Delta#theta")
+    name = name.replace("Delta#theta","#Delta#theta")
+
     name = name.replace("cos#theta","cos#theta")
     name = name.replace("dcosTh#eta","#Deltacos#theta")
+
     name = name.replace("phi", "#phi")
     name = name.replace("Phi", "#phi")
     name = name.replace("d#phi","#Delta#phi")
+    name = name.replace("Delta#phi","#Delta#phi")
+
     name = name.replace("dcosXi","cos#Delta#xi")
     name = name.replace("dXi","#Delta#xi")
     name = name.replace("mass","M")
@@ -457,10 +472,16 @@ def generateLatexLabel(name):
             ["BosonB1","b_{H/Z}"],
             ["BosonB2","b_{H/Z}"],
             ["hadTop","t_{had}"],
+            ["TopHad","t_{had}"],
             ["lepTop","t_{lep}"],
+            ["TopLep","t_{lep}"],
             ["hadB","b_{had}"],
+            ["BHad","b_{had}"],
             ["hadW","W_{had}"],
+            ["WHad","W_{had}"],
+            ["WLep","W_{lep}"],
             ["lepB","b_{lep}"],
+            ["BLep","b_{lep}"],
             ["Lepton","lep"],
             ["Boson","X_{H/Z}"],
             ["ttX","t#bar{t}X"],
