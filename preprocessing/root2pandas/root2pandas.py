@@ -189,11 +189,8 @@ class Dataset:
 
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
 
-        for v in self.variables: print(v)
         # remove old files
-        old_files = glob.glob(self.outputdir+"*"+self.naming+".h5")
-        for f in old_files:
-            os.remove(f)
+        self.removeOldFiles()
 
         if self.addMEM:
             # generate MEM path
@@ -448,3 +445,13 @@ class Dataset:
 
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
+
+    def removeOldFiles(self):
+        for key in self.samples:
+            sample = self.samples[key]
+            for cat in sample.categories.categories:
+                outFile = self.outputdir+"/"+cat+"_"+self.naming+".h5"
+                if os.path.exists(outFile):
+                    print("removing file {}".format(outFile))
+                    os.remove(outFile)
+
