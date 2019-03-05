@@ -38,41 +38,34 @@ input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
 #input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
 
+multi_dir = basedir+"/workdir/"+"multi_newJEC_allVariables_"+str(JTcategory)+"/"
 
+for i in range(int(sys.argv[2])):
+    # path to output directory (adjust NAMING)
+    savepath = multi_dir+"run_"+str(i)
 
-# path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"newJEC_allVariables_"+str(JTcategory)
+    # initializing DNN training class
+    dnn = DNN.DNN(
+        save_path       = savepath,
+        input_samples   = input_samples,
+        event_category  = JTcategory,
+        train_variables = variables,
+        # number of epochs
+        train_epochs    = 500,
+        # number of epochs without decrease in loss before stopping
+        early_stopping  = 20,
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = 0.2)
 
-# initializing DNN training class
-dnn = DNN.DNN(
-    save_path       = savepath,
-    input_samples   = input_samples,
-    event_category  = JTcategory,
-    train_variables = variables,
-    # number of epochs
-    train_epochs    = 500,
-    # number of epochs without decrease in loss before stopping
-    early_stopping  = 20,
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2)
+    #dnn.data.get_non_train_samples()
 
-#dnn.data.get_non_train_samples()
-
-# build default model
-dnn.build_model()
-# perform the training
-dnn.train_model()
-# evalute the trained model
-dnn.eval_model()
-# get variable ranking
-dnn.get_input_weights()
-
-# plotting 
-# plot the evaluation metrics
-dnn.plot_metrics()
-# plot the confusion matrix
-dnn.plot_confusionMatrix(norm_matrix = True)
-# plot the output discriminators
-dnn.plot_discriminators(plot_nonTrainData = True)
+    # build default model
+    dnn.build_model()
+    # perform the training
+    dnn.train_model()
+    # evalute the trained model
+    dnn.eval_model()
+    # get variable ranking
+    dnn.get_input_weights()

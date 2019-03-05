@@ -11,7 +11,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 # specify which variable set to use
-import variable_sets.goodVariables as variable_set
+import variable_sets.topVariables as variable_set
 
 # when executing the script give the jet-tag category as a first argument
 # (ge)[nJets]j_(ge)[nTags]t
@@ -28,7 +28,9 @@ naming = "_dnn_newJEC.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True)
+# during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
+#       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
+input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True, normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
@@ -39,7 +41,7 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"oldJEC_goodVariables_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"newJEC_preApprovalVariables_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(

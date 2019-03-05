@@ -63,7 +63,6 @@ class EarlyStoppingByLossDiff(keras.callbacks.Callback):
 
 
 class DNN():
-
     def __init__(self, 
             save_path,
             input_samples,
