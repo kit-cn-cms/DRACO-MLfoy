@@ -52,7 +52,7 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 # initialize dataset class
 dataset = root2pandas.Dataset(
     outputdir   = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/DNN_ttH_2017_v2/",
-    naming      = "_dnn_newJEC",
+    naming      = "dnn_newJEC",
     addCNNmap   = False,
     addMEM      = True)
 
