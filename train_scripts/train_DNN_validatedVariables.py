@@ -41,7 +41,7 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"newJEC_validatedVariables_2Layer_juerg_test_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"newJEC_validatedVariables_ArchTest_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
@@ -50,7 +50,7 @@ dnn = DNN.DNN(
     event_category  = JTcategory,
     train_variables = variables,
     # number of epochs
-    train_epochs    = 500,
+    train_epochs    = 5000,
     # number of epochs without decrease in loss before stopping
     early_stopping  = 20,
     # metrics for evaluation (c.f. KERAS metrics)
@@ -59,9 +59,24 @@ dnn = DNN.DNN(
     test_percentage = 0.2)
 
 #dnn.data.get_non_train_samples()
+# custom net config
+from keras import optimizers
+net_config = {
+    "layers":                   [200,200,50,50,20,20],
+    "loss_function":            "categorical_crossentropy",
+    "Dropout":                  0.5,
+    "L2_Norm":                  1e-4,
+    "batch_size":               5000,
+    "optimizer":                optimizers.Adagrad(),
+    "activation_function":      "elu",
+    "output_activation":        "Softmax",
+    "earlystopping_percentage": 0.05,
+    "batchNorm":                False,
+    }
+
 
 # build default model
-dnn.build_model()
+dnn.build_model(net_config)
 # perform the training
 dnn.train_model()
 # evalute the trained model
