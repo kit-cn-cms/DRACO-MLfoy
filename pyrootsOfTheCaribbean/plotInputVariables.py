@@ -9,10 +9,10 @@ import variable_sets.dnnVariableSet as variable_set
 from evaluationScripts.plotVariables import variablePlotter
 
 # location of input dataframes
-data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
+data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC_v2"
 
 # output location of plots
-plot_dir = "/ceph/vanderlinden/ttH_2017/plots/newJEC/"
+plot_dir = "/ceph/vanderlinden/ttH_2017/plots/newJEC_v2/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -44,28 +44,28 @@ plotter = variablePlotter(
 # add samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttHbb_dnn.h5",
+    sampleFile      = data_dir+"/ttH_dnn_newJEC.h5",
     signalSample    = True)
 
 plotter.addSample(
     sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb_dnn.h5")
+    sampleFile      = data_dir+"/ttbb_dnn_newJEC.h5")
 
 plotter.addSample(
     sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b_dnn.h5")
+    sampleFile      = data_dir+"/tt2b_dnn_newJEC.h5")
 
 plotter.addSample(
     sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb_dnn.h5")
+    sampleFile      = data_dir+"/ttb_dnn_newJEC.h5")
 
 plotter.addSample(
     sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc_dnn.h5")
+    sampleFile      = data_dir+"/ttcc_dnn_newJEC.h5")
 
 plotter.addSample(
     sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf_dnn.h5")
+    sampleFile      = data_dir+"/ttlf_dnn_newJEC.h5")
 
 
 
