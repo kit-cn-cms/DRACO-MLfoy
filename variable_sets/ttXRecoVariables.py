@@ -200,7 +200,7 @@ ttx_variables = [
     "recoTTX_pT_WLep",
     ]
 
-all_variables = ttx_variables
+all_variables = ttx_variables+additional_variables
 
 variables = {}
 variables["4j_ge3t"] = all_variables
