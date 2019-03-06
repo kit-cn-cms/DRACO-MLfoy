@@ -12,16 +12,16 @@ import DRACO_Frameworks.ttbarMatcher.ttbarMatcher as ttbarMatcher
 import DRACO_Frameworks.ttbarMatcher.data_frame as df
 
 # absolute path to folder with input dataframes
-inPath   = "/ceph/vanderlinden/MLFoyTrainData/ttbarMatcher/"
+inPath   = "/ceph/vanderlinden/MLFoyTrainData/ttbarMatcher_v2/"
 
 # naming for input files
 naming = "_input.h5"
 
 # define input objects
 input_features = df.InputFeatures()
-input_features.addObject("ttMatchInputJet",     length = "N_ttMatchInputJets",    max = 10)
-input_features.addObject("ttMatchInputLepton",  length = "N_ttMatchInputLeptons", max = 1)
 input_features.addObject("ttMatchInputMET")
+input_features.addObject("ttMatchInputLepton",  length = "N_ttMatchInputLeptons", max = 1)
+input_features.addObject("ttMatchInputJet",     length = "N_ttMatchInputJets",    max = 10)
 # define input variables
 input_features.addVariables(["E", "Px", "Py", "Pz"])# "M", "CSV", "Constituents"])
 input_features.generateVariableSet()
@@ -35,7 +35,7 @@ target_features.addVariables(["E", "Px", "Py", "Pz"])
 target_features.generateTargets()
 
 # load samples
-input_samples = df.InputSamples(inPath, max_events = 100000)
+input_samples = df.InputSamples(inPath, max_events = 10000)
 
 # define the input samples one by one
 input_samples.addSample("ttbar"+naming, label = "ttbar")
@@ -49,11 +49,11 @@ matcher = ttbarMatcher.ttbarMatcher(
     input_samples   = input_samples,
     input_features  = input_features,
     target_features = target_features,
-    shuffle_inputs  = True,
+    shuffle_inputs  = False,
     loss_function   = "mschrode_kit_cool_loss",
-    feature_scaling = 500.,
-    n_epochs        = 10,
-    val_percentage  = 0.2,
+    feature_scaling = 1000.,
+    n_epochs        = 100,
+    val_percentage  = 0.1,
     test_percentage = 0.01)
 
 matcher.build_model()

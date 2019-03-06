@@ -251,9 +251,12 @@ class DNN():
 
         return model
 
-    def build_model(self, model = None):
+    def build_model(self, config = None, model = None):
         ''' build a DNN model
             if none is epecified use default model '''
+        if config:
+            self.architecture = config
+            print("loading non default net config")
 
         if model == None:
             print("Loading default model")
@@ -457,8 +460,8 @@ class DNN():
 
     def plot_outputNodes(self, log = False, cut_on_variable = None, plot_nonTrainData = False):
         ''' plot distribution in outputNodes '''
-        nbins = 21
-        bin_range = [0., 0.7]
+        nbins = 30
+        bin_range = [0., 1.]
 
         plotNodes = plottingScripts.plotOutputNodes(
             data                = self.data,
@@ -482,8 +485,8 @@ class DNN():
 
     def plot_discriminators(self, log = False, plot_nonTrainData = False, signal_class = "ttHbb"):
         ''' plot all events classified as one category '''
-        nbins = 15
-        bin_range = [0.2, 0.7]
+        nbins = 27
+        bin_range = [0.1, 1.]
 
         plotDiscrs = plottingScripts.plotDiscriminators(
             data                = self.data,

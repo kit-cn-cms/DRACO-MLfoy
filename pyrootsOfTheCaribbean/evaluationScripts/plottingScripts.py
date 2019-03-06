@@ -216,7 +216,6 @@ def get_FOM_with_uncert(name, S, B, sB = 0.2):
 
 class plotOutputNodes:
     def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
-        df = pd.concat(samples)
         self.data              = data
         self.prediction_vector = prediction_vector
         self.event_classes     = event_classes
