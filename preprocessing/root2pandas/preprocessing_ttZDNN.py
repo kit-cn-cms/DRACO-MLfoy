@@ -13,7 +13,7 @@ import variable_sets.ttXRecoVariables as variable_set
 # define a base event selection which is applied for all Samples
 base_selection = "\
 ( \
-(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0. and genTTX_M_TopLep > 0.) \
+(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0. and genTTX_M_Lepton >= 0.) \
 and (\
 (N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
 or \
@@ -69,7 +69,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/ntuples2019/ttZ_DNN_v1/"
+ntuplesPath = "/nfs/dust/cms/user/vdlinden/ntuples2019/ttZ_DNN_v2/"
 
 # add samples to dataset
 dataset.addSample(

@@ -15,7 +15,7 @@ from evaluationScripts.plotVariables import variablePlotterGenReco
 data_dir = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN_v3/"
 
 # output location of plots
-plot_dir = basedir + "/workdir/RecoGenComparison/"
+plot_dir = basedir + "/workdir/RecoGenComparison_v3/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -23,23 +23,37 @@ if not os.path.exists(plot_dir):
 plotOptions = {
     "plot1D":       True,
     "ratio":        True,
-    "ratioTitle":   "#frac{gen}{reco}",
-    "KSscore":      True,
+    "ratioTitle":   "#frac{MC truth}{reconstructed}",
+    "KSscore":      False,
     "logscale":     False,
-    "lumiScale":    1.,
+    "lumiScale":    0.,
+    "privateWork":  True,
     }
 
 # variables to plot
 variables = [
+    "DeltaEta_BAdd1_BAdd2",
+    "DeltaEta_Boson_Lepton",
+    "DeltaEta_Boson_TopLep",
+    "DeltaEta_Boson_TopHad",
     "DeltaEta_BHad_BLep",
     "DeltaEta_BHad_Lepton",
     "DeltaEta_TopHad_TopLep",
+    "DeltaEta_BAdd1_BAdd2",
+    "DeltaPhi_Boson_Lepton",
+    "DeltaPhi_Boson_TopLep",
+    "DeltaPhi_Boson_TopHad",
     "DeltaPhi_BHad_BLep",
     "DeltaPhi_BHad_Lepton",
     "DeltaPhi_TopHad_TopLep",
     #"DeltaTheta_BHad_BLep",
     #"DeltaTheta_BHad_Lepton",
     #"DeltaTheta_TopHad_TopLep",
+    "Eta_QHad1",
+    "Eta_QHad2",
+    "Eta_BAdd1",
+    "Eta_BAdd2",
+    "Eta_Boson",
     "Eta_BHad",
     "Eta_BLep",
     "Eta_Lepton",
@@ -54,6 +68,11 @@ variables = [
     #"Theta_TopLep",
     #"Theta_WHad",
     #"Theta_WLep",
+    "pT_QHad1",
+    "pT_QHad2",
+    "pT_BAdd1",
+    "pT_BAdd2",
+    "pT_Boson",
     "pT_BHad",
     "pT_BLep",
     "pT_Lepton",
@@ -121,7 +140,7 @@ plotter.addSample(
 # add JT categories
 #plotter.addCategory("4j_ge3t")
 #plotter.addCategory("5j_ge3t")
-#plotter.addCategory("ge6j_ge3t")
+plotter.addCategory("ge6j_ge3t")
 plotter.addCategory("ge4j_ge3t")
 
 
