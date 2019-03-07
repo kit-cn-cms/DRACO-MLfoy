@@ -9,7 +9,6 @@ class Variable:
 
 
 # add variable settings
-variables["Jet_Pt[0]"]		                                        = Variable(bin_range = [30.,400.])
 variables["BDT_common5_input_HT"]                                   = Variable(bin_range = [50.,1500.])
 variables["BDT_common5_input_HT_tag"]		                        = Variable(bin_range = [50.0,800.0])
 variables["BDT_common5_input_aplanarity_jets"]		                = Variable(bin_range = [0.0,0.3])
@@ -44,7 +43,7 @@ variables["Evt_Dr_MinDeltaRLeptonTaggedJet"]                		= Variable(bin_ran
 variables["Evt_Dr_MinDeltaRTaggedJets"]		                        = Variable(bin_range = [0.5,3.5])
 variables["Evt_Dr_TaggedJetsAverage"]		                        = Variable(bin_range = [0.5,3.5])
 variables["Evt_Dr_UntaggedJetsAverage"]                             = Variable(bin_range = [0.5,4.])
-variables["Evt_HT"]		                                            = Variable(bin_range = [100.0,1500.0])
+variables["Evt_HT"]		                                            = Variable(bin_range = [300.0,2000.0])
 variables["Evt_HT_Jets"]                                            = Variable(bin_range = [0.,1500.0])
 variables["Evt_JetPtOverJetE"]		                                = Variable(bin_range = [0.2,1.0])
 variables["Evt_M2_TaggedJetsAverage"]		                        = Variable(bin_range = [50.0,500.0])
@@ -84,10 +83,10 @@ variables["Jet_Eta[0]"]		                                        = Variable(bin_
 variables["Jet_Eta[1]"]		                                        = Variable(bin_range = [-2.4,2.4])
 variables["Jet_Eta[2]"]		                                        = Variable(bin_range = [-2.4,2.4])
 variables["Jet_Eta[3]"]		                                        = Variable(bin_range = [-2.4,2.4])
-variables["Jet_Pt[0]"]		                                        = Variable(bin_range = [30.0,400.0])
-variables["Jet_Pt[1]"]		                                        = Variable(bin_range = [30.0,300.0])
-variables["Jet_Pt[2]"]		                                        = Variable(bin_range = [30.0,200.0])
-variables["Jet_Pt[3]"]		                                        = Variable(bin_range = [30.0,100.0])
+variables["Jet_Pt[0]"]		                                        = Variable(bin_range = [30.0,600.0])
+variables["Jet_Pt[1]"]		                                        = Variable(bin_range = [30.0,500.0])
+variables["Jet_Pt[2]"]		                                        = Variable(bin_range = [30.0,400.0])
+variables["Jet_Pt[3]"]		                                        = Variable(bin_range = [30.0,300.0])
 variables["LooseLepton_Eta[0]"]		                                = Variable(bin_range = [-2.4,2.4])
 variables["LooseLepton_Pt[0]"]		                                = Variable(bin_range = [0.0,600.0])
 variables["N_BTagsT"]		                                        = Variable(bin_range = [-0.5,4.5],          nbins = 5)
@@ -519,8 +518,10 @@ variables["genTTX_DeltaEta_Boson_TopLep"]           = Variable(bin_range = [0.,6
 variables["recoTTX_DeltaEta_Boson_TopLep"]          = Variable(bin_range = [0.,6.])
 variables["genTTX_Eta_BAdd2"]           = Variable(bin_range = [-2.5,2.5])
 variables["recoTTX_Eta_BAdd2"]          = Variable(bin_range = [-2.5,2.5])
+variables["genTTX_DeltaPhi_BAdd1_BAdd2"]                        = Variable(bin_range = [0.,np.pi])
+variables["recoTTX_DeltaPhi_BAdd1_BAdd2"]                       = Variable(bin_range = [0.,np.pi])
 
-
+variables["TTXmatcher_chi2"]            = Variable(bin_range = [-500.,0.])
 
 def getNbins(variable):
     if variable in variables:

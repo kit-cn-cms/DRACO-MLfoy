@@ -13,12 +13,13 @@ import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
-    def __init__(self, sampleName, sampleFile, signalSample = False, XSscaling = 1., plotColor = None, apply_cut = True, maxEntries = None):
+    def __init__(self, sampleName, sampleFile, signalSample = False, filled = None, XSscaling = 1., plotColor = None, apply_cut = True, maxEntries = None):
         self.sampleName = sampleName
         self.sampleFile = sampleFile
         self.isSignal   = signalSample
         self.applyCut   = apply_cut
         self.XSScale    = XSscaling
+        self.filled     = filled
         self.stop       = None if not maxEntries else int(maxEntries)
 
         self.plotColor  = plotColor
@@ -28,6 +29,9 @@ class Sample:
             except:
                 print("no color for sample chosen + sample not in color dictionary")
                 self.plotColor = 1
+
+        if self.filled == None:
+            self.filled = not signalSample
 
         self.load()
         self.cut_data   = {}
@@ -81,6 +85,7 @@ class variablePlotter:
             "ratioTitle":   None,
             "logscale":     False,
             "scaleSignal":  -1,
+            "privateWork":  False,
             "KSscore":      False}
 
         for key in plotOptions:
@@ -165,11 +170,8 @@ class variablePlotter:
 
         # check if bin_range was found
         if not bin_range:
-            maxValue = -999
-            minValue = 999
-            for key in self.samples:
-                maxValue = max(maxValue, max(self.samples[key].cut_data[cat][variable].values))
-                minValue = min(minValue, min(self.samples[key].cut_data[cat][variable].values))
+            maxValue = max([max(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
+            minValue = min([min(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             config_string = "variables[\""+variable+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
@@ -205,7 +207,7 @@ class variablePlotter:
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
                 ytitle      = setup.GetyTitle(self.options["lumiScale"]),
-                filled      = True)
+                filled      = sample.filled)
 
             bkgHists.append(hist)
             bkgLabels.append(sample.sampleName)
@@ -217,8 +219,13 @@ class variablePlotter:
         # if not background was added, the weight integral is equal to 0
         if weightIntegral == 0:
             self.options["scaleSignal"] = 0   
-
         histInfo["bkgYield"] = weightIntegral
+
+        # scale stack to one if lumiScale is set to zero
+        if self.options["lumiScale"] == 0:
+            for hist in bkgHists:
+                hist.Scale(1./weightIntegral)
+            weightIntegral = 1.
 
         # loop over signals and fill hists
         for key in self.samples:
@@ -244,7 +251,7 @@ class variablePlotter:
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
                 ytitle      = setup.GetyTitle(),
-                filled      = False)
+                filled      = sample.filled)
 
             hist.Scale(scaleFactor)
 
@@ -261,7 +268,9 @@ class variablePlotter:
         legend = setup.getLegend()
         # add signal entriesa
         for iSig in range(len(sigHists)):
-            labelstring = sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig])
+            labelstring = sigLabels[iSig]       
+            if not self.options["lumiScale"] == 0.:
+                labelstring = sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig])
 
             # add KS score to label if activated
             if self.options["KSscore"]:
@@ -288,6 +297,14 @@ class variablePlotter:
         setup.saveCanvas(canvas, plot_name)
     
         return histInfo
+
+
+
+
+
+
+
+
 
 
                         

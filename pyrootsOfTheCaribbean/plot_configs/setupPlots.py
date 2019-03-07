@@ -413,7 +413,7 @@ def printPrivateWork(pad, ratio = False, twoDim = False):
 
     if twoDim:  latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio: latex.DrawLatex(l+0.05,1.-t+0.04, text) 
-    else:       latex.DrawLatex(l,1.-t+0.06, text)
+    else:       latex.DrawLatex(l,1.-t+0.01, text)
 
 def printTitle(pad, title):
     pad.cd(1)
@@ -460,6 +460,7 @@ def generateLatexLabel(name):
         return "N("+name[2:]+")"
 
     # replace stuff
+    name = name.replace("DeltaR","#DeltaR")
     name = name.replace("Dr","#DeltaR")
     name = name.replace("dR","#DeltaR")
     name = name.replace("deltaR","#DeltaR")
@@ -468,13 +469,14 @@ def generateLatexLabel(name):
 
     name = name.replace("eta", "#eta")
     name = name.replace("Eta", "#eta")
-    name = name.replace("d#eta","#Delta#eta")
     name = name.replace("Delta#eta","#Delta#eta")
+    name = name.replace("d#eta","#Delta#eta")
+    name = name.replace("D#eta","#Delta#eta")
 
     name = name.replace("th#eta","#theta")
     name = name.replace("Th#eta","#theta")
-    name = name.replace("dTh#eta","#Delta#theta")
     name = name.replace("Delta#theta","#Delta#theta")
+    name = name.replace("dTh#eta","#Delta#theta")
 
     name = name.replace("cos#theta","cos#theta")
     name = name.replace("dcosTh#eta","#Deltacos#theta")
@@ -489,6 +491,8 @@ def generateLatexLabel(name):
     name = name.replace("mass","M")
     name = name.replace("P","p")
     name = name.replace("HA","helicity angle cos#theta*")
+
+    name = name.replace("blr_ETH", "b-tag likelihood ratio")
 
     names = [
             ["ttbar","t#bar{t}"],
@@ -525,6 +529,18 @@ def generateLatexLabel(name):
             name = name.replace(n[0],n[1]+")")
     
     name = name.replace("pT", "p_{T}")
+    name = name.replace("pt", "p_{T}")
+
+    # some specials
+    name = name.replace("lep)Jet","(lep,Jet)")
+    name = name.replace("lep)TaggedJet","(lep,taggedJet)")
+    name = name.replace("Looselep)","LooseLepton")
+    name = name.replace("primarylep)","primary lepton")
+    name = name.replace("MHT", "missing H_{T}")
+    name = name.replace("HT","H_{T}")
+    name = name.replace("Jetp_{T}OverJetE","average p_{T}^{jet}/E^{jet}")
+    name = name.replace("TTXmatcher_chi2", "t#bar{t} matcher #chi^{2}")
+
     return name
 
 

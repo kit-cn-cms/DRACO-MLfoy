@@ -50,7 +50,7 @@ dnn = DNN.DNN(
     event_category  = JTcategory,
     train_variables = variables,
     # number of epochs
-    train_epochs    = 5000,
+    train_epochs    = 1000,
     # number of epochs without decrease in loss before stopping
     early_stopping  = 20,
     # metrics for evaluation (c.f. KERAS metrics)
@@ -62,12 +62,12 @@ dnn = DNN.DNN(
 # custom net config
 from keras import optimizers
 net_config = {
-    "layers":                   [500,500,500,500,500],
+    "layers":                   [200,200,200],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.5,
-    "L2_Norm":                  5e-4,
+    "L2_Norm":                  1e-4,
     "batch_size":               1000,
-    "optimizer":                optimizers.Adagrad(decay=0.99),
+    "optimizer":                optimizers.Adagrad(decay=0.95),
     "activation_function":      "elu",
     "output_activation":        "Softmax",
     "earlystopping_percentage": 0.05,
@@ -90,5 +90,5 @@ dnn.plot_metrics()
 # plot the confusion matrix
 dnn.plot_confusionMatrix(norm_matrix = True)
 # plot the output discriminators
-dnn.plot_discriminators(signal_class = "ttH")
+dnn.plot_discriminators(signal_class = "ttHbb")
 

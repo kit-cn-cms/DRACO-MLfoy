@@ -1,22 +1,3 @@
-bdt_vars = [
-    'BDT_common5_input_HT_tag',
-    'BDT_common5_input_aplanarity_jets',
-    'BDT_common5_input_aplanarity_tags',
-    'BDT_common5_input_closest_tagged_dijet_mass',
-    'BDT_common5_input_dev_from_avg_disc_btags',
-    'BDT_common5_input_h1',
-    'BDT_common5_input_h2',
-    'BDT_common5_input_h3',
-    'BDT_common5_input_max_dR_bb',
-    'BDT_common5_input_max_dR_jj',
-    'BDT_common5_input_pt_all_jets_over_E_all_jets_tags',
-    'BDT_common5_input_sphericity_jets',
-    'BDT_common5_input_sphericity_tags',
-    'BDT_common5_input_tagged_dijet_mass_closest_to_125',
-    'BDT_common5_input_transverse_sphericity_jets',
-    'BDT_common5_input_transverse_sphericity_tags',
-    ]
-
 reco_variables = [
     'Evt_Deta_TaggedJetsAverage',
     'Evt_Dr_MinDeltaRJets',
@@ -46,8 +27,6 @@ reco_variables = [
     ]
 
 csv_variables = [
-    #'CSV[0]',
-    #'CSV[1]',
     'Evt_CSV_Average',
     'Evt_CSV_Average_Tagged',
     'Evt_CSV_Min',
@@ -114,8 +93,102 @@ deepflav_nodes = [
     'Jet_DeepFlavour_uds[3]',
     ]
 
+gentt_variables = [
+    "genTTX_DeltaEta_BHad_BLep",
+    "genTTX_DeltaEta_BHad_Lepton",
+    "genTTX_DeltaEta_TopHad_TopLep",
+    "genTTX_DeltaPhi_BHad_BLep",
+    "genTTX_DeltaPhi_BHad_Lepton",
+    "genTTX_DeltaPhi_TopHad_TopLep",
+    "genTTX_Eta_BHad",
+    "genTTX_Eta_BLep",
+    "genTTX_Eta_Lepton",
+    "genTTX_Eta_QHad1",
+    "genTTX_Eta_QHad2",
+    "genTTX_Eta_TopHad",
+    "genTTX_Eta_TopLep",
+    "genTTX_Eta_WHad",
+    "genTTX_Eta_WLep",
+    "genTTX_pT_BHad",
+    "genTTX_pT_BLep",
+    "genTTX_pT_Lepton",
+    "genTTX_pT_QHad1",
+    "genTTX_pT_QHad2",
+    "genTTX_pT_TopHad",
+    "genTTX_pT_TopLep",
+    "genTTX_pT_WHad",
+    "genTTX_pT_WLep",
+    ]
+   
+
+recott_variables = [
+    "recoTTX_DeltaEta_BHad_BLep",
+    "recoTTX_DeltaEta_BHad_Lepton",
+    "recoTTX_DeltaEta_TopHad_TopLep",
+    "recoTTX_DeltaPhi_BHad_BLep",
+    "recoTTX_DeltaPhi_BHad_Lepton",
+    "recoTTX_DeltaPhi_TopHad_TopLep",
+    "recoTTX_Eta_BHad",
+    "recoTTX_Eta_BLep",
+    "recoTTX_Eta_Lepton",
+    "recoTTX_Eta_QHad1",
+    "recoTTX_Eta_QHad2",
+    "recoTTX_Eta_TopHad",
+    "recoTTX_Eta_TopLep",
+    "recoTTX_Eta_WHad",
+    "recoTTX_Eta_WLep",
+    "recoTTX_pT_BHad",
+    "recoTTX_pT_BLep",
+    "recoTTX_pT_Lepton",
+    "recoTTX_pT_QHad1",
+    "recoTTX_pT_QHad2",
+    "recoTTX_pT_TopHad",
+    "recoTTX_pT_TopLep",
+    "recoTTX_pT_WHad",
+    "recoTTX_pT_WLep",
+    ]
+   
+
+genttx_variables = [
+    "genTTX_DeltaEta_BAdd1_BAdd2",
+    "genTTX_DeltaEta_Boson_Lepton",
+    "genTTX_DeltaEta_Boson_TopHad",
+    "genTTX_DeltaEta_Boson_TopLep",
+    "genTTX_DeltaPhi_BAdd1_BAdd2",
+    "genTTX_DeltaPhi_Boson_Lepton",
+    "genTTX_DeltaPhi_Boson_TopHad",
+    "genTTX_DeltaPhi_Boson_TopLep",
+    "genTTX_Eta_BAdd1",
+    "genTTX_Eta_BAdd2",
+    "genTTX_Eta_Boson",
+    "genTTX_pT_BAdd1",
+    "genTTX_pT_BAdd2",
+    "genTTX_pT_Boson",
+    ]
+
+recottx_variables = [
+    "recoTTX_DeltaEta_BAdd1_BAdd2",
+    "recoTTX_DeltaEta_Boson_Lepton",
+    "recoTTX_DeltaEta_Boson_TopHad",
+    "recoTTX_DeltaEta_Boson_TopLep",
+    "recoTTX_DeltaPhi_BAdd1_BAdd2",
+    "recoTTX_DeltaPhi_Boson_Lepton",
+    "recoTTX_DeltaPhi_Boson_TopHad",
+    "recoTTX_DeltaPhi_Boson_TopLep",
+    "recoTTX_Eta_BAdd1",
+    "recoTTX_Eta_BAdd2",
+    "recoTTX_Eta_Boson",
+    "recoTTX_pT_BAdd1",
+    "recoTTX_pT_BAdd2",
+    "recoTTX_pT_Boson",
+    ]
+
 current_set = reco_variables + csv_variables + deepcsv_comb
 variables = {}
 variables["4j_ge3t"] = current_set
 variables["5j_ge3t"] = current_set
 variables["ge6j_ge3t"] = current_set
+
+plot_variables = reco_variables + csv_variables + deepcsv_comb + recott_variables + gentt_variables + genttx_variables + recottx_variables
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))
+
