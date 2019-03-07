@@ -40,9 +40,14 @@ class Sample:
         self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
 
     def cutData(self, cut, variables, lumi_scale):
+        # if lumi scale was set to zero set scale to 1
+        scale = lumi_scale
+        if lumi_scale == 0:
+            scale = 1.
+
         if not self.applyCut or cut in ["inclusive", "SL"]:
             self.cut_data[cut] = self.data
-            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi_scale)
+            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale)
             return
 
         # cut events according to JT category
@@ -54,7 +59,7 @@ class Sample:
         self.cut_data[cut] = self.cut_data[cut][list(set(variables))]
 
         # add weight entry for scaling
-        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*lumi_scale*self.XSScale)
+        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
             
         
 
@@ -199,7 +204,7 @@ class variablePlotter:
                 bin_range   = bin_range,
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
-                ytitle      = setup.GetyTitle(),
+                ytitle      = setup.GetyTitle(self.options["lumiScale"]),
                 filled      = True)
 
             bkgHists.append(hist)
@@ -276,6 +281,8 @@ class variablePlotter:
         # add lumi and category to plot
         setup.printLumi(canvas, lumi = self.options["lumiScale"], ratio = self.options["ratio"])
         setup.printCategoryLabel(canvas, JTcut.getJTlabel(cat), ratio = self.options["ratio"])
+        if self.options["privateWork"]: 
+            setup.printPrivateWork(canvas, ratio = self.options["ratio"])
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)
@@ -296,14 +303,15 @@ class variablePlotterGenReco:
 
         # handle options
         defaultOptions = {
-            "xName":        "genlevel",
-            "yName":        "reco",
+            "xName":        "MC truth",
+            "yName":        "reconstructed",
             "plot1D":       False,
             "ratio":        False,
             "ratioTitle":   "",
             "KSscore":      False,
             "logscale":     False,
             "lumiScale":    1.,
+            "privateWork":  False,
             }
 
         for key in plotOptions:
@@ -380,16 +388,16 @@ class variablePlotterGenReco:
 
         # check if bin_range was found
         if not rangeX:
-            maxValue = max(self.samples[sample].cut_data[cat][vX].values)
-            minValue = min(self.samples[sample].cut_data[cat][vX].values)
+            maxValue = max(sample.cut_data[cat][vX].values)
+            minValue = min(sample.cut_data[cat][vX].values)
             config_string = "variables[\""+vX+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
             rangeX = [minValue, maxValue]
 
         if not rangeY:
-            maxValue = max(self.samples[sample].cut_data[cat][vY].values)
-            minValue = min(self.samples[sample].cut_data[cat][vY].values)
+            maxValue = max(sample.cut_data[cat][vY].values)
+            minValue = min(sample.cut_data[cat][vY].values)
             config_string = "variables[\""+vY+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
@@ -410,7 +418,7 @@ class variablePlotterGenReco:
                 bin_range   = bin_range,
                 color       = ROOT.kBlack,
                 xtitle      = cat+"_"+sample.sampleName+"_"+vX,
-                ytitle      = setup.GetyTitle(),
+                ytitle      = setup.GetyTitle(self.options["lumiScale"]),
                 filled      = False)
 
         hY = setup.setupHistogram(
@@ -420,7 +428,7 @@ class variablePlotterGenReco:
                 bin_range   = bin_range,
                 color       = ROOT.kRed,
                 xtitle      = cat+"_"+sample.sampleName+"_"+vY,
-                ytitle      = setup.GetyTitle(),
+                ytitle      = setup.GetyTitle(self.options["lumiScale"]),
                 filled      = False)
         
         # init canvas
@@ -445,6 +453,8 @@ class variablePlotterGenReco:
         # add lumi and category to plot
         setup.printLumi(canvas, lumi = self.options["lumiScale"], ratio = self.options["ratio"])
         setup.printCategoryLabel(canvas, JTcut.getJTlabel(cat), ratio = self.options["ratio"])
+        if self.options["privateWork"]:
+            setup.printPrivateWork(canvas, ratio = self.options["ratio"])
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)
@@ -460,16 +470,16 @@ class variablePlotterGenReco:
 
         # check if bin_range was found
         if not rangeX:
-            maxValue = max(self.samples[sample].cut_data[cat][vX].values)
-            minValue = min(self.samples[sample].cut_data[cat][vX].values)
+            maxValue = max([max(self.samples[sample].cut_data[cat][vX].values) for sample in self.samples])
+            minValue = min([min(self.samples[sample].cut_data[cat][vX].values) for sample in self.samples])
             config_string = "variables[\""+vX+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
             rangeX = [minValue, maxValue]
 
         if not rangeY:
-            maxValue = max(self.samples[sample].cut_data[cat][vY].values)
-            minValue = min(self.samples[sample].cut_data[cat][vY].values)
+            maxValue = max([max(self.samples[sample].cut_data[cat][vY].values) for sample in self.samples])
+            minValue = min([min(self.samples[sample].cut_data[cat][vY].values) for sample in self.samples])
             config_string = "variables[\""+vY+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
             with open("new_variable_configs.txt", "a") as f:
                 f.write(config_string)
@@ -503,6 +513,8 @@ class variablePlotterGenReco:
 
         # add lumi
         setup.printLumi(canvas, lumi = self.options["lumiScale"], twoDim = True)
+        if self.options["privateWork"]: 
+            setup.printPrivateWork(canvas, ratio = self.options["ratio"], twoDim = True)
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)
@@ -520,8 +532,12 @@ class variablePlotterGenReco:
                     bin_range   = bin_range,
                     color       = ROOT.kBlack,
                     xtitle      = vX+"1D",
-                    ytitle      = setup.GetyTitle(),
+                    ytitle      = setup.GetyTitle(self.options["lumiScale"]),
                     filled      = False)
+
+            if self.options["lumiScale"] == 0.:
+                hXInt = hX.Integral()
+                hX.Scale(1./hXInt)
 
             hY = setup.setupHistogram(
                     values      = valuesY,
@@ -530,8 +546,12 @@ class variablePlotterGenReco:
                     bin_range   = bin_range,
                     color       = ROOT.kRed,
                     xtitle      = vY+"1D",
-                    ytitle      = setup.GetyTitle(),
+                    ytitle      = setup.GetyTitle(self.options["lumiScale"]),
                     filled      = False)
+
+            if self.options["lumiScale"] == 0.:
+                hYInt = hY.Integral()
+                hY.Scale(1./hYInt)
 
             # init canvas
             canvas = setup.drawHistsOnCanvas(
@@ -555,6 +575,8 @@ class variablePlotterGenReco:
             # add lumi and category to plot
             setup.printLumi(canvas, lumi = self.options["lumiScale"], ratio = self.options["ratio"])
             setup.printCategoryLabel(canvas, JTcut.getJTlabel(cat), ratio = self.options["ratio"])
+            if self.options["privateWork"]: 
+                setup.printPrivateWork(canvas, ratio = self.options["ratio"])
 
             # save canvas
             setup.saveCanvas(canvas, plot_name.replace(".pdf","_1D.pdf"))

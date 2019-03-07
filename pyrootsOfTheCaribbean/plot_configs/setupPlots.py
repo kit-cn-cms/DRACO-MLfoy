@@ -22,7 +22,10 @@ def GetPlotColor( cls ):
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
 
-def GetyTitle():
+def GetyTitle(lumi = 1.):
+    # if lumi was set to 0 print normalized label
+    if lumi == 0.:
+        return "normalized to unit area"
     return "Events expected"
 
 def setupHistogram(
@@ -39,7 +42,7 @@ def setupHistogram(
 
     histogram.SetStats(False)
     histogram.GetXaxis().SetTitle(xtitle)
-    histogram.GetYaxis().SetTitle(GetyTitle())
+    histogram.GetYaxis().SetTitle(ytitle)
 
     histogram.GetYaxis().SetTitleOffset(1.4)
     histogram.GetXaxis().SetTitleOffset(1.2)
@@ -346,6 +349,8 @@ def calculateKSscore(stack, sig):
 
 
 def printLumi(pad, lumi = 41.5, ratio = False, twoDim = False):
+    if lumi == 0.: return
+
     lumi_text = str(lumi)+" fb^{-1} (13 TeV)"
 
     pad.cd(1)
@@ -391,6 +396,24 @@ def printROCScore(pad, ROC, ratio = False):
 
     if ratio:   latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:       latex.DrawLatex(l,1.-t+0.02, text)
+
+def printPrivateWork(pad, ratio = False, twoDim = False):
+    pad.cd(1) 
+    l = pad.GetLeftMargin() 
+    t = pad.GetTopMargin() 
+    r = pad.GetRightMargin() 
+    b = pad.GetBottomMargin() 
+ 
+    latex = ROOT.TLatex() 
+    latex.SetNDC() 
+    latex.SetTextColor(ROOT.kBlack) 
+    latex.SetTextSize(0.04)
+
+    text = "CMS private work" 
+
+    if twoDim:  latex.DrawLatex(l+0.39,1.-t+0.01, text)
+    elif ratio: latex.DrawLatex(l+0.05,1.-t+0.04, text) 
+    else:       latex.DrawLatex(l,1.-t+0.06, text)
 
 def printTitle(pad, title):
     pad.cd(1)
@@ -471,6 +494,10 @@ def generateLatexLabel(name):
             ["ttbar","t#bar{t}"],
             ["BosonB1","b_{H/Z}"],
             ["BosonB2","b_{H/Z}"],
+            ["BAdd1","b_{H/Z}"],
+            ["BAdd2","b_{H/Z}"],
+            ["QHad1","q_{had}"],
+            ["QHad2","q_{had}"],
             ["hadTop","t_{had}"],
             ["TopHad","t_{had}"],
             ["lepTop","t_{lep}"],
