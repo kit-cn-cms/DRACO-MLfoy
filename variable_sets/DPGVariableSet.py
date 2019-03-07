@@ -1,4 +1,4 @@
-reco_variables = [
+bdt_vars = [
     'BDT_common5_input_HT_tag',
     'BDT_common5_input_aplanarity_jets',
     'BDT_common5_input_aplanarity_tags',
@@ -15,6 +15,9 @@ reco_variables = [
     'BDT_common5_input_tagged_dijet_mass_closest_to_125',
     'BDT_common5_input_transverse_sphericity_jets',
     'BDT_common5_input_transverse_sphericity_tags',
+    ]
+
+reco_variables = [
     'Evt_Deta_TaggedJetsAverage',
     'Evt_Dr_MinDeltaRJets',
     'Evt_Dr_MinDeltaRLeptonJet',
@@ -39,12 +42,12 @@ reco_variables = [
     'LooseLepton_Eta[0]',
     'LooseLepton_Pt[0]',
     'N_BTagsT',
-    'memDBp',
+    #'memDBp',
     ]
 
 csv_variables = [
-    'CSV[0]',
-    'CSV[1]',
+    #'CSV[0]',
+    #'CSV[1]',
     'Evt_CSV_Average',
     'Evt_CSV_Average_Tagged',
     'Evt_CSV_Min',
@@ -111,7 +114,7 @@ deepflav_nodes = [
     'Jet_DeepFlavour_uds[3]',
     ]
 
-current_set = reco_variables + deepcsv_comb
+current_set = reco_variables + csv_variables + deepcsv_comb
 variables = {}
 variables["4j_ge3t"] = current_set
 variables["5j_ge3t"] = current_set

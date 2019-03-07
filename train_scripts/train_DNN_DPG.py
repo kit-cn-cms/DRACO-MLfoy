@@ -11,7 +11,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 # specify which variable set to use
-import variable_sets.newJEC_validated as variable_set
+import variable_sets.DPGVariableSet as variable_set
 
 # when executing the script give the jet-tag category as a first argument
 # (ge)[nJets]j_(ge)[nTags]t
@@ -21,10 +21,10 @@ JTcategory      = sys.argv[1]
 variables       = variable_set.variables[JTcategory]
 
 # absolute path to folder with input dataframes
-inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_newJEC/"
+inPath   = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ_v3/"
 
 # naming for input files
-naming = "_dnn_newJEC.h5"
+naming = "_dnn.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -41,7 +41,7 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"newJEC_validatedVariables_2Layer_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"DPG_standardVars_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
@@ -50,7 +50,7 @@ dnn = DNN.DNN(
     event_category  = JTcategory,
     train_variables = variables,
     # number of epochs
-    train_epochs    = 500,
+    train_epochs    = 5000,
     # number of epochs without decrease in loss before stopping
     early_stopping  = 20,
     # metrics for evaluation (c.f. KERAS metrics)
@@ -59,9 +59,24 @@ dnn = DNN.DNN(
     test_percentage = 0.2)
 
 #dnn.data.get_non_train_samples()
+# custom net config
+from keras import optimizers
+net_config = {
+    "layers":                   [500,500,500,500,500],
+    "loss_function":            "categorical_crossentropy",
+    "Dropout":                  0.5,
+    "L2_Norm":                  5e-4,
+    "batch_size":               1000,
+    "optimizer":                optimizers.Adagrad(decay=0.99),
+    "activation_function":      "elu",
+    "output_activation":        "Softmax",
+    "earlystopping_percentage": 0.05,
+    "batchNorm":                False,
+    }
+
 
 # build default model
-dnn.build_model()
+dnn.build_model(net_config)
 # perform the training
 dnn.train_model()
 # evalute the trained model
@@ -75,4 +90,5 @@ dnn.plot_metrics()
 # plot the confusion matrix
 dnn.plot_confusionMatrix(norm_matrix = True)
 # plot the output discriminators
-dnn.plot_discriminators(plot_nonTrainData = True)
+dnn.plot_discriminators(signal_class = "ttH")
+

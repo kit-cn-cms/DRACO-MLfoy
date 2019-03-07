@@ -460,7 +460,7 @@ class DNN():
 
     def plot_outputNodes(self, log = False, cut_on_variable = None, plot_nonTrainData = False):
         ''' plot distribution in outputNodes '''
-        nbins = 30
+        nbins = 20
         bin_range = [0., 1.]
 
         plotNodes = plottingScripts.plotOutputNodes(
@@ -485,7 +485,7 @@ class DNN():
 
     def plot_discriminators(self, log = False, plot_nonTrainData = False, signal_class = "ttHbb"):
         ''' plot all events classified as one category '''
-        nbins = 27
+        nbins = 18
         bin_range = [0.1, 1.]
 
         plotDiscrs = plottingScripts.plotDiscriminators(
