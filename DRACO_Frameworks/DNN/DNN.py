@@ -22,6 +22,7 @@ import keras.models as models
 import keras.layers as layer
 from keras import backend as K
 import matplotlib.pyplot as plt
+plt.rc('text', usetex=True)
 import pandas as pd
 
 # Limit gpu usage
@@ -429,7 +430,7 @@ class DNN():
         
             
 
-    def plot_metrics(self):
+    def plot_metrics(self, privateWork = False):
         ''' plot history of loss function and evaluation metrics '''
         metrics = ["loss"]
         if self.eval_metrics: metrics += self.eval_metrics
@@ -444,11 +445,16 @@ class DNN():
 
             plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
             plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
-            plt.title(self.categoryLabel.replace("\\geq",">="), loc = "right")
+            if privateWork:
+                plt.title("CMS private work", loc = "left", fontsize = 16)
+
+            title = self.categoryLabel
+            title = title.replace("\\geq", "$\geq$")
+            plt.title(title, loc = "right", fontsize = 16)
 
             plt.grid()
-            plt.xlabel("epoch")
-            plt.ylabel(metric)
+            plt.xlabel("epoch", fontsize = 16)
+            plt.ylabel(metric, fontsize = 16)
 
             plt.legend()
 
@@ -647,7 +653,7 @@ class DNN():
         print("saved output correlation at "+str(out_path))
         plt.clf()
 
-    def plot_confusionMatrix(self, norm_matrix = True):
+    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False):
         ''' plot confusion matrix '''
         plotCM = plottingScripts.plotConfusionMatrix(
             data                = self.data,
@@ -658,4 +664,4 @@ class DNN():
 
         plotCM.set_printROCScore(True)
 
-        plotCM.plot(norm_matrix = norm_matrix)
+        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork)

@@ -147,7 +147,7 @@ def drawHistOnCanvas2D(hist, canvasName, catLabel, sampleName):
 
     return canvas
 
-def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
+def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None, privateWork = False):
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
@@ -173,6 +173,9 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None):
 
     # add category label
     latex.DrawLatex(l,1.-t+0.01, catLabel)
+
+    if privateWork:
+        latex.DrawLatex(l, 1.-t+0.04, "CMS private work")
 
     # add ROC score if activated
     if ROC:

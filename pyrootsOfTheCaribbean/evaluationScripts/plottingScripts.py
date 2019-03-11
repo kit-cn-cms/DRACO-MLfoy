@@ -606,7 +606,7 @@ class plotConfusionMatrix:
         self.ROCScore = roc_auc_score(
             self.data.get_test_labels(), self.prediction_vector)
 
-    def plot(self, norm_matrix = True):
+    def plot(self, norm_matrix = True, privateWork = False):
         
         # norm confusion matrix if activated
         if norm_matrix:
@@ -627,7 +627,7 @@ class plotConfusionMatrix:
             ytitle      = "true class",
             binlabel    = self.event_classes)
 
-        canvas = setup.draw2DHistOnCanvas(cm, "confusion matrix", self.event_category, self.ROCScore)
+        canvas = setup.draw2DHistOnCanvas(cm, "confusion matrix", self.event_category, self.ROCScore, privateWork = privateWork)
         setup.saveCanvas(canvas, self.plotdir+"/confusionMatrix.pdf")
         
 
