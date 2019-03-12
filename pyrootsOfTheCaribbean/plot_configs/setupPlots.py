@@ -46,10 +46,10 @@ def setupHistogram(
 
     histogram.GetYaxis().SetTitleOffset(1.4)
     histogram.GetXaxis().SetTitleOffset(1.2)
-    histogram.GetYaxis().SetTitleSize(0.04)
-    histogram.GetXaxis().SetTitleSize(0.04)
-    histogram.GetYaxis().SetLabelSize(0.04)
-    histogram.GetXaxis().SetLabelSize(0.04)
+    histogram.GetYaxis().SetTitleSize(0.05)
+    histogram.GetXaxis().SetTitleSize(0.05)
+    histogram.GetYaxis().SetLabelSize(0.05)
+    histogram.GetXaxis().SetLabelSize(0.05)
 
     histogram.SetMarkerColor(color)
 
@@ -540,10 +540,10 @@ def generateLatexLabel(name):
     name = name.replace("Looselep)","LooseLepton")
     name = name.replace("primarylep)","primary lepton")
     name = name.replace("MHT", "missing H_{T}")
-    name = name.replace("HT","H_{T}")
+    name = name.replace("HT","H_{T} [GeV]")
     name = name.replace("Jetp_{T}OverJetE","average p_{T}^{jet}/E^{jet}")
     name = name.replace("TTXmatcher_chi2", "t#bar{t} matcher #chi^{2}")
-
+    name = name.replace("Jet_#eta[0]","#eta(first jet)")
     return name
 
 
