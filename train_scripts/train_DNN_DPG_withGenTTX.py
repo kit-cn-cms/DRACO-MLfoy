@@ -11,7 +11,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 # specify which variable set to use
-import variable_sets.DPGVariableSet as variable_set
+import variable_sets.DPGVariableSetGenTTX as variable_set
 import net_config
 
 # when executing the script give the jet-tag category as a first argument
@@ -31,18 +31,18 @@ naming = "_dnn.h5"
 input_samples = df.InputSamples(inPath)
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
+input_samples.addSample("ttZbb_Jets"+naming,   label = "ttZbb", signalSample = True, normalization_weight = 2.)
 input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True, normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-#input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
 
 
 
 # path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/"+"DPG_standardVars_"+str(JTcategory)
+savepath = basedir+"/workdir/"+"DPG_standardVars_withGenTTX_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
@@ -61,7 +61,6 @@ dnn = DNN.DNN(
 
 #dnn.data.get_non_train_samples()
 
-
 # build default model
 dnn.build_model(net_config.dpg_config)
 # perform the training
@@ -72,10 +71,10 @@ dnn.eval_model()
 dnn.get_input_weights()
 
 # plotting 
-# plot the evaluation metrics
-dnn.plot_metrics(privateWork = True)
 # plot the confusion matrix
 dnn.plot_confusionMatrix(norm_matrix = True, privateWork = True)
+# plot the evaluation metrics
+dnn.plot_metrics(privateWork = True)
 # plot the output discriminators
 dnn.plot_discriminators(signal_class = "ttHbb")
 

@@ -183,7 +183,7 @@ recottx_variables = [
     "recoTTX_pT_Boson",
     ]
 
-current_set = reco_variables + csv_variables + deepcsv_comb + deepcsv_nodes
+current_set = reco_variables + csv_variables + deepcsv_comb + gentt_variables + deepcsv_nodes
 variables = {}
 variables["4j_ge3t"] = current_set
 variables["5j_ge3t"] = current_set
