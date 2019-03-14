@@ -329,6 +329,7 @@ class variablePlotterGenReco:
             "logscale":     False,
             "lumiScale":    1.,
             "privateWork":  False,
+            "getCorr":      False,
             }
 
         for key in plotOptions:
@@ -532,6 +533,10 @@ class variablePlotterGenReco:
         setup.printLumi(canvas, lumi = self.options["lumiScale"], twoDim = True)
         if self.options["privateWork"]: 
             setup.printPrivateWork(canvas, ratio = self.options["ratio"], twoDim = True)
+
+        if self.options["getCorr"]:
+            correlation = hist.GetCorrelationFactor()
+            setup.printCorrelation(canvas, correlation)
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)

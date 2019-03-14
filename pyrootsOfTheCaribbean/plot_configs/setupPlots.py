@@ -46,10 +46,10 @@ def setupHistogram(
 
     histogram.GetYaxis().SetTitleOffset(1.4)
     histogram.GetXaxis().SetTitleOffset(1.2)
-    histogram.GetYaxis().SetTitleSize(0.05)
-    histogram.GetXaxis().SetTitleSize(0.05)
-    histogram.GetYaxis().SetLabelSize(0.05)
-    histogram.GetXaxis().SetLabelSize(0.05)
+    histogram.GetYaxis().SetTitleSize(0.055)
+    histogram.GetXaxis().SetTitleSize(0.055)
+    histogram.GetYaxis().SetLabelSize(0.055)
+    histogram.GetXaxis().SetLabelSize(0.055)
 
     histogram.SetMarkerColor(color)
 
@@ -85,7 +85,7 @@ def setupHistogram2D(valuesX, valuesY, weights, binsX, binsY, rangeX, rangeY, ti
 def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     # check if errors for matrix are given
     has_errors = isinstance(errors, np.ndarray)
-    print(has_errors)
+    #print(has_errors)
     
     # init histogram
     cm = ROOT.TH2D("2Dhistogram", "", ncls, 0, ncls, ncls, 0, ncls)
@@ -102,6 +102,8 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.GetXaxis().SetTitle(xtitle)
     cm.GetYaxis().SetTitle(ytitle)
 
+    cm.SetMarkerColor(ROOT.kWhite)
+
     minimum = np.min(matrix)
     maximum = np.max(matrix)
 
@@ -114,7 +116,7 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
 
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
-    cm.SetMarkerSize(1.)
+    cm.SetMarkerSize(2.)
 
     return cm
 
@@ -343,7 +345,7 @@ def getLegend():
     legend.SetBorderSize(0);
     legend.SetLineStyle(0);
     legend.SetTextFont(42);
-    legend.SetTextSize(0.03);
+    legend.SetTextSize(0.05);
     legend.SetFillStyle(0);
     return legend
 
@@ -417,6 +419,22 @@ def printPrivateWork(pad, ratio = False, twoDim = False):
     if twoDim:  latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio: latex.DrawLatex(l+0.05,1.-t+0.04, text) 
     else:       latex.DrawLatex(l,1.-t+0.01, text)
+
+def printCorrelation(pad, correlation):
+    pad.cd(1)
+    l = pad.GetLeftMargin()
+    t = pad.GetTopMargin()
+    r = pad.GetRightMargin()
+    b = pad.GetBottomMargin()
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+    latex.SetTextSize(0.03)
+
+    text = "corr = {:.3f}".format(correlation)
+
+    latex.DrawLatex(l+0.53,1.-t-0.03, text)
 
 def printTitle(pad, title):
     pad.cd(1)

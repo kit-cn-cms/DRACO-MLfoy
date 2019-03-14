@@ -653,7 +653,7 @@ class DNN():
         print("saved output correlation at "+str(out_path))
         plt.clf()
 
-    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False):
+    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
         ''' plot confusion matrix '''
         plotCM = plottingScripts.plotConfusionMatrix(
             data                = self.data,
@@ -662,6 +662,6 @@ class DNN():
             event_category      = self.categoryLabel,
             plotdir             = self.save_path)
 
-        plotCM.set_printROCScore(True)
+        plotCM.set_printROCScore(printROC)
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork)

@@ -11,11 +11,11 @@ import variable_sets.ttXRecoVariables as variable_set
 from evaluationScripts.plotVariables import variablePlotterGenReco
 
 # location of input dataframes
-#data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ_v3/"
-data_dir = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN_v3/"
+data_dir = "/ceph/vanderlinden/MLFoyTrainData/DNN_ttZ_v3/"
+#data_dir = "/nfs/dust/cms/user/vdlinden/DNNInputFiles/ttZ_DNN_v3/"
 
 # output location of plots
-plot_dir = basedir + "/workdir/RecoGenComparison_v3/"
+plot_dir = "/ceph/vanderlinden/RecoGenComparison/"
 if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
@@ -28,6 +28,7 @@ plotOptions = {
     "logscale":     False,
     "lumiScale":    0.,
     "privateWork":  True,
+    "getCorr":      False,
     }
 
 # variables to plot
@@ -141,7 +142,7 @@ plotter.addSample(
 #plotter.addCategory("4j_ge3t")
 #plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
-plotter.addCategory("ge4j_ge3t")
+#plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine

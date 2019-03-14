@@ -603,8 +603,9 @@ class plotConfusionMatrix:
     
     def set_printROCScore(self, printROCScore):
         self.printROCScore = printROCScore
-        self.ROCScore = roc_auc_score(
-            self.data.get_test_labels(), self.prediction_vector)
+        if printROCScore:
+            self.ROCScore = roc_auc_score(
+                self.data.get_test_labels(), self.prediction_vector)
 
     def plot(self, norm_matrix = True, privateWork = False):
         
