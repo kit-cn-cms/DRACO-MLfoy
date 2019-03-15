@@ -9,7 +9,9 @@ pip install --user uproot
 ```
 
 ## Adjust settings in `preprocessing.py`
-- `base_selection` to define a base event selection which is applied for all Samples (default `base_selection = "(N_Jets >= 4 and N_BTagsM >= 3)"`)
+- `base_selection` to define a base event selection which is applied for all Samples 
+   
+   (default `base_selection = "(N_Jets >= 4 and N_BTagsM >= 3)"`)
 - change/add event categories (default event categories are `ttH_categories` and `ttbar_categories`)
 ```python
 	EVENTCATEGORYNAME=root2pandas.EventCategories()
@@ -23,10 +25,10 @@ pip install --user uproot
 - change/add samples of the dataset used with 
 ```python
 	dataset.addSample(SampleName  = SAMPLENAME,
-    				  ntuples     = PATHTONTUPLES,
-    				  categories  = EVENTCATEGORYNAME,
-    				  selections  = SELECTION,
-    				  MEMs        = PATHTOMEMS`
+    			ntuples     = PATHTONTUPLES,
+    			categories  = EVENTCATEGORYNAME,
+    			selections  = SELECTION,
+    			MEMs        = PATHTOMEMS`
 ```
 - change `additional_variables` for variables needed to preprocess, that are not defined in the selection and not needed for training
 
