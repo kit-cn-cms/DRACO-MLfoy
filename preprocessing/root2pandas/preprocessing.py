@@ -1,12 +1,55 @@
 import os
 import sys
+import optparse
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
-import variable_sets.newJEC_top20Variables as variable_set
+
+"""
+USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
+"""
+usage="usage=%prog [options] \n"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
+        help="DIR for output", metavar="outputDir")
+
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="newJEC_top20Variables",
+        help="FILE for variables used to train DNNs", metavar="variableSelection")
+
+parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
+        help="INT used for maximal number of Entries for each batch (otherwise naf will crash)", metavar="maxEntries")
+
+parser.add_option("-m", "--MEM", dest="MEM", default=False,
+        help="BOOL to use MEM or not", metavar="MEM")
+
+parser.add_option("-n", "--name", dest="Name", default="dnn",
+        help="STR of the output file name", metavar="Name")
+
+
+(options, args) = parser.parse_args()
+
+if not os.path.isabs(options.variableSelection):
+    sys.path.append(basedir+"/variable_sets/")
+    variable_set = __import__(options.variableSelection)
+    print(variable_set.all_variables)
+elif os.path.exists(options.variableSelection):
+    variable_set = __import__(options.variableSelection)
+else:
+    sys.exit("ERROR: Variable Selection File does not exist!")
+
+if not os.path.isabs(options.outputDir):
+    outputdir = basedir+"/workdir/"+options.outputDir
+elif os.path.exists(options.outputDir):
+    outputdir=options.outputDir
+else:
+    sys.exit("ERROR: Output Directory does not exist!")
 
 
 
@@ -42,9 +85,10 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-    outputdir   = basedir+"/workdir/InputFeatures/",
-    naming      = "dnn",
-    addMEM      = False)
+    outputdir   = outputdir,
+    naming      = options.Name,
+    addMEM      = options.MEM,
+    maxEntries  = options.maxEntries)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
@@ -52,7 +96,7 @@ dataset.addBaseSelection(base_selection)
 
 
 ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
-memPath = "/nfs/dust/cms/user/vdlinden/MEM_2017/"
+memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
 dataset.addSample(

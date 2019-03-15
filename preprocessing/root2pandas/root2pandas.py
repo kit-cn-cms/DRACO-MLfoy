@@ -25,13 +25,12 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, CNNmaps = None):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
-        self.CNNmaps    = CNNmaps
     
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
@@ -40,7 +39,7 @@ class Sample:
 
 
 class Dataset:
-    def __init__(self, outputdir, naming = "", addCNNmap = False, addMEM = False, maxEntries = 50000):
+    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
@@ -50,7 +49,6 @@ class Dataset:
             os.makedirs(self.outputdir)
  
         # settings for dataset
-        self.addCNNmap  = addCNNmap
         self.addMEM     = addMEM
         self.maxEntries = maxEntries
 
@@ -178,8 +176,7 @@ class Dataset:
 
     # ====================================================================
 
-    def runPreprocessing(self, figureOutVectors = False):
-        self.figureOutVectors = figureOutVectors
+    def runPreprocessing(self):
 
         # add variables for triggering and event category selection
         self.gatherTriggerVariables()
@@ -362,31 +359,6 @@ class Dataset:
             print("    we will only save events with mem...")
         return df       
 
-    def addCNNmaps(self, df, cnn_df):
-        print("adding CNN maps to dataframe ...")
-        # add entry to dataframe to indicate whether a cnn map is found
-        cnn_df["has_cnn"] = pd.Series([True]*cnn_df.shape[0], index = cnn_df.index)
-
-        # get dictionary of column datatypes to recast them later
-        cnn_columns = cnn_df.columns.values
-        dtype_dict = {v: cnn_df[v].dtype for v in cnn_columns if not v == "has_cnn"}
-
-        # add cnn variables
-        df = df.join(cnn_df, how = "left")
-
-        # only return events where a CNN map has been found
-        entries_before = df.shape[0]
-        df = df.query("has_cnn == True")
-        events_after = df.shape[0]
-        print("matched {}/{} events with CNN maps".format(entries_after, entries_before))
-        
-        # remove variable
-        df = df.drop("has_cnn", axis = 1, inplace = True)
-
-        # recast datatypes to save disk
-        df = df.astype(dtype = dtype_dict)
-
-        return df
 
     def removeTriggerVariables(self, df):
         df.drop(self.removedVariables, axis = 1, inplace = True)
