@@ -219,15 +219,10 @@ class Dataset:
             mem_files = glob.glob(sample.MEMs)
             mem_df = self.generateMEMdf(mem_files, sample.sampleName)
         
-        if self.addCNNmap:
-            print("loading CNN maps "+str(sample.CNNmaps))
-            with pd.HDFStore(sample.CNNmaps, "r") as store:
-                cnn_df = store.select("data")
-            print("cnn dataframe has {} entries.".format(cnn_df.shape[0]))
 
         # initialize loop over ntuple files
         n_entries = 0
-        dataframes = []
+        concat_df = pd.DataFrame()
         n_files = len(ntuple_files)
 
         # loop over files
@@ -242,58 +237,26 @@ class Dataset:
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
-
-                if not self.figureOutVectors:
-                    # convert tree to dataframe but only extract the variables needed
-                    df = tree.pandas.df(self.variables)
-
-                    # handle vector variables, loop over them
-                    for vecvar in self.vector_variables:
-                        # load dataframe with vector variable
-                        vec_df = tree.pandas.df(vecvar)
-
-                        # loop over inices in vecvar list
-                        for idx in self.vector_variables[vecvar]:
-                            # slice the index
-                            idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-                            # define name for column in df
-                            col_name = str(vecvar)+"["+str(idx)+"]"
-                            # append column to original dataframe
-                            df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
-                else:
-                    # initialize dataframe with id variables
-                    df = tree.pandas.df(["Evt_Run", "Evt_Lumi", "Evt_ID"])
-
-                    # loop over all variables
-                    for var in self.variables:
-                        # id variables are already covered
-                        if var in ["Evt_Run", "Evt_Lumi", "Evt_ID"]: continue
-
-                        # get data
-                        var_df = tree.pandas.df(var)
-
-                        # if variable istn vectorlike just add it to the dataframe
-                        if not "subentry" in var_df.index.names:
-                            df = df.join(var_df)
-                            continue
-                            
-                        # figure out indices of variable
-                        indices = list(var_df.index.levels[1])
-                        
-                        # add one variable per index
-                        for idx in indices:
-                            if idx > 10: continue
-                            df = df.join( var_df[var].loc[:,idx], rsuffix = "[{}]".format(idx) )
-            
-                        # rename first entry for consistency and drop it
-                        df[var+"[0]"] = df[var]
-                        df.drop(var, axis = 1, inplace = True)
-                        
-            # apply event selection
+	    df = tree.pandas.df(self.variables)
+	    # handle vector variables, loop over them
+	    for vecvar in self.vector_variables:
+		# load dataframe with vector variable
+		vec_df = tree.pandas.df(vecvar)
+		# loop over inices in vecvar list
+		for idx in self.vector_variables[vecvar]:
+		    # slice the index
+		    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+		    # define name for column in df
+		    col_name = str(vecvar)+"["+str(idx)+"]"
+		    # append column to original dataframe
+		    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+		
+	    # apply event selection
             df = self.applySelections(df, sample.selections)
         
             # add to list of dataframes
-            dataframes.append(df)
+            if concat_df.empty: concat_df = df
+            else: concat_df = concat_df.append(df)
 
             # count entries so far
             n_entries += df.shape[0]
@@ -302,8 +265,6 @@ class Dataset:
             if (n_entries > self.maxEntries or f == ntuple_files[-1]):
                 print("*"*50)
                 print("max entries reached ...")
-                concat_df = pd.concat(dataframes)
-                dataframes = []
 
                 # add class labels
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
@@ -315,9 +276,6 @@ class Dataset:
                 if self.addMEM:
                     concat_df = self.addMEMVariable(concat_df, mem_df)
 
-                # add CNN maps
-                if self.addCNNmap:
-                    concat_df = self.addCNNmaps(concat_df, cnn_df)
 
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
@@ -328,8 +286,7 @@ class Dataset:
 
                 # reset counters
                 n_entries = 0
-                del concat_df
-
+                concat_df = pd.DataFrame()
         
 
     # ====================================================================
