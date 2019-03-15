@@ -26,7 +26,7 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
         help="INT used for maximal number of Entries for each batch (otherwise naf will crash)", metavar="maxEntries")
 
-parser.add_option("-m", "--MEM", dest="MEM", default=False,
+parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,
         help="BOOL to use MEM or not", metavar="MEM")
 
 parser.add_option("-n", "--name", dest="Name", default="dnn",
