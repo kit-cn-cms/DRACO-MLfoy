@@ -2,6 +2,7 @@
 import os
 import sys
 import keras.optimizers as optimizers
+import optparse
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -12,14 +13,82 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
-# specify which variable set to use
-import variable_sets.newJEC_top20Variables as variable_set
-# import file with net configs
-import net_configs
+"""
+USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
+"""
+usage="usage=%prog [options] \n"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
 
-# jet-tag category for trainig
-# (ge)[nJets]j_(ge)[nTags]t
-JTcategory      = sys.argv[1]
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_training",
+        help="DIR for output", metavar="outputDir")
+
+parser.add_option("-j", "--jets", dest="nJets",default="4",
+        help="Number of Jets (ge)INT", metavar="nJets")
+
+parser.add_option("-t", "--tags", dest="nTags",default="ge3",
+        help="Number of b-tagged Jets (ge)INT", metavar="nTags")
+
+parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
+        help="INT number of training epochs", metavar="train_epochs")
+
+parser.add_option("-s", "--earlystopping", dest="early_stopping",default=20,
+        help="INT number of epochs without decrease in loss before stopping", metavar="early_stopping")
+
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="newJEC_top20Variables",
+        help="FILE for variables used to train DNNs", metavar="variableSelection")
+
+parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
+        help="activate to create plots", metavar="plot")
+
+parser.add_option("-n","--normmatrix", dest="norm_matrix", action = "store_true", default=False,
+        help="activate to normalize entries of the matrices", metavar="norm_matrix")
+
+parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
+        help="activate for logarithmic plots", metavar="log")
+
+parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
+        help="activate to create private work plot label", metavar="privateWork")
+
+parser.add_option("--netconfig", dest="net_config",default=None,
+        help="STR of config name in net_config (config in this file will not be used anymore!)", metavar="net_config")
+
+parser.add_option("--signalclass", dest="signal_class", default="ttHbb",
+        help="STR of signal class", metavar="signal_class")
+
+parser.add_option("--plotnontraindata", dest="plot_nonTrainData", action = "store_true", default=False,
+        help="activate to use non train data", metavar="plot_nonTrainData")
+
+parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
+        help="activate to print ROC value for confusion matrix", metavar="printROC")
+
+
+(options, args) = parser.parse_args()
+
+#import Variable Selection
+if not os.path.isabs(options.variableSelection):
+    sys.path.append(basedir+"/variable_sets/")
+    variable_set = __import__(options.variableSelection)
+    print(variable_set.all_variables)
+elif os.path.exists(options.variableSelection):
+    variable_set = __import__(options.variableSelection)
+else:
+    sys.exit("ERROR: Variable Selection File does not exist!")
+
+#get output directory path
+if not os.path.isabs(options.outputDir):
+    outputdir = basedir+"/workdir/"+options.outputDir
+elif os.path.exists(options.outputDir):
+    outputdir=options.outputDir
+else:
+    sys.exit("ERROR: Output Directory does not exist!")
+
+#Jet and Tag comvination
+JTcategory = str(options.nJets)+"j_"+str(options.nTags)+"t"
+#add nJets and nTags to output directory
+outputdir += "_"+JTcategory
 
 # the input variables are loaded from the variable_set file
 variables       = variable_set.variables[JTcategory]
@@ -42,20 +111,17 @@ input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
-# path to output directory (adjust NAMING)
-name = "test_training"
-savepath = basedir+"/workdir/"+name+"_"+str(JTcategory)
 
 # initializing DNN training class
 dnn = DNN.DNN(
-    save_path       = savepath,
+    save_path       = outputdir,
     input_samples   = input_samples,
     event_category  = JTcategory,
     train_variables = variables,
     # number of epochs
-    train_epochs    = 1000,
+    train_epochs    = int(options.train_epochs),
     # number of epochs without decrease in loss before stopping
-    early_stopping  = 20,
+    early_stopping  = int(options.early_stopping),
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
@@ -78,8 +144,14 @@ dpg_config = {
     "batchNorm":                False
     }
 
+# import file with net configs if option is used
+if options.net_config:
+    from net_configs import config_list
+    config=config_list[options.net_config]
+else:
+    config=dpg_config
 
-dnn.build_model(dpg_config)
+dnn.build_model(config)
 
 # perform the training
 dnn.train_model()
@@ -91,13 +163,14 @@ dnn.eval_model()
 dnn.get_input_weights()
 
 # plotting 
-# plot the evaluation metrics
-dnn.plot_metrics(privateWork = True)
+if options.plot:
+    # plot the evaluation metrics
+    dnn.plot_metrics(privateWork = options.privateWork)
 
-# plot the confusion matrix
-dnn.plot_confusionMatrix(norm_matrix = True, privateWork = True)
+    # plot the confusion matrix
+    dnn.plot_confusionMatrix(printROC=options.printROC,norm_matrix = options.norm_matrix, privateWork = options.privateWork)
 
-# plot the output discriminators
-dnn.plot_discriminators(signal_class = "ttHbb")
+    # plot the output discriminators
+    dnn.plot_discriminators(log=options.log,signal_class = options.signal_class, plot_nonTrainData= options.plot_nonTrainData)
 
 
