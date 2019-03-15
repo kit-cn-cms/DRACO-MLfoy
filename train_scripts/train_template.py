@@ -25,11 +25,14 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_training",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-j", "--jets", dest="nJets",default="4",
-        help="Number of Jets (ge)INT", metavar="nJets")
+parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
+        help="DIR for input", metavar="inputDir")
 
-parser.add_option("-t", "--tags", dest="nTags",default="ge3",
-        help="Number of b-tagged Jets (ge)INT", metavar="nTags")
+parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
+        help="file ending for the samples in preprocessing", metavar="naming")
+
+parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+        help="STR name of the category (ge)[nJets]j_(ge)[nTags]t", metavar="category")
 
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs", metavar="train_epochs")
@@ -42,9 +45,6 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
         help="activate to create plots", metavar="plot")
-
-parser.add_option("-n","--normmatrix", dest="norm_matrix", action = "store_true", default=False,
-        help="activate to normalize entries of the matrices", metavar="norm_matrix")
 
 parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
         help="activate for logarithmic plots", metavar="log")
@@ -60,6 +60,9 @@ parser.add_option("--signalclass", dest="signal_class", default="ttHbb",
 
 parser.add_option("--plotnontraindata", dest="plot_nonTrainData", action = "store_true", default=False,
         help="activate to use non train data", metavar="plot_nonTrainData")
+
+parser.add_option("--normmatrix", dest="norm_matrix", action = "store_false", default=True,
+        help="activate to normalize entries of the matrices", metavar="norm_matrix")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
@@ -77,6 +80,14 @@ elif os.path.exists(options.variableSelection):
 else:
     sys.exit("ERROR: Variable Selection File does not exist!")
 
+#get input directory path
+if not os.path.isabs(options.inputDir):
+    inPath = basedir+"/workdir/"+options.inputDir
+elif os.path.exists(options.inputDir):
+    inPath=options.inputDir
+else:
+    sys.exit("ERROR: Input Directory does not exist!")
+
 #get output directory path
 if not os.path.isabs(options.outputDir):
     outputdir = basedir+"/workdir/"+options.outputDir
@@ -85,22 +96,19 @@ elif os.path.exists(options.outputDir):
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
-#Jet and Tag comvination
-JTcategory = str(options.nJets)+"j_"+str(options.nTags)+"t"
 #add nJets and nTags to output directory
-outputdir += "_"+JTcategory
+outputdir += "_"+options.category
 
 # the input variables are loaded from the variable_set file
-variables       = variable_set.variables[JTcategory]
+variables       = variable_set.variables[options.category]
 
 # absolute path to folder with input dataframes
 inPath   = basedir+"/workdir/InputFeatures/"
 
-# naming of input files
-naming = "_dnn.h5"
 
 # load samples
 input_samples = df.InputSamples(inPath)
+naming=options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
@@ -116,7 +124,7 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 dnn = DNN.DNN(
     save_path       = outputdir,
     input_samples   = input_samples,
-    event_category  = JTcategory,
+    event_category  = options.category,
     train_variables = variables,
     # number of epochs
     train_epochs    = int(options.train_epochs),
@@ -146,8 +154,8 @@ dpg_config = {
 
 # import file with net configs if option is used
 if options.net_config:
-    from net_configs import config_list
-    config=config_list[options.net_config]
+    from net_configs import config_dict
+    config=config_dict[options.net_config]
 else:
     config=dpg_config
 
