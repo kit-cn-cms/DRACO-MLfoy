@@ -22,9 +22,9 @@ def GetPlotColor( cls ):
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
 
-def GetyTitle(lumi = 1.):
-    # if lumi was set to 0 print normalized label
-    if lumi == 0.:
+def GetyTitle(privateWork = False):
+    # if privateWork flag is enabled, normalize plots to unit area
+    if privateWork:
         return "normalized to unit area"
     return "Events expected"
 

@@ -16,7 +16,7 @@ import plot_configs.setupPlots as setup
 
 
 class plotDiscriminators:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
@@ -28,29 +28,38 @@ class plotDiscriminators:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
-        self.plot_nonTrainData = plot_nonTrainData
 
-        self.signalIndex       = self.data.class_translation[self.signal_class]
-        self.signalFlag        = self.data.get_class_flag(self.signal_class)
+        if self.signal_class:
+            self.signalIndex   = self.data.class_translation[self.signal_class]
+            self.signalFlag    = self.data.get_class_flag(self.signal_class)
 
         # default settings
         self.printROCScore = False
+        self.privateWork = False
 
-    def set_printROCScore(self, printROCScore):
-        self.printROCScore = printROCScore
+    def plot(self, ratio = False, printROC = False, privateWork = False):
+        self.printROCScore = printROC
+        self.privateWork = privateWork
 
-    def plot(self, ratio = False):
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
             print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
+
+            # get index of node
             nodeIndex = self.data.class_translation[node_cls]
+            if self.signal_class:
+                signalIndex = self.signalIndex
+                signalFlag  = self.signalFlag
+            else:
+                signalIndex = nodeIndex
+                signalFlag  = self.data.get_class_flag(node_cls)
 
             # get output values of this node
             out_values = self.prediction_vector[:,i]
 
             if self.printROCScore:
                 # calculate ROC value for specific node
-                nodeROC = roc_auc_score(self.signalFlag, out_values)
+                nodeROC = roc_auc_score(signalFlag, out_values)
 
             # fill lists according to class
             bkgHists  = []
@@ -60,36 +69,6 @@ class plotDiscriminators:
             sig_values = []
             sig_labels = []
             sig_weights = []
-
-            # if non-train data plotting is enabled, add the histograms here
-            if self.plot_nonTrainData:
-                for sample in self.data.non_train_samples:
-                    values = sample.prediction_vector[:,i]
-                    filtered_values = [ values[k] for k in range(len(values)) \
-                        if sample.predicted_classes[k] == nodeIndex]
-                    filtered_weights = [ sample.lumi_weights[k] for k in range(len(values)) \
-                        if sample.predicted_classes[k] == nodeIndex]
-                    print("{} events in discriminator: {}\t(Integral: {})".format(sample.label, len(filtered_values), sum(filtered_weights)))
-
-
-                    if sample.signalSample:
-                        sig_values.append(filtered_values)
-                        sig_labels.append(sample.label)
-                        sig_weights.append(filtered_weights)
-                    else:
-                        histogram = setup.setupHistogram(
-                            values    = filtered_values,
-                            weights   = filtered_weights,
-                            nbins     = self.nbins,
-                            bin_range = self.bin_range,
-                            color     = setup.GetPlotColor(sample.label),
-                            xtitle    = str(sample.label)+" at "+str(node_cls)+" node",
-                            ytitle    = setup.GetyTitle(),
-                            filled    = True)
-
-                        bkgHists.append(histogram)
-                        bkgLabels.append(sample.label)
-
 
             # loop over all classes to fill hists according to truth level class
             for j, truth_cls in enumerate(self.event_classes):
@@ -106,7 +85,7 @@ class plotDiscriminators:
 
                 print("{} events in discriminator: {}\t(Integral: {})".format(truth_cls, len(filtered_values), sum(filtered_weights)))
 
-                if j == self.signalIndex:
+                if j == signalIndex:
                     # signal histogram
                     sig_values.append(filtered_values)
                     sig_labels.append(str(truth_cls))
@@ -122,7 +101,7 @@ class plotDiscriminators:
                         bin_range = self.bin_range,
                         color     = setup.GetPlotColor(truth_cls),
                         xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
-                        ytitle    = setup.GetyTitle(),
+                        ytitle    = setup.GetyTitle(self.privateWork),
                         filled    = True)
                     
                     bkgHists.append( histogram )
@@ -139,7 +118,7 @@ class plotDiscriminators:
                     bin_range = self.bin_range,
                     color     = setup.GetPlotColor(sig_labels[iSig]),
                     xtitle    = str(sig_labels[iSig])+" at "+str(node_cls)+" node",
-                    ytitle    = setup.GetyTitle(),
+                    ytitle    = setup.GetyTitle(self.privateWork),
                     filled    = False)
 
                 # set signal histogram linewidth
@@ -150,14 +129,20 @@ class plotDiscriminators:
                 sigHist.Scale(scaleFactor)
                 sigHists.append(sigHist)
                 scaleFactors.append(scaleFactor)
-                
-                figure_of_merit = get_FOM(sum(sig_weights[iSig]), weightIntegral)
-                print("figure of merit for {}: {}".format(sig_labels[iSig], figure_of_merit))
+
+            # rescale histograms if privateWork is enabled    
+            if privateWork:
+                for sHist in sigHists:
+                    sHist.Scale(1./sHist.Integral())
+                for bHist in bkgHists:
+                    bHist.Scale(1./weightIntegral)
 
             plotOptions = {
                 "ratio":      ratio,
                 "ratioTitle": "#frac{scaled Signal}{Background}",
                 "logscale":   self.logscale}
+
+            # initialize canvas
             canvas = setup.drawHistsOnCanvas(
                 sigHists, bkgHists, plotOptions, 
                 canvasName = node_cls+" final discriminator")
@@ -181,7 +166,8 @@ class plotDiscriminators:
                 setup.printROCScore(canvas, nodeROC, plotOptions["ratio"])
 
             # add lumi and category to plot
-            setup.printLumi(canvas, ratio = plotOptions["ratio"])
+            if not self.privateWork:
+                setup.printLumi(canvas, ratio = plotOptions["ratio"])
             setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
             out_path = self.plotdir + "/finaldiscr_{}.pdf".format(node_cls)
@@ -194,28 +180,13 @@ class plotDiscriminators:
         os.system(cmd)
 
 
-def get_FOM(S, B):
-    return np.sqrt( 2.*( (S+B)*np.log(1.+1.*S/B)-S))
-
-def get_FOM_with_uncert(name, S, B, sB = 0.2):
-    sB*=B
-    term1 = (S+B)*np.log(
-        ( (S+B)*(B+sB**2) )/( B**2+(S+B)*sB**2 ) 
-        )
-    term2 = (B**2/sB**2)*np.log(
-        1+( sB**2*S )/( B*(B+sB**2) )
-        )
-    return np.sqrt(2.*(term1-term2))
-
-
-
 
 
 
 
 
 class plotOutputNodes:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, plot_nonTrainData = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.event_classes     = event_classes
@@ -225,35 +196,34 @@ class plotOutputNodes:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
-        self.plot_nonTrainData = plot_nonTrainData
 
-        self.signalIndex       = self.data.class_translation[self.signal_class]
-        self.signalFlag        = self.data.get_class_flag(self.signal_class)
+        if self.signal_class:
+            self.signalIndex   = self.data.class_translation[self.signal_class]
+            self.signalFlag    = self.data.get_class_flag(self.signal_class)
 
         # default settings
         self.printROCScore = False
-        self.cutVariable = False
-        self.eventInCut = np.array([True for _ in range(len(self.prediction_vector))])
+        self.privateWork = False
 
-    def set_cutVariable(self, cutClass, cutValue):
-        cutVariableIndex = self.data.class_translation[cutClass]
-        predictions_cutVariable = self.prediction_vector[:, cutVariableIndex]
-        self.eventInCut = [predictions_cutVariable[i] <= cutValue for i in len(self.prediction_vector)]
+    def plot(self, ratio = False, printROC = False, privateWork = False):
+        self.printROCScore = printROC
+        self.privateWork = privateWork
 
-        self.cutVariable = True
-
-    def set_printROCScore(self, printROCScore):
-        self.printROCScore = printROCScore
-
-    def plot(self, ratio = False):
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
             # get output values of this node
             out_values = self.prediction_vector[:,i]
+            
+            if self.signal_class:
+                signalIndex = self.signalIndex
+                signalFlag  = self.signalFlag
+            else:
+                signalIndex = nodeIndex
+                signalFlag  = self.data.get_class_flag(node_cls)
 
             if self.printROCScore:
                 # calculate ROC value for specific node
-                nodeROC = roc_auc_score(self.signalFlag, out_values)
+                nodeROC = roc_auc_score(signalFlag, out_values)
 
             # fill lists according to class
             bkgHists  = []
@@ -266,14 +236,12 @@ class plotOutputNodes:
 
                 # filter values per event class
                 filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
-                    and self.eventInCut[k]]
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex]
 
                 filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
-                    and self.eventInCut[k]]
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex]
 
-                if j == self.signalIndex:
+                if j == signalIndex:
                     # signal histogram
                     sig_values  = filtered_values
                     sig_label   = str(truth_cls)
@@ -289,11 +257,12 @@ class plotOutputNodes:
                         bin_range = self.bin_range,
                         color     = setup.GetPlotColor(truth_cls),
                         xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
-                        ytitle    = setup.GetyTitle(),
+                        ytitle    = setup.GetyTitle(self.privateWork),
                         filled    = True)
                     
                     bkgHists.append( histogram )
                     bkgLabels.append( truth_cls )
+
             # setup signal histogram
             sigHist = setup.setupHistogram(
                 values    = sig_values,
@@ -302,8 +271,9 @@ class plotOutputNodes:
                 bin_range = self.bin_range,
                 color     = setup.GetPlotColor(sig_label),
                 xtitle    = str(sig_label)+" at "+str(node_cls)+" node",
-                ytitle    = setup.GetyTitle(),
+                ytitle    = setup.GetyTitle(self.privateWork),
                 filled    = False)
+
             # set signal histogram linewidth
             sigHist.SetLineWidth(3)
 
@@ -311,10 +281,18 @@ class plotOutputNodes:
             scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
             sigHist.Scale(scaleFactor)
 
+            # rescale histograms if privateWork enabled
+            if privateWork:
+                sigHist.Scale(1./sigHist.Integral())
+                for bHist in bkgHists:
+                    bHist.Scale(1./weightIntegral)
+
             plotOptions = {
                 "ratio":      ratio,
                 "ratioTitle": "#frac{scaled Signal}{Background}",
                 "logscale":   self.logscale}
+
+            # initialize canvas
             canvas = setup.drawHistsOnCanvas(
                 sigHist, bkgHists, plotOptions, 
                 canvasName = node_cls+" node")
@@ -329,9 +307,6 @@ class plotOutputNodes:
             for i, h in enumerate(bkgHists):
                 legend.AddEntry(h, bkgLabels[i], "F")
 
-            ## scale signal Histogram
-            #sigHist.Scale( scaleFactor )
-
             # draw legend
             legend.Draw("same")
 
@@ -340,7 +315,8 @@ class plotOutputNodes:
                 setup.printROCScore(canvas, nodeROC, plotOptions["ratio"])
 
             # add lumi and category to plot
-            setup.printLumi(canvas, ratio = plotOptions["ratio"])
+            if not self.privateWork:
+                setup.printLumi(canvas, ratio = plotOptions["ratio"])
             setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
             out_path = self.plotdir + "/outputNode_{}.pdf".format(node_cls)

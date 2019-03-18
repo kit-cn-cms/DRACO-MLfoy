@@ -1,4 +1,6 @@
 # global imports
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
 import sys
 import keras.optimizers as optimizers
@@ -37,10 +39,10 @@ parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs", metavar="train_epochs")
 
-parser.add_option("-s", "--earlystopping", dest="early_stopping",default=20,
-        help="INT number of epochs without decrease in loss before stopping", metavar="early_stopping")
+#parser.add_option("-s", "--earlystopping", dest="early_stopping",default=20,
+#        help="INT number of epochs without decrease in loss before stopping", metavar="early_stopping")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="newJEC_top20Variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
@@ -56,13 +58,13 @@ parser.add_option("--netconfig", dest="net_config",default=None,
         help="STR of config name in net_config (config in this file will not be used anymore!)", metavar="net_config")
 
 parser.add_option("--signalclass", dest="signal_class", default="ttHbb",
-        help="STR of signal class", metavar="signal_class")
+        help="STR of signal class for plots", metavar="signal_class")
 
-parser.add_option("--plotnontraindata", dest="plot_nonTrainData", action = "store_true", default=False,
-        help="activate to use non train data", metavar="plot_nonTrainData")
+#parser.add_option("--plotnontraindata", dest="plot_nonTrainData", action = "store_true", default=False,
+#        help="activate to use non train data", metavar="plot_nonTrainData")
 
-parser.add_option("--normmatrix", dest="norm_matrix", action = "store_false", default=True,
-        help="activate to normalize entries of the matrices", metavar="norm_matrix")
+#parser.add_option("--normmatrix", dest="norm_matrix", action = "store_false", default=True,
+#        help="activate to normalize entries of the matrices", metavar="norm_matrix")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
@@ -100,15 +102,15 @@ else:
 outputdir += "_"+options.category
 
 # the input variables are loaded from the variable_set file
-variables       = variable_set.variables[options.category]
+variables = variable_set.variables[options.category]
 
 # absolute path to folder with input dataframes
-inPath   = basedir+"/workdir/InputFeatures/"
+inPath = basedir+"/workdir/InputFeatures/"
 
 
 # load samples
 input_samples = df.InputSamples(inPath)
-naming=options.naming
+naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
@@ -128,8 +130,6 @@ dnn = DNN.DNN(
     train_variables = variables,
     # number of epochs
     train_epochs    = int(options.train_epochs),
-    # number of epochs without decrease in loss before stopping
-    early_stopping  = int(options.early_stopping),
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
@@ -139,7 +139,7 @@ dnn = DNN.DNN(
 # if given a dictionary as a first argument it uses the specified configs,
 # otherwise builds default network defined in DNN class
 
-dpg_config = {
+config = {
     "layers":                   [200,200],#,300,300,300],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.5,
@@ -149,15 +149,13 @@ dpg_config = {
     "activation_function":      "elu",
     "output_activation":        "Softmax",
     "earlystopping_percentage": 0.05,
-    "batchNorm":                False
+    "earlystopping_epochs":     50,
     }
 
 # import file with net configs if option is used
 if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
-else:
-    config=dpg_config
 
 dnn.build_model(config)
 
@@ -176,9 +174,10 @@ if options.plot:
     dnn.plot_metrics(privateWork = options.privateWork)
 
     # plot the confusion matrix
-    dnn.plot_confusionMatrix(printROC=options.printROC,norm_matrix = options.norm_matrix, privateWork = options.privateWork)
+    dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
     # plot the output discriminators
-    dnn.plot_discriminators(log=options.log,signal_class = options.signal_class, plot_nonTrainData= options.plot_nonTrainData)
+    dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
 
-
+    # plot the output nodes
+    dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
