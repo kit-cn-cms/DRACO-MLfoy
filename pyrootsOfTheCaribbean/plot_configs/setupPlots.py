@@ -14,8 +14,6 @@ def GetPlotColor( cls ):
         "tt2b":  ROOT.kRed+2,
         "ttb":   ROOT.kRed-2,
         "ttbar": ROOT.kOrange,
-        "False": "orangered",
-        "True":  "teal"
         }
 
     if "ttZ" in cls: cls = "ttZ"
@@ -28,6 +26,10 @@ def GetyTitle(privateWork = False):
         return "normalized to unit area"
     return "Events expected"
 
+
+# ===============================================
+# SETUP OF HISTOGRAMS 
+# ===============================================
 def setupHistogram(
         values, weights, 
         nbins, bin_range,
@@ -82,13 +84,13 @@ def setupHistogram2D(valuesX, valuesY, weights, binsX, binsY, rangeX, rangeY, ti
     return hist
 
 
-def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
+def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     # check if errors for matrix are given
     has_errors = isinstance(errors, np.ndarray)
     #print(has_errors)
     
     # init histogram
-    cm = ROOT.TH2D("2Dhistogram", "", ncls, 0, ncls, ncls, 0, ncls)
+    cm = ROOT.TH2D("confusionMatrix", "", ncls, 0, ncls, ncls, 0, ncls)
     cm.SetStats(False)
     ROOT.gStyle.SetPaintTextFormat(".3f")
         
@@ -120,36 +122,12 @@ def setup2DHistogram(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
 
     return cm
 
-def drawHistOnCanvas2D(hist, canvasName, catLabel, sampleName):
-    # init canvas
-    canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
-    canvas.SetTopMargin(0.15)
-    canvas.SetBottomMargin(0.15)
-    canvas.SetRightMargin(0.15)
-    canvas.SetLeftMargin(0.15)
 
-    # draw histogram
-    #ROOT.gStyle.SetPalette(69)
-    draw_option = "colz"
-    hist.DrawCopy(draw_option)
 
-    # setup TLatex
-    latex = ROOT.TLatex()
-    latex.SetNDC()
-    latex.SetTextColor(ROOT.kBlack)
-    latex.SetTextSize(0.03)
-
-    l = canvas.GetLeftMargin()
-    t = canvas.GetTopMargin()
-
-    # add category label
-    latex.DrawLatex(l+0.02,1.-t-0.03, catLabel)
-    # add sample name
-    latex.DrawLatex(l,1.-t+0.01, sampleName)
-
-    return canvas
-
-def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None, privateWork = False):
+# ===============================================
+# DRAW HISTOGRAMS ON CANVAS
+# ===============================================
+def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr = None, privateWork = False):
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
@@ -162,7 +140,7 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None, pr
     #ROOT.gStyle.SetPalette(69)
     draw_option = "colz text1"
     if ROCerr: draw_option += "e"
-    hist.DrawCopy(draw_option)
+    matrix.DrawCopy(draw_option)
 
     # setup TLatex
     latex = ROOT.TLatex()
@@ -184,7 +162,10 @@ def draw2DHistOnCanvas(hist, canvasName, catLabel, ROC = None, ROCerr = None, pr
         text = "ROC-AUC = {:.3f}".format(ROC)
         if ROCerr:
             text += "#pm {:.3f}".format(ROCerr)
-        latex.DrawLatex(l+0.47,1.-t+0.01, text)
+            latex.DrawLatex(l+0.4,1.-t+0.01, text)
+        else:
+            latex.DrawLatex(l+0.47,1.-t+0.01, text)
+
     
     return canvas
 
@@ -294,6 +275,10 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     return canvas
     
 
+
+# ===============================================
+# GENERATE CANVAS AND LEGENDS
+# ===============================================
 def getCanvas(name, ratiopad = False):
     if ratiopad:
         canvas = ROOT.TCanvas(name, name, 1024, 1024)
@@ -320,25 +305,8 @@ def getCanvas(name, ratiopad = False):
         canvas.SetRightMargin(0.05)
         canvas.SetLeftMargin(0.15)
         canvas.SetTicks(1,1)
+
     return canvas
-
-
-def moveOverUnderFlow(h):
-    # move underflow
-    h.SetBinContent(1, h.GetBinContent(0)+h.GetBinContent(1))
-    # move overflow
-    h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1)+h.GetBinContent(h.GetNbinsX()))
-
-    # set underflow error
-    h.SetBinError(1, ROOT.TMath.Sqrt(
-        ROOT.TMath.Power(h.GetBinError(0),2) + ROOT.TMath.Power(h.GetBinError(1),2) ))
-    # set overflow error
-    h.SetBinError(h.GetNbinsX(), ROOT.TMath.Sqrt(
-        ROOT.TMath.Power(h.GetBinError(h.GetNbinsX()),2) + ROOT.TMath.Power(h.GetBinError(h.GetNbinsX()+1),2) ))
-
-
-
-
 
 def getLegend():
     legend=ROOT.TLegend(0.75,0.6,0.95,0.9)
@@ -349,10 +317,15 @@ def getLegend():
     legend.SetFillStyle(0);
     return legend
 
-def calculateKSscore(stack, sig):
-    return stack.KolmogorovTest(sig)
+def saveCanvas(canvas, path):
+    canvas.SaveAs(path)
+    canvas.SaveAs(path.replace(".pdf",".png"))
+    canvas.Clear()
 
 
+# ===============================================
+# PRINT STUFF ON CANVAS
+# ===============================================
 def printLumi(pad, lumi = 41.5, ratio = False, twoDim = False):
     if lumi == 0.: return
 
@@ -402,7 +375,7 @@ def printROCScore(pad, ROC, ratio = False):
     if ratio:   latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:       latex.DrawLatex(l,1.-t+0.02, text)
 
-def printPrivateWork(pad, ratio = False, twoDim = False):
+def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
     pad.cd(1) 
     l = pad.GetLeftMargin() 
     t = pad.GetTopMargin() 
@@ -416,25 +389,10 @@ def printPrivateWork(pad, ratio = False, twoDim = False):
 
     text = "CMS private work" 
 
-    if twoDim:  latex.DrawLatex(l+0.39,1.-t+0.01, text)
-    elif ratio: latex.DrawLatex(l+0.05,1.-t+0.04, text) 
-    else:       latex.DrawLatex(l,1.-t+0.01, text)
-
-def printCorrelation(pad, correlation):
-    pad.cd(1)
-    l = pad.GetLeftMargin()
-    t = pad.GetTopMargin()
-    r = pad.GetRightMargin()
-    b = pad.GetBottomMargin()
-
-    latex = ROOT.TLatex()
-    latex.SetNDC()
-    latex.SetTextColor(ROOT.kBlack)
-    latex.SetTextSize(0.03)
-
-    text = "corr = {:.3f}".format(correlation)
-
-    latex.DrawLatex(l+0.53,1.-t-0.03, text)
+    if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
+    elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
+    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text) 
+    else:           latex.DrawLatex(l,1.-t+0.01, text)
 
 def printTitle(pad, title):
     pad.cd(1)
@@ -448,14 +406,6 @@ def printTitle(pad, title):
     latex.SetTextColor(ROOT.kBlack)
     latex.SetTextSize(0.03)
     latex.DrawLatex(l, 1.-t+0.06, title)
-
-def saveCanvas(canvas, path):
-    canvas.SaveAs(path)
-    canvas.SaveAs(path.replace(".pdf",".png"))
-    canvas.Clear()
-
-
-
 
 def generateLatexLabel(name):
     ''' try to make plot label nicer '''
@@ -565,6 +515,22 @@ def generateLatexLabel(name):
     return name
 
 
+def moveOverUnderFlow(h):
+    # move underflow
+    h.SetBinContent(1, h.GetBinContent(0)+h.GetBinContent(1))
+    # move overflow
+    h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1)+h.GetBinContent(h.GetNbinsX()))
+
+    # set underflow error
+    h.SetBinError(1, ROOT.TMath.Sqrt(
+        ROOT.TMath.Power(h.GetBinError(0),2) + ROOT.TMath.Power(h.GetBinError(1),2) ))
+    # set overflow error
+    h.SetBinError(h.GetNbinsX(), ROOT.TMath.Sqrt(
+        ROOT.TMath.Power(h.GetBinError(h.GetNbinsX()),2) + ROOT.TMath.Power(h.GetBinError(h.GetNbinsX()+1),2) ))
+
+
+def calculateKSscore(stack, sig):
+    return stack.KolmogorovTest(sig)
 
 
 

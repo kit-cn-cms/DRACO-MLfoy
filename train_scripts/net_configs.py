@@ -15,7 +15,7 @@ config_dict["example_config"] = {
         }
 
 config_dict["test_config"] = {
-        "layers":                   [100],
+        "layers":                   [200,200],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.,
         "L2_Norm":                  0.,

@@ -487,7 +487,7 @@ class DNN():
             plotdir             = self.plot_path,
             logscale            = log)
 
-        plotNodes.plot(ratio = False, privateWork = privateWork)
+        plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
@@ -518,4 +518,4 @@ class DNN():
             event_category      = self.categoryLabel,
             plotdir             = self.save_path)
 
-        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork)
+        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)

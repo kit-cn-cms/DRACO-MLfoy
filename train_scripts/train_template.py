@@ -39,9 +39,6 @@ parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs", metavar="train_epochs")
 
-#parser.add_option("-s", "--earlystopping", dest="early_stopping",default=20,
-#        help="INT number of epochs without decrease in loss before stopping", metavar="early_stopping")
-
 parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
@@ -57,14 +54,8 @@ parser.add_option("--privatework", dest="privateWork", action = "store_true", de
 parser.add_option("--netconfig", dest="net_config",default=None,
         help="STR of config name in net_config (config in this file will not be used anymore!)", metavar="net_config")
 
-parser.add_option("--signalclass", dest="signal_class", default="ttHbb",
+parser.add_option("--signalclass", dest="signal_class", default=None,
         help="STR of signal class for plots", metavar="signal_class")
-
-#parser.add_option("--plotnontraindata", dest="plot_nonTrainData", action = "store_true", default=False,
-#        help="activate to use non train data", metavar="plot_nonTrainData")
-
-#parser.add_option("--normmatrix", dest="norm_matrix", action = "store_false", default=True,
-#        help="activate to normalize entries of the matrices", metavar="norm_matrix")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
@@ -102,10 +93,12 @@ else:
 outputdir += "_"+options.category
 
 # the input variables are loaded from the variable_set file
-variables = variable_set.variables[options.category]
-
-# absolute path to folder with input dataframes
-inPath = basedir+"/workdir/InputFeatures/"
+if options.category in variable_set.variables:
+    variables = variable_set.variables[options.category]
+else:
+    variables = variable_st.all_variables
+    print("category {} not specified in variable set {} - using all variables".format(
+        options.category, options.variableSelection))
 
 
 # load samples
@@ -135,12 +128,9 @@ dnn = DNN.DNN(
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2)
 
-# build default model
-# if given a dictionary as a first argument it uses the specified configs,
-# otherwise builds default network defined in DNN class
-
+# config dictionary for DNN architecture
 config = {
-    "layers":                   [200,200],#,300,300,300],
+    "layers":                   [200,200],
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.5,
     "L2_Norm":                  1e-5,
@@ -157,6 +147,7 @@ if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
 
+# build DNN model
 dnn.build_model(config)
 
 # perform the training
@@ -165,7 +156,7 @@ dnn.train_model()
 # evalute the trained model
 dnn.eval_model()
 
-# get variable ranking
+# save and print variable ranking
 dnn.get_input_weights()
 
 # plotting 
