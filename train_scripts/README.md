@@ -55,4 +55,4 @@ or use the following options
 	- `-p` to create plots of the output 
 	- `-l` to create logarithmic plots 
 	- `--printroc` to print ROC value for confusion matrix
-	-`--privatework` to create private work label 
+	- `--privatework` to create private work label 
