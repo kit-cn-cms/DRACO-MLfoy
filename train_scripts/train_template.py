@@ -67,7 +67,6 @@ parser.add_option("--printroc", dest="printROC", action = "store_true", default=
 if not os.path.isabs(options.variableSelection):
     sys.path.append(basedir+"/variable_sets/")
     variable_set = __import__(options.variableSelection)
-    print(variable_set.all_variables)
 elif os.path.exists(options.variableSelection):
     variable_set = __import__(options.variableSelection)
 else:
