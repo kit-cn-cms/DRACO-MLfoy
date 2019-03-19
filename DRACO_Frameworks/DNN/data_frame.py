@@ -5,12 +5,10 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
+    def __init__(self, path, label, normalization_weight = 1.):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
-        self.isTrainSample = isTrainSample
-        self.signalSample = signalSample
         
 
     def load_dataframe(self, event_category, lumi):
@@ -27,13 +25,12 @@ class Sample:
         # add event weight
         df = df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
 
+        # assign train weight
         weight_sum = sum(df["total_weight"].values)
         df = df.assign(train_weight = lambda x: x.total_weight/weight_sum)
-        print("weight sum of train_weight: "+str( sum(df["train_weight"].values) ))
 
         # add lumi weight
         df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
-        print("yield (sum of weights): {}".format(df["lumi_weight"].sum()))
 
         self.data = df
         print("-"*50)
@@ -53,12 +50,19 @@ class InputSamples:
         self.input_path = input_path
         self.samples = []
 
-    def addSample(self, sample_path, label, normalization_weight = 1., isTrainSample = True, signalSample = False):
+    def addSample(self, sample_path, label, normalization_weight = 1.):
         path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(path, label, normalization_weight, isTrainSample, signalSample) )
+        self.samples.append( Sample(path, label, normalization_weight) )
         
 
 class DataFrame(object):
+    ''' takes a path to a folder where one h5 per class is located
+        the events are cut according to the event_category
+        variables in train_variables are used as input variables
+        the dataset is shuffled and split into a test and train sample
+            according to test_percentage
+        for better training, the variables can be normed to std(1) and mu(0) '''
+
     def __init__(self,
                 input_samples,
                 event_category,
@@ -69,12 +73,6 @@ class DataFrame(object):
                 additional_cut = None,
                 lumi = 41.5):
 
-        ''' takes a path to a folder where one h5 per class is located
-            the events are cut according to the event_category
-            variables in train_variables are used as input variables
-            the dataset is shuffled and split into a test and train sample
-                according to test_percentage
-            for better training, the variables can be normed to std(1) and mu(0) '''
         self.event_category = event_category
         self.lumi = lumi
 
@@ -82,8 +80,7 @@ class DataFrame(object):
         train_samples = []
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi)
-            if sample.isTrainSample:
-                train_samples.append(sample.data)
+            train_samples.append(sample.data)
         
         # concatenating all dataframes
         df = pd.concat( train_samples )
@@ -94,7 +91,6 @@ class DataFrame(object):
         self.class_translation = {}
         self.classes = []
         for sample in input_samples.samples:
-            if not sample.isTrainSample: continue
             self.class_translation[sample.label] = index
             self.classes.append(sample.label)
             index += 1
@@ -102,6 +98,7 @@ class DataFrame(object):
 
         # add flag for ttH to dataframe
         df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+
         # add index labelling to dataframe
         df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
@@ -115,7 +112,7 @@ class DataFrame(object):
         # shuffle dataframe
         df = shuffle(df, random_state = 333)
 
-        # norm variables if wanted
+        # norm variables if activated
         unnormed_df = df.copy()
         if norm_variables:
             norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
@@ -125,34 +122,7 @@ class DataFrame(object):
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
             self.norm_csv = norm_csv
 
-        if additional_cut:
-            print("events in dataframe before cut "+str(df.shape[0]))
-            df.query( additional_cut, inplace = True )
-            print("events in dataframe after cut "+str(df.shape[0]))
-
         self.unsplit_df = df.copy()
-
-        # perform PCA if activated
-        if use_pca:
-            # set the PCA tolerance
-            pca = PCA(.95)
-            # calculate principle components
-            principal_components = pca.fit_transform( df.loc[:,train_variables].values )
-
-            # define new variable names
-            n_new_variables = principal_components.shape[1]
-            train_variables = ["PC%i"%i for i in range(n_new_variables)]
-            print("number of components after PCA: {}".format(n_new_variables))
-            print("variance info:")
-            print(pca.explained_variance_ratio_)
-            self.n_input_neurons = n_new_variables
-
-            # transform new data to dataframe
-            principal_df = pd.DataFrame(data = principal_components, columns = train_variables, index = df.index)
-
-            # add labels 
-            df = pd.concat([principal_df, df[["is_ttH","index_label","train_weight","total_weight","lumi_weight","class_label"]]], axis=1)
-            print(df)
 
         # split test sample
         n_test_samples = int( df.shape[0]*test_percentage )
@@ -171,18 +141,6 @@ class DataFrame(object):
         self.output_classes = self.classes
         self.input_samples = input_samples
 
-        # init non trainable samples
-        self.non_train_samples = None
-
-    def get_non_train_samples(self):
-        # get samples with flag 'isTrainSample == False' and load those
-        samples = []
-        for sample in self.input_samples.samples:
-            if sample.isTrainSample: continue
-            sample.data[self.train_variables] = (sample.data[self.train_variables] - self.norm_csv["mu"])/(self.norm_csv["std"])
-            samples.append(sample)
-        self.non_train_samples = samples
-        
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
@@ -196,6 +154,8 @@ class DataFrame(object):
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
+    def get_train_lumi_weights(self):
+        return self.df_train["lumi_weight"].values        
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix = True, normed = True):

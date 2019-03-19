@@ -36,6 +36,11 @@ K.tensorflow_backend.set_session(tf.Session(config=config))
 
 
 class EarlyStopping(keras.callbacks.Callback):
+    ''' custom implementation of early stopping
+        with options for
+            - stopping when val/train loss difference exceeds a percentage threshold
+            - stopping when val loss hasnt increased for a set number of epochs '''
+
     def __init__(self, monitor = "loss", value = None, min_epochs = 20, stopping_epochs = None, patience = 10, verbose = 0):
         super(keras.callbacks.Callback, self).__init__()
         self.val_monitor = "val_"+monitor
@@ -167,6 +172,7 @@ class DNN():
 
 
     def _load_architecture(self, config):
+        ''' load the architecture configs '''
         for key in config:
             self.architecture[key] = config[key]
         
@@ -250,7 +256,7 @@ class DNN():
                 )(X)
 
             # add dropout percentage to layer if activated
-            if not dropout == 1:
+            if not dropout == 0:
                 X = keras.layers.Dropout(dropout)(X)
 
         # generate output layer
@@ -381,6 +387,8 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(
+            self.data.get_train_data(as_matrix = True) )
 
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
@@ -491,8 +499,7 @@ class DNN():
 
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
-                        signal_class = None, 
-                        nbins = 18, bin_range = [0.1,1.]):
+                        signal_class = None, nbins = 18, bin_range = [0.1,1.]):
 
         ''' plot all events classified as one category '''
         plotDiscrs = plottingScripts.plotDiscriminators(
@@ -519,3 +526,22 @@ class DNN():
             plotdir             = self.save_path)
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
+
+    def plot_closureTest(self, log = False, privateWork = False,
+                        nbins = 20, bin_range = [0.,1.]):
+        ''' plot comparison between train and test samples '''
+
+        closureTest = plottingScripts.plotClosureTest(
+            data                = self.data,
+            test_prediction     = self.model_prediction_vector,
+            train_prediction    = self.model_train_prediction,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.categoryLabel,
+            plotdir             = self.plot_path,
+            logscale            = log)
+
+        closureTest.plot(ratio = False, privateWork = privateWork)
+
+

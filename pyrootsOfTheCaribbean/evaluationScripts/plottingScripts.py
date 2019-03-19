@@ -339,6 +339,126 @@ class plotOutputNodes:
 
 
 
+class plotClosureTest:
+    def __init__(self, data, test_prediction, train_prediction, event_classes, nbins, bin_range, event_category, plotdir, logscale = False):
+        self.data               = data
+        self.test_prediction    = test_prediction
+        self.train_prediction   = train_prediction
+
+        self.pred_classes_test  = np.argmax(self.test_prediction, axis = 1)
+        self.pred_classes_train = np.argmax(self.train_prediction, axis = 1)
+
+        self.event_classes      = event_classes
+        self.nbins              = nbins
+        self.bin_range          = bin_range
+        self.event_category     = event_category
+        self.plotdir            = plotdir
+        self.logscale           = logscale
+
+        # generate sub directory
+        self.plotdir += "/ClosurePlots/"
+        if not os.path.exists(self.plotdir):
+            os.makedirs(self.plotdir)
+
+        # default settings
+        self.privateWork = False
+
+    def plot(self, ratio = False, privateWork = False):
+        self.privateWork = privateWork
+
+        # loop over output nodes
+        for i, node_cls in enumerate(self.event_classes):
+            # get index of node
+            nodeIndex = self.data.class_translation[node_cls]
+
+            # get output values of this node
+            test_values = self.test_prediction[:,i]
+            train_values = self.train_prediction[:,i]
+
+            # loop over classes
+            for j, truth_cls in enumerate(self.event_classes):
+                # get class index
+                classIndex = self.data.class_translation[truth_cls]
+
+                # filter values 
+                filtered_test_values = [test_values[k] for k in range(len(test_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    and self.pred_classes_test[k] == nodeIndex]
+                filtered_train_values = [train_values[k] for k in range(len(train_values)) \
+                    if self.data.get_train_labels(as_categorical = False)[k] == classIndex \
+                    and self.pred_classes_train[k] == nodeIndex]
+
+                filtered_test_weights = [self.data.get_lumi_weights()[k] for k in range(len(test_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    and self.pred_classes_test[k] == nodeIndex]
+                filtered_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
+                    if self.data.get_train_labels(as_categorical = False)[k] == classIndex \
+                    and self.pred_classes_train[k] == nodeIndex]
+
+                # setup train histogram
+                train_hist = setup.setupHistogram(
+                    values      = filtered_test_values,
+                    weights     = filtered_test_weights,
+                    nbins       = self.nbins,
+                    bin_range   = self.bin_range,
+                    color       = setup.GetPlotColor(truth_cls),
+                    xtitle      = "train "+str(truth_cls)+" at "+str(node_cls)+" node",
+                    ytitle      = setup.GetyTitle(privateWork = True),
+                    filled      = True)
+
+                train_hist.Scale(1./train_hist.Integral())
+
+                # setup test histogram
+                test_hist = setup.setupHistogram(
+                    values      = filtered_train_values,
+                    weights     = filtered_train_weights,
+                    nbins       = self.nbins,
+                    bin_range   = self.bin_range,   
+                    color       = ROOT.kBlack,
+                    xtitle      = "test "+str(truth_cls)+" at "+str(node_cls)+" node",
+                    ytitle      = setup.GetyTitle(privateWork = True),
+                    filled      = False)
+                
+                test_hist.Scale(1./test_hist.Integral())
+                test_hist.SetLineWidth(3)
+
+                plotOptions = {
+                    "ratio":        ratio,
+                    "ratioTitle":   "#frac{test data}{train data}",
+                    "logscale":     self.logscale}
+
+                # init canvas
+                canvas = setup.drawHistsOnCanvas(
+                    test_hist, train_hist, plotOptions,
+                    canvasName = "{} at {} node".format(truth_cls, node_cls))
+                    
+                # setup legend
+                legend = setup.getLegend()
+
+                # add entries
+                legend.AddEntry(test_hist, "test data", "L")
+                legend.AddEntry(train_hist, "train data", "F")
+
+                # draw legend
+                legend.Draw("same")
+
+                # add private work label if activated
+                if self.privateWork:
+                    setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+
+                out_path = self.plotdir+"/closureTest_{}_at_{}_node.pdf".format(truth_cls, node_cls)
+                setup.saveCanvas(canvas, out_path)
+
+        # add the histograms together
+        workdir = os.path.dirname(os.path.dirname(self.plotdir[:-1]))
+        cmd = "pdfunite "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
+        print(cmd)
+        os.system(cmd)
+
+
+    
+        
+
 class plotConfusionMatrix:
     def __init__(self, data, prediction_vector, event_classes, event_category, plotdir):
         self.data              = data

@@ -106,7 +106,7 @@ naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True, normalization_weight = 2.)
+input_samples.addSample("ttHbb"+naming, label = "ttHbb", normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
@@ -171,3 +171,6 @@ if options.plot:
 
     # plot the output nodes
     dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+
+    # plot closure test
+    dnn.plot_closureTest(log = options.log, privateWork = options.privateWork)
