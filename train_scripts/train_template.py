@@ -19,8 +19,7 @@ import DRACO_Frameworks.DNN.data_frame as df
 USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
 """
 usage="usage=%prog [options] \n"
-usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
-usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
 
 parser = optparse.OptionParser(usage=usage)
 
