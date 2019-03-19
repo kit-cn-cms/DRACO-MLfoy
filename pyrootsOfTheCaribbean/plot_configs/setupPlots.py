@@ -66,22 +66,6 @@ def setupHistogram(
 
     return histogram
 
-def setupHistogram2D(valuesX, valuesY, weights, binsX, binsY, rangeX, rangeY, titleX, titleY):
-    
-    hist = ROOT.TH2D("2dhistogram", "", 
-        binsX, rangeX[0], rangeX[1], 
-        binsY, rangeY[0], rangeY[1])
-    hist.SetStats(False)
-    hist.Sumw2(True)
-
-    for vx, vy, w in zip(valuesX, valuesY, weights):
-        hist.Fill(vx, vy, w)
-
-    hist.GetXaxis().SetTitle(generateLatexLabel(titleX))
-    hist.GetYaxis().SetTitle(generateLatexLabel(titleY))
-
-    # TODO fill overflow bins
-    return hist
 
 
 def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
@@ -415,18 +399,6 @@ def generateLatexLabel(name):
         if name.startswith(s):
             name = name[len(s):]
     
-    if name.startswith("com_"):
-        split = name.split("_")
-        name = "_".join(split[2:])+" in "+split[1]+" c.o.m. system"
-    if name.startswith("HF_"):
-        split = name.split("_")
-        name = "_".join(split[1:])+" in helicity frame"
-
-    if name.startswith("genTTX"):
-        name = name.replace("genTTX_", "generator level ")
-    if name.startswith("recoTTX"):
-        name = name.replace("recoTTX_", "reconstructed ")
-
     if name.startswith("N_"):
         return "N("+name[2:]+")"
 
@@ -444,61 +416,12 @@ def generateLatexLabel(name):
     name = name.replace("d#eta","#Delta#eta")
     name = name.replace("D#eta","#Delta#eta")
 
-    name = name.replace("th#eta","#theta")
-    name = name.replace("Th#eta","#theta")
-    name = name.replace("Delta#theta","#Delta#theta")
-    name = name.replace("dTh#eta","#Delta#theta")
-
-    name = name.replace("cos#theta","cos#theta")
-    name = name.replace("dcosTh#eta","#Deltacos#theta")
-
     name = name.replace("phi", "#phi")
     name = name.replace("Phi", "#phi")
     name = name.replace("d#phi","#Delta#phi")
     name = name.replace("Delta#phi","#Delta#phi")
 
-    name = name.replace("dcosXi","cos#Delta#xi")
-    name = name.replace("dXi","#Delta#xi")
     name = name.replace("mass","M")
-    name = name.replace("P","p")
-    name = name.replace("HA","helicity angle cos#theta*")
-
-    name = name.replace("blr_ETH", "b-tag likelihood ratio")
-
-    names = [
-            ["ttbar","t#bar{t}"],
-            ["BosonB1","b_{H/Z}"],
-            ["BosonB2","b_{H/Z}"],
-            ["BAdd1","b_{H/Z}"],
-            ["BAdd2","b_{H/Z}"],
-            ["QHad1","q_{had}"],
-            ["QHad2","q_{had}"],
-            ["hadTop","t_{had}"],
-            ["TopHad","t_{had}"],
-            ["lepTop","t_{lep}"],
-            ["TopLep","t_{lep}"],
-            ["hadB","b_{had}"],
-            ["BHad","b_{had}"],
-            ["hadW","W_{had}"],
-            ["WHad","W_{had}"],
-            ["WLep","W_{lep}"],
-            ["lepB","b_{lep}"],
-            ["BLep","b_{lep}"],
-            ["Lepton","lep"],
-            ["Boson","X_{H/Z}"],
-            ["ttX","t#bar{t}X"],
-            ["fn","(X,t_{had})(X,t_{lep})"],
-            ]
-    for n in names:
-        name = name.replace("_"+n[0]+"_","("+n[1]+",")
-    for n in names:
-        name = name.replace("_"+n[0],"("+n[1]+")")
-    for n in names:
-        if " "+n[0]+" " in name:
-            name = name.replace(n[0],n[1])
-        else:
-            name = name.replace(n[0],n[1]+")")
-    
     name = name.replace("pT", "p_{T}")
     name = name.replace("pt", "p_{T}")
 
@@ -508,10 +431,9 @@ def generateLatexLabel(name):
     name = name.replace("Looselep)","LooseLepton")
     name = name.replace("primarylep)","primary lepton")
     name = name.replace("MHT", "missing H_{T}")
-    name = name.replace("HT","H_{T} [GeV]")
+    name = name.replace("HT","H_{T}")
     name = name.replace("Jetp_{T}OverJetE","average p_{T}^{jet}/E^{jet}")
-    name = name.replace("TTXmatcher_chi2", "t#bar{t} matcher #chi^{2}")
-    name = name.replace("Jet_#eta[0]","#eta(first jet)")
+    name = name.replace("blr_ETH", "b-tag likelihood ratio")
     return name
 
 
