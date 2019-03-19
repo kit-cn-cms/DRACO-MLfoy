@@ -40,12 +40,13 @@ python preprocessing.py
 ```
 or use the following for options
 - `-o DIR` to change the name of the ouput directory, can be either a string or absolute path (default is `InputFeatures`)
-- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed (default is `NewJEC_top20Variables`)
-- `-e INT` to change the maximal number of entries for each batch to prevent NAF from crashing (default is `50000`)
+- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed (default is `example_variables`)
+- `-e INT` to change the maximal number of entries for each batch to restrict memory usage (default is `50000`)
 - `-n STR` to change the naming of the output file
+- `-m` to activate using MEMs
 
 ```bash
-python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR
+python preprocessing.py -o DIR -v FILE -e INT -m -n STR
 ```
 
 ## Concerning MEMs
