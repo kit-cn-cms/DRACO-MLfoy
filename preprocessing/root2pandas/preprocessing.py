@@ -20,11 +20,11 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="newJEC_top20Variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
-        help="INT used for maximal number of Entries for each batch (otherwise naf will crash)", metavar="maxEntries")
+        help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
 
 parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,
         help="BOOL to use MEM or not", metavar="MEM")

@@ -48,3 +48,12 @@ or use the following for options
 python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR
 ```
 
+## Concerning MEMs
+In the current ntuple setup the MEM likelihood variables are not written directly to ntuples, but are saved separately.
+
+To include MEM variables in the DNN training these need to be read and added separately. For the single-lepton analysis the MEMs are saved in `.root` files with trees called `tree`.
+
+The function `root2pandas.generateMEMdf` reads the MEM values (more specifically `mem_p`) and event IDs (`run`, `lumi`, `event`) from these files and saves the information as separate pandas dataframes.
+At later steps in the `preprocessing` these MEM values are added to the output files. Only events where a MEM value was found (matching IDs) are added to the output files.
+
+The MEM variable is saved as `memDBp` in the output files to match the naming scheme used in the single-lepton analysis.
