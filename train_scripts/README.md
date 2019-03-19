@@ -27,4 +27,33 @@ To execute with default options us
 python train_template.py 
 ```
 or use the following options 
-- 
+1. Category used for training
+	- `-c STR` name of the category (ge)[nJets]j_(ge)[nTags]t 
+	(default is `4j_ge3t`)
+
+2. Naming/File Options
+	- `-o DIR` to change the name of the ouput directory, can be either a string or absolute path
+	(default is `test_training`)
+	- `-i DIR` to change the name of the input directory, can be either a string or absolute path 
+	(default is `InputFeatures`)
+	- `-n STR` to adjust the name of the input file generated in preprocessing 
+	(default is `dnn.h5`)
+	- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed 
+	(default is `NewJEC_top20Variables`)
+	- `--signalclass=STR` to change name of the signal class 
+	(default is `ttHbb`)
+	- `--plotnontraineddata`
+
+3. Training Options
+	- `-e INT` change number of training epochs 
+	(default is `1000`)
+	- `-s INT` change number of epochs without decrease in loss before stopping
+	(default is `20`)
+	- `--netconfig=STR` STR of the config name in `net_config` dictonary in`net_configs.py` (config in this file will not be used anymore!)
+
+4. Plotting Options
+	- `-p` to create plots of the output 
+	- `-l` to create logarithmic plots 
+	- `--normmatrix` to deactivate the normalization of the matrix entries
+	- `--printroc` to print ROC value for confusion matrix
+	-`--privatework` to create private work label 
