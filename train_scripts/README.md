@@ -1,5 +1,6 @@
 # Train NNs
 ## Before Usage
+Manually set TensorFlow backend for KERAS, add this for example to your `~/.zshrc`
 ```bash
 export KERAS_BACKEND=tensorflow
 ```
