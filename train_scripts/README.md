@@ -8,15 +8,15 @@ export KERAS_BACKEND=tensorflow
 ## Adjust settings
 - add/change samples used in training
 ```python
-input_samples.addSample("SAMPLENAME"+naming, label = "SAMPLENAME", signalSample = BOOL, normalization_weight = FLOAT)
+input_samples.addSample("SAMPLENAME"+naming, label = "SAMPLENAME", normalization_weight = FLOAT)
 ```
 for example
 ```python
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", signalSample = True, normalization_weight = 2.)
+input_samples.addSample("ttHbb"+naming, label = "ttHbb", normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 ```
 
-- change network architecture `dpg_config` if optimizing, otherwise add network architecture to the file `net_configs.py` as dictonary entry in the `config_dict` to not lose it and execute it with the parser option --netconfig=CONFIGNAME
+- change network architecture `config` if optimizing, otherwise add network architecture to the file `net_configs.py` as dictonary entry in the `config_dict` to not lose it and execute it with the parser option `--netconfig=CONFIGNAME`
 - only change DNN training class `dnn = DNN.DNN([...])` properties 
 	- `eval_metrics` 
 	- `test_percentage` percentage of samples used to test
@@ -29,7 +29,7 @@ python train_template.py
 ```
 or use the following options 
 1. Category used for training
-	- `-c STR` name of the category (ge)[nJets]j_(ge)[nTags]t 
+	- `-c STR` name of the category `(ge)[nJets]j_(ge)[nTags]t` 
 	(default is `4j_ge3t`)
 
 2. Naming/File Options
@@ -40,21 +40,19 @@ or use the following options
 	- `-n STR` to adjust the name of the input file generated in preprocessing 
 	(default is `dnn.h5`)
 	- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed 
-	(default is `NewJEC_top20Variables`)
+	(default is `example_variables`)
 	- `--signalclass=STR` to change name of the signal class 
-	(default is `ttHbb`)
-	- `--plotnontraineddata`
+	(default is `None`)
 
 3. Training Options
 	- `-e INT` change number of training epochs 
 	(default is `1000`)
-	- `-s INT` change number of epochs without decrease in loss before stopping
+	- `-s INT` change number of epochs without decrease in validation loss before stopping
 	(default is `20`)
 	- `--netconfig=STR` STR of the config name in `net_config` dictonary in`net_configs.py` (config in this file will not be used anymore!)
 
 4. Plotting Options
 	- `-p` to create plots of the output 
 	- `-l` to create logarithmic plots 
-	- `--normmatrix` to deactivate the normalization of the matrix entries
 	- `--printroc` to print ROC value for confusion matrix
 	-`--privatework` to create private work label 
