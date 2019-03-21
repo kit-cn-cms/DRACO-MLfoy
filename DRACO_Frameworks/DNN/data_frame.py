@@ -81,14 +81,15 @@ class DataFrame(object):
                 input_samples,
                 event_category,
                 train_variables,
+                norm_variables = True,
                 test_percentage = 0.1,
-                norm_variables = False,
-                use_pca = False,
-                additional_cut = None,
-                lumi = 41.5):
+                lumi = 41.5,
+                shuffleSeed = None):
 
         self.event_category = event_category
         self.lumi = lumi
+
+        self.shuffleSeed = shuffleSeed
 
         # loop over all input samples and load dataframe
         train_samples = []
@@ -124,7 +125,9 @@ class DataFrame(object):
         self.n_output_neurons = len(self.classes)
 
         # shuffle dataframe
-        df = shuffle(df, random_state = 333)
+        if not self.shuffleSeed:
+            self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
+        df = shuffle(df, random_state = self.shuffleSeed)
 
         # norm variables if activated
         unnormed_df = df.copy()

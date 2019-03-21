@@ -21,8 +21,6 @@ import keras.optimizers as optimizers
 import keras.models as models
 import keras.layers as layer
 from keras import backend as K
-import matplotlib.pyplot as plt
-plt.rc('text', usetex=True)
 import pandas as pd
 
 # Limit gpu usage
@@ -93,10 +91,10 @@ class DNN():
             input_samples,
             event_category,
             train_variables,
-            batch_size      = 5000,
             train_epochs    = 500,
             test_percentage = 0.2,
-            eval_metrics    = None):
+            eval_metrics    = None,
+            shuffle_seed    = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -115,18 +113,17 @@ class DNN():
         # list of input variables
         self.train_variables = train_variables
 
-        # batch size for training
-        self.batch_size = batch_size
-        # number of training epochs
-        self.train_epochs = train_epochs
         # percentage of events saved for testing
         self.test_percentage = test_percentage
+        
+        # number of train epochs
+        self.train_epochs = train_epochs
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
 
         # load data set
-        self.data = self._load_datasets()
+        self.data = self._load_datasets(shuffle_seed)
         self.event_classes = self.data.output_classes
 
         # save variable norm
@@ -148,14 +145,14 @@ class DNN():
 
            
         
-    def _load_datasets(self):
+    def _load_datasets(self, shuffle_seed):
         ''' load data set '''
         return data_frame.DataFrame(
             input_samples       = self.input_samples,
             event_category      = self.event_category,
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
-            norm_variables      = True)
+            shuffleSeed         = shuffle_seed)
 
 
     def _load_architecture(self, config):
@@ -183,6 +180,7 @@ class DNN():
 
         # get the model
         self.model = keras.models.load_model(checkpoint_path)
+        self.model.summary()
 
         # evaluate test dataset
         self.model_eval = self.model.evaluate(
@@ -327,11 +325,14 @@ class DNN():
             validation_split    = 0.25,
             sample_weight       = self.data.get_train_weights())
 
-        # save trained model
-        self.save_model()
-
-    def save_model(self):
+    def save_model(self, argv, execute_dir):
         ''' save the trained model '''
+
+        # save executed command
+        argv[0] = execute_dir+"/"+argv[0]
+        execute_string = "python "+" ".join(argv)
+        with open(self.cp_path+"/command.sh", "w") as f:
+            f.write(execute_string)
 
         # save model as h5py file
         out_file = self.cp_path + "/trained_model.h5py"
@@ -374,9 +375,9 @@ class DNN():
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
         configs["JetTagCategory"] = self.JTstring
-        configs["batchSize"] = self.batch_size
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
+        configs["shuffleSeed"] = self.data.shuffleSeed
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
@@ -449,6 +450,9 @@ class DNN():
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_metrics(self, privateWork = False):
+        import matplotlib.pyplot as plt
+        plt.rc('text', usetex=True)
+
         ''' plot history of loss function and evaluation metrics '''
         metrics = ["loss"]
         if self.eval_metrics: metrics += self.eval_metrics
@@ -539,7 +543,7 @@ class DNN():
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
 
     def plot_closureTest(self, log = False, privateWork = False,
-                        nbins = 20, bin_range = [0.,1.]):
+                        signal_class = None, nbins = 20, bin_range = [0.,1.]):
         ''' plot comparison between train and test samples '''
 
         closureTest = plottingScripts.plotClosureTest(
@@ -549,6 +553,7 @@ class DNN():
             event_classes       = self.event_classes,
             nbins               = nbins,
             bin_range           = bin_range,
+            signal_class        = signal_class,
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
             logscale            = log)
@@ -579,7 +584,8 @@ def loadDNN(inputDirectory, outputDirectory):
         save_path       = outputDirectory,
         input_samples   = input_samples,
         event_category  = config["JetTagCategory"],
-        train_variables = config["trainVariables"]
+        train_variables = config["trainVariables"],
+        shuffle_seed    = config["shuffleSeed"]
         )
         
     # load the trained model

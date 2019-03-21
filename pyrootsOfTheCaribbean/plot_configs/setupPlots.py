@@ -153,7 +153,46 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     
     return canvas
 
-    
+
+def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
+    canvas = getCanvas(canvasName)
+
+    # move over/underflow bins into plotrange
+    moveOverUnderFlow(sig_train)
+    moveOverUnderFlow(bkg_train)
+    moveOverUnderFlow(sig_test)
+    moveOverUnderFlow(bkg_test)
+
+    # figure out plotrange
+    canvas.cd(1)
+    yMax = 1e-9
+    yMinMax = 1000.
+    for h in [sig_train, bkg_train, sig_test, bkg_test]:
+        yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
+        if h.GetBinContent(h.GetMaximumBin()) > 0:
+            yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
+
+    # draw first hist
+    if plotOptions["logscale"]:
+        bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        canvas-SetLogy()
+    else:
+        bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
+    bkg_train.GetXaxis().SetTitle(generateLatexLabel(canvasName))
+
+    option = "histo"
+    bkg_train.DrawCopy(option+"E0")
+
+    # draw the other histograms
+    sig_train.DrawCopy(option+"E0 same")
+    bkg_test.DrawCopy("E0 same")
+    sig_test.DrawCopy("E0 same")
+
+    # redraw axis
+    canvas.cd(1)
+    bkg_train.DrawCopy("axissame")
+
+    return canvas
 
 def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     if not isinstance(sigHists, list):
@@ -202,14 +241,6 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
     for h in bkgHists[1:]:
         h.DrawCopy(option+"same")
 
-    # add stat errorbars
-    errorGraph = ROOT.TGraphErrors( firstHist.Clone() )
-    for iBin in range(firstHist.GetNbinsX()):
-        errorGraph.SetPoint(iBin+1, firstHist.GetBinCenter(iBin+1), firstHist.GetBinContent(iBin+1))
-        errorGraph.SetPointError(iBin+1, firstHist.GetBinWidth(iBin+1)/2., firstHist.GetBinError(iBin+1)*10.)
-    errorGraph.SetFillStyle(3354)
-    errorGraph.SetLineColor(ROOT.kBlack)
-    errorGraph.SetFillColor(ROOT.kBlack)
     canvas.cd(1)
     # redraw axis
     firstHist.DrawCopy("axissame")
@@ -220,7 +251,6 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         # draw signal histogram
         sH.DrawCopy(option+" E0 same")
     
-    errorGraph.Draw("same")
 
     if plotOptions["ratio"]:
         canvas.cd(2)
@@ -293,7 +323,7 @@ def getCanvas(name, ratiopad = False):
     return canvas
 
 def getLegend():
-    legend=ROOT.TLegend(0.75,0.6,0.95,0.9)
+    legend=ROOT.TLegend(0.70,0.6,0.95,0.9)
     legend.SetBorderSize(0);
     legend.SetLineStyle(0);
     legend.SetTextFont(42);

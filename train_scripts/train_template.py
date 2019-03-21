@@ -151,6 +151,9 @@ dnn.build_model(config)
 # perform the training
 dnn.train_model()
 
+# save information
+dnn.save_model(sys.argv, filedir)
+
 # evalute the trained model
 dnn.eval_model()
 
@@ -172,4 +175,4 @@ if options.plot:
     dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
 
     # plot closure test
-    dnn.plot_closureTest(log = options.log, privateWork = options.privateWork)
+    dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)

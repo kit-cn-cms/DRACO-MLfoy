@@ -77,4 +77,4 @@ if options.plot:
     dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
 
     # plot closure test
-    dnn.plot_closureTest(log = options.log, privateWork = options.privateWork)
+    dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
