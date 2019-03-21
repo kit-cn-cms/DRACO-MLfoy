@@ -20,10 +20,11 @@ input_samples.addSample("ttbb"+naming,  label = "ttbb")
 - only change DNN training class `dnn = DNN.DNN([...])` properties 
 	- `eval_metrics` 
 	- `test_percentage` percentage of samples used to test
+
   others are changed with parser options!
 
 ## Usage
-To execute with default options us 
+To execute with default options use
 ```bash
 python train_template.py 
 ```
@@ -61,4 +62,18 @@ or use the following options
 Example:
 ```bash
 python train_template.py -i /path/to/input/files/ -o testRun --netconfig=test_config --plot --printroc -c ge6j_ge3t --epochs=1000
+```
+
+
+Re-evaluate DNN after training with
+```bash
+python eval_template.py
+```
+using the option `-i DIR` to specify the path to the already trained network. 
+
+The plotting options of `train_template.py` are also avaiable for this script.
+
+Example:
+```bash
+python eval_template.py -i testRun_ge6j_ge3t -o eval_testRun --plot --printroc
 ```
