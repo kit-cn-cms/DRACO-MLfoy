@@ -146,19 +146,6 @@ class DNN():
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-        # defnie default network configuration
-        self.architecture = {
-            "layers":                   [200],
-            "loss_function":            "categorical_crossentropy",
-            "Dropout":                  0.2,
-            "L2_Norm":                  1e-5,
-            "batch_size":               5000,
-            "optimizer":                optimizers.Adagrad(decay=0.99),
-            "activation_function":      "elu",
-            "output_activation":        "Softmax",
-            "earlystopping_percentage": None,
-            "earlystopping_epochs":     None,
-            }
            
         
     def _load_datasets(self):
@@ -173,22 +160,42 @@ class DNN():
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
+        # defnie default network configuration
+        self.architecture = {
+            "layers":                   [200],
+            "loss_function":            "categorical_crossentropy",
+            "Dropout":                  0.2,
+            "L2_Norm":                  1e-5,
+            "batch_size":               5000,
+            "optimizer":                optimizers.Adagrad(decay=0.99),
+            "activation_function":      "elu",
+            "output_activation":        "Softmax",
+            "earlystopping_percentage": None,
+            "earlystopping_epochs":     None,
+            }
+
         for key in config:
             self.architecture[key] = config[key]
         
-    def load_trained_model(self):
+    def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
-        checkpoint_path = self.cp_path + "/trained_model.h5py"
+        checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
+        # get the model
         self.model = keras.models.load_model(checkpoint_path)
 
+        # evaluate test dataset
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
 
+        # save predicitons
         self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True))
+            self.data.get_test_data(as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(
+            self.data.get_train_data(as_matrix = True) )
 
+        # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
@@ -199,12 +206,8 @@ class DNN():
         # print evaluations
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("ROC-AUC score: {}".format(self.roc_auc_score))
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        if self.eval_metrics:
-            print("model test loss: {}".format(self.model_eval[0]))
-            for im, metric in enumerate(self.eval_metrics):
-                print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -367,6 +370,14 @@ class DNN():
         configs["outputName"] = self.outputName+"/"+configs["output_activation"]
         configs = {key: configs[key] for key in configs if not "optimizer" in key}
 
+        # more information saving
+        configs["inputData"] = self.input_samples.input_path
+        configs["eventClasses"] = self.input_samples.getClassConfig()
+        configs["JetTagCategory"] = self.JTstring
+        configs["batchSize"] = self.batch_size
+        configs["trainEpochs"] = self.train_epochs
+        configs["trainVariables"] = self.train_variables
+
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
@@ -401,7 +412,7 @@ class DNN():
         # print evaluations
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("ROC-AUC score: {}".format(self.roc_auc_score))
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
             print("model test loss: {}".format(self.model_eval[0]))
@@ -545,3 +556,33 @@ class DNN():
         closureTest.plot(ratio = False, privateWork = privateWork)
 
 
+
+
+def loadDNN(inputDirectory, outputDirectory):
+    # get net config json
+    configFile = inputDirectory+"/checkpoints/net_config.json"
+    if not os.path.exists(configFile): 
+        sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
+
+    with open(configFile) as f:
+        config = f.read()
+    config = json.loads(config)
+
+    # load samples
+    input_samples = data_frame.InputSamples(config["inputData"])
+
+    for sample in config["eventClasses"]:
+        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
+
+    # init DNN class
+    dnn = DNN(
+        save_path       = outputDirectory,
+        input_samples   = input_samples,
+        event_category  = config["JetTagCategory"],
+        train_variables = config["trainVariables"]
+        )
+        
+    # load the trained model
+    dnn.load_trained_model(inputDirectory)
+
+    return dnn

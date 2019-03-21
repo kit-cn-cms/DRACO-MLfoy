@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import numpy as np
 from keras.utils import to_categorical
 from sklearn.utils import shuffle
@@ -35,6 +36,12 @@ class Sample:
         self.data = df
         print("-"*50)
         
+    def getConfig(self):
+        config = {}
+        config["sampleLabel"] = self.label
+        config["samplePath"] = self.path
+        config["sampleWeight"] = self.normalization_weight
+        return config
 
     def addPrediction(self, model, train_variables):
         self.prediction_vector = model.predict(
@@ -51,9 +58,16 @@ class InputSamples:
         self.samples = []
 
     def addSample(self, sample_path, label, normalization_weight = 1.):
-        path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(path, label, normalization_weight) )
+        if not os.path.isabs(sample_path):
+            sample_path = self.input_path + "/" + sample_path
+        self.samples.append( Sample(sample_path, label, normalization_weight) )
         
+    def getClassConfig(self):
+        configs = []
+        for sample in self.samples: 
+            configs.append( sample.getConfig() )
+        return configs
+
 
 class DataFrame(object):
     ''' takes a path to a folder where one h5 per class is located
