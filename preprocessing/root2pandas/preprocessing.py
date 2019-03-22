@@ -51,24 +51,17 @@ elif os.path.exists(options.outputDir):
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
-
-
 # define a base event selection which is applied for all Samples
-'''
-base_selection = "\
-( \
-(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
-and (\
-(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
-or \
-(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1) \
-) \
-)"
-'''
-base_selection = "(N_Jets >= 4 and N_BTagsM >= 3)"
+# select only events with GEN weight > 0 because training with negative weights is weird
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
 
+# single lepton selections
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
 
-ttH_selection = None#"(Evt_Odd == 1)"
+base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
+
+ttH_selection = "(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
