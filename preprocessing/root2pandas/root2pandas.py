@@ -50,7 +50,7 @@ class Dataset:
  
         # settings for dataset
         self.addMEM     = addMEM
-        self.maxEntries = maxEntries
+        self.maxEntries = int(maxEntries)
 
         # default values for some configs
         self.baseSelection  = None
@@ -234,21 +234,21 @@ class Dataset:
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
-	    df = tree.pandas.df(self.variables)
-	    # handle vector variables, loop over them
-	    for vecvar in self.vector_variables:
-		# load dataframe with vector variable
-		vec_df = tree.pandas.df(vecvar)
-		# loop over inices in vecvar list
-		for idx in self.vector_variables[vecvar]:
-		    # slice the index
-		    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-		    # define name for column in df
-		    col_name = str(vecvar)+"["+str(idx)+"]"
-		    # append column to original dataframe
-		    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
-		
-	    # apply event selection
+            df = tree.pandas.df(self.variables)
+            # handle vector variables, loop over them
+            for vecvar in self.vector_variables:
+                # load dataframe with vector variable
+                vec_df = tree.pandas.df(vecvar)
+                # loop over inices in vecvar list
+                for idx in self.vector_variables[vecvar]:
+                    # slice the index
+                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                    # define name for column in df
+                    col_name = str(vecvar)+"["+str(idx)+"]"
+                    # append column to original dataframe
+                    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+            
+            # apply event selection
             df = self.applySelections(df, sample.selections)
         
             # add to list of dataframes
