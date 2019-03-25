@@ -22,7 +22,7 @@ To circumvent this, first import everything related to `ROOT`, only then start i
 - uproot `pip install --user uproot`
 - TensorFlow backend for KERAS `export KERAS_BACKEND=tensorflow`
 
-## workflow in a nutshell
+## Workflow in a nutshell
 1. Preprocess input data:
     - to create input features you need data in the ntuple format, these get converted into hdf5 dataframes
     - create a list of input features in `variable_sets/` (look at the README for structural advice)
