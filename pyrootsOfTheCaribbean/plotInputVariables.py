@@ -11,11 +11,11 @@ sys.path.append(basedir)
 from evaluationScripts.plotVariables import variablePlotter
 
 usage="usage=%prog [options] \n"
-usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
+usage+="USE: python plotInputVariables.py -i DIR -o DIR -v FILE  --ksscore --scalesignal=OPTION --lumiscale=FLOAT --ratio --ratiotitel=STR --privatework --log"
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_test_training",
+parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_InputFeatures",
         help="DIR for output", metavar="outputDir")
 
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
@@ -33,7 +33,7 @@ parser.add_option("-p", "--privatework", dest="privateWork", action = "store_tru
 parser.add_option("-r", "--ratio", dest="ratio", action = "store_false", default=True,
         help="deactivate ratio plot", metavar="ratio")
 
-parser.add_option("--title", dest="ratioTitle", default="#frac{ttH}{ttbar}",
+parser.add_option("--ratiotitle", dest="ratioTitle", default="#frac{signal}{background}",
         help="STR #frac{PROCESS}{PROCESS}", metavar="log")
 
 parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_false", default=True,
@@ -86,10 +86,12 @@ plotOptions = {
     "KSscore":      options.KSscore,
     "privateWork":  options.privateWork,
     }
-#   scaleSignal:
-#   -1:     scale to background Integral
-#   float:  scale with float value
-#   False:  dont scale
+    """
+   scaleSignal:
+   -1:     scale to background Integral
+   float:  scale with float value
+   False:  dont scale
+    """
 
 # additional variables to plot
 additional_variables = [
@@ -104,14 +106,14 @@ plotter = variablePlotter(
     plotOptions     = plotOptions
     )
 
-# add samples
+# add signal samples
 plotter.addSample(
     sampleName      = "ttH",
     sampleFile      = data_dir+"/ttHbb_dnn.h5",
     plotColor       = ROOT.kOrange,
     signalSample    = True)
 
-
+# add background samples
 plotter.addSample(
     sampleName      = "ttbb",
     sampleFile      = data_dir+"/ttbb_dnn.h5",
@@ -140,9 +142,9 @@ plotter.addSample(
 
 # add JT categories
 plotter.addCategory("4j_ge3t")
-#plotter.addCategory("5j_ge3t")
-#plotter.addCategory("ge6j_ge3t")
-#plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("5j_ge3t")
+plotter.addCategory("ge6j_ge3t")
+plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
