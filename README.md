@@ -2,6 +2,13 @@
 
 Collection of Machine learning frameworks for DNNs, Regressions, Adversaries, CNNs and Others (DRACO)
 
+## Refer to READMEs in the corresponding directories for specific information!
+For readability there is a README for each step (this here is only for an overview!):
+- [preprocessing](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/preprocessing/root2pandas/README.md)
+- [training](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/train_scripts/README.md)
+- [variables](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/pyrootsOfTheCaribbean/README.md)
+- [variable plotting](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/variable_sets/README.md) 
+
 ## ATTENTION
 When working with the combination of
 - `ROOT.__version__ = 6.14/04`
@@ -9,6 +16,11 @@ When working with the combination of
 - `pandas.__version__ = 0.23.4`
 segmentation violations appear when opening hdf-files with `pandas.read_hdf()` or `pandas.HDFStore()`.
 To circumvent this, first import everything related to `ROOT`, only then start importing things from `keras`.
+
+## Package-requirements
+- `CMSSW_9_4_9` or newer
+- uproot `pip install --user uproot`
+- TensorFlow backend for KERAS `export KERAS_BACKEND=tensorflow`
 
 ## workflow in a nutshell
 1. Preprocess input data:
