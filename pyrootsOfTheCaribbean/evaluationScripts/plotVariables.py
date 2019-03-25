@@ -91,6 +91,10 @@ class variablePlotter:
         for key in plotOptions:
             defaultOptions[key] = plotOptions[key]
         self.options = defaultOptions
+
+        if self.options["privateWork"]:
+            self.options["scaleSignal"]=-1
+            self.options["lumiScale"]=1
         
 
     def addSample(self, **kwargs):
@@ -145,7 +149,7 @@ class variablePlotter:
                 # generate plot output name
                 plot_name = cat_dir + "/{}.pdf".format(variable)
                 plot_name = plot_name.replace("[","_").replace("]","")
-                    
+
                 # generate plot
                 histInfo = self.histVariable(
                     variable    = variable,
@@ -206,7 +210,7 @@ class variablePlotter:
                 bin_range   = bin_range,
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
-                ytitle      = setup.GetyTitle(self.options["lumiScale"]),
+                ytitle      = setup.GetyTitle(self.options["privateWork"]),
                 filled      = sample.filled)
 
             bkgHists.append(hist)
