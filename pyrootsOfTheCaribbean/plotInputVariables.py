@@ -1,7 +1,7 @@
-import ROOT
 import os
 import sys
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 import optparse
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -20,6 +20,9 @@ parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_Inp
 
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
         help="DIR for input", metavar="inputDir")
+
+parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
+        help="file ending for the samples in preprocessing", metavar="naming")
 
 parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
@@ -45,6 +48,7 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
 
 parser.add_option("--lumiscale", dest="lumiScale", default=1,
         help="FLOAT to scale Luminosity", metavar="lumiScale")
+
 
 (options, args) = parser.parse_args()
 
@@ -81,69 +85,76 @@ plotOptions = {
     "ratio":        options.ratio,
     "ratioTitle":   options.ratioTitle,
     "logscale":     options.log,
-    "scaleSignal":  options.scaleSignal,
+    "scaleSignal":  float(options.scaleSignal),
     "lumiScale":    float(options.lumiScale),
     "KSscore":      options.KSscore,
     "privateWork":  options.privateWork,
     }
-    """
+"""
    scaleSignal:
    -1:     scale to background Integral
    float:  scale with float value
    False:  dont scale
-    """
+"""
 
 # additional variables to plot
 additional_variables = [
     ]
 
+# variables that are not plotted
+ignored_variables = [
+    "Weight_XS",
+    "Weight_GEN_nom",
+    ]
 
 # initialize plotter
 plotter = variablePlotter(
     output_dir      = plot_dir,
     variable_set    = variable_set,
     add_vars        = additional_variables,
+    ignored_vars    = ignored_variables,
     plotOptions     = plotOptions
     )
 
+naming = options.naming
 # add signal samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttHbb_dnn.h5",
-    plotColor       = ROOT.kOrange,
+    sampleFile      = data_dir+"/ttHbb"+naming,
+    plotColor       = ROOT.kBlue+1,
     signalSample    = True)
 
 # add background samples
 plotter.addSample(
     sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb_dnn.h5",
+    sampleFile      = data_dir+"/ttbb"+naming,
     plotColor       = ROOT.kRed+3)
 
 plotter.addSample(
     sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b_dnn.h5",
+    sampleFile      = data_dir+"/tt2b"+naming,
     plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
     sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb_dnn.h5",
+    sampleFile      = data_dir+"/ttb"+naming,
     plotColor       = ROOT.kRed-2)
 
 plotter.addSample(
     sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc_dnn.h5",
+    sampleFile      = data_dir+"/ttcc"+naming,
     plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
     sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf_dnn.h5")
+    sampleFile      = data_dir+"/ttlf"+naming)
 
 
 
 # add JT categories
-plotter.addCategory("4j_ge3t")
-plotter.addCategory("5j_ge3t")
-plotter.addCategory("ge6j_ge3t")
+#plotter.addCategory("4j_ge3t")
+#plotter.addCategory("5j_ge3t")
+#plotter.addCategory("ge6j_ge3t")
 plotter.addCategory("ge4j_ge3t")
 
 
