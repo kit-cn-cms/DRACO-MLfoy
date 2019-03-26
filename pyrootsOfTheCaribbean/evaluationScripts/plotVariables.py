@@ -133,9 +133,9 @@ class variablePlotter:
                 variables = self.getAllVariables()
             # load list of variables from variable set
             elif cat in self.variable_set.variables:
-                variables = self.variable_set.variables[cat] + self.add_vars
+                variables = list(self.variable_set.variables[cat]) + self.add_vars
             else:
-                variables = self.variable_set.all_variables + self.add_vars
+                variables = list(self.variable_set.all_variables) + self.add_vars
 
             # filter events according to JT category
             for key in self.samples:

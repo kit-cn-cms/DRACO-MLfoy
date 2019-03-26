@@ -53,6 +53,6 @@ or use the following options
 
 Example:
 ```bash
-python plotInputVariables.py -i /path/to/input/files -o testPlots -v test_set  --scalesignal=False --lumiscale=41 --ratiotitel=#frac{ttH}{ttbar}
+python plotInputVariables.py -i /path/to/input/files -o testPlots -v test_set  --scalesignal=False --lumiscale=41 --ratiotitle=#frac{ttH}{ttbar}
 ```
 
