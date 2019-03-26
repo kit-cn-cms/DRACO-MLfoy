@@ -1,7 +1,7 @@
 import ROOT
 import os
 import sys
-import pandas
+import pandas 
 import numpy as np
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -9,7 +9,6 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import utils.generateJTcut as JTcut
-import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
@@ -78,6 +77,8 @@ class variablePlotter:
         self.samples        = {}
         self.ordered_stack  = []
         self.categories     = []
+        self.variableconfig = pandas.read_csv(basedir+'/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv')
+        self.variableconfig.set_index('variablename',inplace=True)
 
         # handle options
         defaultOptions = {
@@ -169,8 +170,10 @@ class variablePlotter:
         histInfo = {}
 
         # get number of bins and binrange from config file
-        bins = binning.getNbins(variable)
-        bin_range = binning.getBinrange(variable)
+        bins = self.variableconfig.loc[variable,'numberofbins']
+        minValue = self.variableconfig.loc[variable,'minvalue']
+        maxValue = self.variableconfig.loc[variable,'maxvalue']
+        bin_range = [minValue, maxValue]
 
         # check if bin_range was found
         if not bin_range:
