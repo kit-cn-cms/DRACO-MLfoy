@@ -33,20 +33,20 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("-p", "--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate Private Work option", metavar="privateWork")
 
-parser.add_option("-r", "--ratio", dest="ratio", action = "store_false", default=True,
-        help="deactivate ratio plot", metavar="ratio")
+parser.add_option("-r", "--ratio", dest="ratio", action = "store_true", default=False,
+        help="activate ratio plot", metavar="ratio")
 
 parser.add_option("--ratiotitle", dest="ratioTitle", default="#frac{signal}{background}",
         help="STR #frac{PROCESS}{PROCESS}", metavar="log")
 
-parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_false", default=True,
-        help="deactivate KSscore", metavar="KSscore")
+parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_true", default=False,
+        help="activate KSscore", metavar="KSscore")
 
 parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
         help="-1 to scale Signal to background Integral, FLOAT to scale Signal with float value, False to not scale Signal",
         metavar="scaleSignal")
 
-parser.add_option("--lumiscale", dest="lumiScale", default=1,
+parser.add_option("--lumiscale", dest="lumiScale", default=41.5,
         help="FLOAT to scale Luminosity", metavar="lumiScale")
 
 
@@ -154,8 +154,8 @@ plotter.addSample(
 # add JT categories
 #plotter.addCategory("4j_ge3t")
 #plotter.addCategory("5j_ge3t")
-#plotter.addCategory("ge6j_ge3t")
-plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge6j_ge3t")
+#plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
