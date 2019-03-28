@@ -204,7 +204,6 @@ class variablePlotter:
             #values =  [values[i]  for i in range(len(values))  if not np.isnan(values[i])]
 
             weightIntegral += sum(weights)
-        
             # setup histogram
             hist = setup.setupHistogram(
                 values      = values,
@@ -215,7 +214,6 @@ class variablePlotter:
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
                 ytitle      = setup.GetyTitle(self.options["privateWork"]),
                 filled      = sample.filled)
-
             bkgHists.append(hist)
             bkgLabels.append(sample.sampleName)
 
@@ -266,10 +264,11 @@ class variablePlotter:
             sigLabels.append(sample.sampleName)
             sigScales.append(scaleFactor)
 
+        displayname = self.variableconfig.loc[variable,'displayname']
         # init canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, self.options,   
-            canvasName = variable)
+            canvasName = variable, displayname=displayname)
 
         # setup legend
         legend = setup.getLegend()
