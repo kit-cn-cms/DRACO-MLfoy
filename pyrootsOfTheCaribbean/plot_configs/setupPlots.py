@@ -153,7 +153,7 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     
     return canvas
 
-def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname):
+def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname,logoption):
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
     if not isinstance(bkgHists, list):
@@ -186,7 +186,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname):
         firstHist = sigHists[0]
     else:
         firstHist = bkgHists[0]
-    if plotOptions["logscale"]:
+    if plotOptions["logscale"] or logoption:
         firstHist.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
         canvas.SetLogy()
     else:

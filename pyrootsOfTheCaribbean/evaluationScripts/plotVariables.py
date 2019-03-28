@@ -265,10 +265,16 @@ class variablePlotter:
             sigScales.append(scaleFactor)
 
         displayname = self.variableconfig.loc[variable,'displayname']
+        logoption = self.variableconfig.loc[variable,'logoption']
+        if logoption=="x" or logoption=="X":
+            logoption=True
+        else:
+            logoption=False
         # init canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, self.options,   
-            canvasName = variable, displayname=displayname)
+            canvasName = variable, displayname=displayname,
+            logoption = logoption)
 
         # setup legend
         legend = setup.getLegend()
