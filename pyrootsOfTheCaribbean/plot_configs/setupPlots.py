@@ -153,7 +153,49 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     
     return canvas
 
-def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname,logoption):
+def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
+    canvas = getCanvas(canvasName)
+
+    # move over/underflow bins into plotrange
+    moveOverUnderFlow(sig_train)
+    moveOverUnderFlow(bkg_train)
+    moveOverUnderFlow(sig_test)
+    moveOverUnderFlow(bkg_test)
+
+    # figure out plotrange
+    canvas.cd(1)
+    yMax = 1e-9
+    yMinMax = 1000.
+    for h in [sig_train, bkg_train, sig_test, bkg_test]:
+        yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
+        if h.GetBinContent(h.GetMaximumBin()) > 0:
+            yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
+
+    # draw first hist
+    if plotOptions["logscale"]:
+        bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        canvas-SetLogy()
+    else:
+        bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
+    bkg_train.GetXaxis().SetTitle(canvasName)
+
+    option = "histo"
+    bkg_train.DrawCopy(option+"E0")
+
+    # draw the other histograms
+    sig_train.DrawCopy(option+"E0 same")
+    bkg_test.DrawCopy("E0 same")
+    sig_test.DrawCopy("E0 same")
+
+    # redraw axis
+    canvas.cd(1)
+    bkg_train.DrawCopy("axissame")
+
+    return canvas
+
+def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=None,logoption=False):
+    if not displayname:
+        displayname=canvasName
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
     if not isinstance(bkgHists, list):
@@ -366,19 +408,6 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text) 
     else:           latex.DrawLatex(l,1.-t+0.01, text)
-
-def printTitle(pad, title):
-    pad.cd(1)
-    l = pad.GetLeftMargin()
-    t = pad.GetTopMargin()
-    r = pad.GetRightMargin()
-    b = pad.GetBottomMargin()
-
-    latex = ROOT.TLatex()
-    latex.SetNDC()
-    latex.SetTextColor(ROOT.kBlack)
-    latex.SetTextSize(0.03)
-    latex.DrawLatex(l, 1.-t+0.06, title)
 
 
 def moveOverUnderFlow(h):
