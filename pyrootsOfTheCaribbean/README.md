@@ -25,7 +25,7 @@ plotter.addCategory("(ge)[nJets]j_(ge)[nTags]t")
 	- `minvalue` bin range: minimal value of the plotted histogram
 	- `maxvalue` bin range: maximal value of the plotted histogram
 	- `numberofbins` number of bins plotted
-	- `logoption` logarithmic y-axis range ` to activate, `-` to deactivate
+	- `logoption` logarithmic y-axis range `x` to activate, `-` to deactivate
 	- `displayname` displayed name of the variable on the plot
 
 ## Usage
