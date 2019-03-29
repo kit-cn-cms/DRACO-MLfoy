@@ -20,6 +20,13 @@ plotter.addSample(
 ```python
 plotter.addCategory("(ge)[nJets]j_(ge)[nTags]t")
 ```
+- add/change variable plotting in [plot_configs/variableConfig.csv](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv)
+	- `variablename` name of the variable used in ntuples
+	- `minvalue` bin range: minimal value of the plotted histogram
+	- `maxvalue` bin range: maximal value of the plotted histogram
+	- `numberofbins` number of bins plotted
+	- `logoption` logarithmic y-axis range ` to activate, `-` to deactivate
+	- `displayname` displayed name of the variable on the plot
 
 ## Usage
 to execute with default options use
