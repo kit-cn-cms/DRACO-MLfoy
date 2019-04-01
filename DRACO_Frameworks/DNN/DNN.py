@@ -94,7 +94,8 @@ class DNN():
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
-            shuffle_seed    = None):
+            shuffle_seed    = None,
+            balanceSamples  = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -123,7 +124,7 @@ class DNN():
         self.eval_metrics = eval_metrics
 
         # load data set
-        self.data = self._load_datasets(shuffle_seed)
+        self.data = self._load_datasets(shuffle_seed, balanceSamples)
         self.event_classes = self.data.output_classes
 
         # save variable norm
@@ -145,14 +146,15 @@ class DNN():
 
            
         
-    def _load_datasets(self, shuffle_seed):
+    def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
             input_samples       = self.input_samples,
             event_category      = self.event_category,
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
-            shuffleSeed         = shuffle_seed)
+            shuffleSeed         = shuffle_seed,
+            balanceSamples      = balanceSamples)
 
 
     def _load_architecture(self, config):

@@ -59,6 +59,8 @@ parser.add_option("--signalclass", dest="signal_class", default=None,
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
 
+parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
+        help="activate to balance train samples such that number of events per epoch is roughly equal for all classes", metavar="balanceSamples")
 
 (options, args) = parser.parse_args()
 
@@ -124,7 +126,9 @@ dnn = DNN.DNN(
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2)
+    test_percentage = 0.2,
+    # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.balanceSamples)
 
 # config dictionary for DNN architecture
 config = {
