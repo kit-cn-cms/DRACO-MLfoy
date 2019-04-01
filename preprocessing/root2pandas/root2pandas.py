@@ -4,7 +4,7 @@ import uproot as root
 import re
 import glob
 import os
-import shutil 
+import shutil
 import matplotlib.pyplot as plt
 
 
@@ -31,7 +31,7 @@ class Sample:
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
-    
+
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
         print("\tntuples: {}".format(self.ntuples))
@@ -43,11 +43,11 @@ class Dataset:
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
-       
+
         # generating output dir
         if not os.path.exists(self.outputdir):
             os.makedirs(self.outputdir)
- 
+
         # settings for dataset
         self.addMEM     = addMEM
         self.maxEntries = maxEntries
@@ -56,7 +56,7 @@ class Dataset:
         self.baseSelection  = None
         self.samples        = {}
         self.variables      = []
-    
+
     def addBaseSelection(self, selection):
         self.baseSelection = selection
 
@@ -76,7 +76,7 @@ class Dataset:
         if "memDBp" in self.variables: self.variables.remove("memDBp")
 
     def addAllVariablesNoIndex(self):
-        ''' open up a root file and figure out variables automatically 
+        ''' open up a root file and figure out variables automatically
             dont consider indices separately, write them as subentry '''
         test_sample = self.samples[list(self.samples.keys())[0]]
         test_file = list(glob.glob(test_sample.ntuples))[0]
@@ -87,7 +87,7 @@ class Dataset:
             variables = list(df.columns)
 
         self.addVariables(variables)
-    
+
     def removeVariables(self, variables):
         n_removed = 0
         for v in variables:
@@ -125,7 +125,7 @@ class Dataset:
 
         # add trigger variables to variable list
         self.addVariables(self.triggerVariables)
-        
+
     def searchVariablesInTriggerString(self, string):
         # split trigger string into smaller bits
         splitters = [")", "(", "==", ">=", ">=", ">", "<", "="]
@@ -159,7 +159,7 @@ class Dataset:
             if not found_vector_variable:
                 variables.append(var)
                 continue
-            
+
             # handle vector variable
             index = found_vector_variable.group(0)
             var_name = var[:-len(index)]
@@ -210,12 +210,12 @@ class Dataset:
 
         # collect ntuple files
         ntuple_files = sorted(glob.glob(sample.ntuples))
-        
+
         # collect mem files
         if self.addMEM:
             mem_files = glob.glob(sample.MEMs)
             mem_df = self.generateMEMdf(mem_files, sample.sampleName)
-        
+
 
         # initialize loop over ntuple files
         n_entries = 0
@@ -230,7 +230,8 @@ class Dataset:
             with root.open(f) as rf:
                 # get MVATree
                 try:
-                    tree = rf["MVATree"]
+                    #tree = rf["MVATree"]
+                    tree = rf["liteTreeTTH_step7_cate8"]
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
@@ -247,10 +248,10 @@ class Dataset:
 		    col_name = str(vecvar)+"["+str(idx)+"]"
 		    # append column to original dataframe
 		    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
-		
+
 	    # apply event selection
             df = self.applySelections(df, sample.selections)
-        
+
             # add to list of dataframes
             if concat_df.empty: concat_df = df
             else: concat_df = concat_df.append(df)
@@ -284,10 +285,10 @@ class Dataset:
                 # reset counters
                 n_entries = 0
                 concat_df = pd.DataFrame()
-        
+
 
     # ====================================================================
-    
+
     def generateMEMdf(self, files, sampleName):
         ''' generate and load mem lookuptable '''
         memVariables = ["event", "lumi", "run", "mem_p"]
@@ -309,7 +310,7 @@ class Dataset:
                 # save data
                 with pd.HDFStore(outputFile, "a") as store:
                     store.append("MEM_data", df, index = False)
-                del df                
+                del df
 
         # load the generated MEM file
         with pd.HDFStore(outputFile, "r") as store:
@@ -336,16 +337,16 @@ class Dataset:
                 tmp_df = df
             tmp_df["class_label"] = pd.Series([key]*tmp_df.shape[0], index = tmp_df.index)
             split_dfs.append(tmp_df)
-            
+
         # concatenate the split dataframes again
         df = pd.concat(split_dfs)
         return df
-        
+
     def addMEMVariable(self, df, memdf):
         print("adding MEM to dataframe ...")
         # create variable with default value
         df["memDBp"] = pd.Series([-1]*df.shape[0], index = df.index)
-    
+
         # add mem variable
         df.update( memdf["mem_p"].rename("memDBp") )
 
@@ -357,7 +358,7 @@ class Dataset:
             entries_after = df.shape[0]
             print("    lost {}/{} events".format(entries_before-entries_after, entries_before))
             print("    we will only save events with mem...")
-        return df       
+        return df
 
 
     def removeTriggerVariables(self, df):
@@ -367,7 +368,7 @@ class Dataset:
     def createDatasets(self, df, categories):
         for key in categories:
             outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
-            
+
             # create dataframe for category
             cat_df = df.query("(class_label == \""+str(key)+"\")")
             print("creating dataset for class label {} with {} entries".format(key, cat_df.shape[0]))
@@ -383,4 +384,3 @@ class Dataset:
                 if os.path.exists(outFile):
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
-

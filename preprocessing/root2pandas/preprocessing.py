@@ -94,27 +94,28 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
+ntuplesPath = "/nfs/dust/cms/user/missirol/tthbb/mva_testing/190202_2017_V02_ttHbb2L_mva_inputs/mva_inputs/Nominal/combined"
+#ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
 memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttHbb",
-    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    ntuples     = ntuplesPath+"/train_ttHbb_2L.root",
+    #ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttH_categories,
     selections  = ttH_selection,
-    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-   ) 
+    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+   )
 
-dataset.addSample(
-    sampleName  = "TTToSL",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = None,#ttbar_selection,
-    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-      )
-# initialize variable list 
+#dataset.addSample(
+#    sampleName  = "TTToSL",
+#    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+#    categories  = ttbar_categories,
+#    selections  = None,#ttbar_selection,
+#    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+#      )
+# initialize variable list
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
@@ -124,8 +125,8 @@ additional_variables = [
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
-    "Evt_ID", 
-    "Evt_Run", 
+    "Evt_ID",
+    "Evt_Run",
     "Evt_Lumi"]
 
 # add these variables to the variable list
