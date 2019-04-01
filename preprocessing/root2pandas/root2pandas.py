@@ -268,7 +268,7 @@ class Dataset:
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                 # add indexing
-                concat_df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
+                concat_df.set_index(["runNumber", "lumiBlock", "eventNumber"], inplace = True, drop = True)
 
                 # add MEM variables
                 if self.addMEM:

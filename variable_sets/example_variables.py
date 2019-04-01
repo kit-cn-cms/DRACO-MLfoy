@@ -9,7 +9,7 @@ variables["4j_ge3t"] = [
     "BDT_common5_input_closest_tagged_dijet_mass",
     "BDT_common5_input_sphericity_jets",
     "Evt_blr_ETH",
-    #"memDBp",
+    "memDBp",
     "Evt_Dr_MinDeltaRTaggedJets",
     "BDT_common5_input_transverse_sphericity_jets",
     "Evt_CSV_Min_Tagged",
@@ -39,7 +39,7 @@ variables["5j_ge3t"] = [
     "BDT_common5_input_HT_tag",
     "Evt_Dr_TaggedJetsAverage",
     "Evt_HT",
-    #"memDBp",
+    "memDBp",
     "Evt_CSV_Average_Tagged",
     "Evt_CSV_Min_Tagged",
     "Evt_CSV_Average",
@@ -68,7 +68,7 @@ variables["ge6j_ge3t"] = [
     "Evt_CSV_Min_Tagged",
     "BDT_common5_input_HT_tag",
     "Evt_M_JetsAverage",
-    #"memDBp",
+    "memDBp",
     "Evt_blr_ETH_transformed",
     ]
 

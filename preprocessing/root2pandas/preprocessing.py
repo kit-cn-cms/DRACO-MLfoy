@@ -20,7 +20,7 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="cate8_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
@@ -57,7 +57,7 @@ else:
 '''
 base_selection = "\
 ( \
-(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
+(N_jets >= 4 and N_btags >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
 and (\
 (N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
 or \
@@ -65,7 +65,7 @@ or \
 ) \
 )"
 '''
-base_selection = "(N_Jets >= 4 and N_BTagsM >= 3)"
+base_selection = "(N_jets >= 4 and N_btags >= 3)"
 
 
 ttH_selection = None#"(Evt_Odd == 1)"
@@ -75,12 +75,28 @@ ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
 
-ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+ttbar_bb = root2pandas.EventCategories()
+ttbar_bb.addCategory("ttbb")
+
+ttbar_b = root2pandas.EventCategories()
+ttbar_b.addCategory("ttb")
+
+ttbar_2b = root2pandas.EventCategories()
+ttbar_2b.addCategory("tt2b")
+
+ttbar_lf = root2pandas.EventCategories()
+ttbar_lf.addCategory("ttlf")
+
+
+ttbar_cc = root2pandas.EventCategories()
+ttbar_cc.addCategory("ttcc")
+
+
+#ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
 
 # initialize dataset class
@@ -115,19 +131,61 @@ dataset.addSample(
 #    selections  = None,#ttbar_selection,
 #    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 #      )
+
+
+dataset.addSample(
+    sampleName  = "ttbar_b",
+    ntuples     = ntuplesPath+"/train_ttbar_b.root",
+    categories  = ttbar_b,
+    selections  = None
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+      )
+
+dataset.addSample(
+    sampleName  = "ttbar_bb",
+    ntuples     = ntuplesPath+"/train_ttbar_bb.root",
+    categories  = ttbar_bb,
+    selections  = None
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+)
+
+dataset.addSample(
+    sampleName  = "ttbar_2b",
+    ntuples     = ntuplesPath+"/train_ttbar_2b.root",
+    categories  = ttbar_bb,
+    selections  = None
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+)
+
+dataset.addSample(
+    sampleName  = "ttbar_lf",
+    ntuples     = ntuplesPath+"/train_ttbar_lf.root",
+    categories  = ttbar_lf,
+    selections  = None
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+)
+
+dataset.addSample(
+    sampleName  = "ttbar_cc",
+    ntuples     = ntuplesPath+"/train_ttbar_cc.root",
+    categories  = ttbar_cc,
+    selections  = None
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+)
+
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
-    "N_Jets",
-    "N_BTagsM",
-    "Weight_XS",
-    "Weight_CSV",
-    "Weight_GEN_nom",
-    "Evt_ID",
-    "Evt_Run",
-    "Evt_Lumi"]
+    "N_jets",
+    "N_btags",
+    #"Weight_XS",
+    #"Weight_CSV",
+    "weight_GEN",
+    "eventNumber",
+    "runNumber",
+    "lumiBlock"]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
