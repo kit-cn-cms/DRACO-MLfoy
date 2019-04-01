@@ -66,6 +66,42 @@ def setupHistogram(
 
     return histogram
 
+def setupYieldHistogram(yields, classes, xtitle, ytitle, color = ROOT.kBlack, filled = True):
+    # define histogram
+    histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", len(classes), 0, len(classes))
+    histogram.Sumw2(True)
+
+    for iBin in range(len(classes)):
+        histogram.SetBinContent(iBin+1, yields[iBin])
+        histogram.SetBinError(iBin+1, np.sqrt(yields[iBin]))
+
+
+    histogram.SetStats(False)
+    histogram.GetXaxis().SetTitle(xtitle)
+    histogram.GetYaxis().SetTitle(ytitle)
+
+    histogram.GetYaxis().SetTitleOffset(1.4)
+    histogram.GetXaxis().SetTitleOffset(1.2)
+    histogram.GetYaxis().SetTitleSize(0.055)
+    histogram.GetXaxis().SetTitleSize(0.055)
+    histogram.GetYaxis().SetLabelSize(0.055)
+    histogram.GetXaxis().SetLabelSize(0.055)
+
+    histogram.SetMarkerColor(color)
+
+    if filled:
+        histogram.SetLineColor( ROOT.kBlack )
+        histogram.SetFillColor( color )
+        histogram.SetLineWidth(1)
+    else:
+        histogram.SetLineColor( color )
+        histogram.SetFillColor(0)
+        histogram.SetLineWidth(2)
+
+    for i, cls in enumerate(classes):
+        histogram.GetXaxis().SetBinLabel(i+1, cls)
+
+    return histogram
 
 
 def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):

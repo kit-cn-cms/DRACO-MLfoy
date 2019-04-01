@@ -71,7 +71,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if self.value:
             if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
                 if self.verbose > 0:
-                    print("Epoch {}: early stopping threshold reached".format(epoch))
+                    print("\nEpoch {}: early stopping threshold reached".format(epoch))
                 self.n_failed += 1
                 if self.n_failed > self.patience:
                     self.model.stop_training = True
@@ -80,7 +80,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if self.stopping_epochs:
             if self.best_epoch + self.stopping_epochs < epoch and epoch > self.min_epochs:
                 if self.verbose > 0:
-                    print("Validation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
+                    print("\nValidation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
                 self.model.stop_training = True
         
 
@@ -564,7 +564,17 @@ class DNN():
 
         closureTest.plot(ratio = False, privateWork = privateWork)
 
+    def plot_eventYields(self, log = False, privateWork = False, signal_class = None):
+        eventYields = plottingScripts.plotEventYields(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.categoryLabel,
+            signal_class        = signal_class,
+            plotdir             = self.save_path,
+            logscale            = log)
 
+        eventYields.plot(privateWork = privateWork)
 
 
 def loadDNN(inputDirectory, outputDirectory):
