@@ -10,7 +10,7 @@ class Sample:
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
-        
+
 
     def load_dataframe(self, event_category, lumi):
         print("-"*50)
@@ -21,6 +21,7 @@ class Sample:
 
         # apply event category cut
         df.query(event_category, inplace = True)
+        print("dopo il taglio")
         print("number of events after selections:  "+str(df.shape[0]))
 
         # add event weight
@@ -35,7 +36,7 @@ class Sample:
 
         self.data = df
         print("-"*50)
-        
+
     def getConfig(self):
         config = {}
         config["sampleLabel"] = self.label
@@ -46,7 +47,7 @@ class Sample:
     def addPrediction(self, model, train_variables):
         self.prediction_vector = model.predict(
             self.data[train_variables].values)
-        
+
         print("total number of events in sample: "+str(self.data.shape[0]))
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1 )
 
@@ -61,10 +62,10 @@ class InputSamples:
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
         self.samples.append( Sample(sample_path, label, normalization_weight) )
-        
+
     def getClassConfig(self):
         configs = []
-        for sample in self.samples: 
+        for sample in self.samples:
             configs.append( sample.getConfig() )
         return configs
 
@@ -96,7 +97,7 @@ class DataFrame(object):
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi)
             train_samples.append(sample.data)
-        
+
         # concatenating all dataframes
         df = pd.concat( train_samples )
         del train_samples
@@ -172,7 +173,7 @@ class DataFrame(object):
         else:              return self.df_train["index_label"].values
 
     def get_train_lumi_weights(self):
-        return self.df_train["lumi_weight"].values        
+        return self.df_train["lumi_weight"].values
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix = True, normed = True):

@@ -66,7 +66,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if current_val < self.best_validation:
             self.best_validation = current_val
             self.best_epoch = epoch
-    
+
         # check loss by percentage difference
         if self.value:
             if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
@@ -82,11 +82,11 @@ class EarlyStopping(keras.callbacks.Callback):
                 if self.verbose > 0:
                     print("Validation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
                 self.model.stop_training = True
-        
+
 
 
 class DNN():
-    def __init__(self, 
+    def __init__(self,
             save_path,
             input_samples,
             event_category,
@@ -115,7 +115,7 @@ class DNN():
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
-        
+
         # number of train epochs
         self.train_epochs = train_epochs
 
@@ -143,8 +143,8 @@ class DNN():
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-           
-        
+
+
     def _load_datasets(self, shuffle_seed):
         ''' load data set '''
         return data_frame.DataFrame(
@@ -173,7 +173,7 @@ class DNN():
 
         for key in config:
             self.architecture[key] = config[key]
-        
+
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
@@ -261,7 +261,7 @@ class DNN():
                 X = keras.layers.Dropout(dropout)(X)
 
         # generate output layer
-        X = keras.layers.Dense( 
+        X = keras.layers.Dense(
             units               = self.data.n_output_neurons,
             activation          = output_activation.lower(),
             kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
@@ -420,12 +420,12 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
-                
-        
+
+
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-        # get weights 
+        # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
@@ -494,7 +494,7 @@ class DNN():
 
 
 
-    def plot_outputNodes(self, log = False, printROC = False, signal_class = None, 
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False,
                         nbins = 20, bin_range = [0.,1.]):
 
@@ -566,7 +566,7 @@ class DNN():
 def loadDNN(inputDirectory, outputDirectory):
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
-    if not os.path.exists(configFile): 
+    if not os.path.exists(configFile):
         sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
 
     with open(configFile) as f:
@@ -587,7 +587,7 @@ def loadDNN(inputDirectory, outputDirectory):
         train_variables = config["trainVariables"],
         shuffle_seed    = config["shuffleSeed"]
         )
-        
+
     # load the trained model
     dnn.load_trained_model(inputDirectory)
 

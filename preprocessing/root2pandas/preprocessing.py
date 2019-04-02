@@ -74,7 +74,6 @@ ttH_selection = None#"(Evt_Odd == 1)"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
-
 ttbar_bb = root2pandas.EventCategories()
 ttbar_bb.addCategory("ttbb")
 
@@ -86,7 +85,6 @@ ttbar_2b.addCategory("tt2b")
 
 ttbar_lf = root2pandas.EventCategories()
 ttbar_lf.addCategory("ttlf")
-
 
 ttbar_cc = root2pandas.EventCategories()
 ttbar_cc.addCategory("ttcc")
@@ -152,7 +150,7 @@ dataset.addSample(
 dataset.addSample(
     sampleName  = "ttbar_2b",
     ntuples     = ntuplesPath+"/train_ttbar_2b.root",
-    categories  = ttbar_bb,
+    categories  = ttbar_2b,
     selections  = None
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 )
@@ -180,12 +178,13 @@ dataset.addVariables(variable_set.all_variables)
 additional_variables = [
     "N_jets",
     "N_btags",
-    #"Weight_XS",
-    #"Weight_CSV",
     "weight_GEN",
     "eventNumber",
     "runNumber",
-    "lumiBlock"]
+    "lumiBlock",
+        #"Weight_XS",
+        #"Weight_CSV",
+    ]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)

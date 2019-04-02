@@ -173,6 +173,7 @@ class Dataset:
 
         self.variables = variables
         self.vector_variables = vector_variables
+        print(self.variables)
 
     # ====================================================================
 

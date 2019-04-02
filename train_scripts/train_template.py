@@ -32,13 +32,13 @@ parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatur
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in preprocessing", metavar="naming")
 
-parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+parser.add_option("-c", "--category", dest="category",default="ge4j_ge4t",
         help="STR name of the category (ge)[nJets]j_(ge)[nTags]t", metavar="category")
 
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs", metavar="train_epochs")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="cate8_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
@@ -94,7 +94,7 @@ outputdir += "_"+options.category
 if options.category in variable_set.variables:
     variables = variable_set.variables[options.category]
 else:
-    variables = variable_st.all_variables
+    variables = variable_set.all_variables
     print("category {} not specified in variable set {} - using all variables".format(
         options.category, options.variableSelection))
 
@@ -102,6 +102,8 @@ else:
 # load samples
 input_samples = df.InputSamples(inPath)
 naming = options.naming
+
+
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
@@ -160,7 +162,7 @@ dnn.eval_model()
 # save and print variable ranking
 dnn.get_input_weights()
 
-# plotting 
+# plotting
 if options.plot:
     # plot the evaluation metrics
     dnn.plot_metrics(privateWork = options.privateWork)
