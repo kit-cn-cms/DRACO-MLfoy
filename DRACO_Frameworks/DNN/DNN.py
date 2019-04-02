@@ -331,10 +331,12 @@ class DNN():
         ''' save the trained model '''
 
         # save executed command
-        argv[0] = execute_dir+"/"+argv[0]
+        argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
         execute_string = "python "+" ".join(argv)
-        with open(self.cp_path+"/command.sh", "w") as f:
+        out_file = self.cp_path+"/command.sh"
+        with open(out_file, "w") as f:
             f.write(execute_string)
+        print("saved executed command to {}".format(out_file))
 
         # save model as h5py file
         out_file = self.cp_path + "/trained_model.h5py"
