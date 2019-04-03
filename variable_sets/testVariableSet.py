@@ -20,7 +20,6 @@ variables["4j_ge3t"] = [
     'BDT_common5_input_closest_tagged_dijet_mass',
     'BDT_common5_input_cos_theta_blep_bhad',
     'BDT_common5_input_cos_theta_l_bhad',
-    'BDT_common5_input_dEta_fn',
     'BDT_common5_input_delta_eta_blep_bhad',
     'BDT_common5_input_delta_eta_l_bhad',
     'BDT_common5_input_delta_phi_blep_bhad',
@@ -165,7 +164,6 @@ variables["5j_ge3t"] = [
     'BDT_common5_input_closest_tagged_dijet_mass',
     'BDT_common5_input_cos_theta_blep_bhad',
     'BDT_common5_input_cos_theta_l_bhad',
-    'BDT_common5_input_dEta_fn',
     'BDT_common5_input_delta_eta_blep_bhad',
     'BDT_common5_input_delta_eta_l_bhad',
     'BDT_common5_input_delta_phi_blep_bhad',
@@ -435,3 +433,4 @@ variables["ge6j_ge3t"] = [
     ]
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
+
