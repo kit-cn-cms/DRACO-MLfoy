@@ -18,13 +18,13 @@ BDT_common5_input_avg_dr_tagged_jets,1,3.5,30,-,avg_dr_tagged_jets
 BDT_common5_input_best_higgs_mass,0,250,30,-,best_higgs_Mass
 BDT_common5_input_blr_transformed,-5,15,30,-,blr_transformed
 BDT_common5_input_closest_tagged_dijet_mass,0,400,30,-,closest_tagged_dijet_Mass
-BDT_common5_input_cos_theta_blep_bhad,-1,1,30,-,cos#theta(b_{lep},b_{had})
-BDT_common5_input_cos_theta_l_bhad,-1,1,30,-,cos#theta(lep,b_{had})
+BDT_common5_input_cos_theta_blep_bhad,-1,1,30,-,cos#theta(b_{lep} b_{had})
+BDT_common5_input_cos_theta_l_bhad,-1,1,30,-,cos#theta(lep b_{had})
 BDT_common5_input_dEta_fn,0,3,30,-,#Delta#eta_fn
-BDT_common5_input_delta_eta_blep_bhad,0,4,30,-,#Delta#eta(b_{lep},b_{had})
-BDT_common5_input_delta_eta_l_bhad,0,4,30,-,#Delta#eta(lep,b_{had})
-BDT_common5_input_delta_phi_blep_bhad,0,6.28318530717959,30,-,#Delta#phi(b_{lep},b_{had})
-BDT_common5_input_delta_phi_l_bhad,0,6.28318530717959,30,-,#Delta#phi(lep,b_{had})
+BDT_common5_input_delta_eta_blep_bhad,0,4,30,-,#Delta#eta(b_{lep} b_{had})
+BDT_common5_input_delta_eta_l_bhad,0,4,30,-,#Delta#eta(lep b_{had})
+BDT_common5_input_delta_phi_blep_bhad,0,6.28318530717959,30,-,#Delta#phi(b_{lep} b_{had})
+BDT_common5_input_delta_phi_l_bhad,0,6.28318530717959,30,-,#Delta#phi(lep b_{had})
 BDT_common5_input_dev_from_avg_disc_btags,0,0.06,30,-,dev_from_avg_disc_btags
 BDT_common5_input_dr_between_lep_and_closest_jet,0.5,3,30,-,dr_between_lep_and_closest_jet
 BDT_common5_input_fifth_highest_CSV,0,0.4,30,-,fifth_highest_CSV
@@ -37,12 +37,12 @@ BDT_common5_input_h2,-0.2,0.3,30,-,h2
 BDT_common5_input_h3,-0.2,0.3,30,-,h3
 BDT_common5_input_invariant_mass_of_everything,0,2000,30,-,invariant_Mass_of_everything
 BDT_common5_input_lowest_btag,0.5,1,30,-,lowest_btag
-BDT_common5_input_max_dR_bb,1,5,30,-,max #DeltaR(tag,tag)
-BDT_common5_input_max_dR_jj,1,5,30,-,max #DeltaR(jet,jet)
-BDT_common5_input_maxeta_jet_jet,0,1.6,30,-,max #eta(jet,jet)
-BDT_common5_input_maxeta_jet_tag,0,1.6,30,-,max #eta(jet,tag)
-BDT_common5_input_maxeta_tag_tag,0,1.6,30,-,max #eta(tag,tag)
-BDT_common5_input_min_dr_tagged_jets,0.5,3,30,-,min #DeltaR(tag,tag)
+BDT_common5_input_max_dR_bb,1,5,30,-,max #DeltaR(tag tag)
+BDT_common5_input_max_dR_jj,1,5,30,-,max #DeltaR(jet jet)
+BDT_common5_input_maxeta_jet_jet,0,1.6,30,-,max #eta(jet jet)
+BDT_common5_input_maxeta_jet_tag,0,1.6,30,-,max #eta(jet tag)
+BDT_common5_input_maxeta_tag_tag,0,1.6,30,-,max #eta(tag tag)
+BDT_common5_input_min_dr_tagged_jets,0.5,3,30,-,min #DeltaR(tag tag)
 BDT_common5_input_pt_all_jets_over_E_all_jets,0.2,1,30,-,p_{T}_all_jets_over_E_all_jets
 BDT_common5_input_pt_all_jets_over_E_all_jets_tags,0.2,1,30,-,p_{T}_all_jets_over_E_all_jets_tags
 BDT_common5_input_second_higest_btag,0.5,1,30,-,second_higest_btag
@@ -72,11 +72,11 @@ Evt_Deta_TaggedJetsAverage,0,3,30,-,#Delta#eta(TaggedJetsAverage)
 Evt_Deta_UntaggedJetsAverage,0,3,30,-,#Delta#eta(UntaggedJetsAverage)
 Evt_Dr_JetsAverage,0.7,3.5,30,-,#DeltaR(JetsAverage)
 Evt_Dr_Jets_Average,1.5,3.5,30,-,#DeltaR(Jets_Average)
-Evt_Dr_MinDeltaRJets,0.5,2.5,30,-,#DeltaR(min #DeltaR(jet,jet))
-Evt_Dr_MinDeltaRLeptonJet,0.5,3,30,-,#DeltaR(min #DeltaR(lep,jet))
-Evt_Dr_MinDeltaRLeptonTaggedJet,0.5,3,30,-,#DeltaR(min #DeltaR (lep,tag))
-Evt_Dr_MinDeltaRTaggedJets,0.5,3.5,30,-,#DeltaR(min #DeltaR(tag,tag))
-Evt_Dr_MinDeltaRUntaggedJets,0.5,4,30,-,#DeltaR(min #DeltaR(untagged,untagged))
+Evt_Dr_MinDeltaRJets,0.5,2.5,30,-,#DeltaR(min #DeltaR(jet jet))
+Evt_Dr_MinDeltaRLeptonJet,0.5,3,30,-,#DeltaR(min #DeltaR(lep jet))
+Evt_Dr_MinDeltaRLeptonTaggedJet,0.5,3,30,-,#DeltaR(min #DeltaR (lep tag))
+Evt_Dr_MinDeltaRTaggedJets,0.5,3.5,30,-,#DeltaR(min #DeltaR(tag tag))
+Evt_Dr_MinDeltaRUntaggedJets,0.5,4,30,-,#DeltaR(min #DeltaR(untagged untagged))
 Evt_Dr_TaggedJetsAverage,0.5,3.5,30,-,#DeltaR(TaggedJetsAverage)
 Evt_Dr_UntaggedJetsAverage,0.5,4,30,-,#DeltaR(UntaggedJetsAverage)
 Evt_E_PrimaryLepton,0,500,30,-,E_PrimaryLepton
@@ -87,7 +87,7 @@ Evt_Eta_UntaggedJetsAverage,-2.5,2.5,30,-,#eta(UntaggedJetsAverage)
 Evt_HT,300,2000,30,-,H_{T}
 Evt_HT_Jets,0,1500,30,-,H_{T}_Jets
 Evt_JetPtOverJetE,0.2,1,30,-,JetPtOverJetE
-Evt_Jet_MaxDeta_Jets,0,5,30,-,max# Delta#eta(jet,jet)
+Evt_Jet_MaxDeta_Jets,0,5,30,-,max# Delta#eta(jet jet)
 Evt_M2_JetsAverage,50,400,30,-,M2(JetsAverage)
 Evt_M2_TaggedJetsAverage,50,500,30,-,M2(TaggedJetsAverage)
 Evt_M2_UntaggedJetsAverage,50,400,30,-,M2(UntaggedJetsAverage)
@@ -95,10 +95,10 @@ Evt_M3,0,1000,30,-,M3
 Evt_MHT,0,400,30,-,missing H_{T}
 Evt_M_JetsAverage,0,15,30,-,M(JetsAverage)
 Evt_M_MedianTaggedJets,0,500,30,-,M(MedianTaggedJets)
-Evt_M_MinDeltaRJets,0,200,30,-,Mass min #DeltaR(jet,jet)
-Evt_M_MinDeltaRLeptonJet,0,200,30,-,Mass min #DeltaR(lep,jet)
-Evt_M_MinDeltaRLeptonTaggedJet,0,300,30,-,Mass min #DeltaR(lep,tag)
-Evt_M_MinDeltaRTaggedJets,50,1000,30,-,Mass min #DeltaR(tag,tag)
+Evt_M_MinDeltaRJets,0,200,30,-,Mass min #DeltaR(jet jet)
+Evt_M_MinDeltaRLeptonJet,0,200,30,-,Mass min #DeltaR(lep jet)
+Evt_M_MinDeltaRLeptonTaggedJet,0,300,30,-,Mass min #DeltaR(lep tag)
+Evt_M_MinDeltaRTaggedJets,50,1000,30,-,Mass min #DeltaR(tag tag)
 Evt_M_PrimaryLepton,-0.25,0.35,30,-,Mass PrimaryLepton
 Evt_M_TaggedJetsAverage,5,100,30,-,Mass TaggedJetsAverage
 Evt_M_TaggedJetsClosestTo125,0,250,30,-,Mass TaggedJetsClosestTo125
@@ -107,19 +107,19 @@ Evt_M_UntaggedJetsAverage,0,150,30,-,Mass UntaggedJetsAverage
 Evt_Phi_MET,-3.14159265358979,3.14159265358979,30,-,#phi(MET)
 Evt_Phi_PrimaryLepton,-3.14159265358979,3.14159265358979,30,-,#phi(PrimaryLepton)
 Evt_Pt_MET,20,1000,30,-,p_{T}(MET)
-Evt_Pt_MinDeltaRJets,7,1500,30,-,p_{T} min #DeltaR(jet,jet)
-Evt_Pt_MinDeltaRTaggedJets,1,1500,30,-,p_{T} min #DeltaR(tag,tag)
-Evt_Pt_MinDeltaRUntaggedJets,0,1500,30,-,p_{T} min #DeltaR(untagged,untagged)
+Evt_Pt_MinDeltaRJets,7,1500,30,-,p_{T} min #DeltaR(jet jet)
+Evt_Pt_MinDeltaRTaggedJets,1,1500,30,-,p_{T} min #DeltaR(tag tag)
+Evt_Pt_MinDeltaRUntaggedJets,0,1500,30,-,p_{T} min #DeltaR(untagged untagged)
 Evt_Pt_PrimaryLepton,30,1000,30,-,p_{T}(PrimaryLepton)
 Evt_blr_ETH,0,1,30,-,b-tag likelihood ratio
 Evt_blr_ETH_transformed,-5,10,30,-,transformed b-tag likelihood ratio
 HA_Lepton,-1,1,30,-,helicity angle Lepton
 HA_hadB,-1,1,30,-,helicity angle b_{had}
-HA_hadB_lepB,-1,1,30,-,helicity angle (b_{had},b_{lep})
+HA_hadB_lepB,-1,1,30,-,helicity angle (b_{had} b_{lep})
 HA_lepB,-1,1,30,-,helicity anglie b_{lep}
-HF_dEta_hadB_lepB,0,5,30,-,#Delta#eta(b_{had},b_{lep}) in helicity frame
-HF_dPhi_hadB_lepB,0,3.14159265358979,30,-,#Delta#phi(b_{had},b_{lep}) in helicity frame
-HF_#Delta#xi_hadB_lepB,0,3.14159265358979,30,-,#Delta#xi(b_{had},b_{lep}) in helicity frame
+HF_dEta_hadB_lepB,0,5,30,-,#Delta#eta(b_{had} b_{lep}) in helicity frame
+HF_dPhi_hadB_lepB,0,3.14159265358979,30,-,#Delta#phi(b_{had} b_{lep}) in helicity frame
+HF_#Delta#xi_hadB_lepB,0,3.14159265358979,30,-,#Delta#xi(b_{had} b_{lep}) in helicity frame
 Jet_CSV[0],0,1,30,-,Jet CSV[0]
 Jet_CSV[1],0,1,30,-,Jet CSV[1]
 Jet_CSV[2],0,1,30,-,Jet CSV[2]
