@@ -20,6 +20,7 @@ class Sample:
             print("number of events before selections: "+str(df.shape[0]))
 
         # apply event category cut
+        print("prima del taglio")
         df.query(event_category, inplace = True)
         print("dopo il taglio")
         print("number of events after selections:  "+str(df.shape[0]))
@@ -95,8 +96,10 @@ class DataFrame(object):
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
+            print(sample)
             sample.load_dataframe(self.event_category, self.lumi)
             train_samples.append(sample.data)
+
 
         # concatenating all dataframes
         df = pd.concat( train_samples )

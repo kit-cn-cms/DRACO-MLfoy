@@ -113,8 +113,8 @@ input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-
-
+print("prima di dnn")
+print(options.category)
 # initializing DNN training class
 dnn = DNN.DNN(
     save_path       = outputdir,
@@ -127,6 +127,7 @@ dnn = DNN.DNN(
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2)
+print("prima di config")
 
 # config dictionary for DNN architecture
 config = {
@@ -142,14 +143,18 @@ config = {
     "earlystopping_epochs":     50,
     }
 
+print("prima di import")
+
 # import file with net configs if option is used
 if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
 
+print("prima di build")
 # build DNN model
 dnn.build_model(config)
 
+print("prima di train")
 # perform the training
 dnn.train_model()
 
