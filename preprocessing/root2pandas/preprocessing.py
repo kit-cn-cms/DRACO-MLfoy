@@ -9,21 +9,24 @@ sys.path.append(basedir)
 import root2pandas
 
 """
-USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
+USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --treeName=STR --maxentries=INT --MEM=BOOL
 """
 usage="usage=%prog [options] \n"
-usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
-usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --treeName=STR --maxentries=INT --MEM=BOOL --name=STR\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -t STR-e INT -m BOOL -n STR"
 
 parser = optparse.OptionParser(usage=usage)
 
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="cate8_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="DL_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
-parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
+parser.add_option("-t", "--treeName", dest="treeName",default="liteTreeTTH_step7_cate8",
+        help="Name of the tree corresponding to the right category", metavar="treeName")
+
+parser.add_option("-e", "--maxentries", dest="maxEntries", default=100000,
         help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
 
 parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,
@@ -65,10 +68,10 @@ or \
 ) \
 )"
 '''
-base_selection = "(N_jets >= 4 and N_btags >= 3)"
+base_selection = "(N_jets >= 3 and N_btags >= 2)"
 
 
-ttH_selection = None#"(Evt_Odd == 1)"
+ttH_selection = None #"(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
@@ -90,17 +93,11 @@ ttbar_cc = root2pandas.EventCategories()
 ttbar_cc.addCategory("ttcc")
 
 
-#ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-#ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
-#ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
-#ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-#ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
-
-
 # initialize dataset class
 dataset = root2pandas.Dataset(
     outputdir   = outputdir,
     naming      = options.Name,
+    tree        = options.treeName,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries)
 
@@ -108,67 +105,50 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/missirol/tthbb/mva_testing/190202_2017_V02_ttHbb2L_mva_inputs/mva_inputs/Nominal/combined"
-#ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
-memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
+ntuplesPath = "/nfs/dust/cms/user/angirald/workspace/DRACO-MLfoy/combined/"
+
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttHbb",
-    ntuples     = ntuplesPath+"/train_ttHbb_2L.root",
-    #ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    ntuples     = ntuplesPath+"/ttHbb_2L.root",
     categories  = ttH_categories,
     selections  = ttH_selection,
-    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
    )
-
-#dataset.addSample(
-#    sampleName  = "TTToSL",
-#    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-#    categories  = ttbar_categories,
-#    selections  = None,#ttbar_selection,
-#    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#      )
-
 
 dataset.addSample(
     sampleName  = "ttbar_b",
-    ntuples     = ntuplesPath+"/train_ttbar_b.root",
+    ntuples     = ntuplesPath+"/ttbar_b.root",
     categories  = ttbar_b,
     selections  = None
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
       )
 
 dataset.addSample(
     sampleName  = "ttbar_bb",
-    ntuples     = ntuplesPath+"/train_ttbar_bb.root",
+    ntuples     = ntuplesPath+"/ttbar_bb.root",
     categories  = ttbar_bb,
     selections  = None
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 )
 
 dataset.addSample(
     sampleName  = "ttbar_2b",
-    ntuples     = ntuplesPath+"/train_ttbar_2b.root",
+    ntuples     = ntuplesPath+"/ttbar_2b.root",
     categories  = ttbar_2b,
     selections  = None
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 )
 
 dataset.addSample(
     sampleName  = "ttbar_lf",
-    ntuples     = ntuplesPath+"/train_ttbar_lf.root",
+    ntuples     = ntuplesPath+"/ttbar_lf.root",
     categories  = ttbar_lf,
     selections  = None
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 )
 
 dataset.addSample(
     sampleName  = "ttbar_cc",
-    ntuples     = ntuplesPath+"/train_ttbar_cc.root",
+    ntuples     = ntuplesPath+"/ttbar_cc.root",
     categories  = ttbar_cc,
     selections  = None
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
 )
 
 # initialize variable list
@@ -182,6 +162,7 @@ additional_variables = [
     "eventNumber",
     "runNumber",
     "lumiBlock",
+    "weight"
         #"Weight_XS",
         #"Weight_CSV",
     ]

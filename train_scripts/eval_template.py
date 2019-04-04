@@ -23,7 +23,7 @@ usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_4j_ge3t",
+parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_ge4j_ge4t",
         help="DIR of trained net data", metavar="inputDir")
 
 parser.add_option("-o", "--outputdirectory", dest="outDir",default=None,
@@ -65,7 +65,7 @@ else:
 dnn = DNN.loadDNN(inPath, outPath)
 
 
-# plotting 
+# plotting
 if options.plot:
     # plot the confusion matrix
     dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)

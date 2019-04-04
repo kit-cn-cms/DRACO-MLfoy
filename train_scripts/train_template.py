@@ -38,7 +38,7 @@ parser.add_option("-c", "--category", dest="category",default="ge4j_ge4t",
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs", metavar="train_epochs")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="cate8_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="DL_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
@@ -107,14 +107,13 @@ naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", normalization_weight = 2.)
+input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
-print("prima di dnn")
-print(options.category)
+
 # initializing DNN training class
 dnn = DNN.DNN(
     save_path       = outputdir,
@@ -127,7 +126,6 @@ dnn = DNN.DNN(
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2)
-print("prima di config")
 
 # config dictionary for DNN architecture
 config = {
@@ -143,18 +141,14 @@ config = {
     "earlystopping_epochs":     50,
     }
 
-print("prima di import")
-
 # import file with net configs if option is used
 if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
 
-print("prima di build")
 # build DNN model
 dnn.build_model(config)
 
-print("prima di train")
 # perform the training
 dnn.train_model()
 

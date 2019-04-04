@@ -39,10 +39,11 @@ class Sample:
 
 
 class Dataset:
-    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000):
+    def __init__(self, outputdir, tree, naming = "", addMEM = False, maxEntries = 50000):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
+        self.tree = tree
 
         # generating output dir
         if not os.path.exists(self.outputdir):
@@ -232,7 +233,7 @@ class Dataset:
                 # get MVATree
                 try:
                     #tree = rf["MVATree"]
-                    tree = rf["liteTreeTTH_step7_cate8"]
+                    tree = rf[self.tree]
                 except:
                     print("could not open MVATree in ROOT file")
                     continue

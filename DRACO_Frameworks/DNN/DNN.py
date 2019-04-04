@@ -108,29 +108,22 @@ class DNN():
         # name of event category (usually nJet/nTag category)
         self.JTstring       = event_category
         self.event_category = JTcut.getJTstring(event_category)
-        print(self.event_category)
         self.categoryLabel  = JTcut.getJTlabel(event_category)
-        print(self.categoryLabel )
 
         # list of input variables
         self.train_variables = train_variables
-        print(self.train_variables)
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
-        print(self.test_percentage)
 
         # number of train epochs
         self.train_epochs = train_epochs
-        print(self.train_epochs)
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
-        print(self.eval_metrics)
 
         # load data set
         self.data = self._load_datasets(shuffle_seed)
-        print(self.eval_metrics)
         self.event_classes = self.data.output_classes
 
 
