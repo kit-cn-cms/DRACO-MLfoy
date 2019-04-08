@@ -37,7 +37,7 @@ parser.add_option("-r", "--ratio", dest="ratio", action = "store_true", default=
         help="activate ratio plot", metavar="ratio")
 
 parser.add_option("--ratiotitle", dest="ratioTitle", default="#frac{signal}{background}",
-        help="STR #frac{PROCESS}{PROCESS}", metavar="log")
+        help="STR #frac{PROCESS}{PROCESS}", metavar="title")
 
 parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_true", default=False,
         help="activate KSscore", metavar="KSscore")
@@ -152,10 +152,10 @@ plotter.addSample(
 
 
 # add JT categories
-#plotter.addCategory("4j_ge3t")
-#plotter.addCategory("5j_ge3t")
+plotter.addCategory("4j_ge3t")
+plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
-#plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
