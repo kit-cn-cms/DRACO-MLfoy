@@ -102,6 +102,8 @@ else:
 
 if options.signal_class:
     signal=options.signal_class.split(",")
+else:
+    signal=None
 
 
 
