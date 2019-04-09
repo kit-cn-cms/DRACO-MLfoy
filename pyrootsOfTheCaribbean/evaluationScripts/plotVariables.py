@@ -86,6 +86,7 @@ class variablePlotter:
             "ratioTitle":   None,
             "logscale":     False,
             "scaleSignal":  -1,
+            "lumiScale":    1,
             "privateWork":  False,
             "KSscore":      False}
 

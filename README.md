@@ -19,7 +19,9 @@ To circumvent this, first import everything related to `ROOT`, only then start i
 
 ## Package-requirements
 - `CMSSW_9_4_9` or newer
-- uproot `pip install --user uproot`
+- uproot `pip install --user uproot==3.2.7`
+- `pip install --user uproot-methods==0.2.6`
+- `pip install --user awkward==0.4.2`
 - TensorFlow backend for KERAS `export KERAS_BACKEND=tensorflow`
 
 ## Workflow in a nutshell

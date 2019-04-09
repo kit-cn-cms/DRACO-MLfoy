@@ -3,7 +3,6 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
 import sys
-import keras.optimizers as optimizers
 import optparse
 
 # local imports
@@ -15,6 +14,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
+import keras.optimizers as optimizers
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
 """
