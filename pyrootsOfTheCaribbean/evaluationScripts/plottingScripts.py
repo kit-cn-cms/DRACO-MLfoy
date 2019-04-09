@@ -28,10 +28,13 @@ class plotDiscriminators:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.signalIndex       = []
+        self.signalFlag        = []
 
         if self.signal_class:
-            self.signalIndex   = self.data.class_translation[self.signal_class]
-            self.signalFlag    = self.data.get_class_flag(self.signal_class)
+            for signal in signal_class:
+                self.signalIndex.append(self.data.class_translation[signal])
+                self.signalFlag.append(self.data.get_class_flag(signal))
 
         # default settings
         self.printROCScore = False
@@ -51,8 +54,8 @@ class plotDiscriminators:
                 signalIndex = self.signalIndex
                 signalFlag  = self.signalFlag
             else:
-                signalIndex = nodeIndex
-                signalFlag  = self.data.get_class_flag(node_cls)
+                signalIndex = [nodeIndex]
+                signalFlag  = [self.data.get_class_flag(node_cls)]
 
             # get output values of this node
             out_values = self.prediction_vector[:,i]
@@ -85,7 +88,7 @@ class plotDiscriminators:
 
                 print("{} events in discriminator: {}\t(Integral: {})".format(truth_cls, len(filtered_values), sum(filtered_weights)))
 
-                if j == signalIndex:
+                if j in signalIndex:
                     # signal histogram
                     sig_values.append(filtered_values)
                     sig_labels.append(str(truth_cls))
@@ -200,10 +203,13 @@ class plotOutputNodes:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.signalIndex       = []
+        self.signalFlag        = []
 
         if self.signal_class:
-            self.signalIndex   = self.data.class_translation[self.signal_class]
-            self.signalFlag    = self.data.get_class_flag(self.signal_class)
+            for signal in signal_class:
+                self.signalIndex.append(self.data.class_translation[signal])
+                self.signalFlag.append(self.data.get_class_flag(signal))
 
         # default settings
         self.printROCScore = False
@@ -246,7 +252,7 @@ class plotOutputNodes:
                 filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
                     if self.data.get_test_labels(as_categorical = False)[k] == classIndex]
 
-                if j == signalIndex:
+                if j in signalIndex:
                     # signal histogram
                     sig_values  = filtered_values
                     sig_label   = str(truth_cls)
@@ -355,10 +361,14 @@ class plotClosureTest:
         self.event_category     = event_category
         self.plotdir            = plotdir
         self.logscale           = logscale
+        self.signalIndex       = []
+        self.signalFlag        = []
 
         if self.signal_class:
-            self.signalIndex = self.data.class_translation[self.signal_class]
-            self.signalFlag  = self.data.get_class_flag(self.signal_class)
+            for signal in signal_class:
+                self.signalIndex.append(self.data.class_translation[signal])
+                self.signalFlag.append(self.data.get_class_flag(signal))
+
 
         # generate sub directory
         self.plotdir += "/ClosurePlots/"
@@ -387,31 +397,31 @@ class plotClosureTest:
             train_values = self.train_prediction[:,i]
 
             sig_test_values = [test_values[k] for k in range(len(test_values)) \
-                if self.data.get_test_labels(as_categorical = False)[k] == signalIndex \
+                if self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
             bkg_test_values = [test_values[k] for k in range(len(test_values)) \
-                if not self.data.get_test_labels(as_categorical = False)[k] == signalIndex \
+                if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
 
             sig_train_values = [train_values[k] for k in range(len(train_values)) \
-                if self.data.get_train_labels(as_categorical = False)[k] == signalIndex \
+                if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
             bkg_train_values = [train_values[k] for k in range(len(train_values)) \
-                if not self.data.get_train_labels(as_categorical = False)[k] == signalIndex \
+                if not self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
 
             sig_test_weights = [self.data.get_lumi_weights()[k] for k in range(len(test_values)) \
-                if self.data.get_test_labels(as_categorical = False)[k] == signalIndex \
+                if self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
             bkg_test_weights = [self.data.get_lumi_weights()[k] for k in range(len(test_values)) \
-                if not self.data.get_test_labels(as_categorical = False)[k] == signalIndex \
+                if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
         
             sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
-                if self.data.get_train_labels(as_categorical = False)[k] == signalIndex \
+                if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
             bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
-                if self.data.get_train_labels(as_categorical = False)[k] == signalIndex \
+                if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
 
             # setup train histograms
