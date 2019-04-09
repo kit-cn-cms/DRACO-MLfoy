@@ -94,7 +94,6 @@ ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/DNN_ntuples_v1/"
 memPath = None#"/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
-'''
 dataset.addSample(
     sampleName  = "ttHbb",
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
@@ -109,7 +108,7 @@ dataset.addSample(
     selections  = odd_selection,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     ) 
-'''
+
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
@@ -131,14 +130,14 @@ dataset.addSample(
     selections  = odd_selection
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
-'''
+
 dataset.addSample(
     sampleName  = "ttZbb",
     ntuples     = ntuplesPath+"/TTZToBB_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
     categories  = ttZ_categories,
     selections  = odd_selection,
     )
-'''
+
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
 
