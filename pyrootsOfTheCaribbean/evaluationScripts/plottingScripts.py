@@ -229,8 +229,8 @@ class plotOutputNodes:
                 signalIndex = self.signalIndex
                 signalFlag  = self.signalFlag
             else:
-                signalIndex = nodeIndex
-                signalFlag  = self.data.get_class_flag(node_cls)
+                signalIndex = [nodeIndex]
+                signalFlag  = [self.data.get_class_flag(node_cls)]
 
             if self.printROCScore:
                 # calculate ROC value for specific node
@@ -362,12 +362,10 @@ class plotClosureTest:
         self.plotdir            = plotdir
         self.logscale           = logscale
         self.signalIndex       = []
-        self.signalFlag        = []
 
         if self.signal_class:
             for signal in signal_class:
                 self.signalIndex.append(self.data.class_translation[signal])
-                self.signalFlag.append(self.data.get_class_flag(signal))
 
 
         # generate sub directory
@@ -389,7 +387,7 @@ class plotClosureTest:
                 signalIndex = self.signalIndex
                 signalClass = self.signal_class
             else:
-                signalIndex = nodeIndex
+                signalIndex = [nodeIndex]
                 signalClass = node_cls
 
             # get output values of this node
