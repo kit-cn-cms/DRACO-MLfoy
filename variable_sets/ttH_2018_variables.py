@@ -55,5 +55,5 @@ variables["ge6j_ge3t"] = [
 
 
 
-all_variables = set( [v for key in variables for v in variables[key] ] )
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))
 
