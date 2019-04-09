@@ -578,10 +578,13 @@ class plotEventYields:
         self.event_classes      = event_classes
         self.n_classes          = len(self.event_classes)
         self.signal_class       = signal_class
+        self.signalIndex       = []
+
         if self.signal_class:
-            self.signalIndex = self.data.class_translation[self.signal_class]
+            for signal in signal_class:
+                self.signalIndex.append(self.data.class_translation[signal])
         else:
-            self.signalIndex = self.data.class_translation["ttHbb"]
+            self.signalIndex = [self.data.class_translation["ttHbb"]]
 
         self.event_category     = event_category
         self.plotdir            = plotdir
@@ -629,7 +632,7 @@ class plotEventYields:
 
         
 
-            if self.signalIndex == i:
+            if i in self.signalIndex:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
                     classes = self.event_classes,
