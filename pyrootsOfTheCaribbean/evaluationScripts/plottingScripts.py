@@ -597,6 +597,8 @@ class plotEventYields:
         self.privateWork = privateWork
 
         # loop over processes
+        sigHists = []
+        sigLabels = []
         bkgHists = []
         bkgLabels = []
 
@@ -640,11 +642,13 @@ class plotEventYields:
                     ytitle  = yTitle,
                     color   = setup.GetPlotColor(truth_cls),
                     filled  = False)
-            
-                sigHist = histogram
-                sigLabel = truth_cls
+
                 # set signal histogram linewidth
-                sigHist.SetLineWidth(3)
+                histogram.SetLineWidth(3)
+                sigHists.append(histogram)
+                sigLabels.append(truth_cls)
+                
+                
             else:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
@@ -659,25 +663,31 @@ class plotEventYields:
                 totalBkgYield += sum(class_yields)
 
 
-        scaleFactor = totalBkgYield/sigHist.Integral()
+        
         # scale histograms according to options
+        scaleFactors=[]
+        for sig in sigHists:
+            scaleFactors.append(totalBkgYield/sig.Integral())
         if privateWork:
-            sigHist.Scale(1./sigHist.Integral())
+            for sig in sigHists:
+                sig.Scale(1./sig.Integral())
             for h in bkgHists:
                 h.Scale(1./totalBkgYield)
         else:
-            sigHist.Scale(scaleFactor)
+            for i,sig in enumerate(sigHists):
+                sig.Scale(scaleFactors[i])
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
-            sigHist, bkgHists, plotOptions,
+            sigHists, bkgHists, plotOptions,
             canvasName = "event yields per node")
 
         # setup legend
         legend = setup.getLegend()
 
         # add signal entry
-        legend.AddEntry(sigHist, sigLabel+" x {:4.0f}".format(scaleFactor), "L")
+        for i,sig in enumerate(sigHists):
+            legend.AddEntry(sig, sigLabels[i]+" x {:4.0f}".format(scaleFactors[i]), "L")
 
         # add background entries
         for i, h in enumerate(bkgHists):
