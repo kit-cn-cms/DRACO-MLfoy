@@ -15,7 +15,7 @@ config_dict["example_config"] = {
         }
 
 config_dict["test_config"] = {
-        "layers":                   [200,200],
+        "layers":                   [1000,1000,200,200],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.,
         "L2_Norm":                  0.,
@@ -36,6 +36,6 @@ config_dict["ttH_2018"] = {
         "optimizer":                optimizers.Adam(1e-4),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.02,
+        "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     100,
         }
