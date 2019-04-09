@@ -86,6 +86,7 @@ class variablePlotter:
             "ratioTitle":   None,
             "logscale":     False,
             "scaleSignal":  -1,
+            "lumiScale":    1,
             "privateWork":  False,
             "KSscore":      False}
 
@@ -169,20 +170,29 @@ class variablePlotter:
     def histVariable(self, variable, plot_name, cat):
         histInfo = {}
 
-        # get number of bins and binrange from config file
-        bins = self.variableconfig.loc[variable,'numberofbins']
-        minValue = self.variableconfig.loc[variable,'minvalue']
-        maxValue = self.variableconfig.loc[variable,'maxvalue']
-        bin_range = [minValue, maxValue]
-
-        # check if bin_range was found
-        if not bin_range:
+        if variable in self.variableconfig.index:
+            # get variable info from config file
+            bins = self.variableconfig.loc[variable,'numberofbins']
+            minValue = self.variableconfig.loc[variable,'minvalue']
+            maxValue = self.variableconfig.loc[variable,'maxvalue']
+            displayname = self.variableconfig.loc[variable,'displayname']
+            logoption = self.variableconfig.loc[variable,'logoption']
+        else:
+            bins = 20
             maxValue = max([max(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             minValue = min([min(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
-            config_string = "variables[\""+variable+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
-            with open("new_variable_configs.txt", "a") as f:
+            displayname = variable
+            logoption = "-"
+
+            config_string = "{},{},{},{},{},{}\n".format(variable, minValue, maxValue, bins, logoption, displayname)
+            with open("new_variable_configs.csv", "a") as f:
                 f.write(config_string)
-            bin_range = [minValue, maxValue]
+        
+        bin_range = [minValue, maxValue]
+        if logoption=="x" or logoption=="X":
+            logoption=True
+        else:
+            logoption=False
 
         histInfo["nbins"] = bins
         histInfo["range"] = bin_range
@@ -264,12 +274,6 @@ class variablePlotter:
             sigLabels.append(sample.sampleName)
             sigScales.append(scaleFactor)
 
-        displayname = self.variableconfig.loc[variable,'displayname']
-        logoption = self.variableconfig.loc[variable,'logoption']
-        if logoption=="x" or logoption=="X":
-            logoption=True
-        else:
-            logoption=False
         # init canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, self.options,   

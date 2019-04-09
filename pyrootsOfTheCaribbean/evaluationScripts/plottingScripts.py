@@ -569,7 +569,128 @@ class plotConfusionMatrix:
 
 
 
+class plotEventYields:
+    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):
+        self.data               = data
+        self.prediction_vector  = prediction_vector
+        self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
 
+        self.event_classes      = event_classes
+        self.n_classes          = len(self.event_classes)
+        self.signal_class       = signal_class
+        if self.signal_class:
+            self.signalIndex = self.data.class_translation[self.signal_class]
+        else:
+            self.signalIndex = self.data.class_translation["ttHbb"]
+
+        self.event_category     = event_category
+        self.plotdir            = plotdir
+
+        self.logscale           = logscale
+        
+        self.privateWork = False
+
+    def plot(self, privateWork = False, ratio = False):
+        self.privateWork = privateWork
+
+        # loop over processes
+        bkgHists = []
+        bkgLabels = []
+
+        plotOptions = {
+            "ratio":      ratio,
+            "ratioTitle": "#frac{scaled Signal}{Background}",
+            "logscale":   self.logscale}
+        yTitle = "event Yield"
+        if privateWork:
+            yTitle = setup.GetyTitle(privateWork)
+
+        totalBkgYield = 0
+    
+        # generate one plot per output node
+        for i, truth_cls in enumerate(self.event_classes):
+            classIndex = self.data.class_translation[truth_cls]
+
+            class_yields = []
+
+            # loop over output nodes
+            for j, node_cls in enumerate(self.event_classes):
+            
+                # get output values of this node
+                out_values = self.prediction_vector[:,i]
+
+                nodeIndex = self.data.class_translation[node_cls]
+
+                # get yields
+                class_yield = sum([ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    and self.predicted_classes[k] == nodeIndex])
+                class_yields.append(class_yield)
+
+        
+
+            if self.signalIndex == i:
+                histogram = setup.setupYieldHistogram(
+                    yields  = class_yields,
+                    classes = self.event_classes,
+                    xtitle  = str(truth_cls)+" event yield",
+                    ytitle  = yTitle,
+                    color   = setup.GetPlotColor(truth_cls),
+                    filled  = False)
+            
+                sigHist = histogram
+                sigLabel = truth_cls
+                # set signal histogram linewidth
+                sigHist.SetLineWidth(3)
+            else:
+                histogram = setup.setupYieldHistogram(
+                    yields  = class_yields,
+                    classes = self.event_classes,
+                    xtitle  = str(truth_cls)+" event yield",
+                    ytitle  = yTitle,
+                    color   = setup.GetPlotColor(truth_cls),
+                    filled  = True)
+                bkgHists.append(histogram)
+                bkgLabels.append(truth_cls)
+
+                totalBkgYield += sum(class_yields)
+
+
+        scaleFactor = totalBkgYield/sigHist.Integral()
+        # scale histograms according to options
+        if privateWork:
+            sigHist.Scale(1./sigHist.Integral())
+            for h in bkgHists:
+                h.Scale(1./totalBkgYield)
+        else:
+            sigHist.Scale(scaleFactor)
+
+        # initialize canvas
+        canvas = setup.drawHistsOnCanvas(
+            sigHist, bkgHists, plotOptions,
+            canvasName = "event yields per node")
+
+        # setup legend
+        legend = setup.getLegend()
+
+        # add signal entry
+        legend.AddEntry(sigHist, sigLabel+" x {:4.0f}".format(scaleFactor), "L")
+
+        # add background entries
+        for i, h in enumerate(bkgHists):
+            legend.AddEntry(h, bkgLabels[i], "F")
+
+        # draw legend
+        legend.Draw("same")
+
+        # add lumi
+        setup.printLumi(canvas, ratio = plotOptions["ratio"])
+
+        # add category label
+        setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+
+        out_path = self.plotdir + "/event_yields.pdf"
+        setup.saveCanvas(canvas, out_path)
 
 
 
