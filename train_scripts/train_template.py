@@ -98,6 +98,10 @@ else:
     print("category {} not specified in variable set {} - using all variables".format(
         options.category, options.variableSelection))
 
+if options.signal_class:
+    signal=options.signal_class.split(",")
+
+
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -169,10 +173,10 @@ if options.plot:
     dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
     # plot the output discriminators
-    dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
     # plot the output nodes
-    dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
     # plot closure test
-    dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+    dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
