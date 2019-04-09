@@ -25,17 +25,22 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[]):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
+        self.ownVars    = ownVars
     
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
         print("\tntuples: {}".format(self.ntuples))
         print("\tselections: {}".format(self.selections))
+
+    def SetOwnVariables(self,variableList):
+        self.ownVars = variableList
+        
 
 
 class Dataset:
@@ -107,9 +112,12 @@ class Dataset:
         for key in self.samples:
             # search in additional selection strings
             if self.samples[key].selections:
-                self.trigger.append(self.samples[key].selections)
-            # search in event category selection strings
-            self.trigger += self.samples[key].categories.getSelections()
+                self.samples[key].ownVars = self.searchVariablesInTriggerString( self.samples[key].selections )
+            if self.samples[key].categories:
+                tmpstr = ''
+                for sel in self.samples[key].categories.getSelections():
+                    tmpstr += sel
+                self.samples[key].ownVars += self.searchVariablesInTriggerString( sel )
 
         self.trigger = list(set(self.trigger))
 
@@ -201,7 +209,11 @@ class Dataset:
 
         # start loop over all samples to preprocess them
         for key in self.samples:
+            # include own variables of the sample
+            self.addVariables( self.samples[key].ownVars )
             self.processSample(self.samples[key])
+            # remove the own variables
+            self.removeVariables( self.samples[key].ownVars )
             print("done.")
 
     def processSample(self, sample):
