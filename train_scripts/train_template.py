@@ -96,7 +96,7 @@ outputdir += "_"+options.category
 if options.category in variable_set.variables:
     variables = variable_set.variables[options.category]
 else:
-    variables = variable_st.all_variables
+    variables = variable_set.all_variables
     print("category {} not specified in variable set {} - using all variables".format(
         options.category, options.variableSelection))
 
