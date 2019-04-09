@@ -5,7 +5,9 @@ execute on NAF with `CMSSW_9_4_9` or newer
 
 uproot needs to be installed locally as it is not a part of the CMSSW package
 ```bash
-pip install --user uproot
+pip install --user uproot==3.2.7`
+pip install --user uproot-methods==0.2.6
+pip install --user awkward==0.4.2
 ```
 
 ## Adjust settings in `preprocessing.py`
