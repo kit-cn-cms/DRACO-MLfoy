@@ -33,11 +33,11 @@ def createSampleFile(outPath, sampleList):
 def readSampleFile(inPath):
     """ reads file and returns a list with all samples, that are not uncommented. Uncomment samples by adding a '#' in front of the line"""
     sampleList = []
-    with open(outPath+"/sampleFile.dat","w") as sampleFile:
+    with open(inPath+"/sampleFile.dat","r") as sampleFile:
         for row in sampleFile:
             if row[0] != "#":
                 sample = row.split()
-                sampleList.append(dict( sample=sample[0], label=sample[1], normWeight=sample[2]) )
+                sampleList.append(dict( sample=sample[0], label=sample[1], normWeight=float(sample[2])) )
     return sampleList
 
 # function to add samples to InputSamples

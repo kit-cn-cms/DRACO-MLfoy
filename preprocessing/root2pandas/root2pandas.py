@@ -202,7 +202,7 @@ class Dataset:
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
 
         # remove old files
-        self.removeOldFiles()
+        self.renameOldFiles()
 
         if self.addMEM:
             # generate MEM path
@@ -227,6 +227,9 @@ class Dataset:
             print("done.")
         # write file with preprocessed samples
         pputils.createSampleFile(self.outputdir, sampleList)
+
+        # handle old files
+        self.handleOldFiles()
 
     def processSample(self, sample):
         # print sample info
@@ -399,12 +402,37 @@ class Dataset:
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
 
-    def removeOldFiles(self):
+
+    # renames old files by adding ".old"
+    def renameOldFiles(self):
         for key in self.samples:
             sample = self.samples[key]
             for cat in sample.categories.categories:
                 outFile = self.outputdir+"/"+cat+"_"+self.naming+".h5"
                 if os.path.exists(outFile):
-                    print("removing file {}".format(outFile))
-                    os.remove(outFile)
+                    print("renaming file {}".format(outFile))
+                    os.rename(outFile,outFile+".old")
 
+    # deletes old files that were created new and rerenames old files by removing ".old", if no new files were created
+    def handleOldFiles(self):
+        old = []
+        actual = []
+        rerename = []
+        remo = []
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old"):
+                old.append(filename.split(".")[0])
+            else:
+                actual.append(filename.split(".")[0])
+        for name in old:
+            if name in actual:
+                remo.append(name)
+            else:
+                rerename.append(name)
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old") and filename.split(".")[0] in remo:
+                print("removing file {}".format(filename))
+                os.remove(self.outputdir+"/"+filename)
+            if filename.endswith(".old") and filename.split(".")[0] in rerename:
+                print("re-renaming file {}".format(filename))
+                os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
