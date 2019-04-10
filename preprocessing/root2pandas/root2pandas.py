@@ -7,7 +7,7 @@ import os
 import shutil 
 import matplotlib.pyplot as plt
 
-
+import preprocessing_utils as pputils
 
 class EventCategories:
     def __init__(self):
@@ -25,13 +25,15 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[]):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
         self.ownVars    = ownVars
+        self.even_odd   = even_odd
+        self.evenOddSplitting()
     
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
@@ -40,6 +42,13 @@ class Sample:
 
     def SetOwnVariables(self,variableList):
         self.ownVars = variableList
+
+    def evenOddSplitting(self):
+        if self.even_odd == True:
+            if self.selections:
+                self.selections += "(Evt_Odd == 1)"
+            else:
+                self.selections = "(Evt_Odd == 1)"
         
 
 
@@ -113,11 +122,9 @@ class Dataset:
             # search in additional selection strings
             if self.samples[key].selections:
                 self.samples[key].ownVars = self.searchVariablesInTriggerString( self.samples[key].selections )
+#!!!        #  might cause problems if there are different selections within the categories
             if self.samples[key].categories:
-                tmpstr = ''
-                for sel in self.samples[key].categories.getSelections():
-                    tmpstr += sel
-                self.samples[key].ownVars += self.searchVariablesInTriggerString( sel )
+                self.samples[key].ownVars += self.searchVariablesInTriggerString( self.samples[key].categories.getSelections()[0] )
 
         self.trigger = list(set(self.trigger))
 
@@ -207,6 +214,8 @@ class Dataset:
             if not os.path.exists(self.memPath):
                 os.makedirs(self.memPath)
 
+        sampleList = []
+
         # start loop over all samples to preprocess them
         for key in self.samples:
             # include own variables of the sample
@@ -214,7 +223,10 @@ class Dataset:
             self.processSample(self.samples[key])
             # remove the own variables
             self.removeVariables( self.samples[key].ownVars )
+            pputils.createSampleList(sampleList, self.samples[key])
             print("done.")
+        # write file with preprocessed samples
+        pputils.createSampleFile(self.outputdir, sampleList)
 
     def processSample(self, sample):
         # print sample info
