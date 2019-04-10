@@ -60,9 +60,9 @@ class plotDiscriminators:
             # get output values of this node
             out_values = self.prediction_vector[:,i]
 
-            if self.printROCScore:
+            if self.printROCScore and len(signalIndex)==1:
                 # calculate ROC value for specific node
-                nodeROC = roc_auc_score(signalFlag, out_values)
+                nodeROC = roc_auc_score(signalFlag[0], out_values)
 
             # fill lists according to class
             bkgHists  = []
@@ -165,7 +165,7 @@ class plotDiscriminators:
             legend.Draw("same")
 
             # add ROC score if activated
-            if self.printROCScore:
+            if self.printROCScore and len(signalIndex)==1:
                 setup.printROCScore(canvas, nodeROC, plotOptions["ratio"])
 
             # add lumi or private work label to plot
@@ -232,9 +232,9 @@ class plotOutputNodes:
                 signalIndex = [nodeIndex]
                 signalFlag  = [self.data.get_class_flag(node_cls)]
 
-            if self.printROCScore:
+            if self.printROCScore and len(signalIndex)==1:
                 # calculate ROC value for specific node
-                nodeROC = roc_auc_score(signalFlag, out_values)
+                nodeROC = roc_auc_score(signalFlag[0], out_values)
 
             # fill lists according to class
             bkgHists  = []
@@ -322,7 +322,7 @@ class plotOutputNodes:
             legend.Draw("same")
 
             # add ROC score if activated
-            if self.printROCScore:
+            if self.printROCScore and len(signalIndex)==1:
                 setup.printROCScore(canvas, nodeROC, plotOptions["ratio"])
 
             # add lumi or private work label to plot
