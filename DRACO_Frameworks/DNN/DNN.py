@@ -576,6 +576,19 @@ class DNN():
 
         eventYields.plot(privateWork = privateWork)
 
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = 30, bin_range = [0.,1.]):
+
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            predictions         = self.model_prediction_vector,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.categoryLabel,
+            plotdir             = self.save_path,
+            logscale            = log)
+
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 def loadDNN(inputDirectory, outputDirectory):
     # get net config json
