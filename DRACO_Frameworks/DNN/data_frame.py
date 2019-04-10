@@ -10,7 +10,7 @@ class Sample:
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
-        
+        self.isSignal = None
 
     def load_dataframe(self, event_category, lumi):
         print("-"*50)
@@ -56,6 +56,7 @@ class Sample:
 
 class InputSamples:
     def __init__(self, input_path):
+        self.binary_classification = False
         self.input_path = input_path
         self.samples = []
 
@@ -70,6 +71,15 @@ class InputSamples:
             configs.append( sample.getConfig() )
         return configs
 
+
+    def addBinaryLabel(self, signals):
+        self.binary_classification = True
+        self.signal_classes = signals
+        for sample in self.samples:
+            if sample.label in signals:
+                sample.isSignal = True
+            else:
+                sample.isSignal = False
 
 class DataFrame(object):
     ''' takes a path to a folder where one h5 per class is located
@@ -95,6 +105,7 @@ class DataFrame(object):
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
 
+        self.binary_classification = input_samples.binary_classification
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
@@ -105,28 +116,59 @@ class DataFrame(object):
         df = pd.concat( train_samples )
         del train_samples
 
-        # add class_label translation
-        index = 0
-        self.class_translation = {}
-        self.classes = []
-        for sample in input_samples.samples:
-            self.class_translation[sample.label] = index
-            self.classes.append(sample.label)
-            index += 1
-        self.index_classes = [self.class_translation[c] for c in self.classes]
+        # multiclassification labelling
+        if not self.binary_classification:
+            # add class_label translation
+            index = 0
+            self.class_translation = {}
+            self.classes = []
+            
+            for sample in input_samples.samples:
+                self.class_translation[sample.label] = index
+                self.classes.append(sample.label)
+                index += 1
+            self.index_classes = [self.class_translation[c] for c in self.classes]
 
-        # add flag for ttH to dataframe
-        df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            # add flag for ttH to dataframe
+            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
 
-        # add index labelling to dataframe
-        df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
+            # add index labelling to dataframe
+            df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
-        # norm weights to mean(1)
-        df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
+            # norm weights to mean(1)
+            df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
 
-        # save some meta data about network
-        self.n_input_neurons = len(train_variables)
-        self.n_output_neurons = len(self.classes)
+            # save some meta data about network
+            self.n_input_neurons = len(train_variables)
+            self.n_output_neurons = len(self.classes)
+
+        # binary classification labelling
+        else:
+            # class translations
+            self.class_translation = {}
+            self.class_translation["sig"] = 1
+            self.class_translation["bkg"] = 0
+            self.classes = ["sig", "bkg"]
+            self.index_classes = [self.class_translation[c] for c in self.classes]
+
+            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
+            sig_df = df.query("index_label == 1")
+            bkg_df = df.query("index_label == 0")
+
+            signal_weight = sum( sig_df["train_weight"].values )
+            bkg_weight = sum( bkg_df["train_weight"].values )
+            sig_df["train_weight"] = sig_df["train_weight"]/(2.*signal_weight)*df.shape[0]
+            bkg_df["train_weight"] = bkg_df["train_weight"]/(2.*bkg_weight)*df.shape[0]
+
+            #sig_df["class_label"] = "sig"
+            #bkg_df["class_label"] = "bkg"
+            sig_df["binaryTarget"] = 1.
+            bkg_df["binaryTarget"] = 0.
+
+            df = pd.concat([sig_df,bkg_df])
+            
+            self.n_input_neurons = len(train_variables)
+            self.n_output_neurons = 1
 
         # shuffle dataframe
         if not self.shuffleSeed:
@@ -208,6 +250,7 @@ class DataFrame(object):
         return self.df_train["train_weight"].values
 
     def get_train_labels(self, as_categorical = True):
+        if self.binary_classification: return self.df_train["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
@@ -226,6 +269,7 @@ class DataFrame(object):
         return self.df_test["lumi_weight"].values
 
     def get_test_labels(self, as_categorical = True):
+        if self.binary_classification: return self.df_test["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 

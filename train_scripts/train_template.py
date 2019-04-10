@@ -62,6 +62,9 @@ parser.add_option("--printroc", dest="printROC", action = "store_true", default=
 parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes", metavar="balanceSamples")
 
+parser.add_option("--binary", dest="binary", action = "store_true", default=False,
+        help="activate to perform binary classification instead of multiclassification. Takes the clases passed to 'signal_class' as signals, all others as backgrounds.")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -105,7 +108,9 @@ if options.signal_class:
 else:
     signal=None
 
-
+if options.binary:
+    if not signal:
+        sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -120,6 +125,8 @@ input_samples.addSample("ttb"+naming,   label = "ttb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
+if options.binary:
+    input_samples.addBinaryLabel(signal)
 
 # initializing DNN training class
 dnn = DNN.DNN(
@@ -174,18 +181,23 @@ dnn.get_input_weights()
 if options.plot:
     # plot the evaluation metrics
     dnn.plot_metrics(privateWork = options.privateWork)
+ 
+    if options.binary:
+        # plot output node
+        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    else:
+        # plot the confusion matrix
+        dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
-    # plot the confusion matrix
-    dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+        # plot the output discriminators
+        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
-    # plot the output discriminators
-    dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        # plot the output nodes
+        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        
+        # plot event yields
+        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
 
-    # plot the output nodes
-    dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
-    
-    # plot event yields
-    dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+        # plot closure test
+        dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
 
-    # plot closure test
-    dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
