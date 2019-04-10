@@ -42,8 +42,7 @@ or use the following options
 	(default is `dnn.h5`)
 	- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed 
 	(default is `example_variables`)
-	- `--signalclass=STR` to change name of the signal class 
-	(default is `None`)
+	
 
 3. Training Options
 	- `-e INT` change number of training epochs 
@@ -57,11 +56,13 @@ or use the following options
 	- `-l` to create logarithmic plots 
 	- `--printroc` to print ROC value for confusion matrix
 	- `--privatework` to create private work label
+	- `--signalclass=STR` to change the plotted signal class (not part of the background stack plot), possible to do a combination, for example `ttHbb,ttbb` 
+	(default is `None`)
 
 
 Example:
 ```bash
-python train_template.py -i /path/to/input/files/ -o testRun --netconfig=test_config --plot --printroc -c ge6j_ge3t --epochs=1000
+python train_template.py -i /path/to/input/files/ -o testRun --netconfig=test_config --plot --printroc -c ge6j_ge3t --epochs=1000 --signalclass=ttHbb,ttbb
 ```
 
 
