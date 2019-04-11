@@ -41,13 +41,13 @@ config_dict["ttH_2018"] = {
         }
 
 config_dict["binary_test"] = {
-        "layers":                   [100,100,100],
+        "layers":                   [200,200,200],
         "loss_function":            "binary_crossentropy",
-        "Dropout":                  0.3,
+        "Dropout":                  0.,
         "L2_Norm":                  0.,
         "batch_size":               1000,
         "optimizer":                optimizers.Adagrad(decay=0.99),
-        "activation_function":      "elu",
+        "activation_function":      "relu",
         "output_activation":        "Sigmoid",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     50,
