@@ -1,5 +1,5 @@
 ### import stuff
-
+import os
 
 
 #####################################################################################
@@ -45,3 +45,10 @@ def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
     """ adds each sample in samples to the inputSample """
     for sample in samples:
         inputSamples.addSample(sample["sample"]+naming, label=sample["label"], normalization_weight = sample["normWeight"])
+
+# function to restore old files, if preprocessing crashed
+def restoreOldFiles(path):
+    for filename in os.listdir(path):
+        if filename.endswith(".old"):
+            print("restoring file {}".format(filename))
+            os.rename(path+"/"+filename,path+"/"+filename[:-4])
