@@ -65,6 +65,9 @@ parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_tru
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the clases passed to 'signal_class' as signals, all others as backgrounds.")
 
+parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0.,
+        help="target value for training of background samples (signal is always 1)")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -88,7 +91,9 @@ else:
 if not os.path.isabs(options.outputDir):
     outputdir = basedir+"/workdir/"+options.outputDir
 elif os.path.exists(options.outputDir):
-    outputdir=options.outputDir
+    outputdir = options.outputDir
+elif os.path.exists(os.path.dirname(options.outputDir)):
+    outputdir = options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
@@ -126,7 +131,7 @@ input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 if options.binary:
-    input_samples.addBinaryLabel(signal)
+    input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
 # initializing DNN training class
 dnn = DNN.DNN(
@@ -184,7 +189,8 @@ if options.plot:
  
     if options.binary:
         # plot output node
-        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+        bin_range = [input_samples.bkg_target, 1.]
+        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range)
     else:
         # plot the confusion matrix
         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)

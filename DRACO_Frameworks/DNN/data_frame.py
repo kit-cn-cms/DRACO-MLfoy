@@ -72,9 +72,10 @@ class InputSamples:
         return configs
 
 
-    def addBinaryLabel(self, signals):
+    def addBinaryLabel(self, signals, bkg_target):
         self.binary_classification = True
         self.signal_classes = signals
+        self.bkg_target = float(bkg_target)
         for sample in self.samples:
             if sample.label in signals:
                 sample.isSignal = True
@@ -106,6 +107,9 @@ class DataFrame(object):
         self.balanceSamples = balanceSamples
 
         self.binary_classification = input_samples.binary_classification
+        if self.binary_classification:
+            self.bkg_target = input_samples.bkg_target
+
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
@@ -163,7 +167,7 @@ class DataFrame(object):
             #sig_df["class_label"] = "sig"
             #bkg_df["class_label"] = "bkg"
             sig_df["binaryTarget"] = 1.
-            bkg_df["binaryTarget"] = 0.
+            bkg_df["binaryTarget"] = float(self.bkg_target)
 
             df = pd.concat([sig_df,bkg_df])
             

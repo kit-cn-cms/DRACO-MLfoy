@@ -741,9 +741,9 @@ class plotBinaryOutput:
         sig_hist.SetLineWidth(3)
 
         bkg_values = [ self.predictions[k] for k in range(len(self.predictions)) \
-            if self.data.get_test_labels()[k] == 0 ]
+            if not self.data.get_test_labels()[k] == 1 ]
         bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.predictions)) \
-            if self.data.get_test_labels()[k] == 0]
+            if not self.data.get_test_labels()[k] == 1]
         bkg_hist = setup.setupHistogram(
             values      = bkg_values,
             weights     = bkg_weights,
