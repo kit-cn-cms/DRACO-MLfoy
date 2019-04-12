@@ -260,19 +260,35 @@ class Dataset:
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
+
+            # convert to dataframe
             df = tree.pandas.df(self.variables)
+            
+            # delete subentry index
+            df = df.reset_index(1, drop = True)
+
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:
+
                 # load dataframe with vector variable
                 vec_df = tree.pandas.df(vecvar)
+
                 # loop over inices in vecvar list
                 for idx in self.vector_variables[vecvar]:
+
                     # slice the index
                     idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                    idx_df = idx_df.reset_index(1, drop = True)
+
                     # define name for column in df
                     col_name = str(vecvar)+"["+str(idx)+"]"
+
+                    # initialize column in original dataframe
+                    df[col_name] = 0.
+
                     # append column to original dataframe
-                    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+                    df.update( idx_df[vecvar].rename(col_name) )
+
             # apply event selection
             df = self.applySelections(df, sample.selections)
             # add to list of dataframes
