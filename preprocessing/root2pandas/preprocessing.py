@@ -38,7 +38,6 @@ parser.add_option("-n", "--name", dest="Name", default="dnn",
 if not os.path.isabs(options.variableSelection):
     sys.path.append(basedir+"/variable_sets/")
     variable_set = __import__(options.variableSelection)
-    print(variable_set.all_variables)
 elif os.path.exists(options.variableSelection):
     variable_set = __import__(options.variableSelection)
 else:
@@ -46,7 +45,7 @@ else:
 
 if not os.path.isabs(options.outputDir):
     outputdir = basedir+"/workdir/"+options.outputDir
-elif os.path.exists(options.outputDir):
+elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options.outputDir)):
     outputdir=options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
