@@ -111,7 +111,7 @@ variables["ge4j_ge3t"] = [
     'BDT_common5_input_closest_tagged_dijet_mass',
     'BDT_common5_input_cos_theta_blep_bhad',
     'BDT_common5_input_cos_theta_l_bhad',
-    'BDT_common5_input_dEta_fn',
+    #'BDT_common5_input_dEta_fn',
     'BDT_common5_input_delta_eta_blep_bhad',
     'BDT_common5_input_delta_eta_l_bhad',
     'BDT_common5_input_delta_phi_blep_bhad',
