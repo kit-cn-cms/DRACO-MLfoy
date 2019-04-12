@@ -16,7 +16,7 @@ class EventCategories:
     def addCategory(self, name, selection = None):
         self.categories[name] = selection
 
-    def getSelections(self):
+    def getCategorySelections(self):
         selections = []
         for cat in self.categories:
             if self.categories[cat]:
@@ -40,11 +40,8 @@ class Sample:
         print("\tntuples: {}".format(self.ntuples))
         print("\tselections: {}".format(self.selections))
 
-    def SetOwnVariables(self,variableList):
-        self.ownVars = variableList
-
     def evenOddSplitting(self):
-        if self.even_odd == True:
+        if self.even_odd:
             if self.selections:
                 self.selections += "(Evt_Odd == 1)"
             else:
@@ -119,13 +116,20 @@ class Dataset:
             self.trigger.append(self.baseSelection)
 
         for key in self.samples:
+            # collect variables for specific samples
+            own_variables = []
+
             # search in additional selection strings
             if self.samples[key].selections:
-                self.samples[key].ownVars = self.searchVariablesInTriggerString( self.samples[key].selections )
-#!!!        #  might cause problems if there are different selections within the categories
-            if self.samples[key].categories:
-                self.samples[key].ownVars += self.searchVariablesInTriggerString( self.samples[key].categories.getSelections()[0] )
+                own_variables += self.searchVariablesInTriggerString( self.samples[key].selections )
+            # search in category selections
+            categorySelections = self.samples[key].categories.getCategorySelections()
+            for selection in categorySelections:
+                own_variables += self.searchVariablesInTriggerString( selection )
+            # save list of variables
+            self.samples[key].ownVars = [v for v in list(set(own_variables)) if not v in self.variables]
 
+        # list of triggers
         self.trigger = list(set(self.trigger))
 
         # scan trigger strings for variable names
@@ -192,7 +196,6 @@ class Dataset:
     # ====================================================================
 
     def runPreprocessing(self):
-
         # add variables for triggering and event category selection
         self.gatherTriggerVariables()
 
@@ -200,7 +203,6 @@ class Dataset:
         self.searchVectorVariables()
 
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
-
         # remove old files
         self.removeOldFiles()
 
@@ -271,10 +273,8 @@ class Dataset:
                     col_name = str(vecvar)+"["+str(idx)+"]"
                     # append column to original dataframe
                     df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
-            
             # apply event selection
             df = self.applySelections(df, sample.selections)
-        
             # add to list of dataframes
             if concat_df.empty: concat_df = df
             else: concat_df = concat_df.append(df)
