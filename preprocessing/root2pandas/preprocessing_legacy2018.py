@@ -38,7 +38,6 @@ parser.add_option("-n", "--name", dest="Name", default="dnn",
 if not os.path.isabs(options.variableSelection):
     sys.path.append(basedir+"/variable_sets/")
     variable_set = __import__(options.variableSelection)
-    print(variable_set.all_variables)
 elif os.path.exists(options.variableSelection):
     variable_set = __import__(options.variableSelection)
 else:
@@ -46,7 +45,7 @@ else:
 
 if not os.path.isabs(options.outputDir):
     outputdir = basedir+"/workdir/"+options.outputDir
-elif os.path.exists(options.outputDir):
+elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options.outputDir)):
     outputdir=options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
@@ -60,8 +59,6 @@ single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. 
 single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
-
-odd_selection = "(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
@@ -98,44 +95,44 @@ dataset.addSample(
     sampleName  = "ttHbb",
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttH_categories,
-    selections  = odd_selection,
+    even_odd    = True,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     ) 
-dataset.addSample(
-    sampleName  = "ttHNonbb",
-    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_v2/*nominal*.root",
-    categories  = ttH_categories,
-    selections  = odd_selection,
-    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-    ) 
+#dataset.addSample(
+#    sampleName  = "ttHNonbb",
+#    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_v2/*nominal*.root",
+#    categories  = ttH_categories,
+#    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+#    even_odd    = True,
+#    ) 
 
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttbar_categories,
-    selections  = odd_selection
+    even_odd    = True,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
-dataset.addSample(
-    sampleName  = "TTToDL",
-    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = odd_selection
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
-dataset.addSample(
-    sampleName  = "TTToFH",
-    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = odd_selection
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
+#dataset.addSample(
+#    sampleName  = "TTToDL",
+#    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+#    categories  = ttbar_categories,
+#    even_odd    = True,
+#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+#    )
+#dataset.addSample(
+#    sampleName  = "TTToFH",
+#    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+#    categories  = ttbar_categories,
+#    even_odd    = True,
+#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+#    )
 
 dataset.addSample(
     sampleName  = "ttZbb",
     ntuples     = ntuplesPath+"/TTZToBB_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
     categories  = ttZ_categories,
-    selections  = odd_selection,
+    even_odd    = True,
     )
 
 # initialize variable list 
@@ -144,7 +141,9 @@ dataset.addVariables(variable_set.all_variables)
 # define an additional variable list
 additional_variables = [
     "N_Jets",
+    "N_BTagsL",
     "N_BTagsM",
+    "N_BTagsT",
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
