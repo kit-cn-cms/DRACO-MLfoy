@@ -24,7 +24,6 @@ class Sample:
         print("number of events after selections:  "+str(df.shape[0]))
 
         # add event weight
-    #    df = df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
         df = df.assign(total_weight = lambda x: x.weight)
 
         # assign train weight
@@ -32,7 +31,7 @@ class Sample:
         df = df.assign(train_weight = lambda x: x.total_weight/weight_sum)
 
         # add lumi weight
-        #df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
+        df = df.assign(lumi_weight = lambda x: x.weight * lumi * self.normalization_weight)
 
         self.data = df
         print("-"*50)
@@ -51,7 +50,7 @@ class Sample:
         print("total number of events in sample: "+str(self.data.shape[0]))
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1 )
 
-        #self.lumi_weights = self.data["lumi_weight"].values
+        self.lumi_weights = self.data["lumi_weight"].values
 
 class InputSamples:
     def __init__(self, input_path):
@@ -173,8 +172,8 @@ class DataFrame(object):
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
-    #def get_train_lumi_weights(self):
-    #    return self.df_train["lumi_weight"].values
+    def get_train_lumi_weights(self):
+       return self.df_train["lumi_weight"].values
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix = True, normed = True):
@@ -184,8 +183,8 @@ class DataFrame(object):
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values
-    #def get_lumi_weights(self):
-    #    return self.df_test["lumi_weight"].values
+    def get_lumi_weights(self):
+        return self.df_test["lumi_weight"].values
 
     def get_test_labels(self, as_categorical = True):
         if as_categorical: return to_categorical( self.df_test["index_label"].values )

@@ -1,4 +1,25 @@
 variables = {}
+
+variables["ge4j_ge3t"] = [
+    "MEM",
+    "HT_tags",
+    "ptSum_jets_leptons",
+    "btagDiscriminatorAverage_untagged",
+    "btagDiscriminatorAverage_tagged",
+    "mass_tag_tag_min_deltaR",
+    "mass_jet_tag_min_deltaR",
+    "mass_tag_tag_max_mass",
+    "mass_jet_jet_jet_max_pT",
+    "pT_tag_tag_min_deltaR",
+    "avgDeltaR_tag_tag",
+    "minDeltaR_tag_tag",
+    "maxDeltaEta_jet_jet",
+    "maxDeltaEta_tag_tag",
+    "H0_jet",
+    "twist_tag_tag_max_mass",
+    "multiplicity_higgsLikeDijet15"
+    ]
+
 variables["ge4j_ge4t"] = [
     "MEM",
     "HT_tags",
