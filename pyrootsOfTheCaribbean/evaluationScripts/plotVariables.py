@@ -172,13 +172,13 @@ class variablePlotter:
 
         if variable in self.variableconfig.index:
             # get variable info from config file
-            bins = self.variableconfig.loc[variable,'numberofbins']
-            minValue = self.variableconfig.loc[variable,'minvalue']
-            maxValue = self.variableconfig.loc[variable,'maxvalue']
+            bins = int(self.variableconfig.loc[variable,'numberofbins'])
+            minValue = float(self.variableconfig.loc[variable,'minvalue'])
+            maxValue = float(self.variableconfig.loc[variable,'maxvalue'])
             displayname = self.variableconfig.loc[variable,'displayname']
             logoption = self.variableconfig.loc[variable,'logoption']
         else:
-            bins = 20
+            bins = 30
             maxValue = max([max(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             minValue = min([min(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             displayname = variable
