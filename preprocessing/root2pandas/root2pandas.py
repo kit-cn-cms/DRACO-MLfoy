@@ -222,7 +222,10 @@ class Dataset:
         for key in self.samples:
             # include own variables of the sample
             self.addVariables( self.samples[key].ownVars )
+
+            # process the sample
             self.processSample(self.samples[key])
+
             # remove the own variables
             self.removeVariables( self.samples[key].ownVars )
             pputils.createSampleList(sampleList, self.samples[key])
