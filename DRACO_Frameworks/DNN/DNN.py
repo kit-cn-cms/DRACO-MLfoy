@@ -190,13 +190,6 @@ class DNN():
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
 
-        test = self.data.get_test_data(as_matrix = True)[0:10]
-        print(test)
-        labels = self.data.get_test_labels()[0:10]
-        print(labels)
-        prediction = self.model.predict(test)
-        print(prediction)
-
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
@@ -407,13 +400,6 @@ class DNN():
 
         # save history of eval metrics
         self.model_history = self.trained_model.history
-    
-        test = self.data.get_test_data(as_matrix = True)[0:10]
-        print(test)
-        labels = self.data.get_test_labels()[0:10]
-        print(labels)
-        prediction = self.model.predict(test)
-        print(prediction)
 
         # save predicitons
         self.model_prediction_vector = self.model.predict(
