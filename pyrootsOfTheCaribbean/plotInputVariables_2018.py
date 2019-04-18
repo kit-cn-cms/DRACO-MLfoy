@@ -105,6 +105,9 @@ additional_variables = [
 ignored_variables = [
     "Weight_XS",
     "Weight_GEN_nom",
+    "N_BTagsL",
+    "N_BTagsM",
+    "N_BTagsT",
     ]
 
 # initialize plotter
@@ -162,6 +165,7 @@ plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
 plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge5j_ge3t")
 
 
 # perform plotting routine
