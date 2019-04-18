@@ -55,12 +55,16 @@ class Sample:
         self.lumi_weights = self.data["lumi_weight"].values
 
 class InputSamples:
-    def __init__(self, input_path):
+    def __init__(self, input_path, activateSamples = None):
         self.binary_classification = False
         self.input_path = input_path
+        self.activate_samples = activateSamples
         self.samples = []
 
     def addSample(self, sample_path, label, normalization_weight = 1.):
+        if self.activate_samples and not label in self.activate_samples:
+            print("skipping sample {}".format(label))
+            return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
         self.samples.append( Sample(sample_path, label, normalization_weight) )

@@ -485,7 +485,7 @@ class DNN():
             # make it nicer
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric, fontsize = 16)
+            plt.ylabel(metric.replace("_"," "), fontsize = 16)
 
             # add legend
             plt.legend()
