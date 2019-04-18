@@ -153,6 +153,10 @@ variables["ge4j_ge3t"] = [
     'BDT_common5_input_transverse_sphericity_jets',
     'BDT_common5_input_transverse_sphericity_tags',
 
+    'memDBp',
+    'N_BTagsL',
+    'N_BTagsM',
+    'N_BTagsT',
     ]
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
