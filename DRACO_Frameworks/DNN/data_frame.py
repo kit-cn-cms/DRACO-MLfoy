@@ -181,6 +181,7 @@ class DataFrame(object):
         # shuffle dataframe
         if not self.shuffleSeed:
             self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
+        print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
         df = shuffle(df, random_state = self.shuffleSeed)
 
         # norm variables if activated

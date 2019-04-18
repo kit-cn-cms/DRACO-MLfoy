@@ -183,11 +183,19 @@ class DNN():
         # get the model
         self.model = keras.models.load_model(checkpoint_path)
         self.model.summary()
+        K.set_learning_phase(False)
 
         # evaluate test dataset
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
+
+        test = self.data.get_test_data(as_matrix = True)[0:10]
+        print(test)
+        labels = self.data.get_test_labels()[0:10]
+        print(labels)
+        prediction = self.model.predict(test)
+        print(prediction)
 
         # save predicitons
         self.model_prediction_vector = self.model.predict(
@@ -260,7 +268,7 @@ class DNN():
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
-                X = keras.layers.Dropout(dropout)(X)
+                X = keras.layers.Dropout(dropout)(X, training=False)
 
         # generate output layer
         X = keras.layers.Dense( 
@@ -364,8 +372,8 @@ class DNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        sess = K.get_session()
         saver = tf.train.Saver()
+        sess = K.get_session()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
@@ -399,6 +407,13 @@ class DNN():
 
         # save history of eval metrics
         self.model_history = self.trained_model.history
+    
+        test = self.data.get_test_data(as_matrix = True)[0:10]
+        print(test)
+        labels = self.data.get_test_labels()[0:10]
+        print(labels)
+        prediction = self.model.predict(test)
+        print(prediction)
 
         # save predicitons
         self.model_prediction_vector = self.model.predict(
@@ -591,6 +606,7 @@ class DNN():
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 def loadDNN(inputDirectory, outputDirectory):
+
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
     if not os.path.exists(configFile): 
@@ -606,6 +622,7 @@ def loadDNN(inputDirectory, outputDirectory):
     for sample in config["eventClasses"]:
         input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
 
+    print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
         save_path       = outputDirectory,
@@ -614,8 +631,9 @@ def loadDNN(inputDirectory, outputDirectory):
         train_variables = config["trainVariables"],
         shuffle_seed    = config["shuffleSeed"]
         )
-        
+    
     # load the trained model
     dnn.load_trained_model(inputDirectory)
+
 
     return dnn

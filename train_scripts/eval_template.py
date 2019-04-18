@@ -3,7 +3,6 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
 import sys
-import keras.optimizers as optimizers
 import optparse
 
 # local imports
@@ -14,6 +13,7 @@ sys.path.append(basedir)
 # import class for DNN training
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
+import keras.optimizers as optimizers
 
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
@@ -43,7 +43,6 @@ parser.add_option("--signalclass", dest="signal_class", default=None,
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
-
 
 (options, args) = parser.parse_args()
 
