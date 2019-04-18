@@ -20,7 +20,7 @@ parser.add_option("-i", "--input", dest = "inputDir",
     help = "DIR of trained net data")
 
 parser.add_option("-v", "--variableName", dest = "variableName",
-    help = "threshold of sample split", default = 0.5)
+    help = "name of variable to be added")
 
 parser.add_option("-s", "--sample", dest = "sample",
     help = "sample to be split or folder of all samples to be split")
