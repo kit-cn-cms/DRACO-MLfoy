@@ -68,6 +68,9 @@ parser.add_option("--binary", dest="binary", action = "store_true", default=Fals
 parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0.,
         help="target value for training of background samples (signal is always 1)")
 
+parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
+        help="give comma separated list of samples to be used. ignore option if all should be used")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -118,8 +121,9 @@ if options.binary:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
 # load samples
-input_samples = df.InputSamples(inPath)
+input_samples = df.InputSamples(inPath, options.activateSamples)
 naming = options.naming
+
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
