@@ -99,15 +99,15 @@ plotOptions = {
 
 # additional variables to plot
 additional_variables = [
+    "N_BTagsL",
+    "N_BTagsM",
+    "N_BTagsT",
     ]
 
 # variables that are not plotted
 ignored_variables = [
     "Weight_XS",
     "Weight_GEN_nom",
-    "N_BTagsL",
-    "N_BTagsM",
-    "N_BTagsT",
     ]
 
 # initialize plotter
