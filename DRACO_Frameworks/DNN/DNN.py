@@ -183,7 +183,6 @@ class DNN():
         # get the model
         self.model = keras.models.load_model(checkpoint_path)
         self.model.summary()
-        K.set_learning_phase(False)
 
         # evaluate test dataset
         self.model_eval = self.model.evaluate(
@@ -230,7 +229,6 @@ class DNN():
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
-        K.set_learning_phase(True)
 
         # infer number of input neurons from number of train variables
         number_of_input_neurons     = self.data.n_input_neurons
@@ -261,7 +259,7 @@ class DNN():
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
-                X = keras.layers.Dropout(dropout)(X, training=False)
+                X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
         X = keras.layers.Dense( 
@@ -360,8 +358,6 @@ class DNN():
         for layer in self.model.layers:
             layer.trainable = False
         self.model.trainable = False
-
-        K.set_learning_phase(False)
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
@@ -617,7 +613,7 @@ def loadDNN(inputDirectory, outputDirectory):
         train_variables = config["trainVariables"],
         shuffle_seed    = config["shuffleSeed"]
         )
-    
+
     # load the trained model
     dnn.load_trained_model(inputDirectory)
 
