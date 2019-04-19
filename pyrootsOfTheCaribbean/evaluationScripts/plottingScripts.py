@@ -717,7 +717,7 @@ class plotBinaryOutput:
         self.printROCScore = False
         self.privateWork = False
 
-    def plot(self, ratio = False, printROC = False, privateWork = False):
+    def plot(self, ratio = False, printROC = False, privateWork = False, name = "binary discriminator"):
         self.printROCScore = printROC
         self.privateWork = privateWork
 
@@ -770,7 +770,7 @@ class plotBinaryOutput:
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
             sig_hist, bkg_hist, plotOptions, 
-            canvasName = "binary discriminator")
+            canvasName = name)
 
         # setup legend
         legend = setup.getLegend()

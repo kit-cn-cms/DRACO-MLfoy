@@ -101,6 +101,7 @@ else:
     sys.exit("ERROR: Output Directory does not exist!")
 
 #add nJets and nTags to output directory
+run_name = outputdir.split("/")[-1]
 outputdir += "_"+options.category
 
 # the input variables are loaded from the variable_set file
@@ -195,7 +196,7 @@ if options.plot:
     if options.binary:
         # plot output node
         bin_range = [input_samples.bkg_target, 1.]
-        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range)
+        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
     else:
         # plot the confusion matrix
         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
