@@ -376,6 +376,7 @@ class DNN():
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
         configs["JetTagCategory"] = self.JTstring
+        configs["Selection"] = self.event_category
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
         configs["shuffleSeed"] = self.data.shuffleSeed
@@ -574,7 +575,7 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 30, bin_range = [0.,1.]):
+                        nbins = 30, bin_range = [0.,1.], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
@@ -585,7 +586,7 @@ class DNN():
             plotdir             = self.save_path,
             logscale            = log)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
 def loadDNN(inputDirectory, outputDirectory):
 
