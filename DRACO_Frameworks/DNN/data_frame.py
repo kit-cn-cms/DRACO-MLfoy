@@ -121,7 +121,7 @@ class DataFrame(object):
             train_samples.append(sample.data)
         
         # concatenating all dataframes
-        df = pd.concat( train_samples )
+        df = pd.concat( train_samples, sort = True )
         del train_samples
 
         # multiclassification labelling
@@ -141,7 +141,7 @@ class DataFrame(object):
             df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
 
             # add index labelling to dataframe
-            df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
+            df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH")] for c in df["class_label"].values], index = df.index )
 
             # norm weights to mean(1)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)

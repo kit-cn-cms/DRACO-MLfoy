@@ -386,6 +386,13 @@ class DNN():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
+        # save configurations of variables for plotscript
+        plot_file = self.cp_path+"/plot_config.csv"
+        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv")
+        variable_configs = variable_configs[self.train_variables]
+        variable_configs.to_csv(plot_file)
+        print("wrote config of input variables to {}".format(plot_file))
+        
 
     def eval_model(self):
         ''' evaluate trained model '''
