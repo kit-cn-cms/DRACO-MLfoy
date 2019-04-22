@@ -388,9 +388,9 @@ class DNN():
 
         # save configurations of variables for plotscript
         plot_file = self.cp_path+"/plot_config.csv"
-        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv")
-        variable_configs = variable_configs[self.train_variables]
-        variable_configs.to_csv(plot_file)
+        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        variables = variable_configs.loc[self.train_variables]
+        variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
         
 
@@ -485,6 +485,7 @@ class DNN():
             # add title
             title = self.categoryLabel
             title = title.replace("\\geq", "$\geq$")
+            title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
 
             # make it nicer

@@ -159,7 +159,7 @@ class DataFrame(object):
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
+            df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
             sig_df = df.query("index_label == 1")
             bkg_df = df.query("index_label == 0")
 
@@ -283,7 +283,7 @@ class DataFrame(object):
         else:              return self.df_test["index_label"].values
 
     def get_class_flag(self, class_label):
-        return pd.Series( [1 if c==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
+        return pd.Series( [1 if c.replace("ttHbb","ttH")==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
 
     def get_ttH_flag(self):
         return self.df_test["is_ttH"].values
