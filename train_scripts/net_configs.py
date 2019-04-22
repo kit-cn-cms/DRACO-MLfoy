@@ -41,10 +41,10 @@ config_dict["ttH_2018"] = {
         }
 
 config_dict["binary_config"] = {
-        "layers":                   [200,200],
+        "layers":                   [200,100],
         "loss_function":            "squared_hinge",
         "Dropout":                  0.5,
-        "L2_Norm":                  1e-5,
+        "L2_Norm":                  0.,
         "batch_size":               1000,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "selu",
