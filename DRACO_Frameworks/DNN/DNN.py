@@ -376,6 +376,7 @@ class DNN():
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
         configs["JetTagCategory"] = self.JTstring
+        configs["categoryLabel"] = self.categoryLabel
         configs["Selection"] = self.event_category
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
