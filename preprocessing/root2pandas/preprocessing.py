@@ -64,7 +64,7 @@ ttH_selection = "(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttHbb", selection = None)
+ttH_categories.addCategory("ttH", selection = None)
 
 
 ttbar_categories = root2pandas.EventCategories()
