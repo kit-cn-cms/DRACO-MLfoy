@@ -154,20 +154,6 @@ dnn = DNN.DNN(
     # balance samples per epoch such that there amount of samples per category is roughly equal
     balanceSamples  = options.balanceSamples)
 
-# config dictionary for DNN architecture
-config = {
-    "layers":                   [200,200],
-    "loss_function":            "categorical_crossentropy",
-    "Dropout":                  0.5,
-    "L2_Norm":                  1e-5,
-    "batch_size":               5000,
-    "optimizer":                optimizers.Adagrad(decay=0.99),
-    "activation_function":      "elu",
-    "output_activation":        "Softmax",
-    "earlystopping_percentage": 0.05,
-    "earlystopping_epochs":     50,
-    }
-
 # import file with net configs if option is used
 if options.net_config:
     from net_configs import config_dict
