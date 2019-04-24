@@ -59,6 +59,9 @@ parser.add_option("--signalclass", dest="signal_class", default=None,
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
 
+parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
+        help="activate to balance train samples such that number of events per epoch is roughly equal for all classes", metavar="balanceSamples")
+
 
 (options, args) = parser.parse_args()
 
@@ -98,6 +101,11 @@ else:
     print("category {} not specified in variable set {} - using all variables".format(
         options.category, options.variableSelection))
 
+if options.signal_class:
+    signal=options.signal_class.split(",")
+else:
+    signal=None
+
 
 # load samples
 input_samples = df.InputSamples(inPath)
@@ -126,7 +134,9 @@ dnn = DNN.DNN(
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2)
+    test_percentage = 0.2,
+     # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.balanceSamples)
 
 # config dictionary for DNN architecture
 config = {
@@ -171,10 +181,13 @@ if options.plot:
     dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
     # plot the output discriminators
-    dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
     # plot the output nodes
-    dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+
+    # plot event yields
+    dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
 
     # plot closure test
-    dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+    dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)

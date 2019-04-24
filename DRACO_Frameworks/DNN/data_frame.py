@@ -22,6 +22,7 @@ class Sample:
         # apply event category cut
         df.query(event_category, inplace = True)
         print("number of events after selections:  "+str(df.shape[0]))
+        self.nevents = df.shape[0]
 
         # add event weight
         df = df.assign(total_weight = lambda x: x.weight)
@@ -41,6 +42,7 @@ class Sample:
         config["sampleLabel"] = self.label
         config["samplePath"] = self.path
         config["sampleWeight"] = self.normalization_weight
+        config["sampleEvents"] = self.nevents
         return config
 
     def addPrediction(self, model, train_variables):
@@ -84,12 +86,14 @@ class DataFrame(object):
                 norm_variables = True,
                 test_percentage = 0.1,
                 lumi = 41.5,
-                shuffleSeed = None):
+                shuffleSeed = None,
+                balanceSamples = True):
 
         self.event_category = event_category
         self.lumi = lumi
 
         self.shuffleSeed = shuffleSeed
+        self.balanceSamples = balanceSamples
 
         # loop over all input samples and load dataframe
         train_samples = []
@@ -148,20 +152,54 @@ class DataFrame(object):
         self.df_train = df.tail(df.shape[0] - n_test_samples )
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
 
+        # save variable lists
+        self.train_variables = train_variables
+        self.output_classes = self.classes
+        self.input_samples = input_samples
+
+        # sample balancing if activated
+        if self.balanceSamples:
+            self.balanceTrainSample()
+
         # print some counts
         print("total events after cuts:  "+str(df.shape[0]))
         print("events used for training: "+str(self.df_train.shape[0]))
         print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
 
-        # save variable lists
-        self.train_variables = train_variables
-        self.output_classes = self.classes
-        self.input_samples = input_samples
+    def balanceTrainSample(self):
+        # get max number of events per sample
+        maxEvents = 0
+        for sample in self.input_samples.samples:
+            if maxEvents < sample.nevents:
+                maxEvents = sample.nevents
 
+        new_train_dfs = []
 
-    # train data -----------------------------------
-    def get_train_data(self, as_matrix = True):
+        print("balancing train sample ...")
+        # multiply train events
+        for sample in self.input_samples.samples:
+            print("+"*30)
+
+            # get events
+            events = self.df_train.query("(class_label == '{}')".format(sample.label))
+            # get multiplication factor
+            factor = int(maxEvents/sample.nevents)
+
+            print("multiplying {} Events by factor {}".format(sample.label, factor))
+            print("number of events before: {}".format(events.shape[0]))
+            print("number of events after:  {}".format(events.shape[0]*factor))
+            events["train_weight"] = events["train_weight"]/factor
+            print("sum of train weights: {}".format(sum(events["train_weight"].values)*factor))
+            for _ in range(factor):
+                new_train_dfs.append(events)
+
+        self.df_train = pd.concat(new_train_dfs)
+        print(self.df_train.head())
+
+        self.df_train = shuffle(self.df_train)
+
+    def get_train_data(self, as_matrix= True):
         if as_matrix: return self.df_train[ self.train_variables ].values
         else:         return self.df_train[ self.train_variables ]
 

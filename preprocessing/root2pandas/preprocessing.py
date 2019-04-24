@@ -26,7 +26,7 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 parser.add_option("-t", "--treeName", dest="treeName",default="liteTreeTTH_step7_cate8",
         help="Name of the tree corresponding to the right category", metavar="treeName")
 
-parser.add_option("-e", "--maxentries", dest="maxEntries", default=100000,
+parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
         help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
 
 parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,
@@ -54,22 +54,8 @@ elif os.path.exists(options.outputDir):
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
-
-
 # define a base event selection which is applied for all Samples
-'''
-base_selection = "\
-( \
-(N_jets >= 4 and N_btags >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.) \
-and (\
-(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1)) \
-or \
-(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1) \
-) \
-)"
-'''
 base_selection = "(N_jets >= 3 and N_btags >= 2)"
-
 
 ttH_selection = None #"(Evt_Odd == 1)"
 
@@ -130,35 +116,35 @@ dataset.addSample(
     sampleName  = "ttbar_b",
     ntuples     = ntuplesPath+"/ttbar_b_cate9.root",
     categories  = ttbar_b,
-    selections  = None
+    selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_bb",
     ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
     categories  = ttbar_bb,
-    selections  = None
+    selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_2b",
     ntuples     = ntuplesPath+"/ttbar_2b_cate9.root",
     categories  = ttbar_2b,
-    selections  = None
+    selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_lf",
     ntuples     = ntuplesPath+"/ttbar_lf_cate9.root",
     categories  = ttbar_lf,
-    selections  = None
+    selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_cc",
     ntuples     = ntuplesPath+"/ttbar_cc_cate9.root",
     categories  = ttbar_cc,
-    selections  = None
+    selections  = ttH_selection
 )
 
 # initialize variable list

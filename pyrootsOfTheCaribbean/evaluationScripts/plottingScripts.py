@@ -182,7 +182,7 @@ class plotDiscriminators:
 
         # add the histograms together
         workdir = os.path.dirname(self.plotdir[:-1])
-        cmd = "pdfunite "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
+        cmd = "pdfmerge "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -339,7 +339,7 @@ class plotOutputNodes:
 
         # add the histograms together
         workdir = os.path.dirname(self.plotdir[:-1])
-        cmd = "pdfunite "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
+        cmd = "pdfmerge "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -509,7 +509,7 @@ class plotClosureTest:
 
         # add the histograms together
         workdir = os.path.dirname(os.path.dirname(self.plotdir[:-1]))
-        cmd = "pdfunite "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
+        cmd = "pdfmerge "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
         print(cmd)
         os.system(cmd)
 

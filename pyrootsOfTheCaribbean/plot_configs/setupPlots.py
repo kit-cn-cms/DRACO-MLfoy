@@ -66,6 +66,42 @@ def setupHistogram(
 
     return histogram
 
+def setupYieldHistogram(yields, classes, xtitle, ytitle, color = ROOT.kBlack, filled = True):
+    # define histogram
+    histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", len(classes), 0, len(classes))
+    histogram.Sumw2(True)
+
+    for iBin in range(len(classes)):
+        histogram.SetBinContent(iBin+1, yields[iBin])
+        histogram.SetBinError(iBin+1, np.sqrt(yields[iBin]))
+
+
+    histogram.SetStats(False)
+    histogram.GetXaxis().SetTitle(xtitle)
+    histogram.GetYaxis().SetTitle(ytitle)
+
+    histogram.GetYaxis().SetTitleOffset(1.4)
+    histogram.GetXaxis().SetTitleOffset(1.2)
+    histogram.GetYaxis().SetTitleSize(0.055)
+    histogram.GetXaxis().SetTitleSize(0.055)
+    histogram.GetYaxis().SetLabelSize(0.055)
+    histogram.GetXaxis().SetLabelSize(0.055)
+
+    histogram.SetMarkerColor(color)
+
+    if filled:
+        histogram.SetLineColor( ROOT.kBlack )
+        histogram.SetFillColor( color )
+        histogram.SetLineWidth(1)
+    else:
+        histogram.SetLineColor( color )
+        histogram.SetFillColor(0)
+        histogram.SetLineWidth(2)
+
+    for i, cls in enumerate(classes):
+        histogram.GetXaxis().SetBinLabel(i+1, cls)
+
+    return histogram
 
 
 def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
@@ -153,7 +189,6 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
 
     return canvas
 
-
 def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
     canvas = getCanvas(canvasName)
 
@@ -175,10 +210,10 @@ def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOption
     # draw first hist
     if plotOptions["logscale"]:
         bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
-        canvas.SetLogy()
+        canvas-SetLogy()
     else:
         bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
-    bkg_train.GetXaxis().SetTitle(generateLatexLabel(canvasName))
+    bkg_train.GetXaxis().SetTitle(canvasName)
 
     option = "histo"
     bkg_train.DrawCopy(option+"E0")
@@ -194,7 +229,9 @@ def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOption
 
     return canvas
 
-def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
+def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=None,logoption=False):
+    if not displayname:
+        displayname=canvasName
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
     if not isinstance(bkgHists, list):
@@ -227,12 +264,12 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         firstHist = sigHists[0]
     else:
         firstHist = bkgHists[0]
-    if plotOptions["logscale"]:
+    if plotOptions["logscale"] or logoption:
         firstHist.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
         canvas.SetLogy()
     else:
         firstHist.GetYaxis().SetRangeUser(0, yMax*1.5)
-    firstHist.GetXaxis().SetTitle(generateLatexLabel(canvasName))
+    firstHist.GetXaxis().SetTitle(displayname)
 
     option = "histo"
     firstHist.DrawCopy(option+"E0")
@@ -261,7 +298,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
 
         line.GetXaxis().SetLabelSize(line.GetXaxis().GetLabelSize()*2.4)
         line.GetYaxis().SetLabelSize(line.GetYaxis().GetLabelSize()*2.2)
-        line.GetXaxis().SetTitle(generateLatexLabel(canvasName))
+        line.GetXaxis().SetTitle(displayname)
 
         line.GetXaxis().SetTitleSize(line.GetXaxis().GetTitleSize()*3)
         line.GetYaxis().SetTitleSize(line.GetYaxis().GetTitleSize()*2.5)
@@ -278,7 +315,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName):
         for sigHist in sigHists:
             ratioPlot = sigHist.Clone()
             ratioPlot.Divide(bkgHists[0])
-            ratioPlot.SetTitle(generateLatexLabel(canvasName))
+            ratioPlot.SetTitle(displayname)
             ratioPlot.SetLineColor(sigHist.GetLineColor())
             ratioPlot.SetLineWidth(1)
             ratioPlot.SetMarkerStyle(20)
@@ -407,64 +444,6 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:           latex.DrawLatex(l,1.-t+0.01, text)
-
-def printTitle(pad, title):
-    pad.cd(1)
-    l = pad.GetLeftMargin()
-    t = pad.GetTopMargin()
-    r = pad.GetRightMargin()
-    b = pad.GetBottomMargin()
-
-    latex = ROOT.TLatex()
-    latex.SetNDC()
-    latex.SetTextColor(ROOT.kBlack)
-    latex.SetTextSize(0.03)
-    latex.DrawLatex(l, 1.-t+0.06, title)
-
-def generateLatexLabel(name):
-    ''' try to make plot label nicer '''
-    # remove starters
-    starts = ["Evt_", "BDT_common5_input_"]
-    for s in starts:
-        if name.startswith(s):
-            name = name[len(s):]
-
-    if name.startswith("N_"):
-        return "N("+name[2:]+")"
-
-    # replace stuff
-    name = name.replace("DeltaR","#DeltaR")
-    name = name.replace("Dr","#DeltaR")
-    name = name.replace("dR","#DeltaR")
-    name = name.replace("deltaR","#DeltaR")
-
-    name = name.replace("dY","#Deltay")
-
-    name = name.replace("eta", "#eta")
-    name = name.replace("Eta", "#eta")
-    name = name.replace("Delta#eta","#Delta#eta")
-    name = name.replace("d#eta","#Delta#eta")
-    name = name.replace("D#eta","#Delta#eta")
-
-    name = name.replace("phi", "#phi")
-    name = name.replace("Phi", "#phi")
-    name = name.replace("d#phi","#Delta#phi")
-    name = name.replace("Delta#phi","#Delta#phi")
-
-    name = name.replace("mass","M")
-    name = name.replace("pT", "p_{T}")
-    name = name.replace("pt", "p_{T}")
-
-    # some specials
-    name = name.replace("lep)Jet","(lep,Jet)")
-    name = name.replace("lep)TaggedJet","(lep,taggedJet)")
-    name = name.replace("Looselep)","LooseLepton")
-    name = name.replace("primarylep)","primary lepton")
-    name = name.replace("MHT", "missing H_{T}")
-    name = name.replace("HT","H_{T}")
-    name = name.replace("Jetp_{T}OverJetE","average p_{T}^{jet}/E^{jet}")
-    name = name.replace("blr_ETH", "b-tag likelihood ratio")
-    return name
 
 
 def moveOverUnderFlow(h):

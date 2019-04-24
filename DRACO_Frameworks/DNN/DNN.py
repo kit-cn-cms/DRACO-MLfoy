@@ -94,7 +94,8 @@ class DNN():
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
-            shuffle_seed    = None):
+            shuffle_seed    = None,
+            balanceSamples  = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -123,7 +124,7 @@ class DNN():
         self.eval_metrics = eval_metrics
 
         # load data set
-        self.data = self._load_datasets(shuffle_seed)
+        self.data = self._load_datasets(shuffle_seed, balanceSamples)
         self.event_classes = self.data.output_classes
 
         # save variable norm
@@ -145,14 +146,15 @@ class DNN():
 
 
 
-    def _load_datasets(self, shuffle_seed):
+    def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
             input_samples       = self.input_samples,
             event_category      = self.event_category,
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
-            shuffleSeed         = shuffle_seed)
+            shuffleSeed         = shuffle_seed,
+            balanceSamples      = balanceSamples)
 
 
     def _load_architecture(self, config):
@@ -227,6 +229,7 @@ class DNN():
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
+        K.set_learning_phase(True)
 
         # infer number of input neurons from number of train variables
         number_of_input_neurons     = self.data.n_input_neurons
@@ -257,7 +260,7 @@ class DNN():
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
-                X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
+                X = keras.layers.Dropout(dropout)(X)
 
         # generate output layer
         X = keras.layers.Dense(
@@ -357,10 +360,12 @@ class DNN():
             layer.trainable = False
         self.model.trainable = False
 
+        K.set_learning_phase(False)
+
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Saver()
         sess = K.get_session()
+        saver = tf.train.Saver()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
@@ -480,7 +485,7 @@ class DNN():
             # make it nicer
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            plt.ylabel(metric, fontsize = 16)
 
             # add legend
             plt.legend()
@@ -571,19 +576,6 @@ class DNN():
 
         eventYields.plot(privateWork = privateWork)
 
-    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 30, bin_range = [0.,1.]):
-
-        binaryOutput = plottingScripts.plotBinaryOutput(
-            data                = self.data,
-            predictions         = self.model_prediction_vector,
-            nbins               = nbins,
-            bin_range           = bin_range,
-            event_category      = self.categoryLabel,
-            plotdir             = self.save_path,
-            logscale            = log)
-
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 def loadDNN(inputDirectory, outputDirectory):
 
@@ -602,7 +594,6 @@ def loadDNN(inputDirectory, outputDirectory):
     for sample in config["eventClasses"]:
         input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
 
-    print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
         save_path       = outputDirectory,

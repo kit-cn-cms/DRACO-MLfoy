@@ -120,12 +120,13 @@ class Dataset:
             self.trigger.append(self.baseSelection)
 
         for key in self.samples:
+            print(key)
+            print(self.samples[key].selections)
             # search in additional selection strings
             if self.samples[key].selections:
-                self.samples[key].ownVars = self.searchVariablesInTriggerString( self.samples[key].selections )
-#!!!        #  might cause problems if there are different selections within the categories
-            if self.samples[key].categories:
-                self.samples[key].ownVars += self.searchVariablesInTriggerString( self.samples[key].categories.getSelections()[0] )
+                self.trigger.append(self.samples[key].selections)
+	        # search in event category selection strings
+	        self.trigger += self.samples[key].categories.getSelections()
 
         self.trigger = list(set(self.trigger))
 
