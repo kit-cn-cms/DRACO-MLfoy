@@ -31,8 +31,7 @@ def getAllVariables(infile):
             "common5_output", "Untagged", 
             "CSV_DNN", "PileUp", "Evt_ID", 
             "Evt_Lumi", "Evt_Odd", "Evt_Run",
-            "PartonFlav", "GoodTags",
-            "fifth", "fourth", "third", "second", "N_"]
+            "PartonFlav", "GoodTags",]
     for b in list(t.GetListOfBranches()):
         ignore = False
         for veto in vetos:
