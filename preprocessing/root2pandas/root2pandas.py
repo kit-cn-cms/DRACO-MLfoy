@@ -262,6 +262,10 @@ class Dataset:
                     print("could not open MVATree in ROOT file")
                     continue
 
+            if tree.numentries == 0:
+                print("MVATree has no entries - skipping file")
+                continue
+
             # convert to dataframe
             df = tree.pandas.df(self.variables)
             

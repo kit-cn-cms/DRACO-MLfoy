@@ -73,7 +73,7 @@ ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
 ttZ_categories = root2pandas.EventCategories()
-ttZ_categories.addCategory("ttZbb", selection = None)
+ttZ_categories.addCategory("ttZ", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -87,7 +87,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/DNN_ntuples_v1/"
+ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
 memPath = None#"/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
@@ -95,44 +95,45 @@ dataset.addSample(
     sampleName  = "ttHbb",
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttH_categories,
-    even_odd    = True,
+    even_odd    = False,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     ) 
-#dataset.addSample(
-#    sampleName  = "ttHNonbb",
-#    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_v2/*nominal*.root",
-#    categories  = ttH_categories,
-#    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    even_odd    = True,
-#    ) 
+
+dataset.addSample(
+    sampleName  = "ttHNonbb",
+    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttH_categories,
+    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+    even_odd    = False,
+    ) 
 
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttbar_categories,
-    even_odd    = True,
+    even_odd    = False,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
-#dataset.addSample(
-#    sampleName  = "TTToDL",
-#    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-#    categories  = ttbar_categories,
-#    even_odd    = True,
-#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    )
-#dataset.addSample(
-#    sampleName  = "TTToFH",
-#    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-#    categories  = ttbar_categories,
-#    even_odd    = True,
-#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    )
+dataset.addSample(
+    sampleName  = "TTToDL",
+    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttbar_categories,
+    even_odd    = False,
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    )
+dataset.addSample(
+    sampleName  = "TTToFH",
+    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttbar_categories,
+    even_odd    = False,
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    )
 
 dataset.addSample(
     sampleName  = "ttZbb",
     ntuples     = ntuplesPath+"/TTZToBB_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
     categories  = ttZ_categories,
-    even_odd    = True,
+    even_odd    = False,
     )
 
 # initialize variable list 
@@ -140,6 +141,7 @@ dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
+    "Evt_Odd",
     "N_Jets",
     "N_BTagsL",
     "N_BTagsM",
