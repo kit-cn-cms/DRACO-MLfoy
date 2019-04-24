@@ -71,7 +71,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if self.value:
             if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
                 if self.verbose > 0:
-                    print("Epoch {}: early stopping threshold reached".format(epoch))
+                    print("\nEpoch {}: early stopping threshold reached".format(epoch))
                 self.n_failed += 1
                 if self.n_failed > self.patience:
                     self.model.stop_training = True
@@ -80,7 +80,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if self.stopping_epochs:
             if self.best_epoch + self.stopping_epochs < epoch and epoch > self.min_epochs:
                 if self.verbose > 0:
-                    print("Validation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
+                    print("\nValidation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
                 self.model.stop_training = True
 
 
@@ -126,7 +126,6 @@ class DNN():
         self.data = self._load_datasets(shuffle_seed)
         self.event_classes = self.data.output_classes
 
-
         # save variable norm
         self.cp_path = self.save_path+"/checkpoints/"
         if not os.path.exists(self.cp_path):
@@ -143,7 +142,6 @@ class DNN():
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
-
 
 
 
@@ -229,7 +227,6 @@ class DNN():
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
-        K.set_learning_phase(True)
 
         # infer number of input neurons from number of train variables
         number_of_input_neurons     = self.data.n_input_neurons
@@ -260,7 +257,7 @@ class DNN():
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
-                X = keras.layers.Dropout(dropout)(X)
+                X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
         X = keras.layers.Dense(
@@ -331,10 +328,12 @@ class DNN():
         ''' save the trained model '''
 
         # save executed command
-        argv[0] = execute_dir+"/"+argv[0]
+        argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
         execute_string = "python "+" ".join(argv)
-        with open(self.cp_path+"/command.sh", "w") as f:
+        out_file = self.cp_path+"/command.sh"
+        with open(out_file, "w") as f:
             f.write(execute_string)
+        print("saved executed command to {}".format(out_file))
 
         # save model as h5py file
         out_file = self.cp_path + "/trained_model.h5py"
@@ -358,12 +357,10 @@ class DNN():
             layer.trainable = False
         self.model.trainable = False
 
-        K.set_learning_phase(False)
-
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        sess = K.get_session()
         saver = tf.train.Saver()
+        sess = K.get_session()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
@@ -483,7 +480,7 @@ class DNN():
             # make it nicer
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric, fontsize = 16)
+            plt.ylabel(metric.replace("_"," "), fontsize = 16)
 
             # add legend
             plt.legend()
@@ -562,10 +559,34 @@ class DNN():
 
         closureTest.plot(ratio = False, privateWork = privateWork)
 
+    def plot_eventYields(self, log = False, privateWork = False, signal_class = None):
+        eventYields = plottingScripts.plotEventYields(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.categoryLabel,
+            signal_class        = signal_class,
+            plotdir             = self.save_path,
+            logscale            = log)
 
+        eventYields.plot(privateWork = privateWork)
 
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = 30, bin_range = [0.,1.]):
+
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            predictions         = self.model_prediction_vector,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.categoryLabel,
+            plotdir             = self.save_path,
+            logscale            = log)
+
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 def loadDNN(inputDirectory, outputDirectory):
+
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
     if not os.path.exists(configFile):
@@ -581,6 +602,7 @@ def loadDNN(inputDirectory, outputDirectory):
     for sample in config["eventClasses"]:
         input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
 
+    print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
         save_path       = outputDirectory,
@@ -592,5 +614,6 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
+
 
     return dnn

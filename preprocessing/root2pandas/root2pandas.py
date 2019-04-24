@@ -7,7 +7,7 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 
-
+import preprocessing_utils as pputils
 
 class EventCategories:
     def __init__(self):
@@ -25,17 +25,31 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
+        self.ownVars    = ownVars
+        self.even_odd   = even_odd
+        self.evenOddSplitting()
 
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
         print("\tntuples: {}".format(self.ntuples))
         print("\tselections: {}".format(self.selections))
+
+    def SetOwnVariables(self,variableList):
+        self.ownVars = variableList
+
+    def evenOddSplitting(self):
+        if self.even_odd == True:
+            if self.selections:
+                self.selections += "(Evt_Odd == 1)"
+            else:
+                self.selections = "(Evt_Odd == 1)"
+
 
 
 class Dataset:
@@ -51,7 +65,7 @@ class Dataset:
 
         # settings for dataset
         self.addMEM     = addMEM
-        self.maxEntries = maxEntries
+        self.maxEntries = int(maxEntries)
 
         # default values for some configs
         self.baseSelection  = None
@@ -108,9 +122,10 @@ class Dataset:
         for key in self.samples:
             # search in additional selection strings
             if self.samples[key].selections:
-                self.trigger.append(self.samples[key].selections)
-            # search in event category selection strings
-            self.trigger += self.samples[key].categories.getSelections()
+                self.samples[key].ownVars = self.searchVariablesInTriggerString( self.samples[key].selections )
+#!!!        #  might cause problems if there are different selections within the categories
+            if self.samples[key].categories:
+                self.samples[key].ownVars += self.searchVariablesInTriggerString( self.samples[key].categories.getSelections()[0] )
 
         self.trigger = list(set(self.trigger))
 
@@ -174,7 +189,6 @@ class Dataset:
 
         self.variables = variables
         self.vector_variables = vector_variables
-        print(self.variables)
 
     # ====================================================================
 
@@ -189,7 +203,7 @@ class Dataset:
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
 
         # remove old files
-        self.removeOldFiles()
+        self.renameOldFiles()
 
         if self.addMEM:
             # generate MEM path
@@ -201,10 +215,22 @@ class Dataset:
             if not os.path.exists(self.memPath):
                 os.makedirs(self.memPath)
 
+        sampleList = []
+
         # start loop over all samples to preprocess them
         for key in self.samples:
+            # include own variables of the sample
+            self.addVariables( self.samples[key].ownVars )
             self.processSample(self.samples[key])
+            # remove the own variables
+            self.removeVariables( self.samples[key].ownVars )
+            pputils.createSampleList(sampleList, self.samples[key])
             print("done.")
+        # write file with preprocessed samples
+        pputils.createSampleFile(self.outputdir, sampleList)
+
+        # handle old files
+        self.handleOldFiles()
 
     def processSample(self, sample):
         # print sample info
@@ -232,26 +258,25 @@ class Dataset:
             with root.open(f) as rf:
                 # get MVATree
                 try:
-                    #tree = rf["MVATree"]
                     tree = rf[self.tree]
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
-	    df = tree.pandas.df(self.variables)
-	    # handle vector variables, loop over them
-	    for vecvar in self.vector_variables:
-		# load dataframe with vector variable
-		vec_df = tree.pandas.df(vecvar)
-		# loop over inices in vecvar list
-		for idx in self.vector_variables[vecvar]:
-		    # slice the index
-		    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-		    # define name for column in df
-		    col_name = str(vecvar)+"["+str(idx)+"]"
-		    # append column to original dataframe
-		    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
+            df = tree.pandas.df(self.variables)
+            # handle vector variables, loop over them
+            for vecvar in self.vector_variables:
+                # load dataframe with vector variable
+                vec_df = tree.pandas.df(vecvar)
+                # loop over inices in vecvar list
+                for idx in self.vector_variables[vecvar]:
+                    # slice the index
+                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                    # define name for column in df
+                    col_name = str(vecvar)+"["+str(idx)+"]"
+                    # append column to original dataframe
+                    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
 
-	    # apply event selection
+            # apply event selection
             df = self.applySelections(df, sample.selections)
 
             # add to list of dataframes
@@ -378,11 +403,37 @@ class Dataset:
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
 
-    def removeOldFiles(self):
+
+    # renames old files by adding ".old"
+    def renameOldFiles(self):
         for key in self.samples:
             sample = self.samples[key]
             for cat in sample.categories.categories:
                 outFile = self.outputdir+"/"+cat+"_"+self.naming+".h5"
                 if os.path.exists(outFile):
-                    print("removing file {}".format(outFile))
-                    os.remove(outFile)
+                    print("renaming file {}".format(outFile))
+                    os.rename(outFile,outFile+".old")
+
+    # deletes old files that were created new and rerenames old files by removing ".old", if no new files were created
+    def handleOldFiles(self):
+        old = []
+        actual = []
+        rerename = []
+        remo = []
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old"):
+                old.append(filename.split(".")[0])
+            else:
+                actual.append(filename.split(".")[0])
+        for name in old:
+            if name in actual:
+                remo.append(name)
+            else:
+                rerename.append(name)
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old") and filename.split(".")[0] in remo:
+                print("removing file {}".format(filename))
+                os.remove(self.outputdir+"/"+filename)
+            if filename.endswith(".old") and filename.split(".")[0] in rerename:
+                print("re-renaming file {}".format(filename))
+                os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
