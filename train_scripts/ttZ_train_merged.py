@@ -71,6 +71,11 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
+parser.add_option("--even",dest="even_sel",action="store_true",default=None,
+        help="only select events with Evt_Odd==0")
+parser.add_option("--odd",dest="even_sel",action="store_false",default=None,
+        help="only select events with Evt_Odd==1")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -104,6 +109,15 @@ else:
 run_name = outputdir.split("/")[-1]
 outputdir += "_"+options.category
 
+# handle even odd selection
+nom_weight = 1.
+if options.even_sel==True:
+    outputdir+="_even"
+    nom_weight = 2.
+elif options.even_sel==False:
+    outputdir+="_odd"
+    nom_weight = 2.
+
 # the input variables are loaded from the variable_set file
 if options.category in variable_set.variables:
     variables = variable_set.variables[options.category]
@@ -128,11 +142,11 @@ naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample("ttZbb"+naming, label = "ttZ", normalization_weight = 2.)
-input_samples.addSample("ttHbb"+naming, label = "ttH", normalization_weight = 2.)
-input_samples.addSample("ttb"+naming,   label = "ttb",   normalization_weight = 2.)
-input_samples.addSample("ttcc"+naming,  label = "ttcc",  normalization_weight = 2.)
-input_samples.addSample("ttlf"+naming,  label = "ttlf",  normalization_weight = 2.)
+input_samples.addSample("ttZ"+naming,  label = "ttZ",  normalization_weight = nom_weight)
+input_samples.addSample("ttH"+naming,  label = "ttH",  normalization_weight = nom_weight)
+input_samples.addSample("ttb"+naming,  label = "ttb",  normalization_weight = nom_weight)
+input_samples.addSample("ttcc"+naming, label = "ttcc", normalization_weight = nom_weight)
+input_samples.addSample("ttlf"+naming, label = "ttlf", normalization_weight = nom_weight)
 
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
@@ -150,21 +164,8 @@ dnn = DNN.DNN(
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2,
     # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.balanceSamples)
-
-# config dictionary for DNN architecture
-config = {
-    "layers":                   [200,200],
-    "loss_function":            "categorical_crossentropy",
-    "Dropout":                  0.5,
-    "L2_Norm":                  1e-5,
-    "batch_size":               5000,
-    "optimizer":                optimizers.Adagrad(decay=0.99),
-    "activation_function":      "elu",
-    "output_activation":        "Softmax",
-    "earlystopping_percentage": 0.05,
-    "earlystopping_epochs":     50,
-    }
+    balanceSamples  = options.balanceSamples,
+    evenSel         = options.even_sel)
 
 # import file with net configs if option is used
 if options.net_config:
