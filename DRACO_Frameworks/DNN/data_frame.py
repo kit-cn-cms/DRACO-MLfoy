@@ -12,7 +12,7 @@ class Sample:
         self.normalization_weight = normalization_weight
         self.isSignal = None
 
-    def load_dataframe(self, event_category, lumi):
+    def load_dataframe(self, event_category, lumi, evenSel = ""):
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
@@ -20,7 +20,10 @@ class Sample:
             print("number of events before selections: "+str(df.shape[0]))
 
         # apply event category cut
-        df.query(event_category, inplace = True)
+        query = event_category
+        if not evenSel == "":
+            query+=" and "+evenSel
+        df.query(query, inplace = True)
         print("number of events after selections:  "+str(df.shape[0]))
         self.nevents = df.shape[0]
 
@@ -102,10 +105,12 @@ class DataFrame(object):
                 test_percentage = 0.1,
                 lumi = 41.5,
                 shuffleSeed = None,
-                balanceSamples = True):
+                balanceSamples = True,
+                evenSel = ""):
 
         self.event_category = event_category
         self.lumi = lumi
+        self.evenSel = evenSel
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
@@ -117,7 +122,7 @@ class DataFrame(object):
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
-            sample.load_dataframe(self.event_category, self.lumi)
+            sample.load_dataframe(self.event_category, self.lumi, self.evenSel)
             train_samples.append(sample.data)
         
         # concatenating all dataframes

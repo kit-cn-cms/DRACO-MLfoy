@@ -95,7 +95,8 @@ class DNN():
             test_percentage = 0.2,
             eval_metrics    = None,
             shuffle_seed    = None,
-            balanceSamples  = False):
+            balanceSamples  = False,
+            evenSel         = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -110,6 +111,16 @@ class DNN():
         self.JTstring       = event_category
         self.event_category = JTcut.getJTstring(event_category)
         self.categoryLabel  = JTcut.getJTlabel(event_category)
+        # selection
+        self.evenSel = ""
+        self.oddSel = "1."
+        if not evenSel == None:
+            if evenSel == True:
+                self.evenSel = "(Evt_Odd==0)"
+                self.oddSel  = "(Evt_Odd==1)"
+            elif evenSel == False:
+                self.evenSel = "(Evt_Odd==1)"
+                self.oddSel  = "(Evt_Odd==0)"
 
         # list of input variables
         self.train_variables = train_variables
@@ -154,7 +165,8 @@ class DNN():
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
             shuffleSeed         = shuffle_seed,
-            balanceSamples      = balanceSamples)
+            balanceSamples      = balanceSamples,
+            evenSel             = self.evenSel)
 
 
     def _load_architecture(self, config):
@@ -381,6 +393,8 @@ class DNN():
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
         configs["shuffleSeed"] = self.data.shuffleSeed
+        configs["trainSelection"] = self.evenSel
+        configs["evalSelection"] = self.oddSel
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
