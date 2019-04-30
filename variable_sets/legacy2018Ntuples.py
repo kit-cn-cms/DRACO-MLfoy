@@ -134,6 +134,8 @@ variables["4j_ge3t"] = [
     'LooseLepton_Phi[0]',
     'LooseLepton_Pt[0]',
     ]
+variables["ge4j_ge3t"] = variables["4j_ge3t"]
+variables["le5j_ge3t"] = variables["4j_ge3t"]
 
 variables["5j_ge3t"] = variables["4j_ge3t"] + [
     'CSV[4]',
