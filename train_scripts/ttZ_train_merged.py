@@ -144,7 +144,7 @@ naming = options.naming
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 input_samples.addSample("ttZ"+naming,  label = "ttZ",  normalization_weight = nom_weight)
 input_samples.addSample("ttH"+naming,  label = "ttH",  normalization_weight = nom_weight)
-input_samples.addSample("ttb"+naming,  label = "ttb",  normalization_weight = nom_weight)
+input_samples.addSample("ttmergedB"+naming,  label = "ttb",  normalization_weight = nom_weight)
 input_samples.addSample("ttcc"+naming, label = "ttcc", normalization_weight = nom_weight)
 input_samples.addSample("ttlf"+naming, label = "ttlf", normalization_weight = nom_weight)
 
@@ -178,11 +178,11 @@ dnn.build_model(config)
 # perform the training
 dnn.train_model()
 
-# save information
-dnn.save_model(sys.argv, filedir)
-
 # evalute the trained model
 dnn.eval_model()
+
+# save information
+dnn.save_model(sys.argv, filedir)
 
 # save and print variable ranking
 dnn.get_input_weights()
