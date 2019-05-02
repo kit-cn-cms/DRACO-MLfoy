@@ -11,6 +11,8 @@ class Sample:
         self.label = label
         self.normalization_weight = normalization_weight
         self.isSignal = None
+        self.min=0.0
+        self.max=1.0
 
     def load_dataframe(self, event_category, lumi, evenSel = ""):
         print("-"*50)
@@ -46,6 +48,8 @@ class Sample:
         config["samplePath"] = self.path
         config["sampleWeight"] = self.normalization_weight
         config["sampleEvents"] = self.nevents
+        config["min"] = self.min
+        config["max"] = self.max
         return config
 
     def addPrediction(self, model, train_variables):
