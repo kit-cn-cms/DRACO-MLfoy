@@ -426,6 +426,9 @@ class DNN():
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )
 
+        #figure out ranges
+        self.get_ranges()
+
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -443,6 +446,17 @@ class DNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+
+    def get_ranges(self):
+        max_ = [0.]*len(self.input_samples.samples)
+        for ev in self.model_prediction_vector:
+            for i,node in enumerate(ev):
+                if node>max_[i]:
+                    max_[i]=node
+        print("Max: ",max_)
+        for i, sample in enumerate(self.input_samples.samples):
+            sample.max=round(float(max_[i]),2)
+            sample.min=round(float(1./len(self.input_samples.samples)),2)
 
                 
         

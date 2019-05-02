@@ -164,11 +164,11 @@ dnn.build_model(config)
 # perform the training
 dnn.train_model()
 
-# save information
-dnn.save_model(sys.argv, filedir)
-
 # evalute the trained model
 dnn.eval_model()
+
+# save information
+dnn.save_model(sys.argv, filedir)
 
 # save and print variable ranking
 dnn.get_input_weights()
