@@ -128,7 +128,7 @@ naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample("ttHbb"+naming, label = "ttH", normalization_weight = 2.)
+input_samples.addSample("ttH"+naming, label = "ttH", normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
