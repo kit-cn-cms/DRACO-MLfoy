@@ -35,23 +35,18 @@ or use the following options
 
 2. Naming/File Options
     - `-o DIR` to change the name of the output directory (absolute path or path relative to `workdir`)
-
-    (default is `test_training`)
+        (default is `test_training`)
     - `-i DIR` to change the name of the input directory where the preprocessed h5 files are stored. Which files in this directory are used for training has to be adjusted in the script itself
-
-    (default is `InputFeatures`)
+        (default is `InputFeatures`)
     - `-n STR` to adjust the naming of the input files.
-
-    (default is `_dnn.h5`)
+        (default is `_dnn.h5`)
     - `-v FILE` to change the variable selection (absolute path to the variable set file or path relative to `variable_sets` directory)
-
-    (default is `example_variables`)
+        (default is `example_variables`)
     
 
 3. Training Options
     - `-e INT` change number of training epochs 
-
-    (default is `1000`)
+        (default is `1000`)
     - `--netconfig=STR` STR of the config name in`net_configs.py` file to adjust the architecture of the neural network
     - `--balanceSamples` activates an additional balancing of train samples. With this options the samples which have fewer events are used multiple times in one pass over the training set (epoch). As a default options the sample weights are balanced, such that the sum of train weights is equal for all used samples.
     - `-a` comma separated list of samples to be activated for training. If this option is not used all samples are used as a default.
@@ -62,14 +57,12 @@ or use the following options
     - `--printroc` to print ROC value for confusion matrix
     - `--privatework` to create private work label
     - `--signalclass=STR` to change the plotted signal class (not part of the background stack plot), possible to do a combination, for example `ttH,ttbb` 
-
-    (default is `None`)
+        (default is `None`)
 
 5. Binary Training Options
     - `--binary` activate binary training by defining one signal and one background class. Which samples are set as signal is defined by the `signalclass` option
     - `-t` target value for background samples during training. 
-
-    (default is 0, default for signal 1 and cannot be changed)
+        (default is 0, default for signal 1 and cannot be changed)
 
 
 Example:
