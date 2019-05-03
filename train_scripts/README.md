@@ -18,8 +18,8 @@ input_samples.addSample("ttbb"+naming,  label = "ttbb")
 
 - change network architecture `config` if optimizing, otherwise add network architecture to the file `net_configs.py` as dictonary entry in the `config_dict` to not lose it and execute it with the parser option `--netconfig=CONFIGNAME`
 - only change DNN training class `dnn = DNN.DNN([...])` properties 
-	- `eval_metrics` 
-	- `test_percentage` percentage of samples used to test
+    - `eval_metrics` 
+    - `test_percentage` percentage of samples used to test
 
   others are changed with parser options!
 
@@ -30,38 +30,46 @@ python train_template.py
 ```
 or use the following options 
 1. Category used for training
-	- `-c STR` name of the category `(ge/le)[nJets]j_(ge/le)[nTags]t` 
-	(default is `4j_ge3t`)
+    - `-c STR` name of the category `(ge/le)[nJets]j_(ge/le)[nTags]t` 
+    (default is `4j_ge3t`)
 
 2. Naming/File Options
-	- `-o DIR` to change the name of the output directory (absolute path or path relative to `workdir`)
-	(default is `test_training`)
-	- `-i DIR` to change the name of the input directory where the preprocessed h5 files are stored. Which files in this directory are used for training has to be adjusted in the script itself
-	(default is `InputFeatures`)
-	- `-n STR` to adjust the naming of the input files, the default naming is `_dnn.h5` 
-	(default is `dnn.h5`)
-	- `-v FILE` to change the variable selection (absolute path to the variable set file or path relative to `variable_sets` directory)
-	(default is `example_variables`)
-	
+    - `-o DIR` to change the name of the output directory (absolute path or path relative to `workdir`)
+
+    (default is `test_training`)
+    - `-i DIR` to change the name of the input directory where the preprocessed h5 files are stored. Which files in this directory are used for training has to be adjusted in the script itself
+
+    (default is `InputFeatures`)
+    - `-n STR` to adjust the naming of the input files.
+
+    (default is `_dnn.h5`)
+    - `-v FILE` to change the variable selection (absolute path to the variable set file or path relative to `variable_sets` directory)
+
+    (default is `example_variables`)
+    
 
 3. Training Options
-	- `-e INT` change number of training epochs 
-	(default is `1000`)
-	- `--netconfig=STR` STR of the config name in`net_configs.py` file to adjust the architecture of the neural network
-        - `--balanceSamples` activates an additional balancing of train samples. With this options the samples which have fewer events are used multiple times in one pass over the training set (epoch). As a default options the sample weights are balanced, such that the sum of train weights is equal for all used samples.
-        - `-a` comma separated list of samples to be activated for training. If this option is not used all samples are used as a default.
+    - `-e INT` change number of training epochs 
+
+    (default is `1000`)
+    - `--netconfig=STR` STR of the config name in`net_configs.py` file to adjust the architecture of the neural network
+    - `--balanceSamples` activates an additional balancing of train samples. With this options the samples which have fewer events are used multiple times in one pass over the training set (epoch). As a default options the sample weights are balanced, such that the sum of train weights is equal for all used samples.
+    - `-a` comma separated list of samples to be activated for training. If this option is not used all samples are used as a default.
 
 4. Plotting Options
-	- `--plot` to create plots of the output 
-	- `--log` to create plots with logarithmic y-axis
-	- `--printroc` to print ROC value for confusion matrix
-	- `--privatework` to create private work label
-	- `--signalclass=STR` to change the plotted signal class (not part of the background stack plot), possible to do a combination, for example `ttH,ttbb` 
-	(default is `None`)
+    - `--plot` to create plots of the output 
+    - `--log` to create plots with logarithmic y-axis
+    - `--printroc` to print ROC value for confusion matrix
+    - `--privatework` to create private work label
+    - `--signalclass=STR` to change the plotted signal class (not part of the background stack plot), possible to do a combination, for example `ttH,ttbb` 
+
+    (default is `None`)
 
 5. Binary Training Options
-        - `--binary` activate binary training by defining one signal and one background class. Which samples are set as signal is defined by the `signalclass` option
-        - `-t` target value for background samples during training. The default is 0, the default for the signal samples is 1.
+    - `--binary` activate binary training by defining one signal and one background class. Which samples are set as signal is defined by the `signalclass` option
+    - `-t` target value for background samples during training. 
+
+    (default is 0, default for signal 1 and cannot be changed)
 
 
 Example:
