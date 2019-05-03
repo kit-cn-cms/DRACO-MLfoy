@@ -69,7 +69,7 @@ class EarlyStopping(keras.callbacks.Callback):
     
         # check loss by percentage difference
         if self.value:
-            if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
+            if (current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
                 if self.verbose > 0:
                     print("\nEpoch {}: early stopping threshold reached".format(epoch))
                 self.n_failed += 1
