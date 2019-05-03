@@ -47,6 +47,14 @@ variables["5j_ge3t"] = [
     "Evt_blr_ETH_transformed",
     ]
 
+tmp = list(set(variables["5j_ge3t"] + variables["4j_ge3t"]))
+variables["le5j_ge3t"] = tmp[:]
+variables["le5j_ge4t"] = tmp[:]
+
+if "memDBp" in tmp: tmp.pop(tmp.index("memDBp"))
+variables["le5j_3t"] = tmp
+
+
 
 
 variables["ge6j_ge3t"] = [
