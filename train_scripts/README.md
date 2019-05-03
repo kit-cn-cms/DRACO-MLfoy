@@ -12,16 +12,12 @@ input_samples.addSample("SAMPLENAME"+naming, label = "SAMPLENAME", normalization
 ```
 for example
 ```python
-input_samples.addSample("ttHbb"+naming, label = "ttHbb", normalization_weight = 2.)
+input_samples.addSample("ttH"+naming, label = "ttH", normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 ```
 
-- change network architecture `config` if optimizing, otherwise add network architecture to the file `net_configs.py` as dictonary entry in the `config_dict` to not lose it and execute it with the parser option `--netconfig=CONFIGNAME`
-- only change DNN training class `dnn = DNN.DNN([...])` properties 
-    - `eval_metrics` 
-    - `test_percentage` percentage of samples used to test
+To change the network architecture adjust an architecture in the `net_configs.py` or create a new one. To use this config during training specify the `--netconfig=NAMEOFCONFIG` option.
 
-  others are changed with parser options!
 
 ## Usage
 To execute with default options use
