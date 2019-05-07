@@ -123,20 +123,20 @@ naming = options.naming
 # add signal samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttHbb"+naming,
+    sampleFile      = data_dir+"/ttH"+naming,
     plotColor       = ROOT.kBlue+1,
     signalSample    = True)
 
 plotter.addSample(
     sampleName      = "ttZ",
-    sampleFile      = data_dir+"/ttZbb"+naming,
+    sampleFile      = data_dir+"/ttZ"+naming,
     plotColor       = ROOT.kCyan,
     signalSample    = True)
     
 # add background samples
 plotter.addSample(
-    sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb"+naming,
+    sampleName      = "tthf",
+    sampleFile      = data_dir+"/tthf"+naming,
     plotColor       = ROOT.kRed+3)
 
 plotter.addSample(
@@ -155,7 +155,9 @@ plotter.addCategory("4j_ge3t")
 plotter.addCategory("5j_ge3t")
 plotter.addCategory("ge6j_ge3t")
 plotter.addCategory("ge4j_ge3t")
-plotter.addCategory("ge5j_ge3t")
+plotter.addCategory("le5j_ge3t")
+plotter.addCategory("ge4j_3t")
+plotter.addCategory("ge4j_ge4t")
 
 
 # perform plotting routine
