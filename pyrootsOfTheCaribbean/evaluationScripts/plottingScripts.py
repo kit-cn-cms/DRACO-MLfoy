@@ -428,24 +428,26 @@ class plotClosureTest:
                 weights     = sig_train_weights,
                 nbins       = self.nbins,
                 bin_range   = self.bin_range,
-                color       = ROOT.kCyan,
+                color       = ROOT.kBlue,
                 xtitle      = "signal train at "+str(node_cls)+" node",
                 ytitle      = setup.GetyTitle(privateWork = True),
-                filled      = False)
+                filled      = True)
             sig_train.Scale(1./sig_train.Integral())
-            sig_train.SetLineWidth(2)
+            sig_train.SetLineWidth(1)
+            sig_train.SetFillColorAlpha(ROOT.kBlue, 0.5)
 
             bkg_train = setup.setupHistogram(
                 values      = bkg_train_values,
                 weights     = bkg_train_weights,
                 nbins       = self.nbins,
                 bin_range   = self.bin_range,
-                color       = ROOT.kOrange-3,
+                color       = ROOT.kRed,
                 xtitle      = "bkg train at "+str(node_cls)+" node",
                 ytitle      = setup.GetyTitle(privateWork = True),
-                filled      = False)
+                filled      = True)
             bkg_train.Scale(1./bkg_train.Integral())
-            bkg_train.SetLineWidth(2)
+            bkg_train.SetLineWidth(1)
+            bkg_train.SetFillColorAlpha(ROOT.kRed, 0.5)
 
             # setup test histograms
             sig_test = setup.setupHistogram(
@@ -453,24 +455,28 @@ class plotClosureTest:
                 weights     = sig_test_weights,
                 nbins       = self.nbins,
                 bin_range   = self.bin_range,
-                color       = ROOT.kCyan+2,
+                color       = ROOT.kBlue,
                 xtitle      = "signal test at "+str(node_cls)+" node",
                 ytitle      = setup.GetyTitle(privateWork = True),
                 filled      = False)
             sig_test.Scale(1./sig_test.Integral())
-            sig_test.SetLineWidth(2)
+            sig_test.SetLineWidth(1)
+            sig_test.SetMarkerStyle(20)
+            sig_test.SetMarkerSize(2)
 
             bkg_test = setup.setupHistogram(
                 values      = bkg_test_values,
                 weights     = bkg_test_weights,
                 nbins       = self.nbins,
                 bin_range   = self.bin_range,
-                color       = ROOT.kOrange+7,
+                color       = ROOT.kRed,
                 xtitle      = "bkg test at "+str(node_cls)+" node",
                 ytitle      = setup.GetyTitle(privateWork = True),
                 filled      = False)
             bkg_test.Scale(1./bkg_test.Integral())
-            bkg_test.SetLineWidth(2)
+            bkg_test.SetLineWidth(1)
+            bkg_test.SetMarkerStyle(20)
+            bkg_test.SetMarkerSize(2)
 
             plotOptions = {"logscale": self.logscale}
 
@@ -483,9 +489,9 @@ class plotClosureTest:
             legend = setup.getLegend()
 
             # add entries
-            legend.AddEntry(sig_train, "train {}".format(signalClass), "L")
-            legend.AddEntry(bkg_train, "train bkg", "L")
-            legend.AddEntry(sig_test,  "test {}".format(signalClass), "L")
+            legend.AddEntry(sig_train, "train {}".format("+".join(signalClass)), "F")
+            legend.AddEntry(bkg_train, "train bkg", "F")
+            legend.AddEntry(sig_test,  "test {}".format("+".join(signalClass)), "L")
             legend.AddEntry(bkg_test,  "test bkg", "L")
 
             # draw legend
@@ -642,7 +648,7 @@ class plotEventYields:
                     filled  = False)
 
                 # set signal histogram linewidth
-                histogram.SetLineWidth(3)
+                histogram.SetLineWidth(2)
                 sigHists.append(histogram)
                 sigLabels.append(truth_cls)
                 
