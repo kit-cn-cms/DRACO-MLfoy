@@ -268,9 +268,9 @@ class Dataset:
 
             # convert to dataframe
             df = tree.pandas.df(self.variables)
-            
+
             # delete subentry index
-            df = df.reset_index(1, drop = True)
+            #df = df.reset_index(1, drop = True)
 
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:
