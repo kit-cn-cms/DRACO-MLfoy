@@ -112,6 +112,8 @@ variables["4j_ge3t"] = [
     ]
 variables["ge4j_ge3t"] = variables["4j_ge3t"]
 variables["le5j_ge3t"] = variables["4j_ge3t"]
+variables["ge4j_3t"] = [v for v in variables["4j_ge3t"] if not v == "N_BTagsM"]
+variables["ge4j_ge4t"] = variables["4j_ge3t"]
 
 variables["5j_ge3t"] = variables["4j_ge3t"] + [
     'CSV[4]',
