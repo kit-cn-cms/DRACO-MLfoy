@@ -395,6 +395,12 @@ class DNN():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
+        
+        # save information for binary DNN
+        if self.data.binary_classification:
+            configs["binaryConfig"] = {
+                "minValue": self.input_samples.bkg_target,
+                "maxValue": 1.}
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
@@ -447,16 +453,18 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
+
     def get_ranges(self):
-        max_ = [0.]*len(self.input_samples.samples)
-        for ev in self.model_prediction_vector:
-            for i,node in enumerate(ev):
-                if node>max_[i]:
-                    max_[i]=node
-        print("Max: ",max_)
-        for i, sample in enumerate(self.input_samples.samples):
-            sample.max=round(float(max_[i]),2)
-            sample.min=round(float(1./len(self.input_samples.samples)),2)
+        if not self.data.binary_classification:
+            max_ = [0.]*len(self.input_samples.samples)
+            for ev in self.model_prediction_vector:
+                for i,node in enumerate(ev):
+                    if node>max_[i]:
+                        max_[i]=node
+            print("Max: ",max_)
+            for i, sample in enumerate(self.input_samples.samples):
+                sample.max=round(float(max_[i]),2)
+                sample.min=round(float(1./len(self.input_samples.samples)),2)
 
                 
         
@@ -585,6 +593,7 @@ class DNN():
                         signal_class = None, nbins = 20, bin_range = [0.,1.]):
         ''' plot comparison between train and test samples '''
 
+        bin_range = [1./self.data.n_output_neurons, 1.]
         closureTest = plottingScripts.plotClosureTest(
             data                = self.data,
             test_prediction     = self.model_prediction_vector,

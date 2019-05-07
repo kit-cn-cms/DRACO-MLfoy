@@ -120,7 +120,7 @@ naming = options.naming
 # add signal samples
 plotter.addSample(
     sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttHbb"+naming,
+    sampleFile      = data_dir+"/ttH"+naming,
     plotColor       = ROOT.kBlue+1,
     signalSample    = True)
 
@@ -152,9 +152,6 @@ plotter.addSample(
 
 
 # add JT categories
-plotter.addCategory("4j_ge3t")
-plotter.addCategory("5j_ge3t")
-plotter.addCategory("ge6j_ge3t")
 plotter.addCategory("ge4j_ge3t")
 
 
