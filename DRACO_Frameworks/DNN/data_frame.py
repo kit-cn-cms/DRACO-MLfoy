@@ -101,7 +101,6 @@ class DataFrame(object):
             sample.load_dataframe(self.event_category, self.lumi)
             train_samples.append(sample.data)
 
-
         # concatenating all dataframes
         df = pd.concat( train_samples )
         del train_samples

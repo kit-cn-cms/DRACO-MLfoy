@@ -119,7 +119,6 @@ input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")
-#input_samples.addSample("ttbb"+naming,   label = "ttbb")
 input_samples.addSample("ttcc"+naming,  label = "ttcc")
 input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
@@ -144,7 +143,7 @@ config = {
     "loss_function":            "categorical_crossentropy",
     "Dropout":                  0.5,
     "L2_Norm":                  1e-5,
-    "batch_size":               1000,
+    "batch_size":               5000,
     "optimizer":                optimizers.Adam(1e-4),
     "activation_function":      "elu",
     "output_activation":        "Softmax",

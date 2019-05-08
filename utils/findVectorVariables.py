@@ -31,13 +31,13 @@ variables = variable_set.all_variables
 new_set_of_variables = []
 # open sample file
 with uproot.open(opts.file) as f:
-    tree = f["MVATree"]
+    tree = f[self.tree]
 
     for v in variables:
         print("looking at variable: {}".format(v))
         df = tree.pandas.df([v])
         if "subentry" in df.index.names:
-            if "LooseLepton" in v: 
+            if "LooseLepton" in v:
                 new_set_of_variables += [v+"[0]"]
             else:
                 new_set_of_variables += [v+"[{}]".format(i) for i in range(opts.number_of_indices)]
@@ -62,7 +62,3 @@ if opts.generateSet:
         print("variable set printout:")
         print(out)
         print("-"*50)
-
-
-
-

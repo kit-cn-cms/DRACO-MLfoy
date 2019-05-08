@@ -192,9 +192,15 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
+        print("-------------------->")
+        print(self.model_prediction_vector)
+        print("-------------------->")
+
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )
 
+        print(self.model_train_prediction)
+        print("-------------------->")
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -209,17 +215,18 @@ class DNN():
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
-    def predict_event_query(self, query ):
-        events = self.data.get_full_df().query( query )
-        print(str(events.shape[0]) + " events matched the query '"+str(query)+"'.")
+    def predict_event_query(self):
+        events = self.data.get_full_df()[self.train_variables]
+        print(str(events.shape[0]) + " events.")
 
         for index, row in events.iterrows():
             print("========== DNN output ==========")
             print("Event: "+str(index))
-            for var in row.values:
-                print(var)
+            print(row)
             print("-------------------->")
-            output = self.model.predict( np.array([list(row.values)]) )[0]
+            print(row.values)
+            print("-------------------->")
+            output = self.model.predict( np.array([list(row.values)]))[0]
             for i, node in enumerate(self.event_classes):
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
@@ -229,7 +236,6 @@ class DNN():
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
-        K.set_learning_phase(True)
 
         # infer number of input neurons from number of train variables
         number_of_input_neurons     = self.data.n_input_neurons
@@ -260,7 +266,7 @@ class DNN():
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
-                X = keras.layers.Dropout(dropout)(X)
+                X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
         X = keras.layers.Dense(
@@ -360,8 +366,6 @@ class DNN():
             layer.trainable = False
         self.model.trainable = False
 
-        K.set_learning_phase(False)
-
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
         sess = K.get_session()
@@ -403,8 +407,12 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
+        print(self.data.get_test_data(as_matrix = True) )
+        print(self.model_prediction_vector)
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )
+        print(self.data.get_train_data(as_matrix = True) )
+        print(self.model_train_prediction)
 
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
@@ -606,5 +614,6 @@ def loadDNN(inputDirectory, outputDirectory):
     # load the trained model
     dnn.load_trained_model(inputDirectory)
 
+    #dnn.predict_event_query()
 
     return dnn

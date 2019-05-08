@@ -65,6 +65,7 @@ else:
 dnn = DNN.loadDNN(inPath, outPath)
 
 
+
 # plotting
 if options.plot:
     # plot the confusion matrix
