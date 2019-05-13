@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sys
+import array
 import numpy as np
 #np.set_printoptions(threshold=sys.maxsize)
 
@@ -12,6 +13,9 @@ from keras import backend as K
 
 # Limit gpu usage
 import tensorflow as tf
+
+import ROOT
+from ROOT import TFile, TTree
 
 import pyrootsOfTheCaribbean.plot_configs.setupPlots as setup
 
@@ -158,7 +162,7 @@ class DNN():
 
         # load data set
         self.data = self._load_datasets()
-        self.event_classes = self.data.output_classes
+        self.event_classes = ['ttHbb','ttbb','tt2b','ttb','ttcc','ttlf']
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -197,7 +201,7 @@ class DNN():
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
         print(self.predicted_classes)
 
-    def predict_event_query(self ):
+    def predict_events(self ):
         events = self.data.get_full_df()[self.variables]
         print(str(events.shape[0]) + " events.")
 
@@ -230,6 +234,16 @@ class DNN():
 
         plotNodes.plot(ratio = False,  privateWork = privateWork)
 
+    def save_outputNodes(self, outDir):
+
+        ''' plot distribution in outputNodes '''
+        saveNodes = saveOutputNodes(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.categoryLabel,
+            output_directory    = outDir)
+        saveNodes.save()
 
 
 
@@ -444,3 +458,31 @@ class plotOutputNodes:
         cmd = "pdfunite "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
         print(cmd)
         os.system(cmd)
+
+
+class saveOutputNodes:
+    def __init__(self, data, prediction_vector, event_classes, event_category, output_directory):
+        self.data              = data
+        self.prediction_vector = prediction_vector
+        self.event_classes     = event_classes
+        self.event_category    = event_category
+        self.output_directory  = output_directory
+
+
+    def save(self) :
+        ofile = ROOT.TFile(self.output_directory+"/outputNodes.root", 'recreate')
+        otree = ROOT.TTree('outputNodes', 'outputNodes')
+
+        print("Output nodes distributions saved in "+self.output_directory+"/outputNodes.root")
+
+        predictions = [array.array('f', [0.]) for i in range(6)]
+        for i, node in enumerate(self.event_classes):
+                otree.Branch(str(node), predictions[i], str(node))
+
+        for j in self.prediction_vector:
+            for i in range(6):
+                predictions[i][0] = j[i]
+            otree.Fill()
+
+        ofile.Write()
+        ofile.Close()

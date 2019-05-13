@@ -106,6 +106,8 @@ dnn = DNN.DNN(
 # load the trained model
 dnn.load_trained_model(modelDir)
 
-#dnn.predict_event_query()
+#dnn.predict_events()
 
-dnn.plot_outputNodes(log = options.log, privateWork = options.privateWork)
+dnn.save_outputNodes(outPath)
+
+#dnn.plot_outputNodes(log = options.log, privateWork = options.privateWork)

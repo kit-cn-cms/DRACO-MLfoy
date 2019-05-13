@@ -9,7 +9,6 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import utils.generateJTcut as JTcut
-import plot_configs.variableConfig as binning
 import plot_configs.setupPlots as setup
 
 class Sample:
@@ -41,7 +40,7 @@ class Sample:
             self.data = store.select("data", stop = self.stop)
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
-        self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
+        self.data["weight"] = self.data["weight"].astype(float)
 
     def cutData(self, cut, variables, lumi_scale):
         # if lumi scale was set to zero set scale to 1
@@ -51,7 +50,7 @@ class Sample:
 
         if not self.applyCut or cut in ["inclusive", "SL"]:
             self.cut_data[cut] = self.data
-            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale)
+            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.weight*scale)
             return
 
         # cut events according to JT category
@@ -63,7 +62,7 @@ class Sample:
         self.cut_data[cut] = self.cut_data[cut][list(set(variables))]
 
         # add weight entry for scaling
-        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
+        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.weight*scale*self.XSScale)
 
 
 
@@ -78,6 +77,8 @@ class variablePlotter:
         self.samples        = {}
         self.ordered_stack  = []
         self.categories     = []
+        self.variableconfig = pandas.read_csv(basedir+'/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv')
+        self.variableconfig.set_index('variablename',inplace=True)
 
         # handle options
         defaultOptions = {
@@ -85,12 +86,17 @@ class variablePlotter:
             "ratioTitle":   None,
             "logscale":     False,
             "scaleSignal":  -1,
+            "lumiScale":    1,
             "privateWork":  False,
-            "KSscore":      True}
+            "KSscore":      False}
 
         for key in plotOptions:
             defaultOptions[key] = plotOptions[key]
         self.options = defaultOptions
+
+        if self.options["privateWork"]:
+            self.options["scaleSignal"]=-1
+            self.options["lumiScale"]=1
 
 
     def addSample(self, **kwargs):
@@ -129,9 +135,9 @@ class variablePlotter:
                 variables = self.getAllVariables()
             # load list of variables from variable set
             elif cat in self.variable_set.variables:
-                variables = self.variable_set.variables[cat] + self.add_vars
+                variables = list(self.variable_set.variables[cat]) + self.add_vars
             else:
-                variables = self.variable_set.all_variables + self.add_vars
+                variables = list(self.variable_set.all_variables) + self.add_vars
 
             # filter events according to JT category
             for key in self.samples:
@@ -164,18 +170,29 @@ class variablePlotter:
     def histVariable(self, variable, plot_name, cat):
         histInfo = {}
 
-        # get number of bins and binrange from config file
-        bins = binning.getNbins(variable)
-        bin_range = binning.getBinrange(variable)
-
-        # check if bin_range was found
-        if not bin_range:
+        if variable in self.variableconfig.index:
+            # get variable info from config file
+            bins = int(self.variableconfig.loc[variable,'numberofbins'])
+            minValue = float(self.variableconfig.loc[variable,'minvalue'])
+            maxValue = float(self.variableconfig.loc[variable,'maxvalue'])
+            displayname = self.variableconfig.loc[variable,'displayname']
+            logoption = self.variableconfig.loc[variable,'logoption']
+        else:
+            bins = 15
             maxValue = max([max(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             minValue = min([min(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
-            config_string = "variables[\""+variable+"\"]\t\t\t= Variable(bin_range = [{},{}])\n".format(minValue, maxValue)
-            with open("new_variable_configs.txt", "a") as f:
+            displayname = variable
+            logoption = "-"
+
+            config_string = "{},{},{},{},{},{}\n".format(variable, minValue, maxValue, bins, logoption, displayname)
+            with open("new_variable_configs.csv", "a") as f:
                 f.write(config_string)
-            bin_range = [minValue, maxValue]
+
+        bin_range = [minValue, maxValue]
+        if logoption=="x" or logoption=="X":
+            logoption=True
+        else:
+            logoption=False
 
         histInfo["nbins"] = bins
         histInfo["range"] = bin_range
@@ -197,7 +214,6 @@ class variablePlotter:
             #values =  [values[i]  for i in range(len(values))  if not np.isnan(values[i])]
 
             weightIntegral += sum(weights)
-
             # setup histogram
             hist = setup.setupHistogram(
                 values      = values,
@@ -206,9 +222,8 @@ class variablePlotter:
                 bin_range   = bin_range,
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
-                ytitle      = setup.GetyTitle(self.options["lumiScale"]),
+                ytitle      = setup.GetyTitle(self.options["privateWork"]),
                 filled      = sample.filled)
-
             bkgHists.append(hist)
             bkgLabels.append(sample.sampleName)
 
@@ -262,7 +277,8 @@ class variablePlotter:
         # init canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, self.options,
-            canvasName = variable)
+            canvasName = variable, displayname=displayname,
+            logoption = logoption)
 
         # setup legend
         legend = setup.getLegend()
