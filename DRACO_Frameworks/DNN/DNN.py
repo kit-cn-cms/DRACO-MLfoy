@@ -69,7 +69,7 @@ class EarlyStopping(keras.callbacks.Callback):
 
         # check loss by percentage difference
         if self.value:
-            if abs(current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
+            if (current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
                 if self.verbose > 0:
                     print("\nEpoch {}: early stopping threshold reached".format(epoch))
                 self.n_failed += 1
@@ -95,7 +95,8 @@ class DNN():
             test_percentage = 0.2,
             eval_metrics    = None,
             shuffle_seed    = None,
-            balanceSamples  = False):
+            balanceSamples  = False,
+            evenSel         = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -110,6 +111,16 @@ class DNN():
         self.JTstring       = event_category
         self.event_category = JTcut.getJTstring(event_category)
         self.categoryLabel  = JTcut.getJTlabel(event_category)
+        # selection
+        self.evenSel = ""
+        self.oddSel = "1."
+        if not evenSel == None:
+            if evenSel == True:
+                self.evenSel = "(Evt_Odd==0)"
+                self.oddSel  = "(Evt_Odd==1)"
+            elif evenSel == False:
+                self.evenSel = "(Evt_Odd==1)"
+                self.oddSel  = "(Evt_Odd==0)"
 
         # list of input variables
         self.train_variables = train_variables
@@ -144,8 +155,6 @@ class DNN():
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-
-
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
@@ -154,7 +163,9 @@ class DNN():
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
             shuffleSeed         = shuffle_seed,
-            balanceSamples      = balanceSamples)
+            balanceSamples      = balanceSamples,
+            evenSel             = self.evenSel)
+
 
 
     def _load_architecture(self, config):
@@ -244,6 +255,8 @@ class DNN():
         number_of_neurons_per_layer = self.architecture["layers"]
         dropout                     = self.architecture["Dropout"]
         activation_function         = self.architecture["activation_function"]
+        if activation_function == "leakyrelu":
+            activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
         output_activation           = self.architecture["output_activation"]
 
@@ -263,6 +276,9 @@ class DNN():
                 kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
+
+            if self.architecture["activation_function"] == "leakyrelu":
+                X = keras.layers.LeakyReLU(alpha=0.3)(X)
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
@@ -368,8 +384,8 @@ class DNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        sess = K.get_session()
         saver = tf.train.Saver()
+        sess = K.get_session()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
@@ -383,14 +399,31 @@ class DNN():
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
         configs["JetTagCategory"] = self.JTstring
+        configs["categoryLabel"] = self.categoryLabel
+        configs["Selection"] = self.event_category
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
         configs["shuffleSeed"] = self.data.shuffleSeed
+        configs["trainSelection"] = self.evenSel
+        configs["evalSelection"] = self.oddSel
+
+        # save information for binary DNN
+        if self.data.binary_classification:
+            configs["binaryConfig"] = {
+                "minValue": self.input_samples.bkg_target,
+                "maxValue": 1.}
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
+
+        # save configurations of variables for plotscript
+        plot_file = self.cp_path+"/plot_config.csv"
+        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        variables = variable_configs.loc[self.train_variables]
+        variables.to_csv(plot_file, sep = ",")
+        print("wrote config of input variables to {}".format(plot_file))
 
 
     def eval_model(self):
@@ -414,6 +447,9 @@ class DNN():
         print(self.data.get_train_data(as_matrix = True) )
         print(self.model_train_prediction)
 
+        #figure out ranges
+        self.get_ranges()
+
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -432,6 +468,17 @@ class DNN():
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
+    def get_ranges(self):
+        if not self.data.binary_classification:
+            max_ = [0.]*len(self.input_samples.samples)
+            for ev in self.model_prediction_vector:
+                for i,node in enumerate(ev):
+                    if node>max_[i]:
+                        max_[i]=node
+            print("Max: ",max_)
+            for i, sample in enumerate(self.input_samples.samples):
+                sample.max=round(float(max_[i]),2)
+                sample.min=round(float(1./len(self.input_samples.samples)),2)
 
 
     def get_input_weights(self):
@@ -488,12 +535,13 @@ class DNN():
             # add title
             title = self.categoryLabel
             title = title.replace("\\geq", "$\geq$")
+            title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
 
             # make it nicer
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric, fontsize = 16)
+            plt.ylabel(metric.replace("_"," "), fontsize = 16)
 
             # add legend
             plt.legend()
@@ -558,6 +606,7 @@ class DNN():
                         signal_class = None, nbins = 20, bin_range = [0.,1.]):
         ''' plot comparison between train and test samples '''
 
+        bin_range = [1./self.data.n_output_neurons, 1.]
         closureTest = plottingScripts.plotClosureTest(
             data                = self.data,
             test_prediction     = self.model_prediction_vector,
@@ -584,6 +633,19 @@ class DNN():
 
         eventYields.plot(privateWork = privateWork)
 
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = 30, bin_range = [0.,1.], name = "binary discriminator"):
+
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            predictions         = self.model_prediction_vector,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.categoryLabel,
+            plotdir             = self.save_path,
+            logscale            = log)
+
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
 def loadDNN(inputDirectory, outputDirectory):
 
@@ -602,6 +664,7 @@ def loadDNN(inputDirectory, outputDirectory):
     for sample in config["eventClasses"]:
         input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
 
+    print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
         save_path       = outputDirectory,
@@ -613,7 +676,5 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
-
-    #dnn.predict_event_query()
 
     return dnn

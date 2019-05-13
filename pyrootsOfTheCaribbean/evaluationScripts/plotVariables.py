@@ -98,7 +98,6 @@ class variablePlotter:
             self.options["scaleSignal"]=-1
             self.options["lumiScale"]=1
 
-
     def addSample(self, **kwargs):
         print("adding sample: "+str(kwargs["sampleName"]))
         kwargs["maxEntries"] = self.max_entries
@@ -276,7 +275,7 @@ class variablePlotter:
 
         # init canvas
         canvas = setup.drawHistsOnCanvas(
-            sigHists, bkgHists, self.options,
+            sigHists, bkgHists, self.options,   
             canvasName = variable, displayname=displayname,
             logoption = logoption)
 

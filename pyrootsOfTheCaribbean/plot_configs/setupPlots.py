@@ -6,14 +6,19 @@ import numpy as np
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
-        "ttZ":   ROOT.kBlue+4,
-        "ttH":   ROOT.kBlue+1,
-        "ttlf":  ROOT.kRed-7,
-        "ttcc":  ROOT.kRed+1,
-        "ttbb":  ROOT.kRed+3,
-        "tt2b":  ROOT.kRed+2,
-        "ttb":   ROOT.kRed-2,
-        "ttbar": ROOT.kOrange,
+        "ttZ":          ROOT.kCyan,
+        "ttH":          ROOT.kBlue+1,
+        "ttlf":         ROOT.kRed-7,
+        "ttcc":         ROOT.kRed+1,
+        "ttbb":         ROOT.kRed+3,
+        "tt2b":         ROOT.kRed+2,
+        "ttb":          ROOT.kRed-2,
+        "tthf":         ROOT.kRed-3,
+        "ttbar":        ROOT.kOrange,
+        "ttmergedb":    ROOT.kRed-1,
+
+        "sig":   ROOT.kCyan,
+        "bkg":   ROOT.kOrange,
         }
 
     if "ttZ" in cls: cls = "ttZ"
@@ -36,7 +41,7 @@ def setupHistogram(
         xtitle, ytitle,
         color = ROOT.kBlack, filled = True):
     # define histogram
-    histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", nbins, *bin_range)
+    histogram = ROOT.TH1D(xtitle, "", nbins, *bin_range)
     histogram.Sumw2(True)
 
     for v, w in zip(values, weights):
@@ -187,8 +192,11 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
             latex.DrawLatex(l+0.47,1.-t+0.01, text)
 
 
+<<<<<<< HEAD
     return canvas
 
+=======
+>>>>>>> origin/legacyAnalysis
 def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
     canvas = getCanvas(canvasName)
 
@@ -442,7 +450,7 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
 
     if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
-    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
+    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text) 
     else:           latex.DrawLatex(l,1.-t+0.01, text)
 
 

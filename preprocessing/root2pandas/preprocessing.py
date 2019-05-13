@@ -41,7 +41,6 @@ parser.add_option("-n", "--name", dest="Name", default="dnn",
 if not os.path.isabs(options.variableSelection):
     sys.path.append(basedir+"/variable_sets/")
     variable_set = __import__(options.variableSelection)
-    print(variable_set.all_variables)
 elif os.path.exists(options.variableSelection):
     variable_set = __import__(options.variableSelection)
 else:
@@ -49,19 +48,21 @@ else:
 
 if not os.path.isabs(options.outputDir):
     outputdir = basedir+"/workdir/"+options.outputDir
-elif os.path.exists(options.outputDir):
+elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options.outputDir)):
     outputdir=options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
 # define a base event selection which is applied for all Samples
+
 base_selection = "(N_jets >= 3 and N_btags >= 2)"
 
 ttH_selection = None #"(Evt_Odd == 1)"
 
+
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttHbb", selection = None)
+ttH_categories.addCategory("ttH", selection = None)
 
 ttbar_bb = root2pandas.EventCategories()
 ttbar_bb.addCategory("ttbb")

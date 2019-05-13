@@ -18,15 +18,13 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="combined",
-
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
-
+        help="DIR for input", metavar="inputDir")
 
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in preprocessing", metavar="naming")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="DL_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
@@ -41,7 +39,7 @@ parser.add_option("-r", "--ratio", dest="ratio", action = "store_true", default=
 parser.add_option("--ratiotitle", dest="ratioTitle", default="#frac{signal}{background}",
         help="STR #frac{PROCESS}{PROCESS}", metavar="title")
 
-parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_true", default=True,
+parser.add_option("-k", "--ksscore", dest="KSscore", action = "store_true", default=False,
         help="activate KSscore", metavar="KSscore")
 
 parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
@@ -76,11 +74,11 @@ if not os.path.isabs(options.outputDir):
     plot_dir = basedir+"/workdir/"+options.outputDir
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
-else:
+else: 
     plot_dir=options.outputDir
     if not os.path.exists(options.outputDir):
         os.makedirs(plot_dir)
-
+   
 
 # plotting options
 plotOptions = {
@@ -105,7 +103,8 @@ additional_variables = [
 
 # variables that are not plotted
 ignored_variables = [
-    "weight",
+    "Weight_XS",
+    "Weight_GEN_nom",
     ]
 
 # initialize plotter
@@ -120,43 +119,38 @@ plotter = variablePlotter(
 naming = options.naming
 # add signal samples
 plotter.addSample(
-    sampleName      = "ttHbb_2L",
-    sampleFile      = data_dir+"/ttHbb_2L.root",
-    plotColor       = ROOT.kBlue,
+    sampleName      = "ttH",
+    sampleFile      = data_dir+"/ttHbb"+naming,
+    plotColor       = ROOT.kBlue+1,
     signalSample    = True)
 
-# add samples
+# add background samples
 plotter.addSample(
-    sampleName      = "ttbar_bb",
-    sampleFile      = data_dir+"/ttbar_bb.root",
-    plotColor       = ROOT.kRed+3)
+    sampleName      = "ttb",
+    sampleFile      = data_dir+"/ttb"+naming,
+    plotColor       = ROOT.kRed+3,
+    signalSample    = True)
 
 plotter.addSample(
-    sampleName      = "ttbar_2b",
-    sampleFile      = data_dir+"/ttbar_2b.root",
-    plotColor       = ROOT.kRed+2)
+    sampleName      = "ttcc",
+    sampleFile      = data_dir+"/ttcc"+naming,
+    plotColor       = ROOT.kRed+1,
+    signalSample    = True)
 
 plotter.addSample(
-    sampleName      = "ttbar_b",
-    sampleFile      = data_dir+"/ttbar_b.root",
-    plotColor       = ROOT.kRed-2)
+    sampleName      = "ttlf",
+    sampleFile      = data_dir+"/ttlf"+naming,
+    plotColor       = ROOT.kRed-7,
+    signalSample    = False)
 
-plotter.addSample(
-    sampleName      = "ttbar_cc",
-    sampleFile      = data_dir+"/ttbar_cc.root",
-    plotColor       = ROOT.kRed+1)
 
-plotter.addSample(
-    sampleName      = "ttbar_lf",
-    sampleFile      = data_dir+"/ttbar_lf.root",)
 
 # add JT categories
-plotter.addCategory("3j_2t")
-#plotter.addCategory("3j_3t")
-#plotter.addCategory("ge4j_2t")
-#plotter.addCategory("ge4j_3t")
-#plotter.addCategory("ge4j_ge4t")
-#plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("4j_ge3t")
+plotter.addCategory("5j_ge3t")
+plotter.addCategory("ge6j_ge3t")
+plotter.addCategory("ge4j_ge3t")
+
 
 # perform plotting routine
 plotter.plot(saveKSValues = options.KSscore)

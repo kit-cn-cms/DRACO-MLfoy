@@ -7,8 +7,6 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 
-
-
 class EventCategories:
     def __init__(self):
         self.categories = {}
@@ -16,7 +14,7 @@ class EventCategories:
     def addCategory(self, name, selection = None):
         self.categories[name] = selection
 
-    def getSelections(self):
+    def getCategorySelections(self):
         selections = []
         for cat in self.categories:
             if self.categories[cat]:
@@ -25,17 +23,28 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
+        self.ownVars    = ownVars
+        self.even_odd   = even_odd
+        self.evenOddSplitting()
 
     def printInfo(self):
         print("\nHANDLING SAMPLE {}\n".format(self.sampleName))
         print("\tntuples: {}".format(self.ntuples))
         print("\tselections: {}".format(self.selections))
+
+    def evenOddSplitting(self):
+        if self.even_odd:
+            if self.selections:
+                self.selections += "(Evt_Odd == 1)"
+            else:
+                self.selections = "(Evt_Odd == 1)"
+
 
 
 class Dataset:
@@ -51,7 +60,7 @@ class Dataset:
 
         # settings for dataset
         self.addMEM     = addMEM
-        self.maxEntries = maxEntries
+        self.maxEntries = int(maxEntries)
 
         # default values for some configs
         self.baseSelection  = None
@@ -106,12 +115,20 @@ class Dataset:
             self.trigger.append(self.baseSelection)
 
         for key in self.samples:
+            # collect variables for specific samples
+            own_variables = []
+
             # search in additional selection strings
             if self.samples[key].selections:
-                self.trigger.append(self.samples[key].selections)
-            # search in event category selection strings
-            self.trigger += self.samples[key].categories.getSelections()
+                own_variables += self.searchVariablesInTriggerString( self.samples[key].selections )
+            # search in category selections
+            categorySelections = self.samples[key].categories.getCategorySelections()
+            for selection in categorySelections:
+                own_variables += self.searchVariablesInTriggerString( selection )
+            # save list of variables
+            self.samples[key].ownVars = [v for v in list(set(own_variables)) if not v in self.variables]
 
+        # list of triggers
         self.trigger = list(set(self.trigger))
 
         # scan trigger strings for variable names
@@ -179,7 +196,6 @@ class Dataset:
     # ====================================================================
 
     def runPreprocessing(self):
-
         # add variables for triggering and event category selection
         self.gatherTriggerVariables()
 
@@ -187,7 +203,6 @@ class Dataset:
         self.searchVectorVariables()
 
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
-
         # remove old files
         self.removeOldFiles()
 
@@ -201,10 +216,22 @@ class Dataset:
             if not os.path.exists(self.memPath):
                 os.makedirs(self.memPath)
 
+        sampleList = []
+
         # start loop over all samples to preprocess them
         for key in self.samples:
+            # include own variables of the sample
+            self.addVariables( self.samples[key].ownVars )
+
+            # process the sample
             self.processSample(self.samples[key])
+
+            # remove the own variables
+            self.removeVariables( self.samples[key].ownVars )
+            createSampleList(sampleList, self.samples[key])
             print("done.")
+        # write file with preprocessed samples
+        createSampleFile(self.outputdir, sampleList)
 
     def processSample(self, sample):
         # print sample info
@@ -236,21 +263,41 @@ class Dataset:
                 except:
                     print("could not open MVATree in ROOT file")
                     continue
-	    df = tree.pandas.df(self.variables)
-	    # handle vector variables, loop over them
-	    for vecvar in self.vector_variables:
-		# load dataframe with vector variable
-		vec_df = tree.pandas.df(vecvar)
-		# loop over inices in vecvar list
-		for idx in self.vector_variables[vecvar]:
-		    # slice the index
-		    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-		    # define name for column in df
-		    col_name = str(vecvar)+"["+str(idx)+"]"
-		    # append column to original dataframe
-		    df[col_name] = pd.Series( idx_df[vecvar].values, index = df.index )
 
-	    # apply event selection
+
+            if tree.numentries == 0:
+                print("MVATree has no entries - skipping file")
+                continue
+
+            # convert to dataframe
+            df = tree.pandas.df(self.variables)
+
+            # delete subentry index
+            #df = df.reset_index(1, drop = True)
+
+            # handle vector variables, loop over them
+            for vecvar in self.vector_variables:
+
+                # load dataframe with vector variable
+                vec_df = tree.pandas.df(vecvar)
+
+                # loop over inices in vecvar list
+                for idx in self.vector_variables[vecvar]:
+
+                    # slice the index
+                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                    idx_df = idx_df.reset_index(1, drop = True)
+
+                    # define name for column in df
+                    col_name = str(vecvar)+"["+str(idx)+"]"
+
+                    # initialize column in original dataframe
+                    df[col_name] = 0.
+
+                    # append column to original dataframe
+                    df.update( idx_df[vecvar].rename(col_name) )
+
+            # apply event selection
             df = self.applySelections(df, sample.selections)
 
             # add to list of dataframes
@@ -385,3 +432,42 @@ class Dataset:
                 if os.path.exists(outFile):
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
+
+
+# function to append a list with sample, label and normalization_weight to a list samples
+def createSampleList(sList, sample, label = None, nWeight = 1):
+    """ takes a List a sample and appends a list with category, label and weight. Checks if even/odd splitting was made and therefore adjusts the normalization weight """
+    if sample.even_odd: nWeight*=2.
+    for cat in sample.categories.categories:
+        if label==None:
+            sList.append([cat, cat, nWeight])
+        else:
+            sList.append([cat, label, nWeight])
+    return sList
+
+# function to create a file with all preprocessed samples
+def createSampleFile(outPath, sampleList):
+    # create file
+    processedSamples=""
+    # write samplenames in file
+    for sample in sampleList:
+        processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
+    with open(outPath+"/sampleFile.dat","w") as sampleFile:
+        sampleFile.write(processedSamples)
+
+# function to read Samplefile
+def readSampleFile(inPath):
+    """ reads file and returns a list with all samples, that are not uncommented. Uncomment samples by adding a '#' in front of the line"""
+    sampleList = []
+    with open(outPath+"/sampleFile.dat","w") as sampleFile:
+        for row in sampleFile:
+            if row[0] != "#":
+                sample = row.split()
+                sampleList.append(dict( sample=sample[0], label=sample[1], normWeight=sample[2]) )
+    return sampleList
+
+# function to add samples to InputSamples
+def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
+    """ adds each sample in samples to the inputSample """
+    for sample in samples:
+        inputSamples.addSample(sample["sample"]+naming, label=sample["label"], normalization_weight = sample["normWeight"])

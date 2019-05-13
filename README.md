@@ -2,6 +2,13 @@
 
 Collection of Machine learning frameworks for DNNs, Regressions, Adversaries, CNNs and Others (DRACO)
 
+## Refer to READMEs in the corresponding directories for specific information!
+For readability there is a README for each step (this here is only for an overview!):
+- [preprocessing](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/preprocessing/root2pandas/README.md)
+- [training](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/train_scripts/README.md)
+- [variables](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/pyrootsOfTheCaribbean/README.md)
+- [variable plotting](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/variable_sets/README.md) 
+
 ## ATTENTION
 When working with the combination of
 - `ROOT.__version__ = 6.14/04`
@@ -10,7 +17,14 @@ When working with the combination of
 segmentation violations appear when opening hdf-files with `pandas.read_hdf()` or `pandas.HDFStore()`.
 To circumvent this, first import everything related to `ROOT`, only then start importing things from `keras`.
 
-## workflow in a nutshell
+## Package-requirements
+- `CMSSW_9_4_9` or newer
+- uproot `pip install --user uproot==3.2.7`
+- `pip install --user uproot-methods==0.2.6`
+- `pip install --user awkward==0.4.2`
+- TensorFlow backend for KERAS `export KERAS_BACKEND=tensorflow`
+
+## Workflow in a nutshell
 1. Preprocess input data:
     - to create input features you need data in the ntuple format, these get converted into hdf5 dataframes
     - create a list of input features in `variable_sets/` (look at the README for structural advice)
