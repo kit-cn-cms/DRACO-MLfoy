@@ -27,7 +27,7 @@ python train_template.py
 or use the following options
 1. Category used for training
     - `-c STR` name of the category `(ge/le)[nJets]j_(ge/le)[nTags]t`
-    (default is `4j_ge3t`)
+    (default is `ge4j_ge4t`)
 
 2. Naming/File Options
     - `-o DIR` to change the name of the output directory (absolute path or path relative to `workdir`)

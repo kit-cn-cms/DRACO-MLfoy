@@ -11,7 +11,7 @@ pip install --user awkward==0.4.2
 ```
 
 ## Adjust settings in `preprocessing.py`
-- `ntuplesPath` as absolute path to ntuples
+- `ntuplesPath` as absolute path to ntuples (for DL analysis  they are stored in `/nfs/dust/cms/user/angirald/workspace/DNN/CMSSW_9_4_9/src/DRACO-MLfoy/InputFeatures`)
 - change/add samples of the dataset used with
 ```python
 	dataset.addSample(SampleName  = SAMPLENAME,
@@ -30,7 +30,7 @@ python preprocessing/root2pandas/preprocessing.py -o cate8 -t liteTreeTTH_step7_
 ```
 or use the following for options
 - `-o DIR` to change the name of the ouput directory, can be either a string or absolute path (default is `InputFeatures`)
-- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed (default is `DL_variables`)
+- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed (for DL analysis default is `DL_variables` )
 - `-e STR` to select the tree corresponding to the right category  (default is `liteTreeTTH_step7_cate8`)
 - `-e INT` to change the maximal number of entries for each batch to restrict memory usage (default is `50000`)
 - `-n STR` to change the naming of the output file
