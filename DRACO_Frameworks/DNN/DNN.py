@@ -249,6 +249,8 @@ class DNN():
         number_of_neurons_per_layer = self.architecture["layers"]
         dropout                     = self.architecture["Dropout"]
         activation_function         = self.architecture["activation_function"]
+        if activation_function == "leakyrelu":
+            activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
         output_activation           = self.architecture["output_activation"]
 
@@ -268,6 +270,9 @@ class DNN():
                 kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
+    
+            if self.architecture["activation_function"] == "leakyrelu":
+                X = keras.layers.LeakyReLU(alpha=0.3)(X)
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
