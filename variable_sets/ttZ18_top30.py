@@ -86,7 +86,7 @@ variables["ge4j_ge4t"] = [
     "Evt_M_MedianTaggedJets",
     "MVA_pt_all_jets_over_E_all_jets_tags",
     "Jet_DeepJetCSV[0]",
-    "MVA_blr",
+    #"MVA_blr",
     "N_BTagsM",
     "Evt_Dr_MinDeltaRTaggedJets",
     "Jet_M[0]",
