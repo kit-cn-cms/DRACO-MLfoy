@@ -6,14 +6,16 @@ import numpy as np
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
-        "ttZ":   ROOT.kBlue+4,
-        "ttH":   ROOT.kBlue+1,
-        "ttlf":  ROOT.kRed-7,
-        "ttcc":  ROOT.kRed+1,
-        "ttbb":  ROOT.kRed+3,
-        "tt2b":  ROOT.kRed+2,
-        "ttb":   ROOT.kRed-2,
-        "ttbar": ROOT.kOrange,
+        "ttZ":          ROOT.kCyan,
+        "ttH":          ROOT.kBlue+1,
+        "ttlf":         ROOT.kRed-7,
+        "ttcc":         ROOT.kRed+1,
+        "ttbb":         ROOT.kRed+3,
+        "tt2b":         ROOT.kRed+2,
+        "ttb":          ROOT.kRed-2,
+        "tthf":         ROOT.kRed-3,
+        "ttbar":        ROOT.kOrange,
+        "ttmergedb":    ROOT.kRed-1,
     
         "sig":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
