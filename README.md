@@ -4,10 +4,10 @@ Collection of Machine learning frameworks for DNNs, Regressions, Adversaries, CN
 
 ## Refer to READMEs in the corresponding directories for specific information!
 For readability there is a README for each step (this here is only for an overview!):
-- [preprocessing](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/legacyAnalysis/preprocessing/root2pandas/README.md)
-- [training](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/legacyAnalysis/train_scripts/README.md)
-- [variables](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/legacyAnalysis/pyrootsOfTheCaribbean/README.md)
-- [variable plotting](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/legacyAnalysis/variable_sets/README.md) 
+- [preprocessing](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/preprocessing/root2pandas/README.md)
+- [training](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/train_scripts/README.md)
+- [variables](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/pyrootsOfTheCaribbean/README.md)
+- [variable plotting](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/variable_sets/README.md) 
 
 ## ATTENTION
 When working with the combination of
