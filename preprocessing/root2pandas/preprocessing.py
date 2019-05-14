@@ -62,7 +62,7 @@ ttH_selection = None #"(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH", selection = None)
+ttH_categories.addCategory("ttHbb", selection = None)
 
 ttbar_bb = root2pandas.EventCategories()
 ttbar_bb.addCategory("ttbb")
@@ -95,7 +95,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/workspace/DRACO-MLfoy/combined/"
+ntuplesPath = "/nfs/dust/cms/user/angirald/workspace/DNN/CMSSW_9_4_9/src/DRACO-MLfoy/InputFeatures"
 
 
 # add samples to dataset

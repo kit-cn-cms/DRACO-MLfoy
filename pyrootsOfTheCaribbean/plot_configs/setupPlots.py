@@ -191,12 +191,8 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
         else:
             latex.DrawLatex(l+0.47,1.-t+0.01, text)
 
-
-<<<<<<< HEAD
     return canvas
 
-=======
->>>>>>> origin/legacyAnalysis
 def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
     canvas = getCanvas(canvasName)
 
@@ -450,7 +446,7 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
 
     if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
-    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text) 
+    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:           latex.DrawLatex(l,1.-t+0.01, text)
 
 

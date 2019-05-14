@@ -90,6 +90,7 @@ elif os.path.exists(options.inputDir):
     inPath=options.inputDir
 else:
     sys.exit("ERROR: Input Directory does not exist!")
+print(inPath)
 
 #get output directory path
 if not os.path.isabs(options.outputDir):
