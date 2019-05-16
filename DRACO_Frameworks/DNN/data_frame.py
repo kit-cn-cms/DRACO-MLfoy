@@ -1,16 +1,18 @@
 import pandas as pd
 import os
+import sys
 import numpy as np
 from keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1.):
+    def __init__(self, path, label, normalization_weight = 1., train_weight = 1.):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
         self.isSignal = None
+        self.train_weight = train_weight
         self.min=0.0
         self.max=1.0
 
@@ -34,7 +36,8 @@ class Sample:
 
         # assign train weight
         weight_sum = sum(df["total_weight"].values)
-        df = df.assign(train_weight = lambda x: x.total_weight/weight_sum)
+        df = df.assign(train_weight = lambda x: x.total_weight/weight_sum*self.train_weight)
+        print("sum of train weights: {}".format(sum(df["train_weight"].values)))
 
         # add lumi weight
         df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
@@ -68,13 +71,13 @@ class InputSamples:
         self.activate_samples = activateSamples
         self.samples = []
 
-    def addSample(self, sample_path, label, normalization_weight = 1.):
+    def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(sample_path, label, normalization_weight) )
+        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight) )
         
     def getClassConfig(self):
         configs = []
@@ -200,6 +203,8 @@ class DataFrame(object):
             for v in train_variables:
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
+                if norm_csv["std"][v] == 0.:
+                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
             df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
             self.norm_csv = norm_csv
 

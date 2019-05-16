@@ -82,14 +82,14 @@ config_dict["ttZ_2018"] = {
 config_dict["ttZ_2018_v2"] = {
         "layers":                   [300,200,100,50],
         "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.5,
-        "L2_Norm":                  0.,
-        "batch_size":               4096,
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               5000,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     100,
+        "earlystopping_epochs":     50,
         }
 
 config_dict["binary_config"] = {
@@ -97,7 +97,7 @@ config_dict["binary_config"] = {
         "loss_function":            "squared_hinge",
         "Dropout":                  0.3,
         "L2_Norm":                  0.,
-        "batch_size":               10000,
+        "batch_size":               4000,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "selu",
         "output_activation":        "Tanh",
