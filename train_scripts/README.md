@@ -62,7 +62,7 @@ or use the following options
 
 Example:
 ```bash
-python train_template.py -i /path/to/input/files/ -o testRun --netconfig=test_config --plot --printroc -c ge6j_ge3t --epochs=1000 --signalclass=ttHbb,ttbb
+python train_template.py -i /path/to/input/files/ -o testRun --plot --printroc -c ge6j_ge3t 
 ```
 
 

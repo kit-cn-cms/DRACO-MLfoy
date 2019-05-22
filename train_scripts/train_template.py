@@ -85,7 +85,7 @@ else:
 
 #get input directory path
 if not os.path.isabs(options.inputDir):
-    inPath = basedir+"/workdir/"+options.inputDir
+    inPath = basedir+"/"+options.inputDir
 elif os.path.exists(options.inputDir):
     inPath=options.inputDir
 else:
@@ -128,8 +128,6 @@ input_samples = df.InputSamples(inPath, options.activateSamples)
 naming = options.naming
 
 
-# during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
-#       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
