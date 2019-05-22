@@ -11,7 +11,7 @@ pip install --user awkward==0.4.2
 ```
 
 ## Adjust settings in `preprocessing.py`
-- `ntuplesPath` as absolute path to ntuples (for DL analysis  they are stored in `/nfs/dust/cms/user/angirald/workspace/DNN/CMSSW_9_4_9/src/DRACO-MLfoy/InputFeatures`)
+- `ntuplesPath` as absolute path to ntuples (for DL analysis  they are stored in `/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/`)
 - change/add samples of the dataset used with
 ```python
 	dataset.addSample(SampleName  = SAMPLENAME,

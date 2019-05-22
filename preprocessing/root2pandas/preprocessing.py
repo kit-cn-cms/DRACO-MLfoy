@@ -95,7 +95,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/workspace/DNN/CMSSW_9_4_9/src/DRACO-MLfoy/InputFeatures"
+ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/"
 
 
 # add samples to dataset
