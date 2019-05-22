@@ -203,15 +203,10 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
-        print("-------------------->")
-        print(self.model_prediction_vector)
-        print("-------------------->")
 
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )
 
-        print(self.model_train_prediction)
-        print("-------------------->")
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -440,12 +435,9 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
-        print(self.data.get_test_data(as_matrix = True) )
-        print(self.model_prediction_vector)
+
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )
-        print(self.data.get_train_data(as_matrix = True) )
-        print(self.model_train_prediction)
 
         #figure out ranges
         self.get_ranges()
@@ -676,5 +668,6 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
+    dnn.predict_event_query()
 
     return dnn

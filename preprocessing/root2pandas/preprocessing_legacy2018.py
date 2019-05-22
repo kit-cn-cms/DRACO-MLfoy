@@ -97,7 +97,7 @@ dataset.addSample(
     categories  = ttH_categories,
     even_odd    = False,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-    ) 
+    )
 
 dataset.addSample(
     sampleName  = "ttHNonbb",
@@ -105,7 +105,7 @@ dataset.addSample(
     categories  = ttH_categories,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     even_odd    = False,
-    ) 
+    )
 
 dataset.addSample(
     sampleName  = "TTToSL",
@@ -136,7 +136,7 @@ dataset.addSample(
     even_odd    = False,
     )
 
-# initialize variable list 
+# initialize variable list
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
@@ -149,8 +149,8 @@ additional_variables = [
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
-    "Evt_ID", 
-    "Evt_Run", 
+    "Evt_ID",
+    "Evt_Run",
     "Evt_Lumi"]
 
 # add these variables to the variable list
