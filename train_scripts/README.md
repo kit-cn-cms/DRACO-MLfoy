@@ -62,8 +62,9 @@ or use the following options
 
 Example:
 ```bash
-python train_template.py -i /path/to/input/files/ -o testRun --plot --printroc -c ge6j_ge3t 
+python train_template.py -i /path/to/input/files/ -o testRun --plot --printroc -c ge6j_ge3t
 ```
+- ` /path/to/input/files/` as absolute path to ntuples (for DL analysis  they are stored in `/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/`, divided per category and number of output nodes)
 
 
 Re-evaluate DNN after training with

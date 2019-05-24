@@ -73,9 +73,6 @@ ttbar_b.addCategory("ttb")
 ttbar_2b = root2pandas.EventCategories()
 ttbar_2b.addCategory("tt2b")
 
-#ttbar_bb = root2pandas.EventCategories()
-#ttbar_bb.addCategory("ttbb")
-
 ttbar_lf = root2pandas.EventCategories()
 ttbar_lf.addCategory("ttlf")
 
@@ -95,7 +92,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/cate9"
+ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/"
 
 
 # add samples to dataset

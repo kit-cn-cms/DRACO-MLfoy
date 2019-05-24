@@ -29,10 +29,8 @@ variables["ge3j_ge2t"] = [
     "R1_jet",
     "twist_jet_jet_max_mass",
     "mass_jet_jet_min_deltaR",
-    "R1_tag",
     "centrality_tags",
     "mass_higgsLikeDijet2",
-    "R1_jet",
     "circularity_jet",
     "centrality_jets_leps",
     "R4_tag",
@@ -40,7 +38,9 @@ variables["ge3j_ge2t"] = [
     "twist_jet_tag_max_mass",
     "aplanarity_jet",
     "twist_tag_tag_min_deltaR",
-    "R4_jet"
+    "R4_jet",
+    "H0_tag",
+    "H3_tag"
     ]
 
 
