@@ -137,5 +137,8 @@ variables["ge6j_ge3t"] = variables["5j_ge3t"] + [
     'Jet_Pt[5]',
     ]
 
+variables["ge6j_3t"] = [v for v in variables["ge6j_ge3t"] if not (v == "N_BTagsM" or v == "MVA_best_higgs_mass")]
+variables["ge6j_ge4t"] = variables["ge6j_ge3t"]
+
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
