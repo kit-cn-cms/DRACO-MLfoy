@@ -71,6 +71,9 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
+parser.add_option("-b", "--boost", dest = "boost", def = None,
+        help = "INT number of networks trained parallel")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -174,11 +177,11 @@ dnn.save_model(sys.argv, filedir)
 # save and print variable ranking
 dnn.get_input_weights()
 
-# plotting 
+# plotting
 if options.plot:
     # plot the evaluation metrics
     dnn.plot_metrics(privateWork = options.privateWork)
- 
+
     if options.binary:
         # plot output node
         bin_range = [input_samples.bkg_target, 1.]
@@ -192,10 +195,9 @@ if options.plot:
 
         # plot the output nodes
         dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
-        
+
         # plot event yields
         dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
 
         # plot closure test
         dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
-
