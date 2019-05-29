@@ -71,7 +71,7 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
-parser.add_option("-b", "--boost", dest = "boost", def = None,
+parser.add_option("-b", "--boost", dest = "boost", default = None,
         help = "INT number of networks trained parallel")
 
 (options, args) = parser.parse_args()
@@ -118,11 +118,17 @@ else:
 if options.signal_class:
     signal=options.signal_class.split(",")
 else:
-    signal=None
-
+    # signal=None       #signal=None doesn't work due to tHbb gets triggered later on if signal=None
+    signal=["ttH", "ttbb", "tt2b", "ttb", "ttcc", "ttlf"]
 if options.binary:
     if not signal:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
+
+#get number of dnns to train
+if options.boost:
+    n_boost = int(options.boost)
+else:
+    n_boost = 1
 
 # load samples
 input_samples = df.InputSamples(inPath, options.activateSamples)
@@ -131,6 +137,7 @@ naming = options.naming
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
+
 
 input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
@@ -142,62 +149,67 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
-# initializing DNN training class
-dnn = DNN.DNN(
-    save_path       = outputdir,
-    input_samples   = input_samples,
-    event_category  = options.category,
-    train_variables = variables,
-    # number of epochs
-    train_epochs    = int(options.train_epochs),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2,
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.balanceSamples)
+#loop dnn training to use boosting
+for i in range(1, n_boost+1):
+    print("Loop i: ", i, " of ", n_boost)
+    print("Signal: ", signal)
 
-# import file with net configs if option is used
-if options.net_config:
-    from net_configs import config_dict
-    config=config_dict[options.net_config]
+    # initializing DNN training class
+    dnn = DNN.DNN(
+        save_path       = outputdir + "_" + str(i),
+        input_samples   = input_samples,
+        event_category  = options.category,
+        train_variables = variables,
+        # number of epochs
+        train_epochs    = int(options.train_epochs),
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = 0.2,
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.balanceSamples)
 
-# build DNN model
-dnn.build_model(config)
+    # import file with net configs if option is used
+    if options.net_config:
+        from net_configs import config_dict
+        config=config_dict[options.net_config]
 
-# perform the training
-dnn.train_model()
+    # build DNN model
+    dnn.build_model(config)
 
-# evalute the trained model
-dnn.eval_model()
+    # perform the training
+    dnn.train_model()
 
-# save information
-dnn.save_model(sys.argv, filedir)
+    # evalute the trained model
+    dnn.eval_model()
 
-# save and print variable ranking
-dnn.get_input_weights()
+    # save information
+    dnn.save_model(sys.argv, filedir)
 
-# plotting
-if options.plot:
-    # plot the evaluation metrics
-    dnn.plot_metrics(privateWork = options.privateWork)
+    # save and print variable ranking
+    dnn.get_input_weights()
 
-    if options.binary:
-        # plot output node
-        bin_range = [input_samples.bkg_target, 1.]
-        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
-    else:
-        # plot the confusion matrix
-        dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+    # plotting
+    if options.plot:
+        # plot the evaluation metrics
+        dnn.plot_metrics(privateWork = options.privateWork)
 
-        # plot the output discriminators
-        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        if options.binary:
+            # plot output node
+            bin_range = [input_samples.bkg_target, 1.]
+            dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
+        else:
+            # plot the confusion matrix
+            dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
-        # plot the output nodes
-        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+            # plot the output discriminators
+            dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
-        # plot event yields
-        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+            # plot the output nodes
+            dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
 
-        # plot closure test
-        dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
+            # plot event yields
+            dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+
+            # plot closure test
+            # dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)     #doesn't work so far
