@@ -151,8 +151,9 @@ if options.binary:
 
 #loop dnn training to use boosting
 for i in range(1, n_boost+1):
+    print("\n", "\n")
     print("Loop i: ", i, " of ", n_boost)
-    print("Signal: ", signal)
+    # print("Signal: ", signal)
 
     # initializing DNN training class
     dnn = DNN.DNN(
@@ -167,7 +168,8 @@ for i in range(1, n_boost+1):
         # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
         test_percentage = 0.2,
         # balance samples per epoch such that there amount of samples per category is roughly equal
-        balanceSamples  = options.balanceSamples)
+        balanceSamples  = options.balanceSamples,
+        shuffle_seed = 9)
 
     # import file with net configs if option is used
     if options.net_config:
@@ -184,7 +186,7 @@ for i in range(1, n_boost+1):
     dnn.eval_model()
 
     # save information
-    dnn.save_model(sys.argv, filedir)
+    dnn.save_model(sys.argv, filedir, signal)
 
     # save and print variable ranking
     dnn.get_input_weights()

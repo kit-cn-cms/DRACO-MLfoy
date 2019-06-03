@@ -117,6 +117,7 @@ config_dict["binary_config"] = {
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     50,
         }
+
 config_dict["binary_config_v2"] = {
         "layers":                   [200,100],
         "loss_function":            "binary_crossentropy",

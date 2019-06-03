@@ -96,7 +96,7 @@ class plotDiscriminators:
                 else:
                     # background histograms
                     weightIntegral += sum(filtered_weights)
-                    
+
                     histogram = setup.setupHistogram(
                         values    = filtered_values,
                         weights   = filtered_weights,
@@ -106,10 +106,10 @@ class plotDiscriminators:
                         xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
                         ytitle    = setup.GetyTitle(self.privateWork),
                         filled    = True)
-                    
+
                     bkgHists.append( histogram )
                     bkgLabels.append( truth_cls )
-    
+
             sigHists = []
             scaleFactors = []
             for iSig in range(len(sig_labels)):
@@ -133,7 +133,7 @@ class plotDiscriminators:
                 sigHists.append(sigHist)
                 scaleFactors.append(scaleFactor)
 
-            # rescale histograms if privateWork is enabled    
+            # rescale histograms if privateWork is enabled
             if privateWork:
                 for sHist in sigHists:
                     sHist.Scale(1./sHist.Integral())
@@ -147,7 +147,7 @@ class plotDiscriminators:
 
             # initialize canvas
             canvas = setup.drawHistsOnCanvas(
-                sigHists, bkgHists, plotOptions, 
+                sigHists, bkgHists, plotOptions,
                 canvasName = node_cls+" final discriminator")
 
             # setup legend
@@ -223,7 +223,7 @@ class plotOutputNodes:
         for i, node_cls in enumerate(self.event_classes):
             # get output values of this node
             out_values = self.prediction_vector[:,i]
-            
+
             nodeIndex = self.data.class_translation[node_cls]
             if self.signal_class:
                 signalIndex = self.signalIndex
@@ -260,7 +260,7 @@ class plotOutputNodes:
                 else:
                     # background histograms
                     weightIntegral += sum(filtered_weights)
-                    
+
                     histogram = setup.setupHistogram(
                         values    = filtered_values,
                         weights   = filtered_weights,
@@ -270,7 +270,7 @@ class plotOutputNodes:
                         xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
                         ytitle    = setup.GetyTitle(self.privateWork),
                         filled    = True)
-                    
+
                     bkgHists.append( histogram )
                     bkgLabels.append( truth_cls )
 
@@ -305,7 +305,7 @@ class plotOutputNodes:
 
             # initialize canvas
             canvas = setup.drawHistsOnCanvas(
-                sigHist, bkgHists, plotOptions, 
+                sigHist, bkgHists, plotOptions,
                 canvasName = node_cls+" node")
 
             # setup legend
@@ -414,7 +414,7 @@ class plotClosureTest:
             bkg_test_weights = [self.data.get_lumi_weights()[k] for k in range(len(test_values)) \
                 if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
-        
+
             sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
@@ -484,7 +484,7 @@ class plotClosureTest:
             canvas = setup.drawClosureTestOnCanvas(
                 sig_train, bkg_train, sig_test, bkg_test, plotOptions,
                 canvasName = "closure test at {} node".format(node_cls))
-                    
+
             # setup legend
             legend = setup.getLegend()
 
@@ -503,7 +503,7 @@ class plotClosureTest:
             # add category label
             setup.printCategoryLabel(canvas, self.event_category)
 
-            
+
 
 
             # add private work label if activated
@@ -520,8 +520,8 @@ class plotClosureTest:
         os.system(cmd)
 
 
-    
-        
+
+
 
 class plotConfusionMatrix:
     def __init__(self, data, prediction_vector, event_classes, event_category, plotdir):
@@ -540,7 +540,7 @@ class plotConfusionMatrix:
 
         # default settings
         self.ROCScore = None
-    
+
     def plot(self, norm_matrix = True, privateWork = False, printROC = False):
         if printROC:
             self.ROCScore = roc_auc_score(
@@ -555,7 +555,7 @@ class plotConfusionMatrix:
                     new_matrix[yit,xit] = self.confusion_matrix[yit,xit]/(evt_sum+1e-9)
 
             self.confusion_matrix = new_matrix
-        
+
 
         # initialize Histogram
         cm = setup.setupConfusionMatrix(
@@ -567,7 +567,7 @@ class plotConfusionMatrix:
 
         canvas = setup.drawConfusionMatrixOnCanvas(cm, "confusion matrix", self.event_category, self.ROCScore, privateWork = privateWork)
         setup.saveCanvas(canvas, self.plotdir+"/confusionMatrix.pdf")
-        
+
 
 
 
@@ -588,13 +588,13 @@ class plotEventYields:
             for signal in signal_class:
                 self.signalIndex.append(self.data.class_translation[signal])
         else:
-            self.signalIndex = [self.data.class_translation["ttHbb"]]
+            self.signalIndex = [self.data.class_translation["ttHbb"]]   #why you do this
 
         self.event_category     = event_category
         self.plotdir            = plotdir
 
         self.logscale           = logscale
-        
+
         self.privateWork = False
 
     def plot(self, privateWork = False, ratio = False):
@@ -615,7 +615,7 @@ class plotEventYields:
             yTitle = setup.GetyTitle(privateWork)
 
         totalBkgYield = 0
-    
+
         # generate one plot per output node
         for i, truth_cls in enumerate(self.event_classes):
             classIndex = self.data.class_translation[truth_cls]
@@ -624,7 +624,7 @@ class plotEventYields:
 
             # loop over output nodes
             for j, node_cls in enumerate(self.event_classes):
-            
+
                 # get output values of this node
                 out_values = self.prediction_vector[:,i]
 
@@ -636,7 +636,7 @@ class plotEventYields:
                     and self.predicted_classes[k] == nodeIndex])
                 class_yields.append(class_yield)
 
-        
+
 
             if i in self.signalIndex:
                 histogram = setup.setupYieldHistogram(
@@ -651,8 +651,8 @@ class plotEventYields:
                 histogram.SetLineWidth(2)
                 sigHists.append(histogram)
                 sigLabels.append(truth_cls)
-                
-                
+
+
             else:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
@@ -667,7 +667,7 @@ class plotEventYields:
                 totalBkgYield += sum(class_yields)
 
 
-        
+
         # scale histograms according to options
         scaleFactors=[]
         for sig in sigHists:
@@ -743,7 +743,7 @@ class plotBinaryOutput:
             color       = ROOT.kCyan,
             xtitle      = "signal",
             ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = False)  
+            filled      = False)
         sig_hist.SetLineWidth(3)
 
         bkg_values = [ self.predictions[k] for k in range(len(self.predictions)) \
@@ -758,7 +758,7 @@ class plotBinaryOutput:
             color       = ROOT.kOrange,
             xtitle      = "background",
             ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = True)  
+            filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
         sig_hist.Scale(scaleFactor)
@@ -775,7 +775,7 @@ class plotBinaryOutput:
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
-            sig_hist, bkg_hist, plotOptions, 
+            sig_hist, bkg_hist, plotOptions,
             canvasName = name)
 
         # setup legend
@@ -783,7 +783,7 @@ class plotBinaryOutput:
 
         # add signal entry
         legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
-        
+
         # add background entries
         legend.AddEntry(bkg_hist, "background", "F")
 
@@ -805,8 +805,3 @@ class plotBinaryOutput:
 
         out_path = self.plotdir + "/binaryDiscriminator.pdf"
         setup.saveCanvas(canvas, out_path)
-
-
-
-
-
