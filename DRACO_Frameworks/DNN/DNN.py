@@ -167,7 +167,6 @@ class DNN():
             evenSel             = self.evenSel)
 
 
-
     def _load_architecture(self, config):
         ''' load the architecture configs '''
         # defnie default network configuration

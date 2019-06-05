@@ -130,10 +130,10 @@ naming = options.naming
 
 input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
-input_samples.addSample("tt2b"+naming,  label = "tt2b")
-input_samples.addSample("ttb"+naming,   label = "ttb")
-input_samples.addSample("ttcc"+naming,  label = "ttcc")
-input_samples.addSample("ttlf"+naming,  label = "ttlf")
+#input_samples.addSample("tt2b"+naming,  label = "tt2b")
+#input_samples.addSample("ttb"+naming,   label = "ttb")
+#input_samples.addSample("ttcc"+naming,  label = "ttcc")
+#input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 if options.binary:

@@ -152,8 +152,9 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb") else 0 for c in df["class_label"].values], index = df.index )
 
+            print(df["class_label"].values)
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
@@ -173,7 +174,9 @@ class DataFrame(object):
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
+            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else 0
+                                            for c in df["class_label"].values], index = df.index)
+            print(df["index_label"])
             sig_df = df.query("index_label == 1")
             bkg_df = df.query("index_label == 0")
 
@@ -299,7 +302,7 @@ class DataFrame(object):
         else:              return self.df_test["index_label"].values
 
     def get_class_flag(self, class_label):
-        return pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ")==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
+        return pd.Series( [1 if c==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
 
     def get_ttH_flag(self):
         return self.df_test["is_ttH"].values

@@ -64,20 +64,23 @@ ttH_selection = None #"(Evt_Odd == 1)"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
-ttbar_bb = root2pandas.EventCategories()
-ttbar_bb.addCategory("ttbb")
+ttbar_category = root2pandas.EventCategories()
+ttbar_category.addCategory("ttbb")
 
-ttbar_b = root2pandas.EventCategories()
-ttbar_b.addCategory("ttb")
+#ttbar_bb = root2pandas.EventCategories()
+#ttbar_bb.addCategory("ttbb")
 
-ttbar_2b = root2pandas.EventCategories()
-ttbar_2b.addCategory("tt2b")
+#ttbar_b = root2pandas.EventCategories()
+#ttbar_b.addCategory("ttb")
 
-ttbar_lf = root2pandas.EventCategories()
-ttbar_lf.addCategory("ttlf")
+#ttbar_2b = root2pandas.EventCategories()
+#ttbar_2b.addCategory("tt2b")
 
-ttbar_cc = root2pandas.EventCategories()
-ttbar_cc.addCategory("ttcc")
+#ttbar_lf = root2pandas.EventCategories()
+#ttbar_lf.addCategory("ttlf")
+
+#ttbar_cc = root2pandas.EventCategories()
+#ttbar_cc.addCategory("ttcc")
 
 
 # initialize dataset class
@@ -92,16 +95,24 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/"
+ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/binary"
 
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttHbb",
-    ntuples     = ntuplesPath+"/ttHbb_2L_cate9.root",
+    ntuples     = ntuplesPath+"/ttHbb_2L.root",
     categories  = ttH_categories,
-    selections  = ttH_selection,
+    selections  = base_selection,
    )
+
+
+dataset.addSample(
+    sampleName  = "ttbb",
+    ntuples     = ntuplesPath+"/background.root",
+    categories  = ttbar_category,
+    selections  = base_selection,
+  )
 
 #dataset.addSample(
 #    sampleName  = "ttbar_bb",
@@ -110,40 +121,40 @@ dataset.addSample(
 #    selections  = None
 #    )
 
-dataset.addSample(
-    sampleName  = "ttbar_b",
-    ntuples     = ntuplesPath+"/ttbar_b_cate9.root",
-    categories  = ttbar_b,
-    selections  = ttH_selection
-)
+#dataset.addSample(
+#    sampleName  = "ttbar_b",
+#    ntuples     = ntuplesPath+"/ttbar_b_cate9.root",
+#    categories  = ttbar_b,
+#    selections  = ttH_selection
+#)
 
-dataset.addSample(
-    sampleName  = "ttbar_bb",
-    ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
-    categories  = ttbar_bb,
-    selections  = ttH_selection
-)
+#dataset.addSample(
+#    sampleName  = "ttbar_bb",
+#    ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
+#    categories  = ttbar_bb,
+#    selections  = ttH_selection
+#)
 
-dataset.addSample(
-    sampleName  = "ttbar_2b",
-    ntuples     = ntuplesPath+"/ttbar_2b_cate9.root",
-    categories  = ttbar_2b,
-    selections  = ttH_selection
-)
+#dataset.addSample(
+#    sampleName  = "ttbar_2b",
+#    ntuples     = ntuplesPath+"/ttbar_2b_cate9.root",
+#    categories  = ttbar_2b,
+#    selections  = ttH_selection
+#)
 
-dataset.addSample(
-    sampleName  = "ttbar_lf",
-    ntuples     = ntuplesPath+"/ttbar_lf_cate9.root",
-    categories  = ttbar_lf,
-    selections  = ttH_selection
-)
+#dataset.addSample(
+#    sampleName  = "ttbar_lf",
+#    ntuples     = ntuplesPath+"/ttbar_lf_cate9.root",
+#    categories  = ttbar_lf,
+#    selections  = ttH_selection
+#)
 
-dataset.addSample(
-    sampleName  = "ttbar_cc",
-    ntuples     = ntuplesPath+"/ttbar_cc_cate9.root",
-    categories  = ttbar_cc,
-    selections  = ttH_selection
-)
+#dataset.addSample(
+#    sampleName  = "ttbar_cc",
+#    ntuples     = ntuplesPath+"/ttbar_cc_cate9.root",
+#    categories  = ttbar_cc,
+#    selections  = ttH_selection
+#)
 
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)

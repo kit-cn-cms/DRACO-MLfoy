@@ -1,6 +1,8 @@
 variables = {}
 
 variables["ge3j_ge2t"] = [
+    "N_jets",
+    "N_btags",
     "MEM",
     "HT_tags",
     "ptSum_jets_leptons",
@@ -17,7 +19,10 @@ variables["ge3j_ge2t"] = [
     "maxDeltaEta_tag_tag",
     "H0_jet",
     "twist_tag_tag_max_mass",
-    "multiplicity_higgsLikeDijet15",
+    "multiplicity_higgsLikeDijet15"
+    ]
+
+variables["jets"]= [
     "pT_jet_jet_min_deltaR",
     "avgDeltaR_jet_jet",
     "avgDeltaR_jet_tag",
@@ -40,9 +45,37 @@ variables["ge3j_ge2t"] = [
     "twist_tag_tag_min_deltaR",
     "R4_jet",
     "H0_tag",
-    "H3_tag"
-    ]
-
+    "H3_tag",
+    "jet1_pt",
+    "jet1_eta",
+    "jet1_phi",
+    "jet1_M",
+    "jet2_pt",
+    "jet2_eta",
+    "jet2_phi",
+    "jet2_M",
+    "jet3_pt",
+    "jet3_eta",
+    "jet3_phi",
+    "jet3_M",
+    "jet4_pt",
+    "jet4_eta",
+    "jet4_phi",
+    "jet4_M",
+    "jet1_btag",
+    "jet2_btag",
+    "jet3_btag",
+    "jet4_btag",
+    "bjet1_pt",
+    "bjet1_eta",
+    "bjet2_pt",
+    "bjet2_eta",
+    "bjet3_pt",
+    "bjet3_eta",
+    "bjet1_btag",
+    "bjet2_btag",
+    "bjet3_btag"
+]
 
 variables["ge4j_ge3t"] = [
     "MEM",
