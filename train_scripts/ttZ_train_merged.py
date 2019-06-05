@@ -24,22 +24,22 @@ usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT
 parser = optparse.OptionParser(usage=usage)
 
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_training",
-        help="DIR for output", metavar="outputDir")
+        help="DIR for output (allows relative path to workdir or absolute path)", metavar="outputDir")
 
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
-        help="DIR for input", metavar="inputDir")
+        help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="inputDir")
 
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
-        help="file ending for the samples in preprocessing", metavar="naming")
+        help="file ending for the samples in input directory (default _dnn.h5)", metavar="naming")
 
 parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
-        help="STR name of the category (ge)[nJets]j_(ge)[nTags]t", metavar="category")
+        help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="category")
 
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
-        help="INT number of training epochs", metavar="train_epochs")
+        help="INT number of training epochs (default 1000)", metavar="train_epochs")
 
 parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
-        help="FILE for variables used to train DNNs", metavar="variableSelection")
+        help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="variableSelection")
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
         help="activate to create plots", metavar="plot")
@@ -50,26 +50,27 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label", metavar="privateWork")
 
-parser.add_option("--netconfig", dest="net_config",default=None,
-        help="STR of config name in net_config (config in this file will not be used anymore!)", metavar="net_config")
+parser.add_option("--netconfig", dest="net_config",default="ttH_2017",
+        help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="net_config")
 
 parser.add_option("--signalclass", dest="signal_class", default=None,
-        help="STR of signal class for plots", metavar="signal_class")
+        help="STR of signal class for plots (allows comma separated list)", metavar="signal_class")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
 
 parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
-        help="activate to balance train samples such that number of events per epoch is roughly equal for all classes", metavar="balanceSamples")
+        help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.", metavar="balanceSamples")
 
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
-        help="activate to perform binary classification instead of multiclassification. Takes the clases passed to 'signal_class' as signals, all others as backgrounds.")
+        help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 
 parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0.,
-        help="target value for training of background samples (signal is always 1)")
+        help="target value for training of background samples (default is 0, signal is always 1)")
 
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
+
 
 parser.add_option("--even",dest="even_sel",action="store_true",default=None,
         help="only select events with Evt_Odd==0")
