@@ -158,7 +158,7 @@ for i in range(1, n_boost+1):
     # initializing DNN training class
     dnn = DNN.DNN(
         save_path       = outputdir + "_" + str(i),
-        input_samples   = input_samples,
+        input_samples   = input_samples,        #samples are splitted before training the networks
         event_category  = options.category,
         train_variables = variables,
         # number of epochs
