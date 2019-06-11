@@ -68,9 +68,11 @@ class InputSamples:
     def __init__(self, input_path, activateSamples = None):
         self.binary_classification = False
         self.input_path = input_path
-        self.activate_samples = activateSamples
         self.samples = []
-
+        self.activate_samples = activateSamples
+        if self.activate_samples:
+            self.activate_samples = self.activate_samples.split(",")
+            
     def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
