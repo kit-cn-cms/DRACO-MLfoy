@@ -54,7 +54,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
@@ -77,9 +77,6 @@ ttbar_categories.addCategory("ttcc",        selection = "(GenEvt_I_TTPlusBB == 0
 
 ttZ_categories = root2pandas.EventCategories()
 ttZ_categories.addCategory("ttZ", selection = None)
-
-ST_categories = root2pandas.EventCategories()
-ST_categories.addCategory("ST", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -148,39 +145,6 @@ dataset.addSample(
     categories  = ttZ_categories,
     even_odd    = options.even_odd_splitting,
     )
-
-
-dataset.addSample(
-    sampleName  = "ST_s",
-    ntuples     = ntuplesPath+"/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-madgraph-pythia8/*nominal*.root",
-    categories  = ST_categories,
-    even_odd    = options.even_odd_splitting,
-    )
-dataset.addSample(
-    sampleName  = "ST_t_top",
-    ntuples     = ntuplesPath+"/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/*nominal*.root",
-    categories  = ST_categories,
-    even_odd    = options.even_odd_splitting,
-    )
-dataset.addSample(
-    sampleName  = "ST_t_topbar",
-    ntuples     = ntuplesPath+"/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/*nominal*.root",
-    categories  = ST_categories,
-    even_odd    = options.even_odd_splitting,
-    )
-dataset.addSample(
-    sampleName  = "ST_tW_top",
-    ntuples     = ntuplesPath+"/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-    categories  = ST_categories,
-    even_odd    = options.even_odd_splitting,
-    )
-dataset.addSample(
-    sampleName  = "ST_tW_topbar",
-    ntuples     = ntuplesPath+"/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-    categories  = ST_categories,
-    even_odd    = options.even_odd_splitting,
-    )
-
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
