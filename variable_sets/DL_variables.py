@@ -1,8 +1,6 @@
 variables = {}
 
 variables["ge3j_ge2t"] = [
-    "N_jets",
-    "N_btags",
     "MEM",
     "HT_tags",
     "ptSum_jets_leptons",

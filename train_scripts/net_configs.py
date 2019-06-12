@@ -92,6 +92,19 @@ config_dict["ttZ_2018_v2"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["binary_DL"] = {
+    "layers":                       [200,100],
+        "loss_function":            "squared_hinge",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "batch_size":               5000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "tanh",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+    }
+
 config_dict["binary_config"] = {
         "layers":                   [200,100],
         "loss_function":            "squared_hinge",

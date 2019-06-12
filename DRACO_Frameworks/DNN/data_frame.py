@@ -13,7 +13,7 @@ class Sample:
         self.normalization_weight = normalization_weight
         self.isSignal = None
         self.train_weight = train_weight
-        self.min=0.0
+        self.min=-1.0
         self.max=1.0
 
 
@@ -110,7 +110,7 @@ class DataFrame(object):
                 event_category,
                 train_variables,
                 norm_variables = True,
-                test_percentage = 0.1,
+                test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
@@ -127,7 +127,6 @@ class DataFrame(object):
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification:
             self.bkg_target = input_samples.bkg_target
-
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
@@ -170,23 +169,23 @@ class DataFrame(object):
             # class translations
             self.class_translation = {}
             self.class_translation["sig"] = 1
-            self.class_translation["bkg"] = 0
+            self.class_translation["bkg"] = -1
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else 0
+
+            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else -1
                                             for c in df["class_label"].values], index = df.index)
-            print(df["index_label"])
             sig_df = df.query("index_label == 1")
-            bkg_df = df.query("index_label == 0")
+            bkg_df = df.query("index_label == -1")
 
             signal_weight = sum( sig_df["train_weight"].values )
             bkg_weight = sum( bkg_df["train_weight"].values )
-            sig_df["train_weight"] = sig_df["train_weight"]/(2.*signal_weight)*df.shape[0]
-            bkg_df["train_weight"] = bkg_df["train_weight"]/(2.*bkg_weight)*df.shape[0]
+            sig_df["train_weight"] = sig_df["train_weight"]/(2*signal_weight)*df.shape[0]
+            bkg_df["train_weight"] = bkg_df["train_weight"]/(2*bkg_weight)*df.shape[0]
 
-            #sig_df["class_label"] = "sig"
-            #bkg_df["class_label"] = "bkg"
+            sig_df["class_label"] = "sig"
+            bkg_df["class_label"] = "bkg"
             sig_df["binaryTarget"] = 1.
             bkg_df["binaryTarget"] = float(self.bkg_target)
 
@@ -265,9 +264,6 @@ class DataFrame(object):
                 new_train_dfs.append(events)
 
         self.df_train = pd.concat(new_train_dfs)
-        print(self.df_train.head())
-
-
         self.df_train = shuffle(self.df_train)
 
     def get_train_data(self, as_matrix= True):
@@ -278,12 +274,14 @@ class DataFrame(object):
         return self.df_train["train_weight"].values
 
     def get_train_labels(self, as_categorical = True):
-        if self.binary_classification: return self.df_train["binaryTarget"].values
+        if self.binary_classification:
+            return self.df_train["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
+
     def get_train_lumi_weights(self):
-       return self.df_train["lumi_weight"].values
+        return self.df_train["lumi_weight"].values
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix = True, normed = True):
@@ -297,7 +295,8 @@ class DataFrame(object):
         return self.df_test["lumi_weight"].values
 
     def get_test_labels(self, as_categorical = True):
-        if self.binary_classification: return self.df_test["binaryTarget"].values
+        if self.binary_classification:
+            return self.df_test["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 

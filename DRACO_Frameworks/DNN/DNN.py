@@ -171,17 +171,18 @@ class DNN():
         ''' load the architecture configs '''
         # defnie default network configuration
         self.architecture = {
-            "layers":                   [200],
-            "loss_function":            "categorical_crossentropy",
-            "Dropout":                  0.2,
+            "layers":                       [200,100],
+            "loss_function":            "binary_crossentropy",
+            "Dropout":                  0.5,
             "L2_Norm":                  1e-5,
-            "batch_size":               5000,
-            "optimizer":                optimizers.Adagrad(decay=0.99),
-            "activation_function":      "elu",
-            "output_activation":        "Softmax",
-            "earlystopping_percentage": None,
-            "earlystopping_epochs":     None,
+            "batch_size":               1000,
+            "optimizer":                optimizers.Adadelta(),
+            "activation_function":      "tanh",
+            "output_activation":        "Tanh",
+            "earlystopping_percentage": 0.05,
+            "earlystopping_epochs":     50,
             }
+
 
         for key in config:
             self.architecture[key] = config[key]
@@ -333,6 +334,7 @@ class DNN():
                 verbose         = 1)]
 
         # train main net
+
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
@@ -533,6 +535,7 @@ class DNN():
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
             plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            plt.ylim(ymin=0.)
 
             # add legend
             plt.legend()
@@ -547,7 +550,7 @@ class DNN():
 
     def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False,
-                        nbins = 20, bin_range = [0.,1.]):
+                        nbins = 20, bin_range = [-1.,1.]):
 
         ''' plot distribution in outputNodes '''
         plotNodes = plottingScripts.plotOutputNodes(
@@ -565,7 +568,7 @@ class DNN():
 
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
-                        signal_class = None, nbins = 18, bin_range = [0.1,1.]):
+                        signal_class = None, nbins = 18, bin_range = [-1.,1.]):
 
         ''' plot all events classified as one category '''
         plotDiscrs = plottingScripts.plotDiscriminators(
@@ -594,7 +597,7 @@ class DNN():
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
 
     def plot_closureTest(self, log = False, privateWork = False,
-                        signal_class = None, nbins = 20, bin_range = [0.,1.]):
+                        signal_class = None, nbins = 20, bin_range = [-1.,1.]):
         ''' plot comparison between train and test samples '''
 
         bin_range = [1./self.data.n_output_neurons, 1.]
@@ -625,7 +628,7 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 30, bin_range = [0.,1.], name = "binary discriminator"):
+                        nbins = 30, bin_range = [-1.,1.], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,

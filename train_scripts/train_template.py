@@ -51,7 +51,7 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label", metavar="privateWork")
 
-parser.add_option("--netconfig", dest="net_config",default="ttH_2017",
+parser.add_option("--netconfig", dest="net_config",default="binary_DL",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="net_config")
 
 parser.add_option("--signalclass", dest="signal_class", default=None,
@@ -66,8 +66,8 @@ parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_tru
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 
-parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0.,
-        help="target value for training of background samples (default is 0, signal is always 1)")
+parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = -1,
+        help="target value for training of background samples (default is -1, signal is always 1)")
 
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
@@ -90,7 +90,6 @@ elif os.path.exists(options.inputDir):
     inPath=options.inputDir
 else:
     sys.exit("ERROR: Input Directory does not exist!")
-print(inPath)
 
 #get output directory path
 if not os.path.isabs(options.outputDir):
@@ -130,15 +129,14 @@ naming = options.naming
 
 input_samples.addSample("ttHbb"+naming, label = "ttHbb")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
-#input_samples.addSample("tt2b"+naming,  label = "tt2b")
-#input_samples.addSample("ttb"+naming,   label = "ttb")
-#input_samples.addSample("ttcc"+naming,  label = "ttcc")
-#input_samples.addSample("ttlf"+naming,  label = "ttlf")
+input_samples.addSample("tt2b"+naming,  label = "tt2b")
+input_samples.addSample("ttb"+naming,   label = "ttb")
+input_samples.addSample("ttcc"+naming,  label = "ttcc")
+input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
-
 # initializing DNN training class
 dnn = DNN.DNN(
     save_path       = outputdir,
@@ -155,23 +153,22 @@ dnn = DNN.DNN(
 
 # config dictionary for DNN architecture
 config = {
-    "layers":                   [100,100,100],
-    "loss_function":            "categorical_crossentropy",
-    "Dropout":                  0.5,
-    "L2_Norm":                  1e-5,
-    "batch_size":               5000,
-    "optimizer":                optimizers.Adam(1e-4),
-    "activation_function":      "elu",
-    "output_activation":        "Softmax",
-    "earlystopping_percentage": 0.02,
-    "earlystopping_epochs":     100,
+    "layers":                       [200,100],
+        "loss_function":            "squared_hinge",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "batch_size":               5000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "tanh",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
     }
 
 # import file with net configs if option is used
 if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
-
 # build DNN model
 dnn.build_model(config)
 
