@@ -150,7 +150,7 @@ if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
 #loop dnn training to use boosting
-for i in range(1, n_boost+1):
+for i in range(1, n_boost+1):   #due to naming
     print("\n", "\n")
     print("Loop i: ", i, " of ", n_boost)
     # print("Signal: ", signal)
