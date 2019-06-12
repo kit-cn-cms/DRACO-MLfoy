@@ -48,24 +48,20 @@ def label_correlation(corr):
     label_corr.SetTextAngle(0)
     label_corr.DrawText(0.14, 0.88, text)
 
-def Get_train_labels(inPath):
-    shuffle_seed = 9        #must be same as in train_template
-    
-
-def Get_roc_auc():
-    return roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+def Get_roc_auc(data, prediction_vector):
+    return roc_auc_score(data.get_test_labels(), prediction_vector)
 
 
 """
-USE: python use_boosted_dnns1.py -i DIR -o DIR --printroc
+USE: python use_boosted_dnns1.py -o DIR --netdirectory DIR --load_old_predictions True/False
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python use_boosted_dnns1.py -i DIR -o DIR --printroc"
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_4j_ge3t",
-        help="DIR of train data", metavar="inputDir")
+# parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_4j_ge3t",
+#         help="DIR of train data", metavar="inputDir")
 
 parser.add_option("--netdirectory", dest="netDir",
         help="DIR of DIRs of trained net data", metavar="netDir")
@@ -87,15 +83,15 @@ parser.add_option("--load_old_predictions", dest="load_old_predictions", default
 
 (options, args) = parser.parse_args()
 
-#get input directory path of data
-if not os.path.isabs(options.inputDir):
-    inPath = basedir+"/workdir/"+options.inputDir
-elif os.path.exists(options.inputDir):
-    inPath=options.inputDir
-else:
-    sys.exit("ERROR: Input Directory does not exist!")
+# #get input directory path of data -> doesn't needed any longer because data is loaded from dnn
+# if not os.path.isabs(options.inputDir):
+#     inPath = basedir+"/workdir/"+options.inputDir
+# elif os.path.exists(options.inputDir):
+#     inPath=options.inputDir
+# else:
+#     sys.exit("ERROR: Input Directory does not exist!")
 #load data to evaluate
-validation_labels = Get_test_labels(inPath)
+# validation_labels = Get_test_labels(inPath)
 
 
 #get prediction_vector and roc_vector
@@ -129,22 +125,30 @@ else:
         dnn = DNN.loadDNN(path, outPath)
         prediction_list.append(dnn.model_prediction_vector)
         dnn_roc.append(dnn.roc_auc_score)
+    data = dnn.data #get data class
 
     prediction_vector = numpy.asarray(prediction_list)
     roc_vector = numpy.asarray(dnn_roc)
     numpy.save("/home/ngolks/Projects/boosted_dnn/prediction_array/prediction_vector.npy", prediction_vector)
-    numpy.save("/home/ngolks/Projects/boosted_dnn/prediction_array/roc_vector.npy", roc_vector)
 
-
-#new prediction_vector merged from all dnns
-prediction_vector_eventmean = numpy.mean(prediction_vector, axis = 0)   #mean of all nets for each event
-# roc_formean = Get_roc_auc()
-#new prediction_vector merged from all dnns weighted with roc
-prediction_vector_eventrocmean = numpy.average(prediction_vector, axis = 0, weights = roc_vector)
-# roc_forweightedmean = Get_roc_auc()
 #some information needed
 nnets = prediction_vector.shape[0]
 data_len = prediction_vector.shape[1]
+
+#new prediction_vector merged from all dnns
+prediction_vector_eventmean = numpy.mean(prediction_vector, axis = 0)   #mean of all nets for each event
+#new prediction_vector merged from all dnns weighted with roc
+prediction_vector_eventrocmean = numpy.average(prediction_vector, axis = 0, weights = roc_vector[0:nnets])
+if(load_old_predictions):
+    roc_formean = roc_vector[-2]
+    roc_forweightedmean = roc_vector[-1]
+else:
+    roc_formean = Get_roc_auc(data, prediction_vector_eventmean)
+    dnn_roc.append(roc_formean)
+    roc_forweightedmean = Get_roc_auc(data, prediction_vector_eventrocmean)
+    dnn_roc.append(roc_forweightedmean)
+    roc_vector = numpy.asarray(dnn_roc)
+    numpy.save("/home/ngolks/Projects/boosted_dnn/prediction_array/roc_vector.npy", roc_vector)
 
 #plot histogram over output deviation between two nets for each event
 for h in numpy.arange(0, nnets-1):
@@ -175,12 +179,12 @@ for j in numpy.arange(0, nnets):
     c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
     c1.Divide(2,1)
     c1.cd(1)
-    # print("# DEBUG: h, j: ", h, j)
     hist = ROOT.TH1D("hist", "", 25,-0.3,0.3)
     for i in numpy.arange(0, data_len):
         hist.Fill(prediction_vector[j][i] - prediction_vector_eventmean[i])
     hist.SetTitle(title)
     hist.Draw()
+    label_roc(j, "mean", roc_vector[j], roc_formean)
     c1.cd(2)
     hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
     for i in numpy.arange(0, data_len):
@@ -202,6 +206,7 @@ for j in numpy.arange(0, nnets):
         hist.Fill(prediction_vector[j][i] - prediction_vector_eventrocmean[i])
     hist.SetTitle(title)
     hist.Draw()
+    label_roc(j, "weighted_mean", roc_vector[j], roc_forweightedmean)
     c1.cd(2)
     # print(prediction_vector[j].reshape(data_len,)[0:10])
     hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
