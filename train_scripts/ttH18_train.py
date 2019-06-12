@@ -147,6 +147,9 @@ input_samples.addSample("tt2b"+naming, label = "tt2b", normalization_weight = no
 input_samples.addSample("ttb"+naming,  label = "ttb",  normalization_weight = nom_weight)
 input_samples.addSample("ttcc"+naming, label = "ttcc", normalization_weight = nom_weight)
 input_samples.addSample("ttlf"+naming, label = "ttlf", normalization_weight = nom_weight)
+input_samples.addSample("ttZ"+naming,  label = "ttZ",  normalization_weight = nom_weight)
+input_samples.addSample("ST"+naming,   label = "ST",   normalization_weight = nom_weight)
+input_samples.addSample("tH"+naming,   label = "tH",   normalization_weight = nom_weight)
 
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)

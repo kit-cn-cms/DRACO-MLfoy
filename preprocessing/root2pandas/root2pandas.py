@@ -273,7 +273,7 @@ class Dataset:
             df = tree.pandas.df(self.variables)
 
             # delete subentry index
-            #df = df.reset_index(1, drop = True)
+            df = df.reset_index(1, drop = True)
 
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:
@@ -293,7 +293,6 @@ class Dataset:
 
                     # initialize column in original dataframe
                     df[col_name] = 0.
-
                     # append column to original dataframe
                     df.update( idx_df[vecvar].rename(col_name) )
 
