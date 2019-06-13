@@ -53,7 +53,7 @@ def Get_roc_auc(data, prediction_vector):
 
 
 """
-USE: python use_boosted_dnns1.py -o DIR --netdirectory DIR --load_old_predictions True/False
+USE: python use_boosted_dnns1.py -o DIR --netdirectory DIR -c category --load_old_predictions True/False
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python use_boosted_dnns1.py -i DIR -o DIR --printroc"
@@ -68,6 +68,9 @@ parser.add_option("--netdirectory", dest="netDir",
 
 parser.add_option("-o", "--outputdirectory", dest="outDir",default=None,
         help="DIR of evaluation outputs, if None specified use inputDir", metavar="outDir")
+
+parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+        help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="category")
 
 # parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
         # help="activate to create plots", metavar="plot")
@@ -113,7 +116,13 @@ else:
         outPath = options.outDir
 
     #get all subdirectories
-    netPaths = [dI for dI in os.listdir(netPath) if os.path.isdir(os.path.join(netPath,dI))]
+    netPaths = []
+    netPaths_all = [dI for dI in os.listdir(netPath) if os.path.isdir(os.path.join(netPath,dI))]    #containing all directorys
+    category = options.category         #wanted categorie (number of wanted dnns should also be here)
+    for dirname in netPaths_all:
+        if category in dirname:
+            # print("Used directory: ", dirname)
+            netPaths.append(dirname)
     print("Found dirs: ", netPaths)
 
     #load dnns and evalueate them
@@ -188,7 +197,7 @@ for j in numpy.arange(0, nnets):
     c1.cd(2)
     hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
     for i in numpy.arange(0, data_len):
-        hist2.Fill(prediction_vector[h][i], prediction_vector_eventmean[i])
+        hist2.Fill(prediction_vector[j][i], prediction_vector_eventmean[i])
     hist2.Draw("colz")
     label_correlation(hist2.GetCorrelationFactor())
     c1.Print(out)
@@ -211,7 +220,7 @@ for j in numpy.arange(0, nnets):
     # print(prediction_vector[j].reshape(data_len,)[0:10])
     hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
     for i in numpy.arange(0, data_len):
-        hist2.Fill(prediction_vector[h][i], prediction_vector_eventrocmean[i])
+        hist2.Fill(prediction_vector[j][i], prediction_vector_eventrocmean[i])
     hist2.Draw("colz")
     label_correlation(hist2.GetCorrelationFactor())
     c1.Print(out)
