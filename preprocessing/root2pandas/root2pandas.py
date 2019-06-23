@@ -261,19 +261,18 @@ class Dataset:
                 try:
                     tree = rf[self.tree]
                 except:
-                    print("could not open MVATree in ROOT file")
+                    print("could not open "+str(self.tree)+" in ROOT file")
                     continue
 
-
             if tree.numentries == 0:
-                print("MVATree has no entries - skipping file")
-                continue
+               print(str(self.tree)+" has no entries - skipping file")
+               continue
 
             # convert to dataframe
             df = tree.pandas.df(self.variables)
 
-            # delete subentry index
-            df = df.reset_index(1, drop = True)
+#!!            # delete subentry index
+#!!            df = df.reset_index(1, drop = True)
 
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:
