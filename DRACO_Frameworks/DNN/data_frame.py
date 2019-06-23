@@ -110,7 +110,7 @@ class DataFrame(object):
                 input_samples,
                 event_category,
                 train_variables,
-                norm_variables, # = True,
+                norm_variables,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
@@ -128,6 +128,7 @@ class DataFrame(object):
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification:
             self.bkg_target = input_samples.bkg_target
+
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
@@ -135,7 +136,7 @@ class DataFrame(object):
             train_samples.append(sample.data)
 
         # concatenating all dataframes
-        df = pd.concat( train_samples )
+        df = pd.concat(train_samples, sort=False)
         del train_samples
 
         # multiclassification labelling
@@ -152,9 +153,10 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb") else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttH"] = pd.Series([1 if (c=="ttHbb") else 0 for c in df["class_label"].values], index = df.index )
 
             print(df["class_label"].values)
+
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
 
@@ -167,39 +169,44 @@ class DataFrame(object):
 
         # binary classification labelling
         else:
+
             # class translations
             self.class_translation = {}
-            self.class_translation["sig"] = 1
+            self.class_translation["sig"] = +1
             self.class_translation["bkg"] = -1
+
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
+            df["index_label"] = pd.Series([(1 if c in input_samples.signal_classes else -1) for c in df["class_label"].values], index=df.index) #!!
 
-            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else -1
-                                            for c in df["class_label"].values], index = df.index)
-            sig_df = df.query("index_label == 1")
+            sig_df = df.query("index_label == +1")
             bkg_df = df.query("index_label == -1")
 
-            signal_weight = sum( sig_df["train_weight"].values )
-            bkg_weight = sum( bkg_df["train_weight"].values )
-            sig_df["train_weight"] = sig_df["train_weight"]/(2*signal_weight)*df.shape[0]
-            bkg_df["train_weight"] = bkg_df["train_weight"]/(2*bkg_weight)*df.shape[0]
+            sig_weight = sum(sig_df["train_weight"].values)
+            bkg_weight = sum(bkg_df["train_weight"].values)
 
-            sig_df["class_label"] = "sig"
-            bkg_df["class_label"] = "bkg"
-            sig_df["binaryTarget"] = 1.
-            bkg_df["binaryTarget"] = float(self.bkg_target)
+            sig_df.loc[:, "train_weight"] = sig_df["train_weight"].apply(lambda x: x/(2*sig_weight))
+            bkg_df.loc[:, "train_weight"] = bkg_df["train_weight"].apply(lambda x: x/(2*bkg_weight))
 
-            df = pd.concat([sig_df,bkg_df])
+            sig_df.loc[:, "class_label"] = sig_df["class_label"].apply(lambda x: 'sig')
+            bkg_df.loc[:, "class_label"] = bkg_df["class_label"].apply(lambda x: 'bkg')
+
+            sig_df.loc[:, "binaryTarget"] = pd.Series([1.0]                   *sig_df.shape[0], index=sig_df.index)
+            bkg_df.loc[:, "binaryTarget"] = pd.Series([float(self.bkg_target)]*bkg_df.shape[0], index=bkg_df.index)
+
+            df = pd.concat([sig_df, bkg_df], sort=False)
 
             self.n_input_neurons = len(train_variables)
             self.n_output_neurons = 1
 
         # shuffle dataframe
         if not self.shuffleSeed:
-            self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
+           self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
         print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
         df = shuffle(df, random_state = self.shuffleSeed)
+
+#!!        print(df)
 
         # norm variables if activated
         unnormed_df = df.copy()
@@ -246,12 +253,16 @@ class DataFrame(object):
         new_train_dfs = []
 
         print("balancing train sample ...")
+
         # multiply train events
         for sample in self.input_samples.samples:
             print("+"*30)
 
             # get events
-            events = self.df_train.query("(class_label == '{}')".format(sample.label))
+            class_label = sample.label
+            if self.binary_classification: class_label = 'sig' if class_label in self.input_samples.signal_classes else 'bkg'
+
+            events = self.df_train.query("(class_label == '{}')".format(class_label))
             # get multiplication factor
             factor = int(maxEvents/sample.nevents)
 

@@ -431,6 +431,8 @@ class DNN():
         ''' evaluate trained model '''
 
         # evaluate test dataset
+        print '!'*10, 'data.get_test_data', self.data.get_test_data(as_matrix = True) #!!
+
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
@@ -441,6 +443,8 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(
             self.data.get_test_data(as_matrix = True) )
+
+        print '!'*10, 'model_prediction_vector', self.model_prediction_vector
 
         self.model_train_prediction  = self.model.predict(
             self.data.get_train_data(as_matrix = True) )

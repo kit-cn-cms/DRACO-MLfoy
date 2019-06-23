@@ -66,20 +66,20 @@ ttH_categories.addCategory("ttHbb", selection = None)
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbar")
 
-#ttbar_bb = root2pandas.EventCategories()
-#ttbar_bb.addCategory("ttbb")
-#
-#ttbar_b = root2pandas.EventCategories()
-#ttbar_b.addCategory("ttb")
-#
-#ttbar_2b = root2pandas.EventCategories()
-#ttbar_2b.addCategory("tt2b")
-#
-#ttbar_lf = root2pandas.EventCategories()
-#ttbar_lf.addCategory("ttlf")
-#
-#ttbar_cc = root2pandas.EventCategories()
-#ttbar_cc.addCategory("ttcc")
+#!! ttbar_bb = root2pandas.EventCategories()
+#!! ttbar_bb.addCategory("ttbb")
+#!! 
+#!! ttbar_b = root2pandas.EventCategories()
+#!! ttbar_b.addCategory("ttb")
+#!! 
+#!! ttbar_2b = root2pandas.EventCategories()
+#!! ttbar_2b.addCategory("tt2b")
+#!! 
+#!! ttbar_cc = root2pandas.EventCategories()
+#!! ttbar_cc.addCategory("ttcc")
+#!! 
+#!! ttbar_lf = root2pandas.EventCategories()
+#!! ttbar_lf.addCategory("ttlf")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(

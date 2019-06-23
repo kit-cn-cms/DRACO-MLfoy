@@ -126,7 +126,7 @@ variables["ge4j_3t"] = [
 #variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:]))
 variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:] + variables['jets']))
 
-variables["ge4j_ge3t"] = ['jet1_pt', 'jet2_pt'] #!!!!
+#!! variables["ge4j_ge3t"] = ['jet1_pt', 'jet2_pt'] #!!!!
 
 variables["ge4j_2t"] = [
     "btagDiscriminatorAverage_untagged",
@@ -175,5 +175,3 @@ variables["3j_2t"] = [
     ]
 
 all_variables = set( [v for key in variables for v in variables[key] ] )
-
-all_variables = variables["ge4j_ge3t"][:] #!!

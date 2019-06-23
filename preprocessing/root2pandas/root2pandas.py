@@ -245,7 +245,6 @@ class Dataset:
             mem_files = glob.glob(sample.MEMs)
             mem_df = self.generateMEMdf(mem_files, sample.sampleName)
 
-
         # initialize loop over ntuple files
         n_entries = 0
         concat_df = pd.DataFrame()
@@ -271,8 +270,8 @@ class Dataset:
             # convert to dataframe
             df = tree.pandas.df(self.variables)
 
-#!!            # delete subentry index
-#!!            df = df.reset_index(1, drop = True)
+            # delete subentry index
+            df = df.reset_index(drop=True)
 
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:
@@ -298,7 +297,7 @@ class Dataset:
             # apply event selection
             df = self.applySelections(df, sample.selections)
 
-            df = df[:10]; print df #!!
+#            df = df[:100000]; print df #!!
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
@@ -316,12 +315,11 @@ class Dataset:
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                 # add indexing
-                concat_df.set_index(["runNumber", "lumiBlock", "eventNumber"], inplace = True, drop = True)
+                concat_df.set_index(["runNumber", "lumiBlock", "eventNumber"], inplace=True, drop=True)
 
                 # add MEM variables
                 if self.addMEM:
-                    concat_df = self.addMEMVariable(concat_df, mem_df)
-
+                   concat_df = self.addMEMVariable(concat_df, mem_df)
 
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
@@ -333,7 +331,6 @@ class Dataset:
                 # reset counters
                 n_entries = 0
                 concat_df = pd.DataFrame()
-
 
     # ====================================================================
 
