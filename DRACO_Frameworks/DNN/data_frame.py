@@ -16,7 +16,6 @@ class Sample:
         self.min=-1.0
         self.max=1.0
 
-
     def load_dataframe(self, event_category, lumi, evenSel = ""):
         print("-"*50)
         print("loading sample file "+str(self.path))
@@ -111,7 +110,7 @@ class DataFrame(object):
                 input_samples,
                 event_category,
                 train_variables,
-                norm_variables = True,
+                norm_variables, # = True,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
@@ -229,8 +228,7 @@ class DataFrame(object):
 
         # sample balancing if activated
         if self.balanceSamples:
-            self.balanceTrainSample()
-
+           self.balanceTrainSample()
 
         # print some counts
         print("total events after cuts:  "+str(df.shape[0]))

@@ -298,9 +298,7 @@ class Dataset:
             # apply event selection
             df = self.applySelections(df, sample.selections)
 
-            df = df[:1] #!!!!
-
-            print df #!!!!
+            df = df[:10]; print df #!!
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df

@@ -91,6 +91,7 @@ class DNN():
             input_samples,
             event_category,
             train_variables,
+            norm_variables,
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
@@ -128,6 +129,9 @@ class DNN():
         # percentage of events saved for testing
         self.test_percentage = test_percentage
 
+        # normalize variables in DataFrame
+        self.norm_variables = norm_variables
+
         # number of train epochs
         self.train_epochs = train_epochs
 
@@ -142,9 +146,11 @@ class DNN():
         self.cp_path = self.save_path+"/checkpoints/"
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
-        out_file = self.cp_path + "/variable_norm.csv"
-        self.data.norm_csv.to_csv(out_file)
-        print("saved variabe norms at "+str(out_file))
+
+        if self.norm_variables:
+           out_file = self.cp_path + "/variable_norm.csv"
+           self.data.norm_csv.to_csv(out_file)
+           print("saved variabe norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -162,10 +168,10 @@ class DNN():
             event_category      = self.event_category,
             train_variables     = self.train_variables,
             test_percentage     = self.test_percentage,
+            norm_variables      = self.norm_variables,
             shuffleSeed         = shuffle_seed,
             balanceSamples      = balanceSamples,
             evenSel             = self.evenSel)
-
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
@@ -334,7 +340,6 @@ class DNN():
                 verbose         = 1)]
 
         # train main net
-
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),

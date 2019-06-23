@@ -52,6 +52,9 @@ parser.add_option("--privatework", dest="privateWork", action = "store_true", de
 parser.add_option("--netconfig", dest="net_config",default="ttH_2017",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="net_config")
 
+parser.add_option("--no-norm-variables", dest="norm_variables",action="store_false", default=True,
+        help="do not normalize values of input variables", metavar="norm_variables")
+
 parser.add_option("--signalclass", dest="signal_class", default=None,
         help="STR of signal class for plots (allows comma separated list)", metavar="signal_class")
 
@@ -161,6 +164,9 @@ dnn = DNN.DNN(
     input_samples   = input_samples,
     event_category  = options.category,
     train_variables = variables,
+
+    norm_variables = options.norm_variables,
+
     # number of epochs
     train_epochs    = int(options.train_epochs),
     # metrics for evaluation (c.f. KERAS metrics)
