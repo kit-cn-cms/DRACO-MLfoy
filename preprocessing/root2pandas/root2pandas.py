@@ -257,7 +257,7 @@ class Dataset:
 
             # open root file
             with root.open(f) as rf:
-                # get MVATree
+                # get TTree
                 try:
                     tree = rf[self.tree]
                 except:
@@ -297,6 +297,10 @@ class Dataset:
 
             # apply event selection
             df = self.applySelections(df, sample.selections)
+
+            df = df[:1] #!!!!
+
+            print df #!!!!
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
@@ -430,7 +434,6 @@ class Dataset:
                 if os.path.exists(outFile):
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
-
 
 # function to append a list with sample, label and normalization_weight to a list samples
 def createSampleList(sList, sample, label = None, nWeight = 1):
