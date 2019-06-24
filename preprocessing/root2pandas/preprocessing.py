@@ -52,11 +52,15 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
+#base = "(N_Jets >= 4 and N_BTagsM >= 2 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets<12 and N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+
 
 # single lepton selections
-single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
-single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
+#single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29.)"
+#single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1)"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
@@ -68,12 +72,15 @@ ttH_categories.addCategory("ttH", selection = None)
 
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
-
+#ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+# ttbar_categories.addCategory("ttbar", selection = "(Evt_is_ttbar==1)")
+# ttbar_categories.addCategory("bkg",   selection = "(Evt_is_ttbar==0)")
+ttbar_categories.addCategory("ttbar")
+ttbar_categories.addCategory("bkg")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -87,26 +94,35 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
-memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
+#ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
+#memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
+#ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
+# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ/"
+ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
+
 
 # add samples to dataset
-dataset.addSample(
-    sampleName  = "ttHbb",
-    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttH_categories,
-    selections  = ttH_selection,
-    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-   ) 
+#dataset.addSample(
+#    sampleName  = "ttHbb",
+#    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+#    categories  = ttH_categories,
+#    selections  = ttH_selection,
+#    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+#  )
 
+#dataset.addSample(
+#    sampleName  = "TTToSL",
+#    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+#    categories  = ttbar_categories,
+#    selections  = None,#ttbar_selection,
+#    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+#      )
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = None,#ttbar_selection,
-    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-      )
-# initialize variable list 
+    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_nominal*.root",
+    categories  = ttbar_categories
+)
+# initialize variable list
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
@@ -116,10 +132,15 @@ additional_variables = [
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
-    "Evt_ID", 
-    "Evt_Run", 
-    "Evt_Lumi"]
-
+    "Evt_ID",
+    "Evt_Run",
+    "Evt_Lumi"
+    ]
+import time
+start_time = time.time()
+# your script
+elapsed_time = time.time() - start_time
+time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
 

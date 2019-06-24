@@ -118,41 +118,52 @@ plotter = variablePlotter(
 
 naming = options.naming
 # add signal samples
-plotter.addSample(
-    sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttH"+naming,
-    plotColor       = ROOT.kBlue+1,
-    signalSample    = True)
 
-# add background samples
 plotter.addSample(
-    sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb"+naming,
+    sampleName      = "ttbar",
+    sampleFile      = data_dir + "/ttbar" + naming,
+    plotColor       = ROOT.kBlue+1)
+
+plotter.addSample(
+    sampleName      = "bkg",
+    sampleFile      = data_dir + "/bkg" + naming,
     plotColor       = ROOT.kRed+3)
 
-plotter.addSample(
-    sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b"+naming,
-    plotColor       = ROOT.kRed+2)
+#plotter.addSample(
+    #sampleName      = "ttH",
+    #sampleFile      = data_dir+"/ttH"+naming,
+    #plotColor       = ROOT.kBlue+1,
+    #signalSample    = True)
 
-plotter.addSample(
-    sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb"+naming,
-    plotColor       = ROOT.kRed-2)
+# add background samples
+#plotter.addSample(
+    #sampleName      = "ttbb",
+    #sampleFile      = data_dir+"/ttbb"+naming,
+    #plotColor       = ROOT.kRed+3)
 
-plotter.addSample(
-    sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc"+naming,
-    plotColor       = ROOT.kRed+1)
+#plotter.addSample(
+    #sampleName      = "tt2b",
+    #sampleFile      = data_dir+"/tt2b"+naming,
+    #plotColor       = ROOT.kRed+2)
 
-plotter.addSample(
-    sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf"+naming)
+#plotter.addSample(
+    #sampleName      = "ttb",
+    #sampleFile      = data_dir+"/ttb"+naming,
+    #plotColor       = ROOT.kRed-2)
+
+#plotter.addSample(
+    #sampleName      = "ttcc",
+    #sampleFile      = data_dir+"/ttcc"+naming,
+    #plotColor       = ROOT.kRed+1)
+
+#plotter.addSample(
+    #sampleName      = "ttlf",
+    #sampleFile      = data_dir+"/ttlf"+naming)
 
 
 
 # add JT categories
-plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("4j_ge3t")
 
 
 # perform plotting routine

@@ -1,5 +1,5 @@
 variablename,minvalue,maxvalue,numberofbins,logoption,displayname
-MVA_Evt_CSV_Average,0.2,1,30,x,average btag value
+MVA_Evt_CSV_Average,0.2,1.0,30,x,average btag value
 MVA_Evt_Deta_JetsAverage,0.25,2.5,30,-,average #Delta#eta(jets)
 MVA_Evt_Deta_TaggedJetsAverage,0,3,30,-,average #Delta#eta(tags)
 MVA_Evt_M2_TaggedJetsAverage,0,600,30,x,average M_{2}(tags)
@@ -16,7 +16,7 @@ MVA_aplanarity_tags,0,0.15,30,-,aplanarity of tagged jets
 MVA_avg_btag_disc_btags,0.2,1,30,-,average btag value of tagged jets
 MVA_avg_dr_tagged_jets,0.4,3.5,30,-,average #DeltaR of tagged jets
 MVA_best_higgs_mass,0,250,30,-,best higgs mass
-MVA_blr,0,1,30,-,btag likelihood ratio
+MVA_blr,0.,1.,30,-,btag likelihood ratio
 MVA_blr_transformed,-7,14,30,-,transformed b-tag likelihood ratio
 MVA_closest_tagged_dijet_mass,0,400,30,-,closest tagged dijet mass
 MVA_cos_theta_blep_bhad,-1,1,30,-,cos#theta(b_{lep} b_{had})
@@ -24,8 +24,8 @@ MVA_cos_theta_l_bhad,-1,1,30,-,cos#theta(lep b_{had})
 MVA_dEta_fn,0,3,30,-,#Delta#eta(fn)
 MVA_delta_eta_blep_bhad,0,4,30,-,#Delta#eta(b_{lep} b_{had})
 MVA_delta_eta_l_bhad,0,4,30,-,#Delta#eta(lep b_{had})
-MVA_delta_phi_blep_bhad,0,6.2831853072,30,-,#Delta#phi(b_{lep} b_{had})
-MVA_delta_phi_l_bhad,0,6.2831853072,30,-,#Delta#phi(lep b_{had})
+MVA_delta_phi_blep_bhad,0,6.28318530717959,30,-,#Delta#phi(b_{lep} b_{had})
+MVA_delta_phi_l_bhad,0,6.28318530717959,30,-,#Delta#phi(lep b_{had})
 MVA_dev_from_avg_disc_btags,0,0.13,30,x,deviation from average btag value for tagged jets
 MVA_dr_between_lep_and_closest_jet,0.4,3,30,-,min #DeltaR(lep jet)
 MVA_fifth_highest_CSV,0.25,0.4,30,-,fifth highest btag
@@ -58,11 +58,12 @@ MVA_third_jet_pt,0,200,30,-,third_jet_p_{T}
 MVA_transverse_sphericity,0,1,30,-,transverse sphericity
 MVA_transverse_sphericity_jets,0,1,30,-,transverse sphericity of jets
 MVA_transverse_sphericity_tags,0,1,30,-,transverse sphericity of tagged jets
-BDT_common5_input_Evt_CSV_Average,0.2,1,30,x,average btag value
+BDT_common5_input_Evt_CSV_Average,0.2,1.0,30,x,average btag value
 BDT_common5_input_Evt_Deta_JetsAverage,0.25,2.5,30,-,average #Delta#eta(jets)
 BDT_common5_input_Evt_Deta_TaggedJetsAverage,0,3,30,-,average #Delta#eta(tags)
 BDT_common5_input_Evt_M2_TaggedJetsAverage,0,600,30,x,average M_{2}(tags)
 BDT_common5_input_HT,100,1500,30,-,H_{T}
+BDT_common5_input_HT_tag,100,900,30,-,H_{T}(tags)
 BDT_common5_input_M3,100,1000,30,x,M_{3}
 BDT_common5_input_MET,0,300,30,x,MET
 BDT_common5_input_MHT,0,300,30,x,missing H_{T}
@@ -75,13 +76,15 @@ BDT_common5_input_avg_btag_disc_btags,0.2,1,30,-,average btag value of tagged je
 BDT_common5_input_avg_dr_tagged_jets,0.4,3.5,30,-,average #DeltaR of tagged jets
 BDT_common5_input_best_higgs_mass,0,250,30,-,best_higgs_Mass
 BDT_common5_input_blr_transformed,-7,14,30,-,transformed b-tag likelihood ratio
+BDT_common5_input_closest_tagged_dijet_mass,0,400,30,-,closest tagged dijet mass
 BDT_common5_input_cos_theta_blep_bhad,-1,1,30,-,cos#theta(b_{lep} b_{had})
 BDT_common5_input_cos_theta_l_bhad,-1,1,30,-,cos#theta(lep b_{had})
 BDT_common5_input_dEta_fn,0,3,30,-,#Delta#eta_fn
 BDT_common5_input_delta_eta_blep_bhad,0,4,30,-,#Delta#eta(b_{lep} b_{had})
 BDT_common5_input_delta_eta_l_bhad,0,4,30,-,#Delta#eta(lep b_{had})
-BDT_common5_input_delta_phi_blep_bhad,0,6.2831853072,30,-,#Delta#phi(b_{lep} b_{had})
-BDT_common5_input_delta_phi_l_bhad,0,6.2831853072,30,-,#Delta#phi(lep b_{had})
+BDT_common5_input_delta_phi_blep_bhad,0,6.28318530717959,30,-,#Delta#phi(b_{lep} b_{had})
+BDT_common5_input_delta_phi_l_bhad,0,6.28318530717959,30,-,#Delta#phi(lep b_{had})
+BDT_common5_input_dev_from_avg_disc_btags,0,0.13,30,x,deviation from average btag value for tagged jets
 BDT_common5_input_dr_between_lep_and_closest_jet,0.4,3,30,-,min #DeltaR(lep jet)
 BDT_common5_input_fifth_highest_CSV,0.25,0.4,30,-,fifth highest btag
 BDT_common5_input_first_jet_pt,50,700,30,x,p_{T} of leading jet
@@ -105,19 +108,26 @@ BDT_common5_input_second_higest_btag,0.5,1,30,-,second higest btag
 BDT_common5_input_second_highest_btag,0.5,1,30,-,second highest btag
 BDT_common5_input_second_jet_pt,0,300,30,-,second jet p_{T}
 BDT_common5_input_sphericity,0,1,30,-,sphericity
+BDT_common5_input_sphericity_jets,0,1,30,-,sphericity of jets
 BDT_common5_input_sphericity_tags,0,1,30,-,sphericity of tagged jets
 BDT_common5_input_tagged_dijet_mass_closest_to_125,50,250,30,-,M_{2}(tags) closest to 125 GeV
 BDT_common5_input_third_highest_btag,0.5,1,30,-,third_highest_btag
 BDT_common5_input_third_jet_pt,0,200,30,-,third_jet_p_{T}
 BDT_common5_input_transverse_sphericity,0,1,30,-,transverse sphericity
+BDT_common5_input_transverse_sphericity_jets,0,1,30,-,transverse sphericity of jets
 BDT_common5_input_transverse_sphericity_tags,0,1,30,-,transverse sphericity of tagged jets
-CSV[0],0.3,1,30,x,highest btag value
-CSV[2],0.3,1,30,x,third highest btag value
-CSV[3],0,1,30,x,fourth highest btag value
-CSV[4],0,1,30,x,fifth highest btag value
-CSV[5],0,1,30,x,sixth highest btag value
+CSV[0],0.3,1.,30,x,highest btag value
+CSV[1],0.3,1.,30,x,second highest btag value
+CSV[2],0.3,1.,30,x,third highest btag value
+CSV[3],0.,1.,30,x,fourth highest btag value
+CSV[4],0.,1.,30,x,fifth highest btag value
+CSV[5],0.,1.,30,x,sixth highest btag value
+Evt_CSV_Average,0.3,1.,30,x,average btag value
+Evt_CSV_Average_Tagged,0.3,1,30,-,average btag value of tagged jets
 Evt_CSV_Dev,0,0.25,30,-,deviation of btag value
 Evt_CSV_Dev_Tagged,0,0.12,30,x,deviation of btag value of tagged jets
+Evt_CSV_Min,0,0.6,30,x,min btag value
+Evt_CSV_Min_Tagged,0.3,1,30,x,min btag value of tagged jets
 Evt_Deta_JetsAverage,0.25,2.5,30,-,average #Delta#eta(jets)
 Evt_Deta_TaggedJetsAverage,0,3,30,-,average #Delta#eta(tags)
 Evt_Deta_UntaggedJetsAverage,0,3,30,-,average #Delta#eta(untagged)
@@ -126,6 +136,7 @@ Evt_Dr_Jets_Average,1.5,3.5,30,-,average #DeltaR(jets)
 Evt_Dr_MinDeltaRJets,0.4,2.2,30,-,min #DeltaR(jet jet)
 Evt_Dr_MinDeltaRLeptonJet,0.3,3,30,-,min #DeltaR(lep jet)
 Evt_Dr_MinDeltaRLeptonTaggedJet,0.3,3,30,-,min #DeltaR (lep tag)
+Evt_Dr_MinDeltaRTaggedJets,0.3,3.5,30,-,min #DeltaR(tag tag)
 Evt_Dr_MinDeltaRUntaggedJets,0.3,4,30,-,min #DeltaR(untagged untagged)
 Evt_Dr_TaggedJetsAverage,0.5,3.5,30,-,average #DeltaR(tags)
 Evt_Dr_UntaggedJetsAverage,0.5,4,30,-,average #DeltaR(untagged)
@@ -139,37 +150,43 @@ Evt_HT_Jets,150,1700,30,x,H_{T} of jets
 Evt_JetPtOverJetE,0.2,1,30,-,p_{T}(jets)/E(jets)
 Evt_Jet_MaxDeta_Jets,0,4.5,30,-,max #Delta#eta(jet jet)
 Evt_M2_JetsAverage,50,500,30,-,average M_{2}(jets)
+Evt_M2_TaggedJetsAverage,50,550,30,-,average M_{2}(tags)
 Evt_M2_UntaggedJetsAverage,50,400,30,-,average M_{2}(untagged)
 Evt_M3,100,1000,30,x,M_{3}
 Evt_MHT,0,400,30,-,missing H_{T}
+Evt_M_JetsAverage,2,20,30,-,average M(jets)
 Evt_M_MedianTaggedJets,50,500,30,-,median M(tags)
 Evt_M_MinDeltaRJets,20,200,30,-,mass of min #DeltaR(jet jet)
 Evt_M_MinDeltaRLeptonJet,20,250,30,-,mass of min #DeltaR(lep jet)
+Evt_M_MinDeltaRLeptonTaggedJet,20,300,30,-,mass of min #DeltaR(lep tag)
 Evt_M_MinDeltaRTaggedJets,20,400,30,-,mass of min #DeltaR(tag tag)
 Evt_M_PrimaryLepton,-0.25,0.35,30,-,Mass PrimaryLepton
 Evt_M_TaggedJetsAverage,5,50,30,-,average M(tags)
 Evt_M_TaggedJetsClosestTo125,50,250,30,-,M(tags) closest to 125 GeV
 Evt_M_Total,250,3000,30,x,total mass
 Evt_M_UntaggedJetsAverage,0,150,30,-,Mass UntaggedJetsAverage
-Evt_Phi_MET,-3.1415926536,3.1415926536,30,-,#phi(MET)
-Evt_Phi_PrimaryLepton,-3.1415926536,3.1415926536,30,-,#phi(PrimaryLepton)
+Evt_Phi_MET,-3.14159265358979,3.14159265358979,30,-,#phi(MET)
+Evt_Phi_PrimaryLepton,-3.14159265358979,3.14159265358979,30,-,#phi(PrimaryLepton)
 Evt_Pt_MET,20,400,30,x,p_{T}(MET)
 Evt_Pt_MinDeltaRJets,20,600,30,x,p_{T} of min #DeltaR(jet jet)
 Evt_Pt_MinDeltaRTaggedJets,20,500,30,-,p_{T} of min #DeltaR(tag tag)
 Evt_Pt_MinDeltaRUntaggedJets,0,1500,30,-,p_{T} min #DeltaR(untagged untagged)
 Evt_Pt_PrimaryLepton,30,300,30,x,p_{T}(lep)
-Evt_TaggedJet_MaxDeta_Jets,0,4,30,-,max #Delta#eta(jets)
-Evt_TaggedJet_MaxDeta_TaggedJets,0,5,30,-,max #Delta#eta(tags)
+Evt_blr_ETH,0,1,30,x,btag likelihood ratio
+Evt_blr_ETH_transformed,-6,12,30,x,transformed btag likelihood ratio
+Evt_TaggedJet_MaxDeta_Jets,0.,4.,30,-,max #Delta#eta(jets)
+Evt_TaggedJet_MaxDeta_TaggedJets,0.,5.,30,-,max #Delta#eta(tags)
 HA_Lepton,-1,1,30,-,helicity angle Lepton
 HA_hadB,-1,1,30,-,helicity angle b_{had}
 HA_hadB_lepB,-1,1,30,-,helicity angle (b_{had} b_{lep})
 HA_lepB,-1,1,30,-,helicity anglie b_{lep}
 HF_dEta_hadB_lepB,0,5,30,-,#Delta#eta(b_{had} b_{lep}) in helicity frame
-HF_dPhi_hadB_lepB,0,3.1415926536,30,-,#Delta#phi(b_{had} b_{lep}) in helicity frame
-HF_#Delta#xi_hadB_lepB,0,3.1415926536,30,-,#Delta#xi(b_{had} b_{lep}) in helicity frame
+HF_dPhi_hadB_lepB,0,3.14159265358979,30,-,#Delta#phi(b_{had} b_{lep}) in helicity frame
+HF_#Delta#xi_hadB_lepB,0,3.14159265358979,30,-,#Delta#xi(b_{had} b_{lep}) in helicity frame
 Jet_CSV[0],0,1,30,-,Jet CSV[0]
 Jet_CSV[1],0,1,30,-,Jet CSV[1]
 Jet_CSV[2],0,1,30,-,Jet CSV[2]
+Jet_CSV[3],0,1,30,-,Jet CSV[3]
 Jet_CSV_DNN[0],-2,1,30,-,Jet CSV DNN[0]
 Jet_CSV_DNN[1],-2,1,30,-,Jet CSV DNN[1]
 Jet_CSV_DNN[2],-2,1,30,-,Jet CSV DNN[2]
@@ -186,18 +203,19 @@ Jet_Eta[2],-2.4,2.4,30,-,#eta of third jet
 Jet_Eta[3],-2.4,2.4,30,-,#eta of fourth jet
 Jet_Eta[4],-2.4,2.4,30,-,#eta of fifth jet
 Jet_Eta[5],-2.4,2.4,30,-,#eta of sixth jet
-Jet_M[0],0,100,30,-,mass of leading jet
-Jet_M[1],0,60,30,-,mass of subleading jet
-Jet_M[2],0,40,30,-,mass of third jet
-Jet_M[3],0,30,30,-,mass of fourth jet
-Jet_M[4],0,20,30,-,mass of fifth jet
-Jet_M[5],0,20,30,-,mass of sixth jet
-Jet_Phi[0],-3.1415926536,3.1415926536,30,-,#phi of leading jet
-Jet_Phi[1],-3.1415926536,3.1415926536,30,-,#phi of subleading jet
-Jet_Phi[2],-3.1415926536,3.1415926536,30,-,#phi of third jet
-Jet_Phi[3],-3.1415926536,3.1415926536,30,-,#phi of fourth jet
-Jet_Phi[4],-3.1415926536,3.1415926536,30,-,#phi of fifth jet
-Jet_Phi[5],-3.1415926536,3.1415926536,30,-,#phi of sixth jet
+Jet_M[0],0.,100,30,-,mass of leading jet
+Jet_M[1],0.,60,30,-,mass of subleading jet
+Jet_M[2],0.,40,30,-,mass of third jet
+Jet_M[3],0.,30,30,-,mass of fourth jet
+Jet_M[4],0.,20,30,-,mass of fifth jet
+Jet_M[5],0.,20,30,-,mass of sixth jet
+Jet_Phi[0],-3.14159265358979,3.14159265358979,30,-,#phi of leading jet
+Jet_Phi[1],-3.14159265358979,3.14159265358979,30,-,#phi of subleading jet
+Jet_Phi[2],-3.14159265358979,3.14159265358979,30,-,#phi of third jet
+Jet_Phi[3],-3.14159265358979,3.14159265358979,30,-,#phi of fourth jet
+Jet_Phi[4],-3.14159265358979,3.14159265358979,30,-,#phi of fifth jet
+Jet_Phi[5],-3.14159265358979,3.14159265358979,30,-,#phi of sixth jet
+Jet_Pt[0],0,600,30,x,p_{T} of leading jet
 Jet_Pt[1],0,500,30,x,p_{T} of subleading jet
 Jet_Pt[2],30,300,30,x,p_{T} of third jet
 Jet_Pt[3],30,200,30,x,p_{T} of fourth jet
@@ -206,12 +224,13 @@ Jet_Pt[5],30,100,30,x,p_{T} of sixth jet
 LooseLepton_E[0],0,600,30,-,E(lep)
 LooseLepton_Eta[0],-2.4,2.4,30,-,#eta(lep)
 LooseLepton_M[0],-0.5,0.5,30,-,M(lep)
-LooseLepton_Phi[0],-3.1415926536,3.1415926536,30,-,#phi(lep)
+LooseLepton_Phi[0],-3.14159265358979,3.14159265358979,30,-,#phi(lep)
 LooseLepton_Pt[0],0,400,30,x,p_{T}(lep)
 N_AK8Jets,-0.5,6.5,7,-,N(AK8Jets)
 N_AdditionalGenBQuarks,-0.5,6.5,7,-,N(AdditionalGenBQuarks)
 N_BTagsL,2.5,8.5,6,-,number of btags (loose)
 N_BTagsM,1.5,7.5,6,-,number of btags (medium)
+N_BTagsT,-0.5,5.5,6,-,number of btags (tight)
 N_Jets,1.5,11.5,10,-,number of jets
 N_LooseJets,3.5,10.5,7,-,N(LooseJets)
 N_LooseLeptons,-0.5,6.5,7,-,N(LooseLeptons)
@@ -222,7 +241,7 @@ com_hadTop_P_hadW,40,80,30,-,P(W_{had}) in t_{had} c.o.m. frame
 com_hadTop_costheta_hadB,-1,1,30,-,cos#theta(b_{had}) in t_{had} c.o.m. frame
 com_hadTop_pT_hadB,0,90,30,-,p_{T}(b_{had}) in t_{had} c.o.m. frame
 com_hadTop_pT_hadW,0,90,30,-,p_{T}(W_{had}) in t_{had} c.o.m. frame
-com_hadTop_theta_hadB,0,3.1415926536,30,-,#theta(b_{had}) in t_{had} c.o.m. frame
+com_hadTop_theta_hadB,0,3.14159265358979,30,-,#theta(b_{had}) in t_{had} c.o.m. frame
 com_lepTop_pT_Lepton,0,90,30,-,p_{T}(lep) in t_{lep} c.o.m. frame
 com_lepTop_pT_lepB,0,90,30,-,p_{T}(b_{lep}) in t_{lep} c.o.m. frame
 com_ttbar_dEta_hadTop_lepTop,0,8,30,-,#Delta#eta(t_{had}) in t_{lep} c.o.m. frame
@@ -258,36 +277,36 @@ dEta_lepB_BosonB1,0,5,30,-,#Delta#eta_lepB_BosonB1
 dEta_lepB_BosonB2,0,5,30,-,#Delta#eta_lepB_BosonB2
 dEta_lepTop_hadB,0,5,30,-,#Delta#eta_lepTop_hadB
 dEta_lepTop_lepB,0,5,30,-,#Delta#eta_lepTop_lepB
-dPhi_BosonB1_BosonB2,0,3.1415926536,30,-,#Delta#phi_BosonB1_BosonB2
-dPhi_Boson_Lepton,0,3.1415926536,30,-,#Delta#phi_Boson_Lepton
-dPhi_Boson_hadB,0,3.1415926536,30,-,#Delta#phi_Boson_hadB
-dPhi_Boson_hadTop,0,3.1415926536,30,-,#Delta#phi_Boson_hadTop
-dPhi_Boson_lepB,0,3.1415926536,30,-,#Delta#phi_Boson_lepB
-dPhi_Boson_lepTop,0,3.1415926536,30,-,#Delta#phi_Boson_lepTop
-dPhi_Boson_ttbar,0,3.1415926536,30,-,#Delta#phi_Boson_ttbar
-dPhi_Lepton_BosonB1,0,3.1415926536,30,-,#Delta#phi_Lepton_BosonB1
-dPhi_Lepton_BosonB2,0,3.1415926536,30,-,#Delta#phi_Lepton_BosonB2
-dPhi_Lepton_hadB,0,3.1415926536,30,-,#Delta#phi_Lepton_hadB
-dPhi_Lepton_hadTop,0,3.1415926536,30,-,#Delta#phi_Lepton_hadTop
-dPhi_Lepton_lepB,0,3.1415926536,30,-,#Delta#phi_Lepton_lepB
-dPhi_Lepton_lepTop,0,3.1415926536,30,-,#Delta#phi_Lepton_lepTop
-dPhi_ZBoson_Lepton,0,3.1415926536,30,-,#Delta#phi_ZBoson_LepTon
-dPhi_ZBoson_hadB,0,3.1415926536,30,-,#Delta#phi_ZBoson_hadB
-dPhi_ZBoson_hadTop,0,3.1415926536,30,-,#Delta#phi_ZBoson_hadTop
-dPhi_ZBoson_lepB,0,3.1415926536,30,-,#Delta#phi_ZBoson_lepB
-dPhi_ZBoson_lepTop,0,3.1415926536,30,-,#Delta#phi_ZBoson_lepTop
-dPhi_ZBoson_ttbar,0,3.1415926536,30,-,#Delta#phi_ZBoson_ttbar
-dPhi_fn,0,3.1415926536,30,-,#Delta#phi_fn
-dPhi_hadB_BosonB1,0,3.1415926536,30,-,#Delta#phi_hadB_BosonB1
-dPhi_hadB_BosonB2,0,3.1415926536,30,-,#Delta#phi_hadB_BosonB2
-dPhi_hadB_lepB,0,3.1415926536,30,-,#Delta#phi_hadB_lepB
-dPhi_hadTop_hadB,0,3.1415926536,30,-,#Delta#phi_hadTop_hadB
-dPhi_hadTop_lepB,0,3.1415926536,30,-,#Delta#phi_hadTop_lepB
-dPhi_hadTop_lepTop,0,3.1415926536,30,-,#Delta#phi_hadTop_lepTop
-dPhi_lepB_BosonB1,0,3.1415926536,30,-,#Delta#phi_lepB_BosonB1
-dPhi_lepB_BosonB2,0,3.1415926536,30,-,#Delta#phi_lepB_BosonB2
-dPhi_lepTop_hadB,0,3.1415926536,30,-,#Delta#phi_lepTop_hadB
-dPhi_lepTop_lepB,0,3.1415926536,30,-,#Delta#phi_lepTop_lepB
+dPhi_BosonB1_BosonB2,0,3.14159265358979,30,-,#Delta#phi_BosonB1_BosonB2
+dPhi_Boson_Lepton,0,3.14159265358979,30,-,#Delta#phi_Boson_Lepton
+dPhi_Boson_hadB,0,3.14159265358979,30,-,#Delta#phi_Boson_hadB
+dPhi_Boson_hadTop,0,3.14159265358979,30,-,#Delta#phi_Boson_hadTop
+dPhi_Boson_lepB,0,3.14159265358979,30,-,#Delta#phi_Boson_lepB
+dPhi_Boson_lepTop,0,3.14159265358979,30,-,#Delta#phi_Boson_lepTop
+dPhi_Boson_ttbar,0,3.14159265358979,30,-,#Delta#phi_Boson_ttbar
+dPhi_Lepton_BosonB1,0,3.14159265358979,30,-,#Delta#phi_Lepton_BosonB1
+dPhi_Lepton_BosonB2,0,3.14159265358979,30,-,#Delta#phi_Lepton_BosonB2
+dPhi_Lepton_hadB,0,3.14159265358979,30,-,#Delta#phi_Lepton_hadB
+dPhi_Lepton_hadTop,0,3.14159265358979,30,-,#Delta#phi_Lepton_hadTop
+dPhi_Lepton_lepB,0,3.14159265358979,30,-,#Delta#phi_Lepton_lepB
+dPhi_Lepton_lepTop,0,3.14159265358979,30,-,#Delta#phi_Lepton_lepTop
+dPhi_ZBoson_Lepton,0,3.14159265358979,30,-,#Delta#phi_ZBoson_LepTon
+dPhi_ZBoson_hadB,0,3.14159265358979,30,-,#Delta#phi_ZBoson_hadB
+dPhi_ZBoson_hadTop,0,3.14159265358979,30,-,#Delta#phi_ZBoson_hadTop
+dPhi_ZBoson_lepB,0,3.14159265358979,30,-,#Delta#phi_ZBoson_lepB
+dPhi_ZBoson_lepTop,0,3.14159265358979,30,-,#Delta#phi_ZBoson_lepTop
+dPhi_ZBoson_ttbar,0,3.14159265358979,30,-,#Delta#phi_ZBoson_ttbar
+dPhi_fn,0,3.14159265358979,30,-,#Delta#phi_fn
+dPhi_hadB_BosonB1,0,3.14159265358979,30,-,#Delta#phi_hadB_BosonB1
+dPhi_hadB_BosonB2,0,3.14159265358979,30,-,#Delta#phi_hadB_BosonB2
+dPhi_hadB_lepB,0,3.14159265358979,30,-,#Delta#phi_hadB_lepB
+dPhi_hadTop_hadB,0,3.14159265358979,30,-,#Delta#phi_hadTop_hadB
+dPhi_hadTop_lepB,0,3.14159265358979,30,-,#Delta#phi_hadTop_lepB
+dPhi_hadTop_lepTop,0,3.14159265358979,30,-,#Delta#phi_hadTop_lepTop
+dPhi_lepB_BosonB1,0,3.14159265358979,30,-,#Delta#phi_lepB_BosonB1
+dPhi_lepB_BosonB2,0,3.14159265358979,30,-,#Delta#phi_lepB_BosonB2
+dPhi_lepTop_hadB,0,3.14159265358979,30,-,#Delta#phi_lepTop_hadB
+dPhi_lepTop_lepB,0,3.14159265358979,30,-,#Delta#phi_lepTop_lepB
 dR_BosonB1_BosonB2,0,7,30,-,#DeltaR_BosonB1_BosonB2
 dR_Boson_Lepton,0,7,30,-,#DeltaR_Boson_Lepton
 dR_Boson_hadB,0,7,30,-,#DeltaR_Boson_hadB
@@ -318,12 +337,12 @@ dR_lepB_BosonB1,0,7,30,-,#DeltaR_lepB_BosonB1
 dR_lepB_BosonB2,0,7,30,-,#DeltaR_lepB_BosonB2
 dR_lepTop_hadB,0,7,30,-,#DeltaR_lepTop_hadB
 dR_lepTop_lepB,0,7,30,-,#DeltaR_lepTop_lepB
-#Delta#xi_Lepton_hadB,0,3.1415926536,30,-,#Delta#xi_Lepton_hadB
-#Delta#xi_Lepton_lepTop,0,3.1415926536,30,-,#Delta#xi_Lepton_lepTop
-#Delta#xi_hadB_lepB,0,3.1415926536,30,-,#Delta#xi_hadB_lepB
-#Delta#xi_hadTop_hadB,0,3.1415926536,30,-,#Delta#xi_hadTop_hadB
-#Delta#xi_hadTop_lepTop,0,3.1415926536,30,-,#Delta#xi_hadTop_lepTop
-#Delta#xi_lepTop_lepB,0,3.1415926536,30,-,#Delta#xi_lepTop_lepB
+#Delta#xi_Lepton_hadB,0,3.14159265358979,30,-,#Delta#xi_Lepton_hadB
+#Delta#xi_Lepton_lepTop,0,3.14159265358979,30,-,#Delta#xi_Lepton_lepTop
+#Delta#xi_hadB_lepB,0,3.14159265358979,30,-,#Delta#xi_hadB_lepB
+#Delta#xi_hadTop_hadB,0,3.14159265358979,30,-,#Delta#xi_hadTop_hadB
+#Delta#xi_hadTop_lepTop,0,3.14159265358979,30,-,#Delta#xi_hadTop_lepTop
+#Delta#xi_lepTop_lepB,0,3.14159265358979,30,-,#Delta#xi_lepTop_lepB
 dY_Boson_Lepton,0,5,30,-,#Deltay_Boson_Lepton
 dY_Boson_hadB,0,5,30,-,#Deltay_Boson_hadB
 dY_Boson_hadTop,0,5,30,-,#Deltay_Boson_hadTop
@@ -375,13 +394,13 @@ genTTX_DeltaEta_Boson_Lepton,0,5,30,-,genTTX_#Delta#eta_Boson_Lepton
 genTTX_DeltaEta_Boson_TopHad,0,6,30,-,genTTX_#Delta#eta_Boson_TopHad
 genTTX_DeltaEta_Boson_TopLep,0,6,30,-,genTTX_#Delta#eta_Boson_TopLep
 genTTX_DeltaEta_TopHad_TopLep,0,5,30,-,genTTX_#Delta#eta_TopHad_TopLep
-genTTX_DeltaPhi_BAdd1_BAdd2,0,3.1415926536,30,-,genTTX_#Delta#phi_BAdd1_BAdd2
-genTTX_DeltaPhi_BHad_BLep,0,3.1415926536,30,-,genTTX_#Delta#phi_BHad_BLep
-genTTX_DeltaPhi_BHad_Lepton,0,3.1415926536,30,-,genTTX_#Delta#phi_BHad_Lepton
-genTTX_DeltaPhi_Boson_Lepton,0,3.1415926536,30,-,genTTX_#Delta#phi_Boson_Lepton
-genTTX_DeltaPhi_Boson_TopHad,0,3.1415926536,30,-,genTTX_#Delta#phi_Boson_TopHad
-genTTX_DeltaPhi_Boson_TopLep,0,3.1415926536,30,-,genTTX_#Delta#phi_Boson_TopLep
-genTTX_DeltaPhi_TopHad_TopLep,0,3.1415926536,30,-,genTTX_#Delta#phi_TopHad_TopLep
+genTTX_DeltaPhi_BAdd1_BAdd2,0,3.14159265358979,30,-,genTTX_#Delta#phi_BAdd1_BAdd2
+genTTX_DeltaPhi_BHad_BLep,0,3.14159265358979,30,-,genTTX_#Delta#phi_BHad_BLep
+genTTX_DeltaPhi_BHad_Lepton,0,3.14159265358979,30,-,genTTX_#Delta#phi_BHad_Lepton
+genTTX_DeltaPhi_Boson_Lepton,0,3.14159265358979,30,-,genTTX_#Delta#phi_Boson_Lepton
+genTTX_DeltaPhi_Boson_TopHad,0,3.14159265358979,30,-,genTTX_#Delta#phi_Boson_TopHad
+genTTX_DeltaPhi_Boson_TopLep,0,3.14159265358979,30,-,genTTX_#Delta#phi_Boson_TopLep
+genTTX_DeltaPhi_TopHad_TopLep,0,3.14159265358979,30,-,genTTX_#Delta#phi_TopHad_TopLep
 genTTX_DeltaTheta_BHad_BLep,0,2.5,30,-,genTTX_#Delta#theta_BHad_BLep
 genTTX_DeltaTheta_BHad_Lepton,0,2.5,30,-,genTTX_#Delta#theta_BHad_Lepton
 genTTX_DeltaTheta_TopHad_TopLep,0,3,30,-,genTTX_#Delta#theta_TopHad_TopLep
@@ -397,13 +416,13 @@ genTTX_Eta_TopHad,-5,5,30,-,genTTX_#eta_TopHad
 genTTX_Eta_TopLep,-5,5,30,-,genTTX_#eta_TopLep
 genTTX_Eta_WHad,-5,5,30,-,genTTX_#eta_WHad
 genTTX_Eta_WLep,-5,5,30,-,genTTX_#eta_WLep
-genTTX_Theta_BHad,0,3.1415926536,30,-,genTTX_#theta_BHad
-genTTX_Theta_BLep,0,3.1415926536,30,-,genTTX_#theta_BLep
-genTTX_Theta_Lepton,0,3.1415926536,30,-,genTTX_#theta_Lepton
-genTTX_Theta_TopHad,0,3.1415926536,30,-,genTTX_#theta_TopHad
-genTTX_Theta_TopLep,0,3.1415926536,30,-,genTTX_#theta_TopLep
-genTTX_Theta_WHad,0,3.1415926536,30,-,genTTX_#theta_WHad
-genTTX_Theta_WLep,0,3.1415926536,30,-,genTTX_#theta_WLep
+genTTX_Theta_BHad,0,3.14159265358979,30,-,genTTX_#theta_BHad
+genTTX_Theta_BLep,0,3.14159265358979,30,-,genTTX_#theta_BLep
+genTTX_Theta_Lepton,0,3.14159265358979,30,-,genTTX_#theta_Lepton
+genTTX_Theta_TopHad,0,3.14159265358979,30,-,genTTX_#theta_TopHad
+genTTX_Theta_TopLep,0,3.14159265358979,30,-,genTTX_#theta_TopLep
+genTTX_Theta_WHad,0,3.14159265358979,30,-,genTTX_#theta_WHad
+genTTX_Theta_WLep,0,3.14159265358979,30,-,genTTX_#theta_WLep
 genTTX_pT_BAdd1,0,600,30,-,genTTX_p_{T}_BAdd1
 genTTX_pT_BAdd2,0,600,30,-,genTTX_p_{T}_BAdd2
 genTTX_pT_BHad,0,300,30,-,genTTX_p_{T}_BHad
@@ -425,6 +444,7 @@ mass_lepB,4.5,4.85,30,-,M_lepB
 mass_lepTop,160,190,30,-,M_lepTop
 mass_ttX,0,2000,30,-,M_ttX
 mass_ttbar,300,1200,30,-,M_ttbar
+memDBp,0,1,30,-,MEM
 pT_Boson,0,500,30,-,p_{T}_Boson
 pT_BosonB1,0,400,30,-,p_{T}_BosonB1
 pT_BosonB2,0,400,30,-,p_{T}_BosonB2
@@ -436,17 +456,17 @@ pT_lepB,0,400,30,-,p_{T}_lepB
 pT_lepTop,0,600,30,-,p_{T}_lepTop
 pT_ttX,0,600,30,-,p_{T}_ttX
 pT_ttbar,0,600,30,-,p_{T}_ttbar
-phi_Boson,-3.1415926536,3.1415926536,30,-,#phi_Boson
-phi_BosonB1,-3.1415926536,3.1415926536,30,-,#phi_BosonB1
-phi_BosonB2,-3.1415926536,3.1415926536,30,-,#phi_BosonB2
-phi_Lepton,-3.1415926536,3.1415926536,30,-,#phi_Lepton
-phi_ZBoson,-3.1415926536,3.1415926536,30,-,#phi_ZBoson
-phi_hadB,-3.1415926536,3.1415926536,30,-,#phi_hadB
-phi_hadTop,-3.1415926536,3.1415926536,30,-,#phi_hadTop
-phi_lepB,-3.1415926536,3.1415926536,30,-,#phi_lepB
-phi_lepTop,-3.1415926536,3.1415926536,30,-,#phi_lepTop
-phi_ttX,-3.1415926536,3.1415926536,30,-,#phi_ttX
-phi_ttbar,-3.1415926536,3.1415926536,30,-,#phi_ttbar
+phi_Boson,-3.14159265358979,3.14159265358979,30,-,#phi_Boson
+phi_BosonB1,-3.14159265358979,3.14159265358979,30,-,#phi_BosonB1
+phi_BosonB2,-3.14159265358979,3.14159265358979,30,-,#phi_BosonB2
+phi_Lepton,-3.14159265358979,3.14159265358979,30,-,#phi_Lepton
+phi_ZBoson,-3.14159265358979,3.14159265358979,30,-,#phi_ZBoson
+phi_hadB,-3.14159265358979,3.14159265358979,30,-,#phi_hadB
+phi_hadTop,-3.14159265358979,3.14159265358979,30,-,#phi_hadTop
+phi_lepB,-3.14159265358979,3.14159265358979,30,-,#phi_lepB
+phi_lepTop,-3.14159265358979,3.14159265358979,30,-,#phi_lepTop
+phi_ttX,-3.14159265358979,3.14159265358979,30,-,#phi_ttX
+phi_ttbar,-3.14159265358979,3.14159265358979,30,-,#phi_ttbar
 recoTTX_DeltaEta_BAdd1_BAdd2,0,3,30,-,recoTTX_#Delta#eta_BAdd1_BAdd2
 recoTTX_DeltaEta_BHad_BLep,0,5,30,-,recoTTX_#Delta#eta_BHad_BLep
 recoTTX_DeltaEta_BHad_Lepton,0,5,30,-,recoTTX_#Delta#eta_BHad_Lepton
@@ -454,13 +474,13 @@ recoTTX_DeltaEta_Boson_Lepton,0,5,30,-,recoTTX_#Delta#eta_Boson_Lepton
 recoTTX_DeltaEta_Boson_TopHad,0,6,30,-,recoTTX_#Delta#eta_Boson_TopHad
 recoTTX_DeltaEta_Boson_TopLep,0,6,30,-,recoTTX_#Delta#eta_Boson_TopLep
 recoTTX_DeltaEta_TopHad_TopLep,0,5,30,-,recoTTX_#Delta#eta_TopHad_TopLep
-recoTTX_DeltaPhi_BAdd1_BAdd2,0,3.1415926536,30,-,recoTTX_#Delta#phi_BAdd1_BAdd2
-recoTTX_DeltaPhi_BHad_BLep,0,3.1415926536,30,-,recoTTX_#Delta#phi_BHad_BLep
-recoTTX_DeltaPhi_BHad_Lepton,0,3.1415926536,30,-,recoTTX_#Delta#phi_BHad_Lepton
-recoTTX_DeltaPhi_Boson_Lepton,0,3.1415926536,30,-,recoTTX_#Delta#phi_Boson_Lepton
-recoTTX_DeltaPhi_Boson_TopHad,0,3.1415926536,30,-,recoTTX_#Delta#phi_Boson_TopHad
-recoTTX_DeltaPhi_Boson_TopLep,0,3.1415926536,30,-,recoTTX_#Delta#phi_Boson_TopLep
-recoTTX_DeltaPhi_TopHad_TopLep,0,3.1415926536,30,-,recoTTX_#Delta#phi_TopHad_TopLep
+recoTTX_DeltaPhi_BAdd1_BAdd2,0,3.14159265358979,30,-,recoTTX_#Delta#phi_BAdd1_BAdd2
+recoTTX_DeltaPhi_BHad_BLep,0,3.14159265358979,30,-,recoTTX_#Delta#phi_BHad_BLep
+recoTTX_DeltaPhi_BHad_Lepton,0,3.14159265358979,30,-,recoTTX_#Delta#phi_BHad_Lepton
+recoTTX_DeltaPhi_Boson_Lepton,0,3.14159265358979,30,-,recoTTX_#Delta#phi_Boson_Lepton
+recoTTX_DeltaPhi_Boson_TopHad,0,3.14159265358979,30,-,recoTTX_#Delta#phi_Boson_TopHad
+recoTTX_DeltaPhi_Boson_TopLep,0,3.14159265358979,30,-,recoTTX_#Delta#phi_Boson_TopLep
+recoTTX_DeltaPhi_TopHad_TopLep,0,3.14159265358979,30,-,recoTTX_#Delta#phi_TopHad_TopLep
 recoTTX_DeltaTheta_BHad_BLep,0,2.5,30,-,recoTTX_#Delta#theta_BHad_BLep
 recoTTX_DeltaTheta_BHad_Lepton,0,2.5,30,-,recoTTX_#Delta#theta_BHad_Lepton
 recoTTX_DeltaTheta_TopHad_TopLep,0,3,30,-,recoTTX_#Delta#theta_TopHad_TopLep
@@ -476,13 +496,13 @@ recoTTX_Eta_TopHad,-5,5,30,-,recoTTX_#eta_TopHad
 recoTTX_Eta_TopLep,-5,5,30,-,recoTTX_#eta_TopLep
 recoTTX_Eta_WHad,-5,5,30,-,recoTTX_#eta_WHad
 recoTTX_Eta_WLep,-5,5,30,-,recoTTX_#eta_WLep
-recoTTX_Theta_BHad,0,3.1415926536,30,-,recoTTX_#theta_BHad
-recoTTX_Theta_BLep,0,3.1415926536,30,-,recoTTX_#theta_BLep
-recoTTX_Theta_Lepton,0,3.1415926536,30,-,recoTTX_#theta_Lepton
-recoTTX_Theta_TopHad,0,3.1415926536,30,-,recoTTX_#theta_TopHad
-recoTTX_Theta_TopLep,0,3.1415926536,30,-,recoTTX_#theta_TopLep
-recoTTX_Theta_WHad,0,3.1415926536,30,-,recoTTX_#theta_WHad
-recoTTX_Theta_WLep,0,3.1415926536,30,-,recoTTX_#theta_WLep
+recoTTX_Theta_BHad,0,3.14159265358979,30,-,recoTTX_#theta_BHad
+recoTTX_Theta_BLep,0,3.14159265358979,30,-,recoTTX_#theta_BLep
+recoTTX_Theta_Lepton,0,3.14159265358979,30,-,recoTTX_#theta_Lepton
+recoTTX_Theta_TopHad,0,3.14159265358979,30,-,recoTTX_#theta_TopHad
+recoTTX_Theta_TopLep,0,3.14159265358979,30,-,recoTTX_#theta_TopLep
+recoTTX_Theta_WHad,0,3.14159265358979,30,-,recoTTX_#theta_WHad
+recoTTX_Theta_WLep,0,3.14159265358979,30,-,recoTTX_#theta_WLep
 recoTTX_pT_BAdd1,0,600,30,-,recoTTX_p_{T}_BAdd1
 recoTTX_pT_BAdd2,0,600,30,-,recoTTX_p_{T}_BAdd2
 recoTTX_pT_BHad,0,300,30,-,recoTTX_p_{T}_BHad
@@ -503,78 +523,62 @@ y_lepB,-5,5,30,-,y_lepB
 y_lepTop,-4,4,30,-,y_lepTop
 y_ttX,-3,3,30,-,y_ttX
 y_ttbar,-3,3,30,-,y_ttbar
-Jet_DeepCSV_b[0],0,1,20,-,Jet_DeepCSV_b[0]
-Jet_DeepCSV_b[1],0,1,20,-,Jet_DeepCSV_b[1]
-Jet_DeepCSV_b[2],0,1,20,-,Jet_DeepCSV_b[2]
-Jet_DeepCSV_b[3],0,1,20,-,Jet_DeepCSV_b[3]
-Jet_DeepCSV_bb[0],0,1,20,-,Jet_DeepCSV_bb[0]
-Jet_DeepCSV_bb[1],0,1,20,-,Jet_DeepCSV_bb[1]
-Jet_DeepCSV_bb[2],0,1,20,-,Jet_DeepCSV_bb[2]
-Jet_DeepCSV_bb[3],0,1,20,-,Jet_DeepCSV_bb[3]
-Jet_DeepCSV_c[0],0,1,20,-,Jet_DeepCSV_c[0]
-Jet_DeepCSV_c[1],0,1,20,-,Jet_DeepCSV_c[1]
-Jet_DeepCSV_c[2],0,1,20,-,Jet_DeepCSV_c[2]
-Jet_DeepCSV_c[3],0,1,20,-,Jet_DeepCSV_c[3]
-Jet_DeepCSV_udsg[0],0,1,20,-,Jet_DeepCSV_udsg[0]
-Jet_DeepCSV_udsg[1],0,1,20,-,Jet_DeepCSV_udsg[1]
-Jet_DeepCSV_udsg[2],0,1,20,-,Jet_DeepCSV_udsg[2]
-Jet_DeepCSV_udsg[3],0,1,20,-,Jet_DeepCSV_udsg[3]
-Jet_DeepJetCSV[0],0,1,30,x,DeepJet btag value of leading jet
-Jet_DeepJetCSV[1],0,1,30,x,DeepJet btag value of subleading jet
-Jet_DeepJetCSV[2],0,1,30,x,DeepJet btag value of third jet
-Jet_DeepJetCSV[3],0,1,30,x,DeepJet btag value of fourth jet
-Jet_DeepJetCSV[4],0,1,30,x,DeepJet btag value of fifth jet
-Jet_DeepJetCSV[5],0,1,30,x,DeepJet btag value of sixth jet
-Jet_DeepJet_b[0],0,1,30,x,DeepJet(b) of leading jet
-Jet_DeepJet_b[1],0,1,30,x,DeepJet(b) of subleading jet
-Jet_DeepJet_b[2],0,1,30,x,DeepJet(b) of third jet
-Jet_DeepJet_b[3],0,1,30,x,DeepJet(b) of fourth jet
-Jet_DeepJet_b[4],0,1,30,x,DeepJet(b) of fifth jet
-Jet_DeepJet_b[5],0,1,30,x,DeepJet(b) of sixth jet
-Jet_DeepJet_bb[0],0,1,30,x,DeepJet(bb) of leading jet
-Jet_DeepJet_bb[1],0,1,30,x,DeepJet(bb) of subleading jet
-Jet_DeepJet_bb[2],0,1,30,x,DeepJet(bb) of third jet
-Jet_DeepJet_bb[3],0,1,30,x,DeepJet(bb) of fourth jet
-Jet_DeepJet_bb[4],0,1,30,x,DeepJet(bb) of fifth jet
-Jet_DeepJet_bb[5],0,1,30,x,DeepJet(bb) of sixth jet
-Jet_DeepJet_c[0],0,1,30,x,DeepJet(c) of leading jet
-Jet_DeepJet_c[1],0,1,30,x,DeepJet(c) of subleading jet
-Jet_DeepJet_c[2],0,1,30,x,DeepJet(c) of third jet
-Jet_DeepJet_c[3],0,1,30,x,DeepJet(c) of fourth jet
-Jet_DeepJet_c[4],0,1,30,x,DeepJet(c) of fifth jet
-Jet_DeepJet_c[5],0,1,30,x,DeepJet(c) of sixth jet
-Jet_DeepJet_g[0],0,1,30,x,DeepJet(g) of leading jet
-Jet_DeepJet_g[1],0,1,30,x,DeepJet(g) of subleading jet
-Jet_DeepJet_g[2],0,1,30,x,DeepJet(g) of third jet
-Jet_DeepJet_g[3],0,1,30,x,DeepJet(g) of fourth jet
-Jet_DeepJet_g[4],0,1,30,x,DeepJet(g) of fifth jet
-Jet_DeepJet_g[5],0,1,30,x,DeepJet(g) of sixth jet
-Jet_DeepJet_lepb[0],0,1,30,x,DeepJet(lepb) of leading jet
-Jet_DeepJet_lepb[1],0,1,30,x,DeepJet(lepb) of subleading jet
-Jet_DeepJet_lepb[2],0,1,30,x,DeepJet(lepb) of third jet
-Jet_DeepJet_lepb[3],0,1,30,x,DeepJet(lepb) of fourth jet
-Jet_DeepJet_lepb[4],0,1,30,x,DeepJet(lepb) of fifth jet
-Jet_DeepJet_lepb[5],0,1,30,x,DeepJet(lepb) of sixth jet
-Jet_DeepJet_uds[0],0,1,30,x,DeepJet(uds) of leading jet
-Jet_DeepJet_uds[1],0,1,30,x,DeepJet(uds) of subleading jet
-Jet_DeepJet_uds[2],0,1,30,x,DeepJet(uds) of third jet
-Jet_DeepJet_uds[3],0,1,30,x,DeepJet(uds) of fourth jet
-Jet_DeepJet_uds[4],0,1,30,x,DeepJet(uds) of fifth jet
-Jet_DeepJet_uds[5],0,1,30,x,DeepJet(uds) of sixth jet
-TopHad_B_Jet_E,20,1000,30,-,energy of leading jet
-TopLep_B_Jet_E,20,1000,30,-,energy of subleading jet
-TopHad_Q1_Jet_E,20,500,30,-,energy of third jet
-TopHad_Q2_Jet_E,20,500,30,-,energy of fourth jet
-Top_Had_B_Jet_Eta,-2.4,2.4,30,-,#eta of leading jet
-TopLep_B_Jet_Eta,-2.4,2.4,30,-,#eta of subleading jet
-TopHad_Q1_Jet_Eta,-2.4,2.4,30,-,#eta of third jet
-TopHad_Q2_Jet_Eta,-2.4,2.4,30,-,#eta of fourth jet
-TopHad_B_Jet_Phi,-3.1415926536,3.1415926536,30,-,#phi of leading jet
-TopLep_B_Jet_Phi,-3.1415926536,3.1415926536,30,-,#phi of subleading jet
-TopHad_Q1_Jet_Phi,-3.1415926536,3.1415926536,30,-,#phi of third jet
-TopHad_Q2_Jet_Phi,-3.1415926536,3.1415926536,30,-,#phi of fourth jet
-TopHad_B_Jet_Pt,0,500,30,x,p_{T} of subleading jet
-TopLep_B_Jet_Pt,30,300,30,x,p_{T} of third jet
-TopHad_Q1_Jet_Pt,30,200,30,x,p_{T} of fourth jet
-TopHad_Q2_Jet_Pt,30,150,30,x,p_{T} of fifth jet
-N_Jets,1.5,11.5,10,-,number of jets
+Jet_DeepCSV_b[0],0.,1.,20,-,Jet_DeepCSV_b[0]
+Jet_DeepCSV_b[1],0.,1.,20,-,Jet_DeepCSV_b[1]
+Jet_DeepCSV_b[2],0.,1.,20,-,Jet_DeepCSV_b[2]
+Jet_DeepCSV_b[3],0.,1.,20,-,Jet_DeepCSV_b[3]
+Jet_DeepCSV_bb[0],0.,1.,20,-,Jet_DeepCSV_bb[0]
+Jet_DeepCSV_bb[1],0.,1.,20,-,Jet_DeepCSV_bb[1]
+Jet_DeepCSV_bb[2],0.,1.,20,-,Jet_DeepCSV_bb[2]
+Jet_DeepCSV_bb[3],0.,1.,20,-,Jet_DeepCSV_bb[3]
+Jet_DeepCSV_c[0],0.,1.,20,-,Jet_DeepCSV_c[0]
+Jet_DeepCSV_c[1],0.,1.,20,-,Jet_DeepCSV_c[1]
+Jet_DeepCSV_c[2],0.,1.,20,-,Jet_DeepCSV_c[2]
+Jet_DeepCSV_c[3],0.,1.,20,-,Jet_DeepCSV_c[3]
+Jet_DeepCSV_udsg[0],0.,1.,20,-,Jet_DeepCSV_udsg[0]
+Jet_DeepCSV_udsg[1],0.,1.,20,-,Jet_DeepCSV_udsg[1]
+Jet_DeepCSV_udsg[2],0.,1.,20,-,Jet_DeepCSV_udsg[2]
+Jet_DeepCSV_udsg[3],0.,1.,20,-,Jet_DeepCSV_udsg[3]
+Jet_DeepJetCSV[0],0.,1.,30,x,DeepJet btag value of leading jet
+Jet_DeepJetCSV[1],0.,1.,30,x,DeepJet btag value of subleading jet
+Jet_DeepJetCSV[2],0.,1.,30,x,DeepJet btag value of third jet
+Jet_DeepJetCSV[3],0.,1.,30,x,DeepJet btag value of fourth jet
+Jet_DeepJetCSV[4],0.,1.,30,x,DeepJet btag value of fifth jet
+Jet_DeepJetCSV[5],0.,1.,30,x,DeepJet btag value of sixth jet
+Jet_DeepJet_b[0],0.,1.,30,x,DeepJet(b) of leading jet
+Jet_DeepJet_b[1],0.,1.,30,x,DeepJet(b) of subleading jet
+Jet_DeepJet_b[2],0.,1.,30,x,DeepJet(b) of third jet
+Jet_DeepJet_b[3],0.,1.,30,x,DeepJet(b) of fourth jet
+Jet_DeepJet_b[4],0.,1.,30,x,DeepJet(b) of fifth jet
+Jet_DeepJet_b[5],0.,1.,30,x,DeepJet(b) of sixth jet
+Jet_DeepJet_bb[0],0.,1.,30,x,DeepJet(bb) of leading jet
+Jet_DeepJet_bb[1],0.,1.,30,x,DeepJet(bb) of subleading jet
+Jet_DeepJet_bb[2],0.,1.,30,x,DeepJet(bb) of third jet
+Jet_DeepJet_bb[3],0.,1.,30,x,DeepJet(bb) of fourth jet
+Jet_DeepJet_bb[4],0.,1.,30,x,DeepJet(bb) of fifth jet
+Jet_DeepJet_bb[5],0.,1.,30,x,DeepJet(bb) of sixth jet
+Jet_DeepJet_c[0],0.,1.,30,x,DeepJet(c) of leading jet
+Jet_DeepJet_c[1],0.,1.,30,x,DeepJet(c) of subleading jet
+Jet_DeepJet_c[2],0.,1.,30,x,DeepJet(c) of third jet
+Jet_DeepJet_c[3],0.,1.,30,x,DeepJet(c) of fourth jet
+Jet_DeepJet_c[4],0.,1.,30,x,DeepJet(c) of fifth jet
+Jet_DeepJet_c[5],0.,1.,30,x,DeepJet(c) of sixth jet
+Jet_DeepJet_g[0],0.,1.,30,x,DeepJet(g) of leading jet
+Jet_DeepJet_g[1],0.,1.,30,x,DeepJet(g) of subleading jet
+Jet_DeepJet_g[2],0.,1.,30,x,DeepJet(g) of third jet
+Jet_DeepJet_g[3],0.,1.,30,x,DeepJet(g) of fourth jet
+Jet_DeepJet_g[4],0.,1.,30,x,DeepJet(g) of fifth jet
+Jet_DeepJet_g[5],0.,1.,30,x,DeepJet(g) of sixth jet
+Jet_DeepJet_lepb[0],0.,1.,30,x,DeepJet(lepb) of leading jet
+Jet_DeepJet_lepb[1],0.,1.,30,x,DeepJet(lepb) of subleading jet
+Jet_DeepJet_lepb[2],0.,1.,30,x,DeepJet(lepb) of third jet
+Jet_DeepJet_lepb[3],0.,1.,30,x,DeepJet(lepb) of fourth jet
+Jet_DeepJet_lepb[4],0.,1.,30,x,DeepJet(lepb) of fifth jet
+Jet_DeepJet_lepb[5],0.,1.,30,x,DeepJet(lepb) of sixth jet
+Jet_DeepJet_uds[0],0.,1.,30,x,DeepJet(uds) of leading jet
+Jet_DeepJet_uds[1],0.,1.,30,x,DeepJet(uds) of subleading jet
+Jet_DeepJet_uds[2],0.,1.,30,x,DeepJet(uds) of third jet
+Jet_DeepJet_uds[3],0.,1.,30,x,DeepJet(uds) of fourth jet
+Jet_DeepJet_uds[4],0.,1.,30,x,DeepJet(uds) of fifth jet
+Jet_DeepJet_uds[5],0.,1.,30,x,DeepJet(uds) of sixth jet
+
