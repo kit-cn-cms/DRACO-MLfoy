@@ -16,7 +16,7 @@ import plot_configs.setupPlots as setup
 
 
 class plotDiscriminators:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
@@ -28,6 +28,7 @@ class plotDiscriminators:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.sigScale          = sigScale
         self.signalIndex       = []
         self.signalFlag        = []
 
@@ -128,7 +129,11 @@ class plotDiscriminators:
                 sigHist.SetLineWidth(3)
 
                 # set scalefactor
-                scaleFactor = weightIntegral/(sum(sig_weights[iSig])+1e-9)
+                if self.sigScale == -1:
+                    scaleFactor = weightIntegral/(sum(sig_weights[iSig])+1e-9)
+                else:
+                    scaleFactor = float(self.sigScale)
+
                 sigHist.Scale(scaleFactor)
                 sigHists.append(sigHist)
                 scaleFactors.append(scaleFactor)
@@ -193,7 +198,7 @@ class plotDiscriminators:
 
 
 class plotOutputNodes:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.event_classes     = event_classes
@@ -203,6 +208,7 @@ class plotOutputNodes:
         self.event_category    = event_category
         self.plotdir           = plotdir
         self.logscale          = logscale
+        self.sigScale          = sigScale
         self.signalIndex       = []
         self.signalFlag        = []
 
@@ -289,7 +295,10 @@ class plotOutputNodes:
             sigHist.SetLineWidth(3)
 
             # set scalefactor
-            scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
+            if self.sigScale == -1:
+                scaleFactor = weightIntegral/(sum(sig_weights)+1e-9)
+            else:
+                scaleFactor = float(self.sigScale)
             sigHist.Scale(scaleFactor)
 
             # rescale histograms if privateWork enabled
@@ -573,7 +582,7 @@ class plotConfusionMatrix:
 
 
 class plotEventYields:
-    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):
+    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale, sigScale = -1):
         self.data               = data
         self.prediction_vector  = prediction_vector
         self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
@@ -593,7 +602,8 @@ class plotEventYields:
         self.plotdir            = plotdir
 
         self.logscale           = logscale
-        
+        self.sigScale           = sigScale        
+
         self.privateWork = False
 
     def plot(self, privateWork = False, ratio = False):
@@ -670,7 +680,10 @@ class plotEventYields:
         # scale histograms according to options
         scaleFactors=[]
         for sig in sigHists:
-            scaleFactors.append(totalBkgYield/sig.Integral())
+            if self.sigScale == -1:
+                scaleFactors.append(totalBkgYield/sig.Integral())
+            else:
+                scaleFactors.append(float(self.sigScale))
         if privateWork:
             for sig in sigHists:
                 sig.Scale(1./sig.Integral())
@@ -710,7 +723,7 @@ class plotEventYields:
 
 
 class plotBinaryOutput:
-    def __init__(self, data, predictions, nbins, bin_range, event_category, plotdir, logscale = False):
+    def __init__(self, data, predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1):
         self.data               = data
         self.predictions        = predictions
         self.nbins              = nbins
@@ -718,6 +731,7 @@ class plotBinaryOutput:
         self.event_category     = event_category
         self.plotdir            = plotdir
         self.logscale           = logscale
+        self.sigScale           = sigScale
 
         self.printROCScore = False
         self.privateWork = False
@@ -759,7 +773,10 @@ class plotBinaryOutput:
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = True)  
 
-        scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
+        if self.sigScale == -1:
+            scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
+        else:
+            scaleFactor = float(self.sigScale)
         sig_hist.Scale(scaleFactor)
 
         # rescale histograms if privateWork enabled

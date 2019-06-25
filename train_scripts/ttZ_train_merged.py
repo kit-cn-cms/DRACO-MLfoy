@@ -44,6 +44,9 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
         help="activate to create plots", metavar="plot")
 
+parser.add_option("-s", "--sigScale", dest="sigScale", default = -1, type = float,
+        help="scale of signal histograms in output plots. -1 scales to background integral")
+
 parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
         help="activate for logarithmic plots", metavar="log")
 
@@ -202,13 +205,13 @@ if options.plot:
         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
         # plot the output discriminators
-        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC, sigScale = options.sigScale)
 
         # plot the output nodes
-        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC, sigScale = options.sigScale)
         
         # plot event yields
-        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork, sigScale = options.sigScale)
 
         # plot closure test
         dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
