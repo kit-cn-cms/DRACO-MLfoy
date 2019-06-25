@@ -74,6 +74,9 @@ parser.add_option("-a", "--activateSamples", dest = "activateSamples", default =
 parser.add_option("-b", "--boost", dest = "boost", default = None,
         help = "INT number of networks trained parallel")
 
+parser.add_option("--adaboost", dest = "adaboost", default = None,
+        help = "INT number of epoches Adaboost should perform")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -130,6 +133,18 @@ if options.boost:
 else:
     n_boost = 1
 
+#get number of epoches adaboost should perform and set default signal
+if options.boost:
+    ada_epochs = int(options.adaboost)
+    use_ada = True
+    options.binary = True
+    if options.signal_class:
+        pass
+    else:
+        signal = "ttH"
+else:
+    use_ada = False
+
 # load samples
 input_samples = df.InputSamples(inPath, options.activateSamples)
 naming = options.naming
@@ -169,6 +184,8 @@ for i in range(1, n_boost+1):   #due to naming
         test_percentage = 0.2,
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.balanceSamples,
+        use_adaboost = use_ada,
+        adaboost_epochs = ada_epochs
         shuffle_seed = 9)
 
     # import file with net configs if option is used

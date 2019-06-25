@@ -96,6 +96,8 @@ class DNN():
             eval_metrics    = None,
             shuffle_seed    = None,
             balanceSamples  = False,
+            use_adaboost    = False,
+            adaboost_epochs      = 100,
             evenSel         = None):
 
         # save some information
@@ -133,6 +135,9 @@ class DNN():
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
+
+        #should adaboost be used
+        self.use_adaboost = use_adaboost
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -332,16 +337,42 @@ class DNN():
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
 
-        # train main net
-        self.trained_model = self.model.fit(
-            x = self.data.get_train_data(as_matrix = True),
-            y = self.data.get_train_labels(),
-            batch_size          = self.architecture["batch_size"],
-            epochs              = self.train_epochs,
-            shuffle             = True,
-            callbacks           = callbacks,
-            validation_split    = 0.25,
-            sample_weight       = self.data.get_train_weights())
+        if use_adaboost:
+            # train with adaboost algorithm
+            weak_model_trained = [] #does not contain the trained model
+            alpha_t = []
+            for t in np.arange(0,adaboost_epochs):
+                weak_model_trained.append(self.model.fit(
+                    x = self.data.get_train_data(as_matrix = True),
+                    y = self.data.get_train_labels(),
+                    batch_size          = self.architecture["batch_size"],
+                    epochs              = self.train_epochs,
+                    shuffle             = True,
+                    callbacks           = callbacks,
+                    validation_split    = 0.25,
+                    sample_weight       = self.data.get_train_weights()))
+                alpha_t.append(model.ada_eval_training())
+
+            #geht so leider nicht
+            #self.trained_model = build_strong_model()
+            #hier muss am ende trotzdem irgendetwas rein sonst kommt denke ich der rest vom code nicht klar
+
+        else:
+            # train main net
+            self.trained_model = self.model.fit(
+                x = self.data.get_train_data(as_matrix = True),
+                y = self.data.get_train_labels(),
+                batch_size          = self.architecture["batch_size"],
+                epochs              = self.train_epochs,
+                shuffle             = True,
+                callbacks           = callbacks,
+                validation_split    = 0.25,
+                sample_weight       = self.data.get_train_weights())
+
+        #implement adaboost here
+        #eigentlich alles gleich außer epochen nach außen ziehen
+        #funktionen wie ada_eval_training, ada_adjust_weights nutzen
+        #self.trained_model = Strong Classifier
 
     def save_model(self, argv, execute_dir, signals):
         ''' save the trained model '''
@@ -494,6 +525,42 @@ class DNN():
                 print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
+
+
+    def ada_eval_training(self):
+        '''Calculate weighted error and return alpha_t after each training'''
+        # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
+        model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
+        model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
+        model_train_weights = self.data.get_test_weights()
+
+        num = model_train_prediction.shape(0)
+        weight_sum = np.sum(model_train_weights)
+        weight_false = 0
+        for i in np.arange(0,num):
+            if model_train_prediction[i] != model_train_label[i]:
+                weight_false += model_train_weights[i]
+        epsilon = weight_false/weight_sum
+        return 0.5*np.log((1-epsilon)/epsilon)
+
+    def ada_adjust_weights(self):
+        '''Adjust weights after each training'''
+        #wird vielleicht auch eine funktion/ option von data_frame
+
+    def get_alpha(weight, pred, label):
+        num = pred.shape(0)
+        weight_sum = np.sum(weight)
+        weight_false = 0
+        for i in np.arange(0,num):
+            if pred[i] != label[i]:
+                weight_false += weight[i]
+        epsilon = weight_false/weight_sum
+        return 0.5*np.log((1-epsilon)/epsilon)
+
+
+    def build_strong_model(self, ):
+        '''Build strong Classifier according to adaboost algorithm'''
+        #das geht so nicht
 
 
 
