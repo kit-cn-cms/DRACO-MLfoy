@@ -136,7 +136,7 @@ class DataFrame(object):
             train_samples.append(sample.data)
 
         # concatenating all dataframes
-        df = pd.concat(train_samples, sort=False)
+        df = pd.concat(train_samples, sort=True)
         del train_samples
 
         # multiclassification labelling
@@ -153,7 +153,7 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series([1 if (c=="ttHbb") else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttH"] = pd.Series([1 if ((c == "ttHbb") or (c == "ttH")) else 0 for c in df["class_label"].values], index = df.index )
 
             print(df["class_label"].values)
 
@@ -178,7 +178,7 @@ class DataFrame(object):
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series([(1 if c in input_samples.signal_classes else -1) for c in df["class_label"].values], index=df.index) #!!
+            df["index_label"] = pd.Series([(+1 if c in input_samples.signal_classes else -1) for c in df["class_label"].values], index=df.index)
 
             sig_df = df.query("index_label == +1")
             bkg_df = df.query("index_label == -1")
@@ -195,7 +195,7 @@ class DataFrame(object):
             sig_df.loc[:, "binaryTarget"] = pd.Series([1.0]                   *sig_df.shape[0], index=sig_df.index)
             bkg_df.loc[:, "binaryTarget"] = pd.Series([float(self.bkg_target)]*bkg_df.shape[0], index=bkg_df.index)
 
-            df = pd.concat([sig_df, bkg_df], sort=False)
+            df = pd.concat([sig_df, bkg_df])
 
             self.n_input_neurons = len(train_variables)
             self.n_output_neurons = 1
@@ -203,10 +203,10 @@ class DataFrame(object):
         # shuffle dataframe
         if not self.shuffleSeed:
            self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
-        print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
-        df = shuffle(df, random_state = self.shuffleSeed)
 
-#!!        print(df)
+        print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
+
+        df = shuffle(df, random_state = self.shuffleSeed)
 
         # norm variables if activated
         unnormed_df = df.copy()
@@ -277,6 +277,7 @@ class DataFrame(object):
         self.df_train = pd.concat(new_train_dfs)
         self.df_train = shuffle(self.df_train)
 
+    # train data -----------------------------------
     def get_train_data(self, as_matrix= True):
         if as_matrix: return self.df_train[ self.train_variables ].values
         else:         return self.df_train[ self.train_variables ]
@@ -290,7 +291,6 @@ class DataFrame(object):
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
-
     def get_train_lumi_weights(self):
         return self.df_train["lumi_weight"].values
 
@@ -302,12 +302,12 @@ class DataFrame(object):
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values
+
     def get_lumi_weights(self):
         return self.df_test["lumi_weight"].values
 
     def get_test_labels(self, as_categorical = True):
-        if self.binary_classification:
-            return self.df_test["binaryTarget"].values
+        if self.binary_classification: return self.df_test["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 

@@ -30,9 +30,6 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 K.tensorflow_backend.set_session(tf.Session(config=config))
 
-
-
-
 class EarlyStopping(keras.callbacks.Callback):
     ''' custom implementation of early stopping
         with options for
@@ -175,20 +172,20 @@ class DNN():
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
-        # defnie default network configuration
-        self.architecture = {
-            "layers":                       [200,100],
-            "loss_function":            "binary_crossentropy",
-            "Dropout":                  0.5,
-            "L2_Norm":                  1e-5,
-            "batch_size":               1000,
-            "optimizer":                optimizers.Adadelta(),
-            "activation_function":      "tanh",
-            "output_activation":        "Tanh",
-            "earlystopping_percentage": 0.05,
-            "earlystopping_epochs":     50,
-            }
 
+        # define default network configuration
+        self.architecture = {
+             "layers":                       [200,100],
+             "loss_function":            "binary_crossentropy",
+             "Dropout":                  0.5,
+             "L2_Norm":                  1e-5,
+             "batch_size":               1000,
+             "optimizer":                optimizers.Adadelta(),
+             "activation_function":      "tanh",
+             "output_activation":        "Tanh",
+             "earlystopping_percentage": 0.05,
+             "earlystopping_epochs":     50,
+             }
 
         for key in config:
             self.architecture[key] = config[key]
@@ -420,19 +417,16 @@ class DNN():
         print("wrote net configs to "+str(json_file))
 
         # save configurations of variables for plotscript
-        '''plot_file = self.cp_path+"/plot_config.csv"
+        plot_file = self.cp_path+"/plot_config.csv"
         variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
         variables = variable_configs.loc[self.train_variables]
         variables.to_csv(plot_file, sep = ",")
-        print("wrote config of input variables to {}".format(plot_file))'''
-
+        print("wrote config of input variables to {}".format(plot_file))
 
     def eval_model(self):
         ''' evaluate trained model '''
 
         # evaluate test dataset
-        print '!'*10, 'data.get_test_data', self.data.get_test_data(as_matrix = True) #!!
-
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
@@ -441,13 +435,8 @@ class DNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
-
-        print '!'*10, 'model_prediction_vector', self.model_prediction_vector
-
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
 
         #figure out ranges
         self.get_ranges()
@@ -457,8 +446,7 @@ class DNN():
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -503,9 +491,6 @@ class DNN():
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
 
-
-
-
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
@@ -543,7 +528,7 @@ class DNN():
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
             plt.ylabel(metric.replace("_"," "), fontsize = 16)
-            plt.ylim(ymin=0.)
+#            plt.ylim(ymin=0.)
 
             # add legend
             plt.legend()
@@ -552,9 +537,6 @@ class DNN():
             out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
             plt.savefig(out_path)
             print("saved plot of "+str(metric)+" at "+str(out_path))
-
-
-
 
     def plot_outputNodes(self, log = False, printROC = False, signal_class = None, 
                         privateWork = False, nbins = 30, bin_range = [0.,1.],
@@ -574,7 +556,6 @@ class DNN():
             sigScale            = sigScale)
 
         plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
-
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
                         signal_class = None, nbins = None, bin_range = None,
@@ -599,7 +580,6 @@ class DNN():
             sigScale            = sigScale)
 
         plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
-
 
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
         ''' plot confusion matrix '''

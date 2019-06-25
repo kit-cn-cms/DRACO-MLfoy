@@ -19,9 +19,7 @@ parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_Inp
         help="DIR for output", metavar="outputDir")
 
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="combined",
-
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
-
+        help="DIR for input", metavar="inputDir")
 
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in preprocessing", metavar="naming")
