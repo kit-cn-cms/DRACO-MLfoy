@@ -63,8 +63,8 @@ ttH_selection = None #"(Evt_Odd == 1)"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
-#!! ttbar_categories = root2pandas.EventCategories()
-#!! ttbar_categories.addCategory("ttbar")
+#ttbar_categories = root2pandas.EventCategories()
+#ttbar_categories.addCategory("ttbar")
 
 ttbar_bb = root2pandas.EventCategories()
 ttbar_bb.addCategory("ttbb")

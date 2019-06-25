@@ -95,16 +95,27 @@ config_dict["ttZ_2018_v2"] = {
 
 config_dict["binary_DL"] = {
 
-    "layers":                   [100,100],
-    "loss_function":            'binary_crossentropy',
-    "Dropout":                  0.4,
-    "L2_Norm":                  1e-5,
-    "batch_size":               4096,
-    "optimizer":                'adam',
-    "activation_function":      'relu',
-    "output_activation":        'Softmax',
-    "earlystopping_percentage": 0.05,
-    "earlystopping_epochs":     100,
+  "layers":                   [200,100],
+  "loss_function":            "squared_hinge",
+  "Dropout":                  0.5,
+  "L2_Norm":                  1e-5,
+  "batch_size":               5000,
+  "optimizer":                optimizers.Adadelta(),
+  "activation_function":      "tanh",
+  "output_activation":        "Tanh",
+  "earlystopping_percentage": 0.05,
+  "earlystopping_epochs":     100,
+
+#  "layers":                   [100,100],
+#  "loss_function":            'binary_crossentropy',
+#  "Dropout":                  0.4,
+#  "L2_Norm":                  1e-5,
+#  "batch_size":               4096,
+#  "optimizer":                'adam',
+#  "activation_function":      'relu',
+#  "output_activation":        'Softmax',
+#  "earlystopping_percentage": 0.05,
+#  "earlystopping_epochs":     100,
 }
 
 config_dict["binary_config"] = {
