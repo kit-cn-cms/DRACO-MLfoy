@@ -130,3 +130,16 @@ config_dict["binary_config_v2"] = {
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     50,
         }
+
+config_dict["ada_weak1"] = {
+        "layers":                   [100,50],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.1,
+        "L2_Norm":                  1e-6,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }

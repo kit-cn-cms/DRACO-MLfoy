@@ -352,7 +352,6 @@ class DNN():
                     validation_split    = 0.25,
                     sample_weight       = self.data.get_train_weights()))
                 alpha_t.append(model.ada_eval_training())
-
             #geht so leider nicht
             #self.trained_model = build_strong_model()
             #hier muss am ende trotzdem irgendetwas rein sonst kommt denke ich der rest vom code nicht klar
@@ -533,7 +532,7 @@ class DNN():
         model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
         model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
         model_train_weights = self.data.get_test_weights()
-
+        #Calculate epsilon and alpha
         num = model_train_prediction.shape(0)
         weight_sum = np.sum(model_train_weights)
         weight_false = 0
@@ -541,26 +540,32 @@ class DNN():
             if model_train_prediction[i] != model_train_label[i]:
                 weight_false += model_train_weights[i]
         epsilon = weight_false/weight_sum
-        return 0.5*np.log((1-epsilon)/epsilon)
+        alpha = 0.5*np.log((1-epsilon)/epsilon)
+        #adjust weights
+        self.data.ada_adjust_weights(model_train_prediction, model_train_label, alpha)
+        #check if epsilon < 0.5
+        if epsilon > 0.5:
+            print("# DEBUG: In ada_eval_training epsilon > 0.5")
+        return alpha    #return wird bisher eigentlich nicht benötigt
 
-    def ada_adjust_weights(self):
-        '''Adjust weights after each training'''
-        #wird vielleicht auch eine funktion/ option von data_frame
+    # def ada_adjust_weights(self):
+    #     '''Adjust weights after each training'''
+    #     #wird vielleicht auch eine funktion/ option von data_frame
 
-    def get_alpha(weight, pred, label):
-        num = pred.shape(0)
-        weight_sum = np.sum(weight)
-        weight_false = 0
-        for i in np.arange(0,num):
-            if pred[i] != label[i]:
-                weight_false += weight[i]
-        epsilon = weight_false/weight_sum
-        return 0.5*np.log((1-epsilon)/epsilon)
-
-
-    def build_strong_model(self, ):
-        '''Build strong Classifier according to adaboost algorithm'''
-        #das geht so nicht
+    # def get_alpha(weight, pred, label):
+    #     num = pred.shape(0)
+    #     weight_sum = np.sum(weight)
+    #     weight_false = 0
+    #     for i in np.arange(0,num):
+    #         if pred[i] != label[i]:
+    #             weight_false += weight[i]
+    #     epsilon = weight_false/weight_sum
+    #     return 0.5*np.log((1-epsilon)/epsilon)
+    #
+    #
+    # def build_strong_model(self, ):
+    #     '''Build strong Classifier according to adaboost algorithm'''
+    #     #das geht so nicht
 
 
 
