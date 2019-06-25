@@ -39,7 +39,7 @@ if not "JTSTRING" in inputdir:
 print("using input directory {}".format(inputdir))
 
 if not os.path.exists(opts.outdir):
-    os.makedirs(outs.outdir)
+    os.makedirs(opts.outdir)
 
 
 sorted_variables = {}
