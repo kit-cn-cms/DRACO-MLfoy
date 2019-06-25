@@ -23,7 +23,7 @@ parser.add_option("-v", "--variableName", dest = "variableName",
     help = "name of variable to be added")
 
 parser.add_option("-s", "--sample", dest = "sample",
-    help = "sample to be split or folder of all samples to be split")
+    help = "sample to add variable or folder of all samples to add the variable to")
 
 parser.add_option("--overwrite", dest = "overwrite", default = False, action = "store_true",
     help = "overwrite existing h5 files with added variables, otherwise create _new.h5")
