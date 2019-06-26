@@ -273,7 +273,8 @@ class Dataset:
             df = tree.pandas.df(self.variables)
 
             # delete subentry index
-            #df = df.reset_index(1, drop = True)
+            try: df = df.reset_index(1, drop = True)
+            except: None
 
             # handle vector variables, loop over them
             for vecvar in self.vector_variables:

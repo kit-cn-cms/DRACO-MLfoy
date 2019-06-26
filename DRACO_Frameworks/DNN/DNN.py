@@ -468,7 +468,6 @@ class DNN():
                 for i,node in enumerate(ev):
                     if node>max_[i]:
                         max_[i]=node
-            print("Max: ",max_)
             for i, sample in enumerate(self.input_samples.samples):
                 sample.max=round(float(max_[i]),2)
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
@@ -548,9 +547,10 @@ class DNN():
 
 
 
+
     def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
-                        privateWork = False,
-                        nbins = 20, bin_range = [-1.,1.]):
+                        privateWork = False, nbins = 30, bin_range = [0.,1.],
+                        sigScale = -1):
 
         ''' plot distribution in outputNodes '''
         plotNodes = plottingScripts.plotOutputNodes(
@@ -562,15 +562,22 @@ class DNN():
             signal_class        = signal_class,
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
-            logscale            = log)
+            logscale            = log,
+            sigScale            = sigScale)
 
         plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
-                        signal_class = None, nbins = 18, bin_range = [-1.,1.]):
+                        signal_class = None, nbins = None, bin_range = None,
+                        sigScale = -1):
 
         ''' plot all events classified as one category '''
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(50*(1.-bin_range[0]))
+
         plotDiscrs = plottingScripts.plotDiscriminators(
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
@@ -580,7 +587,8 @@ class DNN():
             signal_class        = signal_class,
             event_category      = self.categoryLabel,
             plotdir             = self.plot_path,
-            logscale            = log)
+            logscale            = log,
+            sigScale            = sigScale)
 
         plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
@@ -597,10 +605,14 @@ class DNN():
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
 
     def plot_closureTest(self, log = False, privateWork = False,
-                        signal_class = None, nbins = 20, bin_range = [-1.,1.]):
+                        signal_class = None, nbins = None, bin_range = None):
         ''' plot comparison between train and test samples '''
 
-        bin_range = [1./self.data.n_output_neurons, 1.]
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(50*(1.-bin_range[0]))
+
         closureTest = plottingScripts.plotClosureTest(
             data                = self.data,
             test_prediction     = self.model_prediction_vector,
@@ -615,7 +627,7 @@ class DNN():
 
         closureTest.plot(ratio = False, privateWork = privateWork)
 
-    def plot_eventYields(self, log = False, privateWork = False, signal_class = None):
+    def plot_eventYields(self, log = False, privateWork = False, signal_class = None, sigScale = -1):
         eventYields = plottingScripts.plotEventYields(
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
@@ -623,12 +635,17 @@ class DNN():
             event_category      = self.categoryLabel,
             signal_class        = signal_class,
             plotdir             = self.save_path,
-            logscale            = log)
+            logscale            = log,
+            sigScale            = sigScale)
 
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 30, bin_range = [-1.,1.], name = "binary discriminator"):
+                        nbins = None, bin_range = [0.,1.], name = "binary discriminator",
+                        sigScale = -1):
+
+        if not nbins:
+            nbins = int(50*(1.-bin_range[0]))
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
@@ -637,7 +654,8 @@ class DNN():
             bin_range           = bin_range,
             event_category      = self.categoryLabel,
             plotdir             = self.save_path,
-            logscale            = log)
+            logscale            = log,
+            sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
