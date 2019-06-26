@@ -277,7 +277,7 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
     # train data -----------------------------------
-    def get_train_data(self, as_matrix= True):
+    def get_train_data(self, as_matrix=True):
         if as_matrix: return self.df_train[ self.train_variables ].values
         else:         return self.df_train[ self.train_variables ]
 
@@ -293,7 +293,7 @@ class DataFrame(object):
         return self.df_train["lumi_weight"].values
 
     # test data ------------------------------------
-    def get_test_data(self, as_matrix = True, normed = True):
+    def get_test_data(self, as_matrix=True, normed=True):
         if not normed: return self.df_test_unnormed[ self.train_variables ]
         if as_matrix:  return self.df_test[ self.train_variables ].values
         else:          return self.df_test[ self.train_variables ]

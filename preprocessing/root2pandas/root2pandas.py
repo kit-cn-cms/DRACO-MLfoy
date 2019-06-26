@@ -48,7 +48,7 @@ class Sample:
 
 
 class Dataset:
-    def __init__(self, outputdir, tree, naming = "", addMEM = False, maxEntries = 50000):
+    def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
