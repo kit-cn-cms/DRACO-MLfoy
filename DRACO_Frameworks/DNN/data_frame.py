@@ -126,8 +126,7 @@ class DataFrame(object):
         self.balanceSamples = balanceSamples
 
         self.binary_classification = input_samples.binary_classification
-        if self.binary_classification:
-            self.bkg_target = input_samples.bkg_target
+        if self.binary_classification: self.bkg_target = input_samples.bkg_target
 
         # loop over all input samples and load dataframe
         train_samples = []
@@ -286,8 +285,7 @@ class DataFrame(object):
         return self.df_train["train_weight"].values
 
     def get_train_labels(self, as_categorical = True):
-        if self.binary_classification:
-            return self.df_train["binaryTarget"].values
+        if self.binary_classification: return self.df_train["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 

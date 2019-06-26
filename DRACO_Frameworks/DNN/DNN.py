@@ -175,17 +175,17 @@ class DNN():
 
         # define default network configuration
         self.architecture = {
-             "layers":                       [200,100],
-             "loss_function":            "binary_crossentropy",
-             "Dropout":                  0.5,
-             "L2_Norm":                  1e-5,
-             "batch_size":               1000,
-             "optimizer":                optimizers.Adadelta(),
-             "activation_function":      "tanh",
-             "output_activation":        "Tanh",
-             "earlystopping_percentage": 0.05,
-             "earlystopping_epochs":     50,
-             }
+          "layers":                   [200],
+          "loss_function":            "categorical_crossentropy",
+          "Dropout":                  0.2,
+          "L2_Norm":                  1e-5,
+          "batch_size":               5000,
+          "optimizer":                optimizers.Adagrad(decay=0.99),
+          "activation_function":      "elu",
+          "output_activation":        "Softmax",
+          "earlystopping_percentage": None,
+          "earlystopping_epochs":     None,
+        }
 
         for key in config:
             self.architecture[key] = config[key]
@@ -407,9 +407,12 @@ class DNN():
 
         # save information for binary DNN
         if self.data.binary_classification:
+
             configs["binaryConfig"] = {
-                "minValue": self.input_samples.bkg_target,
-                "maxValue": 1.}
+
+              "minValue": self.input_samples.bkg_target,
+              "maxValue": 1.,
+            }
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
