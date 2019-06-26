@@ -25,7 +25,8 @@ def createSampleFile(outPath, sampleList):
     processedSamples=""
     # write samplenames in file
     for sample in sampleList:
-        processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
+        if str(sample[0]) not in processedSamples:
+            processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
     with open(outPath+"/sampleFile.dat","w") as sampleFile:
         sampleFile.write(processedSamples)
 
