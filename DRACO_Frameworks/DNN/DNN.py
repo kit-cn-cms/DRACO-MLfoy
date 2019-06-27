@@ -339,10 +339,11 @@ class DNN():
 
         if use_adaboost:
             # train with adaboost algorithm
-            weak_model_trained = [] #does not contain the trained model
+            weak_model_trainout = [] #does not contain the trained model
+            weak_model_trained = [] #trained weak Classifier
             alpha_t = []
             for t in np.arange(0,adaboost_epochs):
-                weak_model_trained.append(self.model.fit(
+                weak_model_trainout.append(self.model.fit(
                     x = self.data.get_train_data(as_matrix = True),
                     y = self.data.get_train_labels(),
                     batch_size          = self.architecture["batch_size"],
@@ -351,7 +352,8 @@ class DNN():
                     callbacks           = callbacks,
                     validation_split    = 0.25,
                     sample_weight       = self.data.get_train_weights()))
-                alpha_t.append(model.ada_eval_training())
+                alpha_t.append(model.ada_eval_training())   #make dict alpha -> model
+                weak_model_trained.append(model)
             #geht so leider nicht
             #self.trained_model = build_strong_model()
             #hier muss am ende trotzdem irgendetwas rein sonst kommt denke ich der rest vom code nicht klar
@@ -454,40 +456,44 @@ class DNN():
     def eval_model(self):
         ''' evaluate trained model '''
 
-        # evaluate test dataset
-        self.model_eval = self.model.evaluate(
-            self.data.get_test_data(as_matrix = True),
-            self.data.get_test_labels())
+        if use_adaboost:
+            self.model.eval_adamodel()
 
-        # save history of eval metrics
-        self.model_history = self.trained_model.history
+        else:
+            # evaluate test dataset
+            self.model_eval = self.model.evaluate(
+                self.data.get_test_data(as_matrix = True),
+                self.data.get_test_labels())
 
-        # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
+            # save history of eval metrics
+            self.model_history = self.trained_model.
 
-        #figure out ranges
-        self.get_ranges()
+            # save predicitons
+            self.model_prediction_vector = self.model.predict(
+                self.data.get_test_data(as_matrix = True) )
+            self.model_train_prediction  = self.model.predict(
+                self.data.get_train_data(as_matrix = True) )
 
-        # save predicted classes with argmax
-        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+            #figure out ranges
+            self.get_ranges()
 
-        # save confusion matrix
-        from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+            # save predicted classes with argmax
+            self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
-        # print evaluations
-        from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+            # save confusion matrix
+            from sklearn.metrics import confusion_matrix
+            self.confusion_matrix = confusion_matrix(
+                self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
-        if self.eval_metrics:
-            print("model test loss: {}".format(self.model_eval[0]))
-            for im, metric in enumerate(self.eval_metrics):
-                print("model test {}: {}".format(metric, self.model_eval[im+1]))
+            # print evaluations
+            from sklearn.metrics import roc_auc_score
+            self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+            print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
+            if self.eval_metrics:
+                print("model test loss: {}".format(self.model_eval[0]))
+                for im, metric in enumerate(self.eval_metrics):
+                    print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
 
     def get_ranges(self):
@@ -502,6 +508,10 @@ class DNN():
                 sample.max=round(float(max_[i]),2)
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
 
+
+    def eval_adamodel(self):
+        '''Evaluate a model trained with adaboost after each trainround t'''
+        bla
 
 
     def get_input_weights(self):

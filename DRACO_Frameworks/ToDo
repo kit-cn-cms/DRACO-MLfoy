@@ -1,0 +1,3 @@
+- Evalfunktionen für AdaBoost erweitern -> verfolgen von train and test sample nach jedem T
+- Save weak classifier
+-
