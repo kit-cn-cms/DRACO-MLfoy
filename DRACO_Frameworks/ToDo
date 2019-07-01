@@ -1,3 +1,8 @@
 - Evalfunktionen für AdaBoost erweitern -> verfolgen von train and test sample nach jedem T
 - Save weak classifier
--
+- Für binary adaboost -> trotzdem y in [-1,1] für weak model nutzen und y in {-1,1} für algorithmus (erstmal zumindest)
+- für Gewichteten Fehler sollten vielleicht nur die weights von adaboost verwendet werden
+
+
+Infos/ Gedanken:
+- loss_function ist verantwortlich für y in {-1,1} oder [-1,1]

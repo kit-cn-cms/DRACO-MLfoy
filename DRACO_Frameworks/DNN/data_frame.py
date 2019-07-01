@@ -267,14 +267,39 @@ class DataFrame(object):
 
     def ada_adjust_weights(self, pred, label, alpha):
         '''Adjust the data weights according to Adaboost algorithm'''
-        rows = self.data_train.shape[0]
+        print("# DEBUG: Starting to update weights")
+        # print(self.df_train["train_weight"][0]*5)
+        rows = pred.shape[0]    #make sure df_train has same shape
         increase = np.exp(alpha)
         decrease = np.exp(-alpha)
+        print("# DEBUG: alpha (should be >0): ", alpha)
+        update_weights = pd.DataFrame(columns = ["train_weight"])
+
+        # mask = np.equal(pred, label)
+        test_frame = self.df_train.head()
+        print("Shape pred: ", pred.shape, pred[0:5])
+        print("Shape label: ", label.shape, label[0:5])
+        print(test_frame)
+        # print(mask.shape)
+        # print(np.isin(mask, 'True'))
+
         for i in np.arange(0, rows):
+            # print("# DEBUG: Handle DataFrame: ", self.df_train["train_weight"][0])
             if pred[i] == label[i]:     #should be same number of rows as data_train
-                self.data_train["train_weight"][i] = self.data_train["train_weight"][i]*decrease
+                new_weight = self.df_train["train_weight"][i]*decrease
+                # update_weights = update_weights.append({"train_weight": self.df_train["train_weight"][i]*decrease}, ignore_index = True)
+                # self.df_train["train_weight"][i] = self.df_train["train_weight"][i]*decrease
+                # print("# DEBUG: Here")
             else:
-                self.data_train["train_weight"][i] = self.data_train["train_weight"][i]*increase
+                new_weight = self.df_train["train_weight"][i]*increase
+                # update_weights = update_weights.append({"train_weight": self.df_train["train_weight"][i]*increase}, ignore_index = True)
+                # self.df_train["train_weight"][i] = self.df_train["train_weight"][i]*increase
+            # print("# DEBUG: Here (i): ", i)
+            # print("# DEBUG: before: ", self.df_train["train_weight"][i])
+            self.df_train["train_weight"][i] = new_weight
+            # print("# DEBUG: after: ", self.df_train["train_weight"][i])
+        # self.df_train.update(update_weights)
+        print("# DEBUG: Updated weights")
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):

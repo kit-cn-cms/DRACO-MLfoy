@@ -302,7 +302,7 @@ class DNN():
         # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
         model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
         model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
-        model_train_weights = self.data.get_test_weights()
+        model_train_weights = self.data.get_train_weights()
         #Calculate epsilon and alpha
         # print("# DEBUG: Type of prediciton: ", type(model_train_prediction))
         num = model_train_prediction.shape[0]
@@ -311,9 +311,10 @@ class DNN():
         weight_false = 0
         for i in np.arange(0,num):
             if model_train_prediction[i] != model_train_label[i]:
-                print("DEBUG: print if prediction was False i: ", i)
-                print("# DEBUG: length of num: ", num)
-                print("# DEBUG: length of train_weights: ", model_train_weights.shape)
+                #check if pred und label aus {-1,1}
+                # print("DEBUG: print if prediction was False i: ", i)
+                # print("# DEBUG: length of num: ", num)
+                # print("# DEBUG: length of train_weights: ", model_train_weights.shape)
                 weight_false += model_train_weights[i]
         epsilon = weight_false/weight_sum
         alpha = 0.5*np.log((1-epsilon)/epsilon)
