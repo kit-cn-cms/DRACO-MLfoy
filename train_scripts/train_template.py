@@ -17,6 +17,7 @@ import DRACO_Frameworks.DNN.data_frame as df
 import keras.optimizers as optimizers
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
+python train_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /home/swieland/ttH/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig ada_weak1 --adaboost 5 --binary -t -1 --signalclass ttH -c ge6j_ge3t
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
@@ -134,7 +135,7 @@ else:
     n_boost = 1
 
 #get number of epoches adaboost should perform and set default signal
-if options.boost:
+if options.adaboost:
     ada_epochs = int(options.adaboost)
     use_ada = True
     options.binary = True
@@ -185,7 +186,7 @@ for i in range(1, n_boost+1):   #due to naming
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.balanceSamples,
         use_adaboost = use_ada,
-        adaboost_epochs = ada_epochs
+        adaboost_epochs = ada_epochs,
         shuffle_seed = 9)
 
     # import file with net configs if option is used
@@ -203,10 +204,10 @@ for i in range(1, n_boost+1):   #due to naming
     dnn.eval_model()
 
     # save information
-    dnn.save_model(sys.argv, filedir, signal)
+    # dnn.save_model(sys.argv, filedir, signal)
 
     # save and print variable ranking
-    dnn.get_input_weights()
+    # dnn.get_input_weights()
 
     # plotting
     if options.plot:

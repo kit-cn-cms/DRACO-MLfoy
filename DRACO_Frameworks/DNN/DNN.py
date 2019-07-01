@@ -97,7 +97,7 @@ class DNN():
             shuffle_seed    = None,
             balanceSamples  = False,
             use_adaboost    = False,
-            adaboost_epochs      = 100,
+            adaboost_epochs = 100,
             evenSel         = None):
 
         # save some information
@@ -138,6 +138,7 @@ class DNN():
 
         #should adaboost be used
         self.use_adaboost = use_adaboost
+        self.adaboost_epochs = adaboost_epochs
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -242,8 +243,6 @@ class DNN():
             print("-------------------->")
 
 
-
-
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
 
@@ -297,6 +296,35 @@ class DNN():
 
         return model
 
+
+    def ada_eval_training(self):
+        '''Calculate weighted error and return alpha_t after each training'''
+        # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
+        model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
+        model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
+        model_train_weights = self.data.get_test_weights()
+        #Calculate epsilon and alpha
+        # print("# DEBUG: Type of prediciton: ", type(model_train_prediction))
+        num = model_train_prediction.shape[0]
+        print("# DEBUG: Get number of predictions: ", num)
+        weight_sum = np.sum(model_train_weights)
+        weight_false = 0
+        for i in np.arange(0,num):
+            if model_train_prediction[i] != model_train_label[i]:
+                print("DEBUG: print if prediction was False i: ", i)
+                print("# DEBUG: length of num: ", num)
+                print("# DEBUG: length of train_weights: ", model_train_weights.shape)
+                weight_false += model_train_weights[i]
+        epsilon = weight_false/weight_sum
+        alpha = 0.5*np.log((1-epsilon)/epsilon)
+        #adjust weights
+        self.data.ada_adjust_weights(model_train_prediction, model_train_label, alpha)
+        #check if epsilon < 0.5
+        if epsilon > 0.5:
+            print("# DEBUG: In ada_eval_training epsilon > 0.5")
+        return alpha    #return wird bisher eigentlich nicht benoetigt
+
+
     def build_model(self, config = None, model = None):
         ''' build a DNN model
             use options defined in 'config' dictionary '''
@@ -337,12 +365,12 @@ class DNN():
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
 
-        if use_adaboost:
+        if self.use_adaboost:
             # train with adaboost algorithm
             weak_model_trainout = [] #does not contain the trained model
             weak_model_trained = [] #trained weak Classifier
             alpha_t = []
-            for t in np.arange(0,adaboost_epochs):
+            for t in np.arange(0,self.adaboost_epochs):
                 weak_model_trainout.append(self.model.fit(
                     x = self.data.get_train_data(as_matrix = True),
                     y = self.data.get_train_labels(),
@@ -352,8 +380,8 @@ class DNN():
                     callbacks           = callbacks,
                     validation_split    = 0.25,
                     sample_weight       = self.data.get_train_weights()))
-                alpha_t.append(model.ada_eval_training())   #make dict alpha -> model
-                weak_model_trained.append(model)
+                alpha_t.append(self.ada_eval_training())   #make dict alpha -> model
+                weak_model_trained.append(self.model)
             #geht so leider nicht
             #self.trained_model = build_strong_model()
             #hier muss am ende trotzdem irgendetwas rein sonst kommt denke ich der rest vom code nicht klar
@@ -371,7 +399,7 @@ class DNN():
                 sample_weight       = self.data.get_train_weights())
 
         #implement adaboost here
-        #eigentlich alles gleich außer epochen nach außen ziehen
+        #eigentlich alles gleich ausser epochen nach aussen ziehen
         #funktionen wie ada_eval_training, ada_adjust_weights nutzen
         #self.trained_model = Strong Classifier
 
@@ -453,6 +481,11 @@ class DNN():
         print("wrote config of input variables to {}".format(plot_file))
 
 
+    def eval_adamodel(self):
+        '''Evaluate a model trained with adaboost after each trainround t'''
+        pass
+
+
     def eval_model(self):
         ''' evaluate trained model '''
 
@@ -466,7 +499,7 @@ class DNN():
                 self.data.get_test_labels())
 
             # save history of eval metrics
-            self.model_history = self.trained_model.
+            self.model_history = self.trained_model.history
 
             # save predicitons
             self.model_prediction_vector = self.model.predict(
@@ -509,11 +542,6 @@ class DNN():
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
 
 
-    def eval_adamodel(self):
-        '''Evaluate a model trained with adaboost after each trainround t'''
-        bla
-
-
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
@@ -536,27 +564,7 @@ class DNN():
         print("wrote weight ranking to "+str(rank_path))
 
 
-    def ada_eval_training(self):
-        '''Calculate weighted error and return alpha_t after each training'''
-        # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
-        model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
-        model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
-        model_train_weights = self.data.get_test_weights()
-        #Calculate epsilon and alpha
-        num = model_train_prediction.shape(0)
-        weight_sum = np.sum(model_train_weights)
-        weight_false = 0
-        for i in np.arange(0,num):
-            if model_train_prediction[i] != model_train_label[i]:
-                weight_false += model_train_weights[i]
-        epsilon = weight_false/weight_sum
-        alpha = 0.5*np.log((1-epsilon)/epsilon)
-        #adjust weights
-        self.data.ada_adjust_weights(model_train_prediction, model_train_label, alpha)
-        #check if epsilon < 0.5
-        if epsilon > 0.5:
-            print("# DEBUG: In ada_eval_training epsilon > 0.5")
-        return alpha    #return wird bisher eigentlich nicht benötigt
+
 
     # def ada_adjust_weights(self):
     #     '''Adjust weights after each training'''
