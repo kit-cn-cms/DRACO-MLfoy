@@ -471,6 +471,8 @@ class Dataset:
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
 
+#########################################################################################
+
     def findbest(self, df):
 
         total_nr = df["Jet_Pt[0]"].size
@@ -518,47 +520,22 @@ class Dataset:
         # loop over all events
         for i in range(total_nr):
 
+            # get number of jets
             njets = min(njets_vec[i],11)
+
+            #create arrays for entries of pepec
             for index in pepec:
                 globals()[index] = np.array([])
-            # jet_pts  = np.array([])
-            # jet_etas = np.array([])
-            # jet_phis = np.array([])
-            # jet_es   = np.array([])
-            # jet_ms   = np.array([])
-            # jet_csv  = np.array([])
 
-            #loop over all jets to write them into arrays with len: njets
+            #loop over all jets: dataframe to arrays with len=njets, i.e. Jet_Pt
             for j in range(njets):
                 for index2 in pepec:
                     globals()[index2] = np.append(globals()[index2], df[str(index2) + "[" + str(j) + "]"].as_matrix()[i])
-                # jet_pts     = np.append(jet_pts, df["Jet_Pt[" + str(j) +"]"].as_matrix()[i])
-                # jet_etas    = np.append(jet_etas, df["Jet_Eta[" + str(j) +"]"].as_matrix()[i])
-                # jet_phis    = np.append(jet_phis, df["Jet_Phi[" + str(j) +"]"].as_matrix()[i])
-                # jet_es      = np.append(jet_es, df["Jet_E[" + str(j) +"]"].as_matrix()[i])
-                # jet_ms      = np.append(jet_ms, df["Jet_M[" + str(j) +"]"].as_matrix()[i])
-                # jet_csv     = np.append(jet_csv, df["Jet_CSV[" + str(j) +"]"].as_matrix()[i])
 
-
-            # Pt_MET     = pt_met[i]
-            # Phi_MET    = phi_met[i]
-
-            #print(event.Evt_Phi_MET)
-
-
-            # if(n_tightmuons[i]==1):
-            #     lepton4=ROOT.TLorentzVector()
-            #     lepton4.SetPtEtaPhiM(muon_pt[i], muon_eta[i], muon_phi[i], muon_m[i])
-            # if(n_tightmuons[i]==0):
-            #     lepton4=ROOT.TLorentzVector()
-            #     lepton4.SetPtEtaPhiM(electron_pt[i], electron_eta[i], electron_phi[i], electron_m[i])
 
             minr=100000.
-            # minrHad=100000.
-            best_combi = np.zeros(4)
-            # best_combiHad = np.zeros(4)
-            # thadbest=ROOT.TLorentzVector()
-            # tlepbest=ROOT.TLorentzVector()
+            best_comb = np.zeros(4)
+
             #Loop over all combinations of 4 jets
             #loop for TopHad_B
             for j in range(njets):
@@ -568,31 +545,30 @@ class Dataset:
                     for l in range(njets):
                         #loop for TopHad_Q2
                         for m in range(njets):
+                            #exclude combinations with two identical indices or without B-tags for b-quarks
                             if(j==k or j==l or j==m or k==l or k==m or l==m):
                                 continue
                             if(Jet_CSV[j]<0.227 or Jet_CSV[k]<0.227):
                                 continue
 
-                            delta_phi_bhad  = Jet_Phi[j] - gentophad_b_phi[i]
-                            delta_phi_blep  = Jet_Phi[k] - gentoplep_b_phi[i]
-                            delta_phi_q1    = Jet_Phi[l] - gentophad_q1_phi[i]
-                            delta_phi_q2    = Jet_Phi[m] - gentophad_q2_phi[i]
 
-                            deltar_bhad = ((Jet_Eta[j]-gentophad_b_eta[i])**2  + (correct_phi(delta_phi_bhad))**2)**0.5
-                            deltar_blep = ((Jet_Eta[k]-gentoplep_b_eta[i])**2  + (correct_phi(delta_phi_blep))**2)**0.5
-                            deltar_q1   = ((Jet_Eta[l]-gentophad_q1_eta[i])**2 + (correct_phi(delta_phi_q1))**2)**0.5
-                            deltar_q2   = ((Jet_Eta[m]-gentophad_q2_eta[i])**2 + (correct_phi(delta_phi_q2))**2)**0.5
+                            # look for combination with smallest delta r between jets and genjets
+                            deltar_bhad = ((Jet_Eta[j]-gentophad_b_eta[i])**2  + (correct_phi(Jet_Phi[j] - gentophad_b_phi[i]))**2)**0.5
+                            deltar_blep = ((Jet_Eta[k]-gentoplep_b_eta[i])**2  + (correct_phi(Jet_Phi[k] - gentoplep_b_phi[i]))**2)**0.5
+                            deltar_q1   = ((Jet_Eta[l]-gentophad_q1_eta[i])**2 + (correct_phi(Jet_Phi[l] - gentophad_q1_phi[i]))**2)**0.5
+                            deltar_q2   = ((Jet_Eta[m]-gentophad_q2_eta[i])**2 + (correct_phi(Jet_Phi[m] - gentophad_q2_phi[i]))**2)**0.5
 
 
                             total_deltar = deltar_bhad + deltar_blep + deltar_q1 + deltar_q2
                             if(total_deltar<minr):
-                                minr = total_deltar # macht quadratische Summation unter der Wurzel mehr Sinn?
+                                minr = total_deltar
                                 best_comb = [j,k,l,m]
                                 minr_bhad   = deltar_bhad
                                 minr_blep   = deltar_blep
                                 minr_q1     = deltar_q1
                                 minr_q2     = deltar_q2
 
+            # combinations with smallest total_deltar and each delta r <0.3 are ttbar-events
             n=0
             if(minr_bhad<0.3 and minr_blep<0.3 and minr_q1<0.3 and minr_q2<0.3):
                 for index in jets:
@@ -605,12 +581,14 @@ class Dataset:
             if(i%500 == 0):
                 print minr, minr_bhad, minr_blep, minr_q1, minr_q2
 
+            #for ttbar events: append wrong combination of jets to arrays and df
             n=0
             false_comb = np.zeros(4)
             j1,k1,l1,m1 = 0,0,0,0
             if is_ttbar[i]==1:
                 df=df.append(df.iloc[[i]])
-                while(j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3])):
+                #kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
+                while(j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
                     j1 = randrange(njets)
                     k1 = randrange(njets)
                     l1 = randrange(njets)
@@ -636,6 +614,8 @@ class Dataset:
         # plt.title("ratio between number of tolerated events and total number")
         # plt.xlabel("$\Delta$r cut")
         # plt.show()
+
+        #delete all variables except for:
         df_new = pd.DataFrame()
         df_new["N_Jets"] = df["N_Jets"].as_matrix()
         df_new["N_BTagsM"]   = df["N_BTagsM"].as_matrix()
@@ -651,17 +631,16 @@ class Dataset:
         df_new["Muon_Pt"]   = df["Muon_Pt"].as_matrix()
         df_new["N_LooseMuons"]   = df["N_LooseMuons"].as_matrix()
         df_new["N_TightElectrons"]   = df["N_TightElectrons"].as_matrix()
-
-
-
-
+        df_new["Evt_Odd"] = df["Evt_Odd"].as_matrix()
 
 
         #print df.shape, len(globals()[index + "_" + index2]), len(is_ttbar)
+
+        #add correct and false combinations with their tags to df
         entr=0
         for index in jets:
             for index2 in pepec:
-                df[index + "_" + index2] = globals()[index + "_" + index2] # hier scheint irgendwas mit den Indices nicht zu passen. Vermutung: array zu lang, muss falsche events noch rausschmeissen
+                df[index + "_" + index2] = globals()[index + "_" + index2]
                 entr+=1
         df["Evt_is_ttbar"]  = is_ttbar
         #print df,entr, df.columns[0:-entr]
@@ -681,13 +660,9 @@ class Dataset:
         df["Muon_Pt"]   = df_new["Muon_Pt"].as_matrix()
         df["N_LooseMuons"]   = df_new["N_LooseMuons"].as_matrix()
         df["N_TightElectrons"]   = df_new["N_TightElectrons"].as_matrix()
+        df["Evt_Odd"] = df_new["Evt_Odd"].as_matrix()
 
-
-
-
-
-
-
+        # delete combinations of events without certain ttbar event
         i,j=0,0
         while(i<total_nr):
             if df["Evt_is_ttbar"].as_matrix()[i]==0:
