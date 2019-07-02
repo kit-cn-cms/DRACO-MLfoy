@@ -304,26 +304,27 @@ class DNN():
         model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
         model_train_weights = self.data.get_train_weights()
         #Calculate epsilon and alpha
-        # print("# DEBUG: Type of prediciton: ", type(model_train_prediction))
         num = model_train_prediction.shape[0]
-        print("# DEBUG: Get number of predictions: ", num)
+        # make_discret = lambda x: -1 if x<0 else 1
+        model_train_prediction_discret = np.array([])
+        for x in model_train_prediction:
+            if x<0:
+                model_train_prediction_discret = np.append(model_train_prediction_discret, -1)
+            else:
+                model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
         weight_sum = np.sum(model_train_weights)
         weight_false = 0
         for i in np.arange(0,num):
-            if model_train_prediction[i] != model_train_label[i]:
-                #check if pred und label aus {-1,1}
-                # print("DEBUG: print if prediction was False i: ", i)
-                # print("# DEBUG: length of num: ", num)
-                # print("# DEBUG: length of train_weights: ", model_train_weights.shape)
+            if model_train_prediction_discret[i] != model_train_label[i]:
                 weight_false += model_train_weights[i]
         epsilon = weight_false/weight_sum
         alpha = 0.5*np.log((1-epsilon)/epsilon)
         #adjust weights
-        self.data.ada_adjust_weights(model_train_prediction, model_train_label, alpha)
+        self.data.ada_adjust_weights(model_train_prediction_discret, alpha)
         #check if epsilon < 0.5
         if epsilon > 0.5:
             print("# DEBUG: In ada_eval_training epsilon > 0.5")
-        return alpha    #return wird bisher eigentlich nicht benoetigt
+        return alpha
 
 
     def build_model(self, config = None, model = None):
@@ -353,6 +354,7 @@ class DNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
+
     def train_model(self):
         ''' train the model '''
 
@@ -368,11 +370,11 @@ class DNN():
 
         if self.use_adaboost:
             # train with adaboost algorithm
-            weak_model_trainout = [] #does not contain the trained model
-            weak_model_trained = [] #trained weak Classifier
-            alpha_t = []
+            self.weak_model_trainout = [] #does not contain the trained model
+            self.weak_model_trained = [] #trained weak Classifier
+            self.alpha_t = []
             for t in np.arange(0,self.adaboost_epochs):
-                weak_model_trainout.append(self.model.fit(
+                self.weak_model_trainout.append(self.model.fit(
                     x = self.data.get_train_data(as_matrix = True),
                     y = self.data.get_train_labels(),
                     batch_size          = self.architecture["batch_size"],
@@ -381,11 +383,8 @@ class DNN():
                     callbacks           = callbacks,
                     validation_split    = 0.25,
                     sample_weight       = self.data.get_train_weights()))
-                alpha_t.append(self.ada_eval_training())   #make dict alpha -> model
-                weak_model_trained.append(self.model)
-            #geht so leider nicht
-            #self.trained_model = build_strong_model()
-            #hier muss am ende trotzdem irgendetwas rein sonst kommt denke ich der rest vom code nicht klar
+                self.alpha_t.append(self.ada_eval_training())   #make dict alpha -> model
+                self.weak_model_trained.append(self.model)
 
         else:
             # train main net
@@ -399,10 +398,6 @@ class DNN():
                 validation_split    = 0.25,
                 sample_weight       = self.data.get_train_weights())
 
-        #implement adaboost here
-        #eigentlich alles gleich ausser epochen nach aussen ziehen
-        #funktionen wie ada_eval_training, ada_adjust_weights nutzen
-        #self.trained_model = Strong Classifier
 
     def save_model(self, argv, execute_dir, signals):
         ''' save the trained model '''
@@ -484,14 +479,14 @@ class DNN():
 
     def eval_adamodel(self):
         '''Evaluate a model trained with adaboost after each trainround t'''
+        # print("# DEBUG: evalv_adamodel size of weak_model_trained: ", len(self.weak_model_trained))
         pass
-
 
     def eval_model(self):
         ''' evaluate trained model '''
 
-        if use_adaboost:
-            self.model.eval_adamodel()
+        if self.use_adaboost:
+            self.eval_adamodel()
 
         else:
             # evaluate test dataset
@@ -563,29 +558,6 @@ class DNN():
                 print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
-
-
-
-
-    # def ada_adjust_weights(self):
-    #     '''Adjust weights after each training'''
-    #     #wird vielleicht auch eine funktion/ option von data_frame
-
-    # def get_alpha(weight, pred, label):
-    #     num = pred.shape(0)
-    #     weight_sum = np.sum(weight)
-    #     weight_false = 0
-    #     for i in np.arange(0,num):
-    #         if pred[i] != label[i]:
-    #             weight_false += weight[i]
-    #     epsilon = weight_false/weight_sum
-    #     return 0.5*np.log((1-epsilon)/epsilon)
-    #
-    #
-    # def build_strong_model(self, ):
-    #     '''Build strong Classifier according to adaboost algorithm'''
-    #     #das geht so nicht
-
 
 
 

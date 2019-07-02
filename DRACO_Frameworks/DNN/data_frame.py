@@ -265,41 +265,36 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
 
-    def ada_adjust_weights(self, pred, label, alpha):
+    def ada_adjust_weights(self, pred, alpha):
         '''Adjust the data weights according to Adaboost algorithm'''
-        print("# DEBUG: Starting to update weights")
-        # print(self.df_train["train_weight"][0]*5)
-        rows = pred.shape[0]    #make sure df_train has same shape
+        #modification constants
         increase = np.exp(alpha)
         decrease = np.exp(-alpha)
-        print("# DEBUG: alpha (should be >0): ", alpha)
-        update_weights = pd.DataFrame(columns = ["train_weight"])
+        #add predicted label to df_train
+        self.df_train['pred_label'] = pred
+        #split right and wrong classified
+        sub_true = self.df_train.query('binaryTarget == pred_label')
+        sub_false = self.df_train.query('binaryTarget != pred_label')
+        #modifie them
+        norm_factor = (increase*sub_false.shape[0] + decrease*sub_true.shape[0])/self.df_train.shape[0]
+        tmp1 = sub_true.train_weight * decrease/norm_factor
+        tmp2 = sub_false.train_weight * increase/norm_factor
+        sub_true.update(tmp1)
+        sub_false.update(tmp2)
+        # print("# DEBUG: Check if order in df is always the same")
+        # print(self.df_train[['train_weight','binaryTarget','pred_label']][30:40])
+        # print("# DEBUG: Indizes: ", self.df_train.index.get_level_values('Evt_ID'))
+        # sort_like_this = self.df_train.index["BDT_common5_input_HT_tag"]
+        #concat df_train with updated weights
+        # index = self.df_train        # print("Evt_ID: ", index[10:20])
+        # self.df_train = pd.concat([sub_true, sub_false])
+        # self.df_train.reindex(index = sort_like_this)
+        self.df_train.update(sub_true)
+        self.df_train.update(sub_false)
+        # print(self.df_train[['train_weight','binaryTarget','pred_label']][30:40])
+        # self.df_train = self.df_train.sample(frac=1)
 
-        # mask = np.equal(pred, label)
-        test_frame = self.df_train.head()
-        print("Shape pred: ", pred.shape, pred[0:5])
-        print("Shape label: ", label.shape, label[0:5])
-        print(test_frame)
-        # print(mask.shape)
-        # print(np.isin(mask, 'True'))
 
-        for i in np.arange(0, rows):
-            # print("# DEBUG: Handle DataFrame: ", self.df_train["train_weight"][0])
-            if pred[i] == label[i]:     #should be same number of rows as data_train
-                new_weight = self.df_train["train_weight"][i]*decrease
-                # update_weights = update_weights.append({"train_weight": self.df_train["train_weight"][i]*decrease}, ignore_index = True)
-                # self.df_train["train_weight"][i] = self.df_train["train_weight"][i]*decrease
-                # print("# DEBUG: Here")
-            else:
-                new_weight = self.df_train["train_weight"][i]*increase
-                # update_weights = update_weights.append({"train_weight": self.df_train["train_weight"][i]*increase}, ignore_index = True)
-                # self.df_train["train_weight"][i] = self.df_train["train_weight"][i]*increase
-            # print("# DEBUG: Here (i): ", i)
-            # print("# DEBUG: before: ", self.df_train["train_weight"][i])
-            self.df_train["train_weight"][i] = new_weight
-            # print("# DEBUG: after: ", self.df_train["train_weight"][i])
-        # self.df_train.update(update_weights)
-        print("# DEBUG: Updated weights")
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):

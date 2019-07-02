@@ -133,7 +133,7 @@ config_dict["binary_config_v2"] = {
 
 config_dict["ada_weak1"] = {
         "layers":                   [100,50],
-        "loss_function":            "hinge",        #choose loss function like hinge for y in {-1, 1}
+        "loss_function":            "binary_crossentropy",        #choose loss function like hinge for y in {-1, 1}
         "Dropout":                  0.1,
         "L2_Norm":                  1e-6,
         "batch_size":               4000,
