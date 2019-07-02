@@ -200,15 +200,19 @@ class DataFrame(object):
 
         # norm variables if activated
         unnormed_df = df.copy()
+        norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
         if norm_variables:
-            norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
             for v in train_variables:
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
                 if norm_csv["std"][v] == 0.:
                     sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
-            df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
-            self.norm_csv = norm_csv
+        else:
+            for v in train_variables:
+                norm_csv["mu"][v] = 0.
+                norm_csv["std"][v] = 1.
+        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+        self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
 

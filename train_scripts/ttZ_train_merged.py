@@ -65,6 +65,9 @@ parser.add_option("--printroc", dest="printROC", action = "store_true", default=
 parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.", metavar="balanceSamples")
 
+parser.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
+        help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.")
+
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 
@@ -169,7 +172,8 @@ dnn = DNN.DNN(
     test_percentage = 0.2,
     # balance samples per epoch such that there amount of samples per category is roughly equal
     balanceSamples  = options.balanceSamples,
-    evenSel         = options.even_sel)
+    evenSel         = options.even_sel,
+    norm_variables  = options.norm_variables)
 
 # import file with net configs if option is used
 if options.net_config:
