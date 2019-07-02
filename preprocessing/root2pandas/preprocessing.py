@@ -79,7 +79,7 @@ ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and Ge
 dataset = root2pandas.Dataset(
     outputdir   = outputdir,
     naming      = options.Name,
-    addMEM      = options.MEM,
+    addMEM      = False,#options.MEM,
     maxEntries  = options.maxEntries)
 
 # add base event selection
@@ -87,7 +87,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
+ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/"
 memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
