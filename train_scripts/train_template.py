@@ -44,6 +44,9 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
         help="activate to create plots", metavar="plot")
 
+parser.add_option("-s", "--sigScale", dest="sigScale", default = -1, type = float,
+        help="scale of signal histograms in output plots. -1 scales to background integral")
+
 parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
         help="activate for logarithmic plots", metavar="log")
 
@@ -62,6 +65,9 @@ parser.add_option("--printroc", dest="printROC", action = "store_true", default=
 parser.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.", metavar="balanceSamples")
 
+parser.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
+        help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.")
+
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 
@@ -70,6 +76,12 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
+
+parser.add_option("--even",dest="even_sel",action="store_true",default=None,
+        help="only select events with Evt_Odd==0")
+parser.add_option("--odd",dest="even_sel",action="store_false",default=None,
+        help="only select events with Evt_Odd==1")
+
 
 (options, args) = parser.parse_args()
 
@@ -104,6 +116,15 @@ else:
 run_name = outputdir.split("/")[-1]
 outputdir += "_"+options.category
 
+# handle even odd selection
+nom_weight = 1.
+if options.even_sel==True:
+    outputdir+="_even"
+    nom_weight = 2.
+elif options.even_sel==False:
+    outputdir+="_odd"
+    nom_weight = 2.
+
 # the input variables are loaded from the variable_set file
 if options.category in variable_set.variables:
     variables = variable_set.variables[options.category]
@@ -129,12 +150,12 @@ naming = options.naming
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 
-input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
-input_samples.addSample("ttbb"+naming,  label = "ttbb")
-input_samples.addSample("tt2b"+naming,  label = "tt2b")
-input_samples.addSample("ttb"+naming,   label = "ttb")
-input_samples.addSample("ttcc"+naming,  label = "ttcc")
-input_samples.addSample("ttlf"+naming,  label = "ttlf")
+input_samples.addSample("ttH"+naming,   label = "ttH",  normalization_weight = nom_weight)
+input_samples.addSample("ttbb"+naming,  label = "ttbb", normalization_weight = nom_weight)
+input_samples.addSample("tt2b"+naming,  label = "tt2b", normalization_weight = nom_weight)
+input_samples.addSample("ttb"+naming,   label = "ttb",  normalization_weight = nom_weight)
+input_samples.addSample("ttcc"+naming,  label = "ttcc", normalization_weight = nom_weight)
+input_samples.addSample("ttlf"+naming,  label = "ttlf", normalization_weight = nom_weight)
 
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
@@ -152,7 +173,9 @@ dnn = DNN.DNN(
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2,
     # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.balanceSamples)
+    balanceSamples  = options.balanceSamples,
+    evenSel         = options.even_sel,
+    norm_variables  = options.norm_variables)
 
 # import file with net configs if option is used
 if options.net_config:
@@ -178,7 +201,7 @@ dnn.get_input_weights()
 if options.plot:
     # plot the evaluation metrics
     dnn.plot_metrics(privateWork = options.privateWork)
- 
+
     if options.binary:
         # plot output node
         bin_range = [input_samples.bkg_target, 1.]
@@ -188,14 +211,15 @@ if options.plot:
         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
         # plot the output discriminators
-        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC, sigScale = options.sigScale)
 
         # plot the output nodes
-        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
-        
+        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC, sigScale = options.sigScale)
+
         # plot event yields
-        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork, sigScale = options.sigScale)
 
         # plot closure test
         dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
+
 
