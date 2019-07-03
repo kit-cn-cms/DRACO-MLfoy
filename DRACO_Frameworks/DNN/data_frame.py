@@ -337,3 +337,6 @@ class DataFrame(object):
     # full sample ----------------------------------
     def get_full_df(self):
         return self.unsplit_df[self.train_variables]
+
+    def get_full_df_train(self):
+        return self.df_train

@@ -262,7 +262,10 @@ class AdaBoost():
         self.test_prediction_vector = []
         # self.train_label = []   #labels need to be collected because order of df changes after evaluation
         # self.test_label = []
+        # print("# DEBUG: Watch weights: ", self.data.get_train_weights()[0:20])
         for t in np.arange(0,self.adaboost_epochs):
+            df = self.data.get_full_df_train()
+            # print("# DEBUG: Watch df_train: ", df.train_weight[200:300])
             self.weak_model_trainout.append(self.model.fit(
                 x = self.data.get_train_data(as_matrix = True),
                 y = self.data.get_train_labels(),
@@ -275,11 +278,14 @@ class AdaBoost():
             #get prediction vector for training and test
             self.train_prediction_vector.append(self.model.predict(self.data.get_train_data(as_matrix = True)))
             self.test_prediction_vector.append(self.model.predict(self.data.get_test_data(as_matrix = True)))
+            print("# DEBUG: Overwatch test_prediction_vector: ", self.test_prediction_vector[t][0:5])
+            print("# DEBUG: Overwatch train_prediction_vector: ", self.train_prediction_vector[t][0:5])
             #get labels
             # self.train_label.append(self.data.get_train_labels(as_categorical = False))
             # self.test_label.append(self.data.get_test_labels(as_categorical = False))
             #get alpha
             self.alpha_t.append(self.get_alpha())   #make dict alpha -> model
+            print("# DEBUG: Watch alpha", self.alpha_t)
             #collect weak classifier
             self.weak_model_trained.append(self.model)
 
@@ -320,7 +326,7 @@ class AdaBoost():
         test_fraction = np.array([])
         for i in np.arange(0, len(self.train_prediction_vector)):
             train_prediction_final = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i])
-            test_prediction_final = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:1])
+            test_prediction_final = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i])
             print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
             train_fraction = np.append(train_fraction,
                         np.count_nonzero(train_prediction_final==self.train_label)/float(self.train_label.shape[0]))
@@ -331,6 +337,10 @@ class AdaBoost():
         # print("# DEBUG: check dimension: ", epoches.shape, train_fraction.shape)
         # print("# DEBUG: test_fraction: ", test_fraction)
         # print("# DEBUG: train_fraction: ", train_fraction)
-        plt.plot(epoches, train_fraction, 'r--')
-        plt.plot(epoches, test_fraction, 'g--')
+        name = "test.pdf"
+        plt.plot(epoches, train_fraction, 'r--', label = "Trainingsdaten")
+        plt.plot(epoches, test_fraction, 'g--', label = "Testdaten")
+        plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
+        plt.legend(loc='lower left')
+        plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name)
         plt.show()
