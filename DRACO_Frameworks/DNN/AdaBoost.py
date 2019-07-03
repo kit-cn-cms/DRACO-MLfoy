@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
+#sklearn imports
+from sklearn import metrics
+
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
 DRACOdir = os.path.dirname(filedir)
@@ -321,26 +324,40 @@ class AdaBoost():
                             -Get roc'''
         self.train_label = self.data.get_train_labels(as_categorical = False)
         self.test_label = self.data.get_test_labels(as_categorical = False)
-        #get values after each adaboost_epoch
+        #get prediction fraction after each adaboost_epoch
         train_fraction = np.array([])
         test_fraction = np.array([])
         for i in np.arange(0, len(self.train_prediction_vector)):
             train_prediction_final = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i])
             test_prediction_final = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i])
-            print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
+            # print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
             train_fraction = np.append(train_fraction,
                         np.count_nonzero(train_prediction_final==self.train_label)/float(self.train_label.shape[0]))
             test_fraction = np.append(test_fraction,
                         np.count_nonzero(test_prediction_final==self.test_label)/float(self.test_label.shape[0]))
+        #get roc
+        fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction_final)
+        roc_auc = metrics.auc(fpr, tpr)
         #plot
+        name = "b500a100_ge6j_ge3t"
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
-        # print("# DEBUG: check dimension: ", epoches.shape, train_fraction.shape)
-        # print("# DEBUG: test_fraction: ", test_fraction)
-        # print("# DEBUG: train_fraction: ", train_fraction)
-        name = "test.pdf"
+
+        plt.figure(1)
         plt.plot(epoches, train_fraction, 'r--', label = "Trainingsdaten")
         plt.plot(epoches, test_fraction, 'g--', label = "Testdaten")
         plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
-        plt.legend(loc='lower left')
-        plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name)
+        plt.legend(loc='lower right')
+        plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name +"_frac.pdf")
+
+        plt.figure(2)
+        plt.title('Receiver Operating Characteristic')
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.legend(loc = 'lower right')
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name +"_roc.pdf")
+
         plt.show()
