@@ -60,13 +60,17 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
+ttH_selection = "(Evt_Odd == 1)"
+
 # define output classes
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH", selection = None)
 
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttb", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
@@ -83,7 +87,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
+ntuplesPath = "/nfs/dust/cms/user/kelmorab/ttH_2018/ntuples_v5/"
 memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
@@ -91,18 +95,9 @@ dataset.addSample(
     sampleName  = "ttHbb",
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttH_categories,
-    selections  = None,
+    selections  = ttH_selection,
     MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-    even_odd    = True
-    ) 
-dataset.addSample(
-    sampleName  = "ttHNonbb",
-    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttH_categories,
-    selections  = None,
-    MEMs        = memPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-    even_odd    = True
-    ) 
+   ) 
 
 dataset.addSample(
     sampleName  = "TTToSL",
@@ -110,22 +105,7 @@ dataset.addSample(
     categories  = ttbar_categories,
     selections  = None,#ttbar_selection,
     MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
-dataset.addSample(
-    sampleName  = "TTToDL",
-    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = None,#ttbar_selection,
-    MEMs        = memPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
-dataset.addSample(
-    sampleName  = "TTToFH",
-    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = None,#ttbar_selection,
-    MEMs        = memPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
-
+      )
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
 
@@ -133,8 +113,6 @@ dataset.addVariables(variable_set.all_variables)
 additional_variables = [
     "N_Jets",
     "N_BTagsM",
-    "N_BTagsT",
-    "N_BTagsL",
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",

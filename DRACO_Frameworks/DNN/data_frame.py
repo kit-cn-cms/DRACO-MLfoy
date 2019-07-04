@@ -7,13 +7,14 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., train_weight = 1.):
+    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
         self.isSignal = None
         self.train_weight = train_weight
-        self.min=-1.0
+        self.test_percentage = test_percentage
+        self.min=0.0
         self.max=1.0
 
 
@@ -41,7 +42,8 @@ class Sample:
         print("sum of train weights: {}".format(sum(df["train_weight"].values)))
 
         # add lumi weight
-        df = df.assign(lumi_weight = lambda x: x.weight * lumi * self.normalization_weight)
+        # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
+        df = df.assign(lumi_weight = lambda x: x.weight * lumi * self.normalization_weight/ self.test_percentage)
 
         self.data = df
         print("-"*50)
@@ -66,13 +68,16 @@ class Sample:
         self.lumi_weights = self.data["lumi_weight"].values
 
 class InputSamples:
-    def __init__(self, input_path, activateSamples = None):
+    def __init__(self, input_path, activateSamples = None, test_percentage = 0.2):
         self.binary_classification = False
         self.input_path = input_path
         self.samples = []
         self.activate_samples = activateSamples
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
+        self.test_percentage = float(test_percentage)
+        if self.test_percentage <= 0. or self.test_percentage >= 1.:
+            sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
 
     def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
@@ -80,14 +85,13 @@ class InputSamples:
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight) )
+        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage) )
 
     def getClassConfig(self):
         configs = []
         for sample in self.samples:
             configs.append( sample.getConfig() )
         return configs
-
 
     def addBinaryLabel(self, signals, bkg_target):
         self.binary_classification = True
@@ -203,22 +207,26 @@ class DataFrame(object):
 
         # norm variables if activated
         unnormed_df = df.copy()
+        norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
         if norm_variables:
-            norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
             for v in train_variables:
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
                 if norm_csv["std"][v] == 0.:
                     sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
-            df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
-            self.norm_csv = norm_csv
+        else:
+            for v in train_variables:
+                norm_csv["mu"][v] = 0.
+                norm_csv["std"][v] = 1.
+        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+        self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
 
         # split test sample
-        n_test_samples = int( df.shape[0]*test_percentage )
+        n_test_samples = int( df.shape[0]*test_percentage)
         self.df_test = df.head(n_test_samples)
-        self.df_train = df.tail(df.shape[0] - n_test_samples )
+        self.df_train = df.tail(df.shape[0] - n_test_samples)
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
 
         # save variable lists

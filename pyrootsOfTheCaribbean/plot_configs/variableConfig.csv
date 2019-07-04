@@ -35,7 +35,7 @@ Evt_Jet_MaxDeta_Jets,0,4.5,50,-,max #Delta#eta(jet jet)
 Evt_M2_JetsAverage,50,500,50,-,average M_{2}(jets)
 Evt_M2_TaggedJetsAverage,50,550,50,-,average M_{2}(tags)
 Evt_M2_UntaggedJetsAverage,50,400,50,-,average M_{2}(untagged)
-Evt_M3,100,1000,50,x,M_{3} closest to 175 GeV
+Evt_M3,50,1000,50,-,M_{3} with highest p_{T}
 Evt_MHT,0,400,50,-,missing H_{T}
 Evt_M_JetsAverage,5.,30.,50,-,average M(jets)
 Evt_M_MedianTaggedJets,50,500,50,-,median M(tags)
@@ -198,7 +198,7 @@ Evt_M2_closestTo91TaggedJets,0.,300.,50,-,"M_{2}(tag,tag) closest to 91 GeV"
 Evt_M2_minDrJets,0.,200.,50,-,"M_{2}( min #DeltaR(jet,jet) )"
 Evt_M2_minDrTaggedJets,0.,400.,50,-,"M_{2}( min #DeltaR(tag,tag) )"
 Evt_M2_minDrUntaggedJets,0.,500.,50,-,"M_{2}( min #DeltaR(untag,untag) )"
-Evt_M3_oneTagged,100.,1000.,50,-,M_{3} closest to 175 GeV with one untagged jet
+Evt_M3_oneTagged,50.,1000.,50,-,M_{3} with highest p_{T} and one untagged jet
 Evt_MET,20.0,400.,50,-,MET
 Evt_MET_Phi,-3.14159265358979,3.14159265358979,50,-,#phi(MET)
 Evt_MET_Pt,20.0,400.,50,-,p_{T}(MET)
