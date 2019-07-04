@@ -23,6 +23,7 @@ options.initArguments()
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples())
 
 # define all samples
+# only ttH sample needs even/odd splitting for 2017 MC
 input_samples.addSample(options.getDefaultName("ttHbb"),label = "ttH",  normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = 1.)
 input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
