@@ -73,7 +73,7 @@ class InputSamples:
         self.activate_samples = activateSamples
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
-            
+
     def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
@@ -174,7 +174,6 @@ class DataFrame(object):
             self.class_translation["bkg"] = -1
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
-
 
             df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else -1
                                             for c in df["class_label"].values], index = df.index)

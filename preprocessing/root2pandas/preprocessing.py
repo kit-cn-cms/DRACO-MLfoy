@@ -64,6 +64,9 @@ ttH_selection = None #"(Evt_Odd == 1)"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttHbb", selection = None)
 
+#ttbar_category = root2pandas.EventCategories()
+#ttbar_category.addCategory("ttbb")
+
 ttbar_bb = root2pandas.EventCategories()
 ttbar_bb.addCategory("ttbb")
 
@@ -92,48 +95,63 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/6nodes"
+ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/6nodes/cate9"
 
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttHbb",
-    ntuples     = ntuplesPath+"/ttHbb_2L.root",
+    ntuples     = ntuplesPath+"/ttHbb_2L_cate9.root",
     categories  = ttH_categories,
     selections  = base_selection,
    )
 
+
+#dataset.addSample(
+#    sampleName  = "ttbb",
+#    ntuples     = ntuplesPath+"/background_cate9.root",
+#    categories  = ttbar_category,
+#    selections  = base_selection,
+ #  )
+
 dataset.addSample(
     sampleName  = "ttbar_bb",
-    ntuples     = ntuplesPath+"/ttbar_bb.root",
+    ntuples     = ntuplesPath+"/ttbar_cate9.root",
     categories  = ttbar_bb,
     selections  = None
     )
 
 dataset.addSample(
     sampleName  = "ttbar_b",
-    ntuples     = ntuplesPath+"/ttbar_b.root",
+    ntuples     = ntuplesPath+"/ttbar_b_cate9.root",
     categories  = ttbar_b,
     selections  = ttH_selection
 )
 
 dataset.addSample(
+    sampleName  = "ttbar_bb",
+    ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
+    categories  = ttbar_bb,
+    selections  = ttH_selection
+)
+
+dataset.addSample(
     sampleName  = "ttbar_2b",
-    ntuples     = ntuplesPath+"/ttbar_2b.root",
+    ntuples     = ntuplesPath+"/ttbar_2b_cate9.root",
     categories  = ttbar_2b,
     selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_lf",
-    ntuples     = ntuplesPath+"/ttbar_lf.root",
+    ntuples     = ntuplesPath+"/ttbar_lf_cate9.root",
     categories  = ttbar_lf,
     selections  = ttH_selection
 )
 
 dataset.addSample(
     sampleName  = "ttbar_cc",
-    ntuples     = ntuplesPath+"/ttbar_cc.root",
+    ntuples     = ntuplesPath+"/ttbar_cc_cate9.root",
     categories  = ttbar_cc,
     selections  = ttH_selection
 )
@@ -143,8 +161,6 @@ dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
-    "N_jets",
-    "N_btags",
     "weight_GEN",
     "eventNumber",
     "runNumber",
