@@ -424,10 +424,10 @@ class plotClosureTest:
                 if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
         
-            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
-            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
 

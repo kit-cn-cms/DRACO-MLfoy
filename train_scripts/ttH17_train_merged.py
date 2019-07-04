@@ -23,13 +23,11 @@ options.initArguments()
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
 
 # define all samples
-input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
+# only ttH sample needs even/odd splitting for 2017 MC
+input_samples.addSample(options.getDefaultName("ttHbb"),label = "ttH",  normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = 1.)
+input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
+input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = 1.)
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())

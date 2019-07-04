@@ -7,12 +7,13 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., train_weight = 1.):
+    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
         self.isSignal = None
         self.train_weight = train_weight
+        self.test_percentage = test_percentage
         self.min=0.0
         self.max=1.0
 
@@ -40,7 +41,8 @@ class Sample:
         print("sum of train weights: {}".format(sum(df["train_weight"].values)))
 
         # add lumi weight
-        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight)
+        # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
+        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
 
         self.data = df
         print("-"*50)
@@ -65,21 +67,24 @@ class Sample:
         self.lumi_weights = self.data["lumi_weight"].values
 
 class InputSamples:
-    def __init__(self, input_path, activateSamples = None):
+    def __init__(self, input_path, activateSamples = None, test_percentage = 0.2):
         self.binary_classification = False
         self.input_path = input_path
         self.samples = []
         self.activate_samples = activateSamples
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
-            
+        self.test_percentage = float(test_percentage)
+        if self.test_percentage <= 0. or self.test_percentage >= 1.:
+            sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
+        
     def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight) )
+        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage) )
         
     def getClassConfig(self):
         configs = []
@@ -111,7 +116,7 @@ class DataFrame(object):
                 event_category,
                 train_variables,
                 norm_variables = True,
-                test_percentage = 0.1,
+                test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
@@ -217,9 +222,9 @@ class DataFrame(object):
         self.unsplit_df = df.copy()
 
         # split test sample
-        n_test_samples = int( df.shape[0]*test_percentage )
+        n_test_samples = int( df.shape[0]*test_percentage)
         self.df_test = df.head(n_test_samples)
-        self.df_train = df.tail(df.shape[0] - n_test_samples )
+        self.df_train = df.tail(df.shape[0] - n_test_samples)
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
 
         # save variable lists
