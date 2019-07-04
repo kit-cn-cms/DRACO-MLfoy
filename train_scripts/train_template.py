@@ -20,7 +20,7 @@ import DRACO_Frameworks.DNN.data_frame as df
 options.initArguments()
 
 # load samples
-input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples())
+input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
 
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
@@ -44,7 +44,7 @@ dnn = DNN.DNN(
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2,
+    test_percentage = options.getTestPercentage(),
     # balance samples per epoch such that there amount of samples per category is roughly equal
     balanceSamples  = options.doBalanceSamples(),
     evenSel         = options.doEvenSelection(),

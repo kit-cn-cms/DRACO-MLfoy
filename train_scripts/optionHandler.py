@@ -39,6 +39,8 @@ trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttH_2017",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="NETCONFIG")
 trainopts.add_option("-e", "--epochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="TRAINEPOCHS")
+trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.2,type=float,
+        help="set fraction of events used for testing, rest is used for training", metavar="TESTFRACTION")
 trainopts.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.")
 trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
@@ -167,6 +169,9 @@ class optionHandler:
 
     def getActivatedSamples(self):
         return self.__options.activateSamples
+    
+    def getTestPercentage(self):
+        return self.__options.test_percentage
 
     def getDefaultName(self, sample):
         return sample+self.__options.naming
