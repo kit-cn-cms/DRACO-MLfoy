@@ -1,0 +1,15 @@
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/1000/ -v testVariableSet -p -c 4j_ge3t -o m_ttH_binning/1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/1000/ -v testVariableSet -p -c 5j_ge3t -o m_ttH_binning/1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/1000/ -v testVariableSet -p -c ge6j_ge3t -o m_ttH_binning/1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600/ -v testVariableSet -p -c 4j_ge3t -o m_ttH_binning/600/ --netconfig ttH_2018 --signalclass=ttH_m_g600,ttH_m_le600 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600/ -v testVariableSet -p -c 5j_ge3t -o m_ttH_binning/000/ --netconfig ttH_2018 --signalclass=ttH_m_g600,ttH_m_le600 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600/ -v testVariableSet -p -c ge6j_ge3t -o m_ttH_binning/600/ --netconfig ttH_2018 --signalclass=ttH_m_g600,ttH_m_le600 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700/ -v testVariableSet -p -c 4j_ge3t -o m_ttH_binning/700/ --netconfig ttH_2018 --signalclass=ttH_m_g700,ttH_m_le700 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700/ -v testVariableSet -p -c 5j_ge3t -o m_ttH_binning/700/ --netconfig ttH_2018 --signalclass=ttH_m_g700,ttH_m_le700 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700/ -v testVariableSet -p -c ge6j_ge3t -o m_ttH_binning/700/ --netconfig ttH_2018 --signalclass=ttH_m_g700,ttH_m_le700 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600-1000/ -v testVariableSet -p -c 4j_ge3t -o m_ttH_binning/600-1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le600,ttH_m_l1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600-1000/ -v testVariableSet -p -c 5j_ge3t -o m_ttH_binning/600-1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le600,ttH_m_l1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/600-1000/ -v testVariableSet -p -c ge6j_ge3t -o m_ttH_binning/600-1000/ --netconfig ttH_2018 --signalclass=ttH_m_g1000,ttH_m_le600,ttH_m_l1000 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700-1100/ -v testVariableSet -p -c 4j_ge3t -o m_ttH_binning/700-1100/ --netconfig ttH_2018 --signalclass=ttH_m_g1100,ttH_m_le700,ttH_m_l1100 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700-1100/ -v testVariableSet -p -c 5j_ge3t -o m_ttH_binning/700-1100/ --netconfig ttH_2018 --signalclass=ttH_m_g1100,ttH_m_le700,ttH_m_l1100 -e 500
+python htxs_train.py -i ~/trainingData/ntuples/m_ttH_binning/700-1100/ -v testVariableSet -p -c ge6j_ge3t -o m_ttH_binning/700-1100/ --netconfig ttH_2018 --signalclass=ttH_m_g1100,ttH_m_le700,ttH_m_l1100 -e 500
