@@ -125,6 +125,9 @@ class optionHandler:
     def __setNomWeight(self):
         # handle even odd selection
         self.__nom_weight = 1.
+        if self.__options.even_sel is None:
+            return
+
         if self.__options.even_sel:
             self.__outputdir+="_even"
             self.__nom_weight = 2.
