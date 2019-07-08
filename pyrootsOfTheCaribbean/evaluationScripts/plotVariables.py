@@ -40,7 +40,9 @@ class Sample:
             self.data = store.select("data", stop = self.stop)
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
-        self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
+        # self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
+        self.data["Weight_XS"] = 1.
+        self.data["Weight_GEN_nom"] = 1.
 
     def cutData(self, cut, variables, lumi_scale):
         # if lumi scale was set to zero set scale to 1
