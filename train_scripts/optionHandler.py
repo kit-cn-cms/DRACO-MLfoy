@@ -22,7 +22,7 @@ sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFe
         help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="INPUTDIR")
 sampleopts.add_option("--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
-sampleopts.add_option("-c", "--category", dest="category",default="4j_ge3t",
+sampleopts.add_option("-c", "--category", dest="category",default="",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
 sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
@@ -41,8 +41,6 @@ trainopts.add_option("-e", "--epochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="TRAINEPOCHS")
 trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.2,type=float,
         help="set fraction of events used for testing, rest is used for training", metavar="TESTFRACTION")
-trainopts.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
-        help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.")
 trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
         help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.")
 parser.add_option_group(trainopts)
@@ -125,6 +123,8 @@ class optionHandler:
     def __setNomWeight(self):
         # handle even odd selection
         self.__nom_weight = 1.
+        if self.__options.even_sel is None:
+            return
         if self.__options.even_sel:
             self.__outputdir+="_even"
             self.__nom_weight = 2.
