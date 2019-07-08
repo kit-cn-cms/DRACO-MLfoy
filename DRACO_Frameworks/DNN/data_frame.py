@@ -28,12 +28,15 @@ class Sample:
         query = event_category
         if not evenSel == "":
             query+=" and "+evenSel
-        df.query(query, inplace = True)
+        if query!="":
+            df.query(query, inplace = True)
+        print(df)
         print("number of events after selections:  "+str(df.shape[0]))
         self.nevents = df.shape[0]
 
         # add event weight
-        df = df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
+        # df = df.assign(total_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom)
+        df = df.assign(total_weight = 1)
 
         # assign train weight
         weight_sum = sum(df["total_weight"].values)
@@ -42,7 +45,8 @@ class Sample:
 
         # add lumi weight
         # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
-        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
+        # df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
+        df = df.assign(lumi_weight = self.normalization_weight / self.test_percentage)
 
         self.data = df
         print("-"*50)
@@ -157,7 +161,7 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            # df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
 
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
