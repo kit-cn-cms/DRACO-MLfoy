@@ -20,6 +20,7 @@ def GetPlotColor( cls ):
         "tH":           ROOT.kWhite,
     
         "sig":   ROOT.kCyan,
+        "signal":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
         }
 
