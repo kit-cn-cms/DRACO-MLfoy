@@ -265,13 +265,13 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
 
-    def ada_adjust_weights(self, pred, pred_disc, alpha, beta):
+    def ada_adjust_weights(self, pred, pred_disc, alpha, m2):
         '''Adjust the data weights according to Adaboost algorithm'''
         #use AdaBoost.M2 algorithm
-        if alpha is None:
+        if m2:
             weight_factor = np.array([])
-            for i in self.df_train.shape[0]:
-                factor = beta**(1-pred[i])
+            for i in range(0,self.df_train.shape[0]):
+                factor = alpha**(1-pred[i])
                 #get all factors to update the weights
                 weight_factor = np.append(weight_factor, factor)
             norm_factor = np.sum(weight_factor)
@@ -280,6 +280,7 @@ class DataFrame(object):
             tmp = self.df_train.train_weight * weight_factor
             #update the df_train
             self.df_train.update(tmp)
+            # print("# DEBUG: data_frame, watch wights: ", self.df_train.train_weight[0:10])
         #use normal AdaBoost algorithm
         else:
             #modification constants

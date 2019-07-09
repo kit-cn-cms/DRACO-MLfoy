@@ -78,6 +78,9 @@ parser.add_option("-b", "--boost", dest = "boost", default = None,
 parser.add_option("--adaboost", dest = "adaboost", default = None,
         help = "INT number of epoches Adaboost should perform")
 
+parser.add_option("--m2", dest = "m2", default = False,
+        help = "Should AdaBoost.M2 algorithm be used")
+
 (options, args) = parser.parse_args()
 
 #import Variable Selection
@@ -146,6 +149,12 @@ if options.adaboost:
 else:
     use_ada = False
 
+if options.m2:
+    m2 = options.m2
+    options.binary_bkg_target = 0     #otherwise the algorithm does not work
+else:
+    m2 = False
+
 # load samples
 input_samples = df.InputSamples(inPath, options.activateSamples)
 naming = options.naming
@@ -187,7 +196,8 @@ for i in range(1, n_boost+1):   #due to naming
         balanceSamples  = options.balanceSamples,
         use_adaboost = use_ada,
         adaboost_epochs = ada_epochs,
-        shuffle_seed = 9)
+        shuffle_seed = 9,
+        m2 = m2)
 
     # import file with net configs if option is used
     if options.net_config:
