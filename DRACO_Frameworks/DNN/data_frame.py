@@ -265,34 +265,41 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
 
-    def ada_adjust_weights(self, pred, alpha):
+    def ada_adjust_weights(self, pred, pred_disc, alpha, beta):
         '''Adjust the data weights according to Adaboost algorithm'''
-        #modification constants
-        increase = np.exp(alpha)
-        decrease = np.exp(-alpha)
-        #add predicted label to df_train
-        self.df_train['pred_label'] = pred
-        #split right and wrong classified
-        sub_true = self.df_train.query('binaryTarget == pred_label')
-        sub_false = self.df_train.query('binaryTarget != pred_label')
-        #modifie them
-        norm_factor = (increase*sub_false.shape[0] + decrease*sub_true.shape[0])/self.df_train.shape[0]
-        tmp1 = sub_true.train_weight * decrease/norm_factor
-        tmp2 = sub_false.train_weight * increase/norm_factor
-        sub_true.update(tmp1)
-        sub_false.update(tmp2)
-        # print("# DEBUG: Check if order in df is always the same")
-        # print(self.df_train[['train_weight','binaryTarget','pred_label']][30:40])
-        # print("# DEBUG: Indizes: ", self.df_train.index.get_level_values('Evt_ID'))
-        # sort_like_this = self.df_train.index["BDT_common5_input_HT_tag"]
-        #concat df_train with updated weights
-        # index = self.df_train        # print("Evt_ID: ", index[10:20])
-        # self.df_train = pd.concat([sub_true, sub_false])
-        # self.df_train.reindex(index = sort_like_this)
-        self.df_train.update(sub_true)
-        self.df_train.update(sub_false)
-        # print(self.df_train[['train_weight','binaryTarget','pred_label']][30:40])
-        # self.df_train = self.df_train.sample(frac=1)
+        #use AdaBoost.M2 algorithm
+        if alpha is None:
+            weight_factor = np.array([])
+            for i in self.df_train.shape[0]:
+                factor = beta**(1-pred[i])
+                #get all factors to update the weights
+                weight_factor = np.append(weight_factor, factor)
+            norm_factor = np.sum(weight_factor)
+            weight_factor = weight_factor/norm_factor
+            #modifie the weights
+            tmp = self.df_train.train_weight * weight_factor
+            #update the df_train
+            self.df_train.update(tmp)
+        #use normal AdaBoost algorithm
+        else:
+            #modification constants
+            increase = np.exp(alpha)
+            decrease = np.exp(-alpha)
+            #add predicted label to df_train
+            self.df_train['pred_disc_label'] = pred_disc
+            #split right and wrong classified
+            sub_true = self.df_train.query('binaryTarget == pred_disc_label')
+            sub_false = self.df_train.query('binaryTarget != pred_disc_label')
+            #modifie them
+            norm_factor = (increase*sub_false.shape[0] + decrease*sub_true.shape[0])/self.df_train.shape[0]
+            tmp1 = sub_true.train_weight * decrease/norm_factor
+            tmp2 = sub_false.train_weight * increase/norm_factor
+            sub_true.update(tmp1)
+            sub_false.update(tmp2)
+            #update the df_train
+            self.df_train.update(sub_true)
+            self.df_train.update(sub_false)
+
 
 
 

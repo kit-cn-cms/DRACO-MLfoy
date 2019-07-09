@@ -47,7 +47,8 @@ class AdaBoost():
             shuffle_seed    = None,
             balanceSamples  = False,
             adaboost_epochs = 100,
-            evenSel         = None):
+            evenSel         = None,
+            m2              = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -87,6 +88,9 @@ class AdaBoost():
 
         #number of adaboost_epochs
         self.adaboost_epochs = adaboost_epochs
+
+        #should Adaboost.M2 algorithm be Used
+        self.m2 = m2
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -201,7 +205,7 @@ class AdaBoost():
         return model
 
 
-    def get_alpha(self):
+    def get_alpha_epsilon(self):
         '''Calculate weighted error and return alpha_t after each training'''
         # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
         #hier kann man auch self... verwenden da prediciton vectoren schon in train_model erstellt
@@ -210,26 +214,38 @@ class AdaBoost():
         model_train_weights = self.data.get_train_weights()
         #Calculate epsilon and alpha
         num = model_train_prediction.shape[0]
-        # make_discret = lambda x: -1 if x<0 else 1
+
+        #create a discret prediction vector
         model_train_prediction_discret = np.array([])
         for x in model_train_prediction:
             if x<0:
                 model_train_prediction_discret = np.append(model_train_prediction_discret, -1)
             else:
                 model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
-        weight_sum = np.sum(model_train_weights)
-        weight_false = 0
-        for i in np.arange(0,num):
-            if model_train_prediction_discret[i] != model_train_label[i]:
-                weight_false += model_train_weights[i]
-        epsilon = weight_false/weight_sum
-        alpha = 0.5*np.log((1-epsilon)/epsilon)
+        #adaboost.m2 algorithm
+        if self.m2:
+            epsilon = 0
+            for i in np.arange(0, num):
+                if model_train_prediction_discret[i] != model_train_label[i]:
+                    epsilon += model_train_weights[i]*(1-model_train_prediction[i])
+            alpha = None
+            beta = epsilon/(1-epsilon)
+        #normal adaboost
+        else:
+            weight_sum = np.sum(model_train_weights)
+            weight_false = 0
+            for i in np.arange(0,num):
+                if model_train_prediction_discret[i] != model_train_label[i]:
+                    weight_false += model_train_weights[i]
+            epsilon = weight_false/weight_sum
+            alpha = 0.5*np.log((1-epsilon)/epsilon)
+            beta = None
         #adjust weights
-        self.data.ada_adjust_weights(model_train_prediction_discret, alpha)
+        self.data.ada_adjust_weights(model_train_prediction, model_train_prediction_discret, alpha, beta)
         #check if epsilon < 0.5
         if epsilon > 0.5:
             print("# DEBUG: In ada_eval_training epsilon > 0.5")
-        return alpha
+        return alpha, epsilon
 
 
     def build_model(self, config):
@@ -260,6 +276,7 @@ class AdaBoost():
 
         self.weak_model_trainout = [] #does not contain the trained model
         self.weak_model_trained = [] #trained weak Classifier
+        self.epsilon = []
         self.alpha_t = []
         self.train_prediction_vector = []   #collect prediction vector for each weak classifier
         self.test_prediction_vector = []
@@ -267,7 +284,8 @@ class AdaBoost():
         # self.test_label = []
         # print("# DEBUG: Watch weights: ", self.data.get_train_weights()[0:20])
         for t in np.arange(0,self.adaboost_epochs):
-            df = self.data.get_full_df_train()
+            print("adaboost_epoch: ", t)
+            # df = self.data.get_full_df_train()
             # print("# DEBUG: Watch df_train: ", df.train_weight[200:300])
             self.weak_model_trainout.append(self.model.fit(
                 x = self.data.get_train_data(as_matrix = True),
@@ -281,14 +299,17 @@ class AdaBoost():
             #get prediction vector for training and test
             self.train_prediction_vector.append(self.model.predict(self.data.get_train_data(as_matrix = True)))
             self.test_prediction_vector.append(self.model.predict(self.data.get_test_data(as_matrix = True)))
-            print("# DEBUG: Overwatch test_prediction_vector: ", self.test_prediction_vector[t][0:5])
-            print("# DEBUG: Overwatch train_prediction_vector: ", self.train_prediction_vector[t][0:5])
+            # print("# DEBUG: Overwatch test_prediction_vector: ", self.test_prediction_vector[t][0:5])
+            # print("# DEBUG: Overwatch train_prediction_vector: ", self.train_prediction_vector[t][0:5])
             #get labels
             # self.train_label.append(self.data.get_train_labels(as_categorical = False))
             # self.test_label.append(self.data.get_test_labels(as_categorical = False))
-            #get alpha
-            self.alpha_t.append(self.get_alpha())   #make dict alpha -> model
+            #get alpha and epsilon
+            alpha , epsilon = self.get_alpha_epsilon()
+            self.epsilon.append(epsilon)
+            self.alpha_t.append(alpha)   #make dict alpha -> model
             print("# DEBUG: Watch alpha", self.alpha_t)
+            print("# DEBUG: Watch epsilon", self.epsilon)
             #collect weak classifier
             self.weak_model_trained.append(self.model)
 
@@ -339,12 +360,12 @@ class AdaBoost():
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction_final)
         roc_auc = metrics.auc(fpr, tpr)
         #plot
-        name = "b500a100_ge6j_ge3t"
+        name = "b100a100_ge6j_ge3t_ada_weak1"
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
 
         plt.figure(1)
-        plt.plot(epoches, train_fraction, 'r--', label = "Trainingsdaten")
-        plt.plot(epoches, test_fraction, 'g--', label = "Testdaten")
+        plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
+        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
         plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.legend(loc='lower right')
         plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name +"_frac.pdf")
@@ -359,5 +380,10 @@ class AdaBoost():
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name +"_roc.pdf")
+
+        plt.figure(3)
+        plt.title('Epsilon')
+        plt.plot(epoches, self.epsilon, '-')
+        plt.savefig("/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/" + name +"_eps.pdf")
 
         plt.show()
