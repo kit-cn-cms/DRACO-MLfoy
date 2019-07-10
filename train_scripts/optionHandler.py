@@ -35,7 +35,7 @@ parser.add_option_group(sampleopts)
 trainopts = optparse.OptionGroup(parser, "Train Configurations")
 trainopts.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="VARIABLESET")
-trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttH_2017",
+trainopts.add_option("-n", "--netconfig", dest="net_config",default="example_config_challenge",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="NETCONFIG")
 trainopts.add_option("-e", "--epochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="TRAINEPOCHS")
@@ -46,7 +46,7 @@ trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "stor
 parser.add_option_group(trainopts)
 
 plotopts = optparse.OptionGroup(parser, "Plotting Options")
-plotopts.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
+plotopts.add_option("-p", "--plot", dest="plot", action = "store_true", default=True,
         help="activate to create plots")
 plotopts.add_option("-s", "--sigScale", dest="sigScale", default = -1, type = float, metavar = "SIGSCALE",
         help="scale of signal histograms in output plots. -1 scales to background integral")
@@ -54,7 +54,7 @@ plotopts.add_option("-L", "--log", dest="log", action = "store_true", default=Fa
         help="activate for logarithmic plots")
 plotopts.add_option("-P", "--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label")
-plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", default=False,
+plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", default=True,
         help="activate to print ROC value for confusion matrix")
 plotopts.add_option("--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
@@ -157,8 +157,8 @@ class optionHandler:
         if self.__options.net_config:
             self.__config = config_dict[self.__options.net_config]
         else:
-            self.__config = config_dict["example_config"]
-            print("no net config was specified - using 'example_config'")
+            self.__config = config_dict["example_config_challenge"]
+            print("no net config was specified - using 'example_config_challenge'")
 
 
 
