@@ -79,8 +79,8 @@ class InputSamples:
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
         self.test_percentage = float(test_percentage)
-        if self.test_percentage <= 0. or self.test_percentage >= 1.:
-            sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
+        if self.test_percentage < 0. or self.test_percentage > 1.:
+            sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)".format(test_percentage))
         
     def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
         if self.activate_samples and not label in self.activate_samples:
