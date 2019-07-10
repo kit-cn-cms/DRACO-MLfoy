@@ -129,15 +129,17 @@ def plotScatter3D(inputdf, vars=["E1", "E2", "dPhi"], xrange=(300, 900), yrange=
 
 
 if __name__ == "__main__":
-    dfPath= "/ceph/swieland/TP2-WZH/MLInput/data.h5"
+    dfPath= "/ceph/swieland/TP2-WZH/MLInput/data/data.h5"
     df = pd.read_hdf(dfPath)
     print(df.loc[df["signal"]==1])
     print(df.loc[df["signal"]==0])
     plot1D(inputdf=df, var="E1")
     plot1D(inputdf=df, var="E2")
+    plot1D(inputdf=df, var="pt1")
+    plot1D(inputdf=df, var="pt2")
     plot1D(inputdf=df, var="dPhi", range_=(0, 3.2))
 
-    plotScatter(inputdf=df, vars=["E1", "E2"])
-    plotScatter(inputdf=df, vars=["E1", "dPhi"])
-    plotScatter(inputdf=df, vars=["E2", "dPhi"])
-    plotScatter3D(inputdf=df, vars=["E1", "E2", "dPhi"])
+    # plotScatter(inputdf=df, vars=["E1", "E2"])
+    # plotScatter(inputdf=df, vars=["E1", "dPhi"])
+    # plotScatter(inputdf=df, vars=["E2", "dPhi"])
+    # plotScatter3D(inputdf=df, vars=["E1", "E2", "dPhi"])
