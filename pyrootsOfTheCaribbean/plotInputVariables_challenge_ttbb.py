@@ -62,12 +62,14 @@ else:
     sys.exit("ERROR: Variable Selection File does not exist!")
 
 #get input directory path
-if not os.path.isabs(options.inputDir):
-    data_dir = basedir+"/workdir/"+options.inputDir
-elif os.path.exists(options.inputDir):
-    data_dir=options.inputDir
-else:
-    sys.exit("ERROR: Input Directory does not exist!")
+data_dir = "/ceph/swieland/TP2-WZH/MLInput/train"
+
+# if not os.path.isabs(options.inputDir):
+    # data_dir = basedir+"/workdir/"+options.inputDir
+# elif os.path.exists(options.inputDir):
+    # data_dir=options.inputDir
+# else:
+    # sys.exit("ERROR: Input Directory does not exist!")
 
 #get output directory path
 if not os.path.isabs(options.outputDir):
