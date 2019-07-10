@@ -18,7 +18,7 @@ import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
 options.initArguments()
-dataPath = "/ceph/swieland/TP2-WZH/MLInput/"
+dataPath = "/ceph/swieland/TP2-WZH/MLInput/train/"
 # load samples
 input_samples = df.InputSamples(dataPath, options.getActivatedSamples(), options.getTestPercentage())
 

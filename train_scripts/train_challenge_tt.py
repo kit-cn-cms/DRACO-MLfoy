@@ -18,14 +18,14 @@ import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
 options.initArguments()
-dataPath = "/ceph/swieland/TP2-WZH/MLInput/"
+dataPath = "/ceph/swieland/TP2-WZH/MLInput/train"
 
 # load samples
 input_samples = df.InputSamples(dataPath, options.getActivatedSamples(), options.getTestPercentage())
 
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt"), label = "ttbb", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tt"), label = "tt", normalization_weight = options.getNomWeight())
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
@@ -34,7 +34,7 @@ if options.isBinary():
 dnn = DNN.DNN(
     save_path       = options.getOutputDir(),
     input_samples   = input_samples,
-    event_category  = options.getCategory(),
+    event_category  = "ge6j_ge3t",
     train_variables = options.getTrainVariables(),
     # number of epochs
     train_epochs    = options.getTrainEpochs(),
