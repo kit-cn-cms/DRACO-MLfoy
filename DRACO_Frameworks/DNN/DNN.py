@@ -454,6 +454,8 @@ class DNN():
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
+        print("#")*40
+        print("TEST DATASET:")
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
@@ -462,6 +464,23 @@ class DNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+        print("#")*40
+        print("TRAIN DATASET:")
+        # evaluate train dataset
+        model_eval = self.model.evaluate(
+            self.data.get_train_data(as_matrix = True),
+            self.data.get_train_labels())
+        # print evaluations
+        from sklearn.metrics import roc_auc_score
+        roc_auc_score = roc_auc_score(self.data.get_train_labels(), self.model_train_prediction)
+        print("\nROC-AUC score: {}".format(roc_auc_score))
+
+        if self.eval_metrics:
+            print("model train loss: {}".format(model_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("model train {}: {}".format(metric, model_eval[im+1]))
+        print("#")*40
+
 
 
     def get_ranges(self):
@@ -661,7 +680,7 @@ class DNN():
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-def loadDNN(inputDirectory, outputDirectory):
+def loadDNN(inputDirectory, outputDirectory, evalSample=None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -671,12 +690,16 @@ def loadDNN(inputDirectory, outputDirectory):
     with open(configFile) as f:
         config = f.read()
     config = json.loads(config)
-
+    percentage = 0.2
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"])
+    if evalSample == None:
+        input_samples = data_frame.InputSamples(config["inputData"])
+        for sample in config["eventClasses"]:
+            input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
+    else:
+        input_samples = evalSample
+        percentage = 1.0
 
-    for sample in config["eventClasses"]:
-        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
 
     print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
@@ -685,7 +708,8 @@ def loadDNN(inputDirectory, outputDirectory):
         input_samples   = input_samples,
         event_category  = config["JetTagCategory"],
         train_variables = config["trainVariables"],
-        shuffle_seed    = config["shuffleSeed"]
+        shuffle_seed    = config["shuffleSeed"],
+        test_percentage = percentage
         )
 
     # load the trained model
