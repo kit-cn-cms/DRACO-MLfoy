@@ -23,6 +23,7 @@ To circumvent this, first import everything related to `ROOT`, only then start i
 - `pip install --user uproot-methods==0.2.6`
 - `pip install --user awkward==0.4.2`
 - TensorFlow backend for KERAS `export KERAS_BACKEND=tensorflow`
+- `pip install numpy==1.15.4`
 
 ## Workflow in a nutshell
 1. Preprocess input data:
