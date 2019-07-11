@@ -7,7 +7,7 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 import ROOT
-from math import sin, cos
+from math import sin, cos, log
 from random import randrange
 
 class EventCategories:
@@ -477,43 +477,58 @@ class Dataset:
 
         total_nr = df["Jet_Pt[0]"].size
 
-        njets_vec       = df["N_Jets"].as_matrix()
-        # n_tightmuons    = df["N_TightMuons"].as_matrix()
-        # muon_pt         = df["Muon_Pt[0]"].as_matrix()
-        # muon_eta        = df["Muon_Eta[0]"].as_matrix()
-        # muon_phi        = df["Muon_Phi[0]"].as_matrix()
-        # muon_m          = df["Muon_M[0]"].as_matrix()
-        # electron_pt     = df["Electron_Pt[0]"].as_matrix()
-        # electron_eta    = df["Electron_Eta[0]"].as_matrix()
-        # electron_phi    = df["Electron_Phi[0]"].as_matrix()
-        # electron_m      = df["Electron_M[0]"].as_matrix()
-        # pt_met          = df["Evt_MET_Pt"].as_matrix()
-        # phi_met         = df["Evt_MET_Phi"].as_matrix()
-        # gentoplep_eta   = df["GenTopLep_Eta"].as_matrix()
-        # gentoplep_phi   = df["GenTopLep_Phi"].as_matrix()
-        # gentophad_eta   = df["GenTopHad_Eta"].as_matrix()
-        # gentophad_phi   = df["GenTopHad_Phi"].as_matrix()
+        njets_vec       = df["N_Jets"].values
+        # n_tightmuons    = df["N_TightMuons"].values
+        # muon_pt         = df["Muon_Pt[0]"].values
+        # muon_eta        = df["Muon_Eta[0]"].values
+        # muon_phi        = df["Muon_Phi[0]"].values
+        # muon_E          = df["Muon_E[0]"].values
+        # electron_pt     = df["Electron_Pt[0]"].values
+        # electron_eta    = df["Electron_Eta[0]"].values
+        # electron_phi    = df["Electron_Phi[0]"].values
+        # electron_m      = df["Electron_M[0]"].values
+        # pt_met          = df["Evt_MET_Pt"].values
+        # phi_met         = df["Evt_MET_Phi"].values
+        # gentoplep_eta   = df["GenTopLep_Eta"].values
+        # gentoplep_phi   = df["GenTopLep_Phi"].values
+        # gentophad_eta   = df["GenTopHad_Eta"].values
+        # gentophad_phi   = df["GenTopHad_Phi"].values
 
-        gentophad_b_phi = df["GenTopHad_B_Phi"].as_matrix()
-        gentophad_b_eta = df["GenTopHad_B_Eta"].as_matrix()
-        gentoplep_b_phi = df["GenTopLep_B_Phi"].as_matrix()
-        gentoplep_b_eta = df["GenTopLep_B_Eta"].as_matrix()
+        GenTopHad_B_Phi = df["GenTopHad_B_Phi"].values
+        GenTopHad_B_Eta = df["GenTopHad_B_Eta"].values
+        GenTopLep_B_Phi = df["GenTopLep_B_Phi"].values
+        GenTopLep_B_Eta = df["GenTopLep_B_Eta"].values
 
-        gentophad_q1_phi= df["GenTopHad_Q1_Phi"].as_matrix()
-        gentophad_q1_eta= df["GenTopHad_Q1_Eta"].as_matrix()
-        gentophad_q2_phi= df["GenTopHad_Q2_Phi"].as_matrix()
-        gentophad_q2_eta= df["GenTopHad_Q2_Eta"].as_matrix()
+        GenTophad_Q1_Phi= df["GenTopHad_Q1_Phi"].values
+        GenTophad_Q1_Eta= df["GenTopHad_Q1_Eta"].values
+        Gentophad_Q2_Phi= df["GenTopHad_Q2_Phi"].values
+        GenTophad_Q2_Eta= df["GenTopHad_Q2_Eta"].values
 
         numb = np.zeros(40)
 
-        pepec = ["Jet_Pt", "Jet_Eta", "Jet_Phi", "Jet_E", "Jet_CSV"]
+
         jets  = ["TopHad_B", "TopLep_B", "TopHad_Q1", "TopHad_Q2"]
+        pepec = ["Pt", "Eta", "Phi", "E", "CSV"]
+
+        recos = ["TopHad", "TopLep", "WHad", "WLep"]
+        pepm  = ["Pt", "Eta", "Phi", "M", "logM"]
 
         for index in jets:
             for index2 in pepec:
                 globals()[index + "_" + index2] = np.zeros(total_nr)
 
+        for index in recos:
+            for index2 in pepm:
+                globals()["reco_" + index + "_" + index2] = np.zeros(total_nr)
+
         is_ttbar = np.zeros(total_nr)
+        # reco_TopHad_M  = np.zeros(total_nr)
+        # reco_TopLep_M  = np.zeros(total_nr)
+        # reco_WHad_M    = np.zeros(total_nr)
+        # reco_log_WHad_M= np.zeros(total_nr)
+        # reco_WLep_M    = np.zeros(total_nr)
+        # reco_log_WLep_M= np.zeros(total_nr)
+        ttbar_Pt_div_Ht_p_Met = np.zeros(total_nr)
         cntr     = 0
         # idx_bhad, idx_blep, idx_q1, idx_q2, delta_r = np.zeros(total_nr),np.zeros(total_nr),np.zeros(total_nr),np.zeros(total_nr), np.zeros(total_nr)
 
@@ -527,14 +542,16 @@ class Dataset:
             for index in pepec:
                 globals()[index] = np.array([])
 
+
             #loop over all jets: dataframe to arrays with len=njets, i.e. Jet_Pt
             for j in range(njets):
                 for index2 in pepec:
-                    globals()[index2] = np.append(globals()[index2], df[str(index2) + "[" + str(j) + "]"].as_matrix()[i])
+                    globals()[index2] = np.append(globals()[index2], df["Jet_" + str(index2) + "[" + str(j) + "]"].values[i])
 
 
             minr=100000.
             best_comb = np.zeros(4)
+
 
             #Loop over all combinations of 4 jets
             #loop for TopHad_B
@@ -548,15 +565,15 @@ class Dataset:
                             #exclude combinations with two identical indices or without B-tags for b-quarks
                             if(j==k or j==l or j==m or k==l or k==m or l==m):
                                 continue
-                            if(Jet_CSV[j]<0.227 or Jet_CSV[k]<0.227):
+                            if(CSV[j]<0.227 or CSV[k]<0.227):
                                 continue
 
 
                             # look for combination with smallest delta r between jets and genjets
-                            deltar_bhad = ((Jet_Eta[j]-gentophad_b_eta[i])**2  + (correct_phi(Jet_Phi[j] - gentophad_b_phi[i]))**2)**0.5
-                            deltar_blep = ((Jet_Eta[k]-gentoplep_b_eta[i])**2  + (correct_phi(Jet_Phi[k] - gentoplep_b_phi[i]))**2)**0.5
-                            deltar_q1   = ((Jet_Eta[l]-gentophad_q1_eta[i])**2 + (correct_phi(Jet_Phi[l] - gentophad_q1_phi[i]))**2)**0.5
-                            deltar_q2   = ((Jet_Eta[m]-gentophad_q2_eta[i])**2 + (correct_phi(Jet_Phi[m] - gentophad_q2_phi[i]))**2)**0.5
+                            deltar_bhad = ((Eta[j]-GenTopHad_B_Eta[i])**2  + (correct_phi(Phi[j] - GenTopHad_B_Phi[i]))**2)**0.5
+                            deltar_blep = ((Eta[k]-GenTopLep_B_Eta[i])**2  + (correct_phi(Phi[k] - GenTopLep_B_Phi[i]))**2)**0.5
+                            deltar_q1   = ((Eta[l]-GenTophad_Q1_Eta[i])**2 + (correct_phi(Phi[l] - GenTophad_Q1_Phi[i]))**2)**0.5
+                            deltar_q2   = ((Eta[m]-GenTophad_Q2_Eta[i])**2 + (correct_phi(Phi[m] - Gentophad_Q2_Phi[i]))**2)**0.5
 
 
                             total_deltar = deltar_bhad + deltar_blep + deltar_q1 + deltar_q2
@@ -573,10 +590,21 @@ class Dataset:
             if(minr_bhad<0.3 and minr_blep<0.3 and minr_q1<0.3 and minr_q2<0.3):
                 for index in jets:
                     for index2 in pepec:
-                        globals()[index + "_" + index2][i] = df[str(index2) + "[" + str(best_comb[n]) + "]"].as_matrix()[i]
+                        globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(best_comb[n]) + "]"].values[i]
                     n+=1
                 is_ttbar[i]=1
 
+                reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_Neutrino_4vec = reconstruct_ttbar(df, i,best_comb[0],best_comb[1],best_comb[2],best_comb[3])
+
+                # print p4.Pt()
+                for index in recos:
+                    globals()["reco_" + index + "_Pt"][i]   =     locals()["reco_" + index + "_4vec"].Pt()
+                    globals()["reco_" + index + "_Eta"][i]  =     locals()["reco_" + index + "_4vec"].Eta()
+                    globals()["reco_" + index + "_Phi"][i]  =     locals()["reco_" + index + "_4vec"].Phi()
+                    globals()["reco_" + index + "_M"][i]    =     locals()["reco_" + index + "_4vec"].M()
+                    globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
+
+                ttbar_Pt_div_Ht_p_Met[i] = (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt())
             # idx_bhad[i], idx_blep[i], idx_q1[i], idx_q2[i], delta_r[i] = best_comb[0], best_comb[1],best_comb[2],best_comb[3], minr
             if(i%500 == 0):
                 print minr, minr_bhad, minr_blep, minr_q1, minr_q2
@@ -596,10 +624,31 @@ class Dataset:
                 false_comb = [j1,k1,l1,m1]
                 for index in jets:
                     for index2 in pepec:
-                        globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df[str(index2) + "[" + str(false_comb[n]) + "]"].as_matrix()[i]))
+                        globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
                     n+=1
                 is_ttbar = np.append(is_ttbar,0)
+                # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+
+                reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+                for index in recos:
+                    globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
+                    globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
+                    globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
+                    globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
+                    globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+
+                ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
+
+                # reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_m)
+                # reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_m)
+                # reco_WHad_M     = np.append(reco_WHad_M, reco_whad_m)
+                # reco_log_WHad_M   = np.append(reco_log_WHad_M  , reco_log_whad_m)
+                # reco_WLep_M     = np.append(reco_WLep_M, reco_wlep_m)
+                # reco_log_WLep_M   = np.append(reco_log_WLep_M  , reco_log_wlep_m)
+                # ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met, ttbar_pt_div_ht_p_met)
                 cntr +=1
+
+
 
             #Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
             # for u in range(40):
@@ -617,21 +666,35 @@ class Dataset:
 
         #delete all variables except for:
         df_new = pd.DataFrame()
-        df_new["N_Jets"] = df["N_Jets"].as_matrix()
-        df_new["N_BTagsM"]   = df["N_BTagsM"].as_matrix()
-        df_new["Evt_Run"]   = df["Evt_Run"].as_matrix()
-        df_new["Evt_Lumi"]   = df["Evt_Lumi"].as_matrix()
-        df_new["Evt_ID"]   = df["Evt_ID"].as_matrix()
-        df_new["Evt_MET_Pt"]   = df["Evt_MET_Pt"].as_matrix()
-        df_new["Weight_GEN_nom"]   = df["Weight_GEN_nom"].as_matrix()
-        df_new["Weight_XS"]   = df["Weight_XS"].as_matrix()
-        df_new["Weight_CSV"]   = df["Weight_CSV"].as_matrix()
-        df_new["N_LooseElectrons"]   = df["N_LooseElectrons"].as_matrix()
-        df_new["N_TightMuons"]   = df["N_TightMuons"].as_matrix()
-        df_new["Muon_Pt"]   = df["Muon_Pt"].as_matrix()
-        df_new["N_LooseMuons"]   = df["N_LooseMuons"].as_matrix()
-        df_new["N_TightElectrons"]   = df["N_TightElectrons"].as_matrix()
-        df_new["Evt_Odd"] = df["Evt_Odd"].as_matrix()
+        variables_toadd  = ["N_Jets", "N_BTagsM", "Evt_Run", "Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons",
+                            "Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]", "Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
+
+        for ind in variables_toadd:
+            df_new[ind] = df[ind].values
+
+        # df_new["N_Jets"]        = df["N_Jets"].values
+        # df_new["N_BTagsM"]      = df["N_BTagsM"].values
+        # df_new["Evt_Run"]       = df["Evt_Run"].values
+        # df_new["Evt_Lumi"]      = df["Evt_Lumi"].values
+        # df_new["Evt_ID"]        = df["Evt_ID"].values
+        # df_new["Evt_MET_Pt"]    = df["Evt_MET_Pt"].values
+        # df_new["Evt_MET_Phi"]   = df["Evt_MET_Phi"].values
+        # df_new["Weight_GEN_nom"]    = df["Weight_GEN_nom"].values
+        # df_new["Weight_XS"]     = df["Weight_XS"].values
+        # df_new["Weight_CSV"]    = df["Weight_CSV"].values
+        # df_new["N_LooseElectrons"]  = df["N_LooseElectrons"].values
+        # df_new["N_TightMuons"]      = df["N_TightMuons"].values
+        # df_new["Muon_Pt"]       = df["Muon_Pt[0]"].values
+        # df_new["Muon_Eta"]      = df["Muon_Eta[0]"].values
+        # df_new["Muon_Phi"]      = df["Muon_Phi[0]"].values
+        # df_new["Muon_E"]        = df["Muon_E[0]"].values
+        # df_new["Electron_Pt"]   = df["Electron_Pt[0]"].values
+        # df_new["Electron_Eta"]  = df["Electron_Eta[0]"].values
+        # df_new["Electron_Phi"]  = df["Electron_Phi[0]"].values
+        # df_new["Electron_E"]    = df["Electron_E[0]"].values
+        # df_new["N_LooseMuons"]   = df["N_LooseMuons"].values
+        # df_new["N_TightElectrons"]   = df["N_TightElectrons"].values
+        # df_new["Evt_Odd"] = df["Evt_Odd"].values
 
 
         #print df.shape, len(globals()[index + "_" + index2]), len(is_ttbar)
@@ -643,29 +706,51 @@ class Dataset:
                 df[index + "_" + index2] = globals()[index + "_" + index2]
                 entr+=1
         df["Evt_is_ttbar"]  = is_ttbar
+        for index in recos:
+            for index2 in pepm:
+                df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
+                entr+=1
+        # df["reco_TopHad_M"] = reco_TopHad_M
+        # df["reco_TopLep_M"] = reco_TopLep_M
+        # df["reco_WHad_M"]   = reco_WHad_M
+        # df["reco_log_WHad_M"] = reco_log_WHad_M
+        # df["reco_WLep_M"]   = reco_WLep_M
+        # df["reco_log_WLep_M"] = reco_log_WLep_M
+        df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
         #print df,entr, df.columns[0:-entr]
-        df.drop(df.columns[:-(entr+1)],inplace = True, axis = 1)
+        df.drop(df.columns[:-(entr+2)],inplace = True, axis = 1)
         # # print df
-        df["N_Jets"]= df_new["N_Jets"].as_matrix()
-        df["N_BTagsM"]   = df_new["N_BTagsM"].as_matrix()
-        df["Evt_Run"]   = df_new["Evt_Run"].as_matrix()
-        df["Evt_Lumi"]   = df_new["Evt_Lumi"].as_matrix()
-        df["Evt_ID"]   = df_new["Evt_ID"].as_matrix()
-        df["Evt_MET_Pt"]   = df_new["Evt_MET_Pt"].as_matrix()
-        df["Weight_GEN_nom"]   = df_new["Weight_GEN_nom"].as_matrix()
-        df["Weight_XS"]   = df_new["Weight_XS"].as_matrix()
-        df["Weight_CSV"]   = df_new["Weight_CSV"].as_matrix()
-        df["N_LooseElectrons"]   = df_new["N_LooseElectrons"].as_matrix()
-        df["N_TightMuons"]   = df_new["N_TightMuons"].as_matrix()
-        df["Muon_Pt"]   = df_new["Muon_Pt"].as_matrix()
-        df["N_LooseMuons"]   = df_new["N_LooseMuons"].as_matrix()
-        df["N_TightElectrons"]   = df_new["N_TightElectrons"].as_matrix()
-        df["Evt_Odd"] = df_new["Evt_Odd"].as_matrix()
+
+        for ind in variables_toadd:
+            df[ind] = df_new[ind].values
+        # df["N_Jets"]= df_new["N_Jets"].values
+        # df["N_BTagsM"]   = df_new["N_BTagsM"].values
+        # df["Evt_Run"]   = df_new["Evt_Run"].values
+        # df["Evt_Lumi"]   = df_new["Evt_Lumi"].values
+        # df["Evt_ID"]   = df_new["Evt_ID"].values
+        # df["Evt_MET_Pt"]   = df_new["Evt_MET_Pt"].values
+        # df["Evt_MET_Phi"]   = df_new["Evt_MET_Phi"].values
+        # df["Weight_GEN_nom"]   = df_new["Weight_GEN_nom"].values
+        # df["Weight_XS"]   = df_new["Weight_XS"].values
+        # df["Weight_CSV"]   = df_new["Weight_CSV"].values
+        # df["N_LooseElectrons"]   = df_new["N_LooseElectrons"].values
+        # df["N_TightMuons"]   = df_new["N_TightMuons"].values
+        # df["Muon_Pt"]   = df_new["Muon_Pt"].values
+        # df["Muon_Eta"]      = df_new["Muon_Eta"].values
+        # df["Muon_Phi"]      = df_new["Muon_Phi"].values
+        # df["Muon_E"]        = df_new["Muon_E"].values
+        # df["Electron_Pt"]   = df_new["Electron_Pt"].values
+        # df["Electron_Eta"]  = df_new["Electron_Eta"].values
+        # df["Electron_Phi"]  = df_new["Electron_Phi"].values
+        # df["Electron_E"]    = df_new["Electron_E"].values
+        # df["N_LooseMuons"]   = df_new["N_LooseMuons"].values
+        # df["N_TightElectrons"]   = df_new["N_TightElectrons"].values
+        # df["Evt_Odd"] = df_new["Evt_Odd"].values
 
         # delete combinations of events without certain ttbar event
         i,j=0,0
         while(i<total_nr):
-            if df["Evt_is_ttbar"].as_matrix()[i]==0:
+            if df["Evt_is_ttbar"].values[i]==0:
                 df=df.drop(df.index[i],axis=0)
                 total_nr -= 1
                 j+=1
@@ -720,4 +805,52 @@ def correct_phi(phi):
     if(phi  >    np.pi):
         phi -= 2*np.pi
     return phi
+
+
+def reconstruct_ttbar(df,i,j,k,l,m):
+    # Rekonstruktion der top quarks:
+    if df["N_TightMuons"].values[i]:
+        lepton_4vec=ROOT.TLorentzVector()
+        lepton_4vec.SetPtEtaPhiE(df["Muon_Pt[0]"].values[i],df["Muon_Eta[0]"].values[i], df["Muon_Phi[0]"].values[i], df["Muon_E[0]"].values[i])
+    if df["N_TightMuons"].values[i]==0 :
+        lepton_4vec=ROOT.TLorentzVector()
+        lepton_4vec.SetPtEtaPhiE(df["Electron_Pt[0]"].values[i], df["Electron_Eta[0]"].values[i], df["Electron_Phi[0]"].values[i], df["Electron_E[0]"].values[i])
+
+    Pt_MET = df["Evt_MET_Pt"].values[i]
+    Phi_MET = df["Evt_MET_Phi"].values[i]
+    mW = 80.4
+
+    #Neutrino-Berechnung
+    neutrino_4vec = ROOT.TLorentzVector(Pt_MET*cos(Phi_MET),Pt_MET*sin(Phi_MET),0.,Pt_MET)
+    mu = ((mW*mW)/2) + lepton_4vec.Px()*neutrino_4vec.Px()+ lepton_4vec.Py()*neutrino_4vec.Py()
+    a = (mu*lepton_4vec.Pz())/(lepton_4vec.Pt()**2)
+    a2 = a**2
+    b = (lepton_4vec.E()**2*neutrino_4vec.Pt()**2 - mu**2)/(lepton_4vec.Pt()**2)
+    if(a2<b):
+        neutrino_4vec.SetPz(a)
+    else:
+        pz1=a+(a2-b)**0.5
+        pz2=a-(a2-b)**0.5
+
+        if(abs(pz1) <= abs(pz2)):
+            neutrino_4vec.SetPz(pz1)
+        else:
+            neutrino_4vec.SetPz(pz2)
+    neutrino_4vec.SetE(neutrino_4vec.P())
+
+    combi = [j,k,l,m]
+    ind = 0
+    for index in ["TopHad_B", "TopLep_B", "TopHad_Q1", "TopHad_Q2"]:
+        globals()[index + "_4vec"] = ROOT.TLorentzVector()
+        globals()[index + "_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(combi[ind])+"]"].values[i],df["Jet_Eta[" + str(combi[ind])+"]"].values[i],
+        df["Jet_Phi[" + str(combi[ind])+"]"].values[i],df["Jet_E[" + str(combi[ind])+"]"].values[i])
+        ind+=1
+
+    #reconstructions
+    whad_4vec = TopHad_Q1_4vec + TopHad_Q2_4vec
+    wlep_4vec = neutrino_4vec + lepton_4vec
+    thad_4vec = whad_4vec + TopHad_B_4vec
+    tlep_4vec = wlep_4vec + TopLep_B_4vec
+
+    return thad_4vec, tlep_4vec, whad_4vec, wlep_4vec, lepton_4vec, neutrino_4vec
     # ====================================================================

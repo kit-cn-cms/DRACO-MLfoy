@@ -53,23 +53,27 @@ else:
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
 #base = "(N_Jets >= 4 and N_BTagsM >= 2 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
-base = "(N_Jets<12 and N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+# base = "(N_Jets<12 and N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)" #################################################################noch bei chi2 anpassen
+base = "(N_Jets<13 and N_Jets >= 4 and N_BTagsM >= 3)"
 
 
 # single lepton selections
 #single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
-single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29.)"
+# single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29.)" ###################################################################################noch bei chi2 anpassen
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1)" ###################################################################################noch bei chi2 anpassen
+
 #single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
 single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1)"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
-ttH_selection = "(Evt_Odd == 1)"
+# ttH_selection = "(Evt_Odd == 1)"
 
 # define output classes
-ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH", selection = None)
+# ttH_categories = root2pandas.EventCategories()
+# ttH_categories.addCategory("ttH", selection = None)
 
+ttbar_selection = "(Evt_Odd == 1)"
 
 ttbar_categories = root2pandas.EventCategories()
 #ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
@@ -120,7 +124,8 @@ ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_nominal*.root",
-    categories  = ttbar_categories
+    categories  = ttbar_categories,
+    selections  = ttbar_selection
 )
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)

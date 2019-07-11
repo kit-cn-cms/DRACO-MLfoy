@@ -1,5 +1,5 @@
 variables = {}
-variables["4j_ge3t"] = [
+variables["ge4j_ge3t"] = [
 	"Jet_Pt[0]",
 	"Jet_Pt[1]",
 	"Jet_Pt[2]",
@@ -11,6 +11,7 @@ variables["4j_ge3t"] = [
 	"Jet_Pt[8]",
 	"Jet_Pt[9]",
 	"Jet_Pt[10]",
+	"Jet_Pt[11]",
 	"Jet_Phi[0]",
 	"Jet_Phi[1]",
 	"Jet_Phi[2]",
@@ -22,6 +23,7 @@ variables["4j_ge3t"] = [
 	"Jet_Phi[8]",
 	"Jet_Phi[9]",
 	"Jet_Phi[10]",
+	"Jet_Phi[11]",
 	"Jet_Eta[0]",
 	"Jet_Eta[1]",
 	"Jet_Eta[2]",
@@ -33,6 +35,7 @@ variables["4j_ge3t"] = [
 	"Jet_Eta[8]",
 	"Jet_Eta[9]",
 	"Jet_Eta[10]",
+	"Jet_Eta[11]",
 	"Jet_M[0]",
 	"Jet_M[1]",
 	"Jet_M[2]",
@@ -44,6 +47,7 @@ variables["4j_ge3t"] = [
 	"Jet_M[8]",
 	"Jet_M[9]",
 	"Jet_M[10]",
+	"Jet_M[11]",
 	"Jet_E[0]",
 	"Jet_E[1]",
 	"Jet_E[2]",
@@ -55,6 +59,7 @@ variables["4j_ge3t"] = [
 	"Jet_E[8]",
 	"Jet_E[9]",
 	"Jet_E[10]",
+	"Jet_E[11]",
 	"Jet_CSV[0]",
 	"Jet_CSV[1]",
 	"Jet_CSV[2]",
@@ -66,16 +71,17 @@ variables["4j_ge3t"] = [
 	"Jet_CSV[8]",
 	"Jet_CSV[9]",
 	"Jet_CSV[10]",
+	"Jet_CSV[11]",
 	"N_TightMuons",
 	"N_TightElectrons",
 	"Muon_Pt[0]",	
 	"Muon_Eta[0]",
 	"Muon_Phi[0]",
-	"Muon_M[0]",
+	"Muon_E[0]",
 	"Electron_Pt[0]",
 	"Electron_Eta[0]",
 	"Electron_Phi[0]",
-	"Electron_M[0]",
+	"Electron_E[0]",
 	"Evt_MET_Pt",
 	"Evt_MET_Phi",
 	"GenTopLep_Eta",
@@ -90,6 +96,8 @@ variables["4j_ge3t"] = [
 	"GenTopHad_Q1_Phi",
 	"GenTopHad_Q2_Eta",
 	"GenTopHad_Q2_Phi",
+	"Evt_Odd",
+	"Evt_HT"
 	]
 
 
