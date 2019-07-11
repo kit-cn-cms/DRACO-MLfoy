@@ -331,7 +331,79 @@ class AdaBoost():
 
 
     def save_model(self):
-        pass
+        ''' save the trained model'''
+
+        # get the path
+        self.cp_path = "Just to here to avoid error"
+        save_path = self.path
+
+        # save model as h5py file
+        for i in
+        out_file = self.cp_path + "/trained_model.h5py"
+        self.model.save(out_file)
+        print("saved trained model at "+str(out_file))
+
+        # save config of model
+        model_config = self.model.get_config()
+        out_file = self.cp_path +"/trained_model_config"
+        with open(out_file, "w") as f:
+            f.write( str(model_config))
+        print("saved model config at "+str(out_file))
+
+        # save weights of network
+        out_file = self.cp_path +"/trained_model_weights.h5"
+        self.model.save_weights(out_file)
+        print("wrote trained weights to "+str(out_file))
+
+        # set model as non trainable
+        for layer in self.model.layers:
+            layer.trainable = False
+        self.model.trainable = False
+
+        # save checkpoint files (needed for c++ implementation)
+        out_file = self.cp_path + "/trained_model"
+        saver = tf.train.Saver()
+        sess = K.get_session()
+        save_path = saver.save(sess, out_file)
+        print("saved checkpoint files to "+str(out_file))
+
+        # produce json file with configs
+        configs = self.architecture
+        configs["inputName"] = self.inputName
+        configs["outputName"] = self.outputName+"/"+configs["output_activation"]
+        configs = {key: configs[key] for key in configs if not "optimizer" in key}
+
+        # more information saving
+        configs["inputData"] = self.input_samples.input_path
+        configs["eventClasses"] = self.input_samples.getClassConfig()
+        configs["JetTagCategory"] = self.JTstring
+        configs["categoryLabel"] = self.categoryLabel
+        configs["Selection"] = self.event_category
+        configs["trainEpochs"] = self.train_epochs
+        configs["trainVariables"] = self.train_variables
+        configs["shuffleSeed"] = self.data.shuffleSeed
+        configs["trainSelection"] = self.evenSel
+        configs["evalSelection"] = self.oddSel
+
+        # save information for binary DNN
+        if self.data.binary_classification:
+            configs["binaryConfig"] = {
+                "minValue": self.input_samples.bkg_target,
+                "maxValue": 1.,
+                "signals":  signals}
+
+        json_file = self.cp_path + "/net_config.json"
+        with open(json_file, "w") as jf:
+            json.dump(configs, jf, indent = 2, separators = (",", ": "))
+        print("wrote net configs to "+str(json_file))
+
+        # save configurations of variables for plotscript
+        plot_file = self.cp_path+"/plot_config.csv"
+        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        variables = variable_configs.loc[self.train_variables]
+        variables.to_csv(plot_file, sep = ",")
+        print("wrote config of input variables to {}".format(plot_file))
+
 
 
     def weight_prediction(self, pred, alpha):

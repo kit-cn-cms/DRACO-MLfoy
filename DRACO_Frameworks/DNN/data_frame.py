@@ -265,10 +265,6 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
 
-    def ada_m2_adjust_weights(sub_true, sub_false):
-        bla
-        return(blalala)
-
 
     def ada_adjust_weights(self, pred, pred_disc, alpha, m2):
         '''Adjust the data weights according to Adaboost algorithm -> wight mean is set to 1'''
@@ -279,7 +275,6 @@ class DataFrame(object):
         self.df_train['pred_disc_label'] = pred_disc
         #use AdaBoost.M2 algorithm
         if m2:
-            exponent = np.array([])
             #add continous prediction to df
             self.df_train['pred_label'] = pred
             #split signal and bkg
