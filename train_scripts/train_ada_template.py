@@ -134,6 +134,7 @@ if options.binary:
 #get number of dnns to train
 if options.boost:
     n_boost = int(options.boost)
+    options.binary_bkg_target = -1
 else:
     n_boost = 1
 
@@ -151,6 +152,8 @@ else:
 
 #Should AdaBoost.M2 be used
 m2 = options.m2
+if m2:
+    options.binary_bkg_target = 0       #algorithm does not work with different range
 
 # load samples
 input_samples = df.InputSamples(inPath, options.activateSamples)
@@ -171,12 +174,23 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
+# get output path and name
+if m2:
+    path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost_M2/"
+else:
+    path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost"           #needs to be adjusted
+name = "b"+str(int(options.train_epochs))+"a"+str(int(options.ada_epochs))+"_"+str(options.category)+"_"+options.net_config"
+
 #initializing AdaBoost training class
 ada = ADA.AdaBoost(
     save_path       = outputdir,
+    path            = path,
+    names           = name, 
     input_samples   = input_samples,        #samples are splitted before training the networks
     event_category  = options.category,
     train_variables = variables,
+    #binary_bkg_target
+    binary_bkg_target = options.binary_bkg_target,
     # number of epochs
     train_epochs    = int(options.train_epochs),
     # metrics for evaluation (c.f. KERAS metrics)

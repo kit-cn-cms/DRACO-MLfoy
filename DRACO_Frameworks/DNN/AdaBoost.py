@@ -38,9 +38,12 @@ K.tensorflow_backend.set_session(tf.Session(config=config))
 class AdaBoost():
     def __init__(self,
             save_path,
+            path,
+            name,
             input_samples,
             event_category,
             train_variables,
+            binary_bkg_target,
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
@@ -51,6 +54,11 @@ class AdaBoost():
             m2              = False):
 
         # save some information
+
+        #path and name to save model and plots
+        self.path = path
+        self.name = name
+
         # list of samples to load into dataframe
         self.input_samples = input_samples
 
@@ -76,6 +84,12 @@ class AdaBoost():
 
         # list of input variables
         self.train_variables = train_variables
+
+        # get cutting value to dedide if event is background or target
+        self.cut_value = (1+binary_bkg_target)/2
+
+        #get background target value
+        self.binary_bkg_target = binary_bkg_target
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
@@ -219,17 +233,22 @@ class AdaBoost():
         #create a discret prediction vector
         model_train_prediction_discret = np.array([])
         for x in model_train_prediction:
-            if x<0:
-                model_train_prediction_discret = np.append(model_train_prediction_discret, -1)
+            if x<self.cut_value:
+                model_train_prediction_discret = np.append(model_train_prediction_discret, self.binary_bkg_target)
             else:
                 model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
         #adaboost.m2 algorithm
         if self.m2:
+            #normalize the weights
+            model_train_weights = model_train_weights/weight_sum
             epsilon = 0
             for i in np.arange(0, num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
-                    # print("# DEBUG: model_train_weights: ", model_train_weights[i])
-                    epsilon += model_train_weights[i]*(1-model_train_prediction[i])
+                    if model_train_label[i] != 1:                                          #check if the real value is traget
+                        # print("# DEBUG: model_train_weights: ", model_train_weights[i])
+                        epsilon += model_train_weights[i]*(1-model_train_prediction[i])
+                    else:
+                        epsilonn += model_train_weights[i]*(model_train_prediction[i])
             epsilon = epsilon/weight_sum
             alpha = epsilon/(1-epsilon)
             # print("# DEBUG: get_a epsilon, alpha")
@@ -316,24 +335,24 @@ class AdaBoost():
 
 
     def weight_prediction(self, pred, alpha):
-        for i in np.arrange(0,len(alpha)):
-            pred[i] = pred[i]*alpha[i]
+        pred = np.asarray(pred)
+        if self.m2:
+            for i in np.arrange(0,len(alpha)):
+                pred[i] = pred[i]*np.log(1\alpha[i])
+        else:
+            for i in np.arrange(0,len(alpha)):
+                pred[i] = pred[i]*alpha[i]
         return pred
 
 
     def strong_classification(self, pred, alpha):
         '''builds prediciton vector for strong classifier'''
-        #m2
-        #missing
-        #normal
-        pred_array = np.asarray(pred)
-        for i in np.arange(0,len(alpha)):
-            pred_array[i] = pred_array[i]*alpha[i]
+        pred_array = self.weight_prediction(pred, alpha)
         sum = np.sum(pred_array, axis = 0)
         final_prediction_vector = np.array([])
         for x in sum:
-            if x<0:
-                final_prediction_vector = np.append(final_prediction_vector, -1)
+            if x<self.cut_value:
+                final_prediction_vector = np.append(final_prediction_vector, self.binary_bkg_target)
             else:
                 final_prediction_vector = np.append(final_prediction_vector, 1)
         return final_prediction_vector
@@ -361,8 +380,8 @@ class AdaBoost():
         roc_auc = metrics.auc(fpr, tpr)
         #plot
         # path = "/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/"
-        path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost_M2/"
-        name = "b10a10_ge6j_ge3t_ada_weak1"
+        # path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost_M2/"
+        # name = "b10a10_ge6j_ge3t_ada_weak1"
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
 
         plt.figure(1)
@@ -370,7 +389,7 @@ class AdaBoost():
         plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
         plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.legend(loc='lower right')
-        plt.savefig(path + name +"_frac.pdf")
+        plt.savefig(self.path + self.name +"_frac.pdf")
 
         plt.figure(2)
         plt.title('Receiver Operating Characteristic')
@@ -381,11 +400,11 @@ class AdaBoost():
         plt.ylim([0, 1])
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
-        plt.savefig(path + name +"_roc.pdf")
+        plt.savefig(self.path + self.name +"_roc.pdf")
 
         plt.figure(3)
         plt.title('Epsilon')
         plt.plot(epoches, self.epsilon, '-')
-        plt.savefig(path + name +"_eps.pdf")
+        plt.savefig(self.path + self.name +"_eps.pdf")
 
         plt.show()
