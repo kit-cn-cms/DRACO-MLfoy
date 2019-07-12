@@ -430,7 +430,7 @@ class AdaBoost():
             for i in np.arrange(0,len(alpha)):
                 pred[i] = pred[i]*np.log(1/alpha[i])
         else:
-            for i in np.arrange(0,len(alpha)):
+            for i in range(0,len(alpha)):
                 pred[i] = pred[i]*alpha[i]
         return pred
 
