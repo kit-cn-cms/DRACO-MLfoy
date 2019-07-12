@@ -217,4 +217,4 @@ ada.build_model(config)
 ada.train_model()
 
 # evalute the trained model
-ada.eval_model()
+# ada.eval_model()
