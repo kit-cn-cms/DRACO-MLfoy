@@ -348,7 +348,7 @@ class AdaBoost():
             os.makedirs(dir)
         else:
             print("Dir already exists -> can not save model")
-            break
+            sys.exit()
 
         # save model as h5py file
         for i in range(0, self.adaboost_epochs):
