@@ -19,6 +19,8 @@ USE: python train_ada_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p 
 python train_ada_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /home/swieland/ttH/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig binary_config --adaboost 20 --binary -t -1 --signalclass ttH -c ge6j_ge3t
 """
 
+# python train_ada_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /home/swieland/ttH/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig binary_config --adaboost 2 --binary -t -1 --signalclass ttH -c ge6j_ge3t
+
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
 

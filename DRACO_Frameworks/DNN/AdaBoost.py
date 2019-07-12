@@ -497,4 +497,4 @@ class AdaBoost():
         plt.plot(epoches, self.epsilon, '-')
         plt.savefig(save_path + self.name +"_eps.pdf")
 
-        plt.show()
+        # plt.show()
