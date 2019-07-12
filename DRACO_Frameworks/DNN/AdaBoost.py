@@ -250,14 +250,18 @@ class AdaBoost():
         if self.m2:
             #normalize the weights
             model_train_weights = model_train_weights/weight_sum
+            print("# DEBUG: get_alpha_epsilon, normalized? ", np.sum(model_train_weights))
             epsilon = 0
+            counter = 0
             for i in np.arange(0, num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
+                    counter += 1
                     if model_train_label[i] != 1:                                          #check if the real value is traget
                         # print("# DEBUG: model_train_weights: ", model_train_weights[i])
                         epsilon += model_train_weights[i]*(1-model_train_prediction[i])
                     else:
                         epsilonn += model_train_weights[i]*(model_train_prediction[i])
+            print("# DEBUG: wong predicitons: ", counter)
             epsilon = epsilon/weight_sum
             alpha = epsilon/(1-epsilon)
             # print("# DEBUG: get_a epsilon, alpha")
