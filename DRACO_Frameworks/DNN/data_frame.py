@@ -285,7 +285,7 @@ class DataFrame(object):
             for n in range(0, sub_sig.shape[0]):
                 factor = alpha**(pred[n])
                 weight_factor_sig = np.append(weight_factor_sig, factor)
-            sub_sig = subg_sig['train_weight'].multiply(weight_factor_sig, axis=0)
+            sub_sig = sub_sig['train_weight'].multiply(weight_factor_sig, axis=0)
 
             weight_factor_bkg = np.array([])
             for n in range(0, sub_bkg.shape[0]):
