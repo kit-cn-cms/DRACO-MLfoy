@@ -266,11 +266,11 @@ class AdaBoost():
                 if model_train_prediction_discret[i] != model_train_label[i]:
                     # print("# DEBUG: pred, label", model_train_prediction_discret[i], model_train_label[i])
                     weight_false += model_train_weights[i]
-            print("# DEBUG: get_alpha_epsilon, weight_false, weight_sum ", weight_false, weight_sum)
+            # print("# DEBUG: get_alpha_epsilon, weight_false, weight_sum ", weight_false, weight_sum)
             epsilon = weight_false/weight_sum
             alpha = 0.5*np.log((1-epsilon)/epsilon)
-            print("# DEBUG: get_alpha_epsilon, alpha: ", alpha)
-            print("# DEBUG: get_alpha_epsilon, epsilon: ", epsilon)
+            # print("# DEBUG: get_alpha_epsilon, alpha: ", alpha)
+            # print("# DEBUG: get_alpha_epsilon, epsilon: ", epsilon)
         #adjust weights
         self.data.ada_adjust_weights(model_train_prediction, model_train_prediction_discret, alpha, self.m2)
         #check if epsilon < 0.5
@@ -446,9 +446,9 @@ class AdaBoost():
         final_prediction_vector = np.array([])
         for x in sum:
             if x<self.cut_value:
-                final_prediction_vector = np.append(final_prediction_vector, self.binary_bkg_target)
+                final_prediction_vector = np.append(final_prediction_vector, int(self.binary_bkg_target))
             else:
-                final_prediction_vector = np.append(final_prediction_vector, 1)
+                final_prediction_vector = np.append(final_prediction_vector, int(1))
         return final_prediction_vector
 
 
