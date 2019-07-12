@@ -2,7 +2,8 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-plt.use('Agg')
+# plt.use('Agg')
+plt.rcParams['backend'] = 'TkAgg'
 import json
 
 #sklearn imports
