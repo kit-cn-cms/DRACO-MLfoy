@@ -260,7 +260,7 @@ class AdaBoost():
                         # print("# DEBUG: model_train_weights: ", model_train_weights[i])
                         epsilon += model_train_weights[i]*(1-model_train_prediction[i])
                     else:
-                        epsilonn += model_train_weights[i]*(model_train_prediction[i])
+                        epsilon += model_train_weights[i]*(model_train_prediction[i])
             print("# DEBUG: wong predicitons: ", counter)
             epsilon = epsilon/weight_sum
             alpha = epsilon/(1-epsilon)
