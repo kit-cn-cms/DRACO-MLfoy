@@ -235,7 +235,7 @@ class AdaBoost():
         model_train_weights = self.data.get_train_weights()
         weight_sum = np.sum(model_train_weights)
         #Calculate epsilon and alpha
-        num = model_train_prediction.shape[0]
+        num = model_train_weights.shape[0]
 
         #create a discret prediction vector
         model_train_prediction_discret = np.array([])
@@ -265,6 +265,7 @@ class AdaBoost():
             for i in np.arange(0,num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
                     weight_false += model_train_weights[i]
+            print("# DEBUG: get_alpha_epsilon, weight_false, weight_sum ", weight_false, weight_sum)
             epsilon = weight_false/weight_sum
             alpha = 0.5*np.log((1-epsilon)/epsilon)
             print("# DEBUG: get_alpha_epsilon, alpha: ", alpha)
