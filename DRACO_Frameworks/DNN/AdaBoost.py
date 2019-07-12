@@ -241,9 +241,9 @@ class AdaBoost():
         model_train_prediction_discret = np.array([])
         for x in model_train_prediction:
             if x<self.cut_value:
-                model_train_prediction_discret = np.append(model_train_prediction_discret, self.binary_bkg_target)
+                model_train_prediction_discret = np.append(model_train_prediction_discret, int(self.binary_bkg_target))
             else:
-                model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
+                model_train_prediction_discret = np.append(model_train_prediction_discret, int(1))
         #adaboost.m2 algorithm
         if self.m2:
             #normalize the weights
@@ -264,7 +264,7 @@ class AdaBoost():
             weight_false = 0
             for i in np.arange(0,num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
-                    print("# DEBUG: pred, label", model_train_prediction_discret[i], model_train_label[i])
+                    # print("# DEBUG: pred, label", model_train_prediction_discret[i], model_train_label[i])
                     weight_false += model_train_weights[i]
             print("# DEBUG: get_alpha_epsilon, weight_false, weight_sum ", weight_false, weight_sum)
             epsilon = weight_false/weight_sum
