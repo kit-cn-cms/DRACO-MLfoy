@@ -86,7 +86,7 @@ class AdaBoost():
         self.train_variables = train_variables
 
         # get cutting value to dedide if event is background or target
-        self.cut_value = (1+binary_bkg_target)/2
+        self.cut_value = (1+int(binary_bkg_target))/2
 
         #get background target value
         self.binary_bkg_target = binary_bkg_target
