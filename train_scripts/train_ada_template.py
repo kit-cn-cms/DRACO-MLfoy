@@ -78,7 +78,7 @@ parser.add_option("-b", "--boost", dest = "boost", default = None,
 parser.add_option("--adaboost", dest = "adaboost", default = None,
         help = "INT number of epoches Adaboost should perform")
 
-parser.add_option("--m2", dest = "m2", default = False,
+parser.add_option("--m2", dest = "m2_use", default = False,
         help = "Should AdaBoost.M2 algorithm be used")
 
 (options, args) = parser.parse_args()
@@ -150,9 +150,9 @@ if options.adaboost:
 else:
     use_ada = False
 
-#Should AdaBoost.M2 be used
-m2 = options.m2
-if m2:
+#Should AdaBoost.m2_use be used
+m2_use = options.m2_use
+if m2_use:
     options.binary_bkg_target = 0       #algorithm does not work with different range
 
 # load samples
@@ -175,7 +175,7 @@ if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
 # get output path and name
-if m2:
+if m2_use:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost_M2/"
 else:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost"           #needs to be adjusted
@@ -201,7 +201,7 @@ ada = ADA.AdaBoost(
     balanceSamples  = options.balanceSamples,
     adaboost_epochs = ada_epochs,
     shuffle_seed = 9,
-    m2 = m2)
+    m2 = m2_use)
 
 # import file with net configs if option is used
 if options.net_config:
