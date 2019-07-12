@@ -264,6 +264,7 @@ class AdaBoost():
             weight_false = 0
             for i in np.arange(0,num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
+                    print("# DEBUG: pred, label", model_train_prediction_discret[i], model_train_label[i])
                     weight_false += model_train_weights[i]
             print("# DEBUG: get_alpha_epsilon, weight_false, weight_sum ", weight_false, weight_sum)
             epsilon = weight_false/weight_sum
