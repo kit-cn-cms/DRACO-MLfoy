@@ -162,7 +162,14 @@ class AdaBoost():
 
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
-        pass
+        load_path = self.path + "save_model/" + self.name + "/"
+        self.weak_model_trained = []
+        for i in range(0, self.adaboost_epochs):
+            load = load_path + "trained_model" + str(i) + ".h5py"
+            model = keras.models.load_model(load)
+            self.weak_model_trained.append(model)
+        #load alpha
+        self.alpha_t = np.load(load_path + "alpha.npy")
 
 
     def build_default_model(self):
@@ -334,38 +341,48 @@ class AdaBoost():
         ''' save the trained model'''
 
         # get the path
-        self.cp_path = "Just to here to avoid error"
-        save_path = self.path
+        # self.cp_path = "Just to here to avoid error"
+        save_path = self.path + "save_model/" + self.name + "/"
+        # create new dir for the trained net
+        if not os.path.exists(save_path):
+            os.makedirs(dir)
+        else:
+            print("Dir already exists -> can not save model")
+            break
 
         # save model as h5py file
-        for i in
-        out_file = self.cp_path + "/trained_model.h5py"
-        self.model.save(out_file)
-        print("saved trained model at "+str(out_file))
+        for i in range(0, self.adaboost_epochs):
+            out_file = save_path + "trained_model" + str(i) + ".h5py"
+            self.weak_model_trained[i].save(out_file)
+        print("saved trained model")
 
         # save config of model
-        model_config = self.model.get_config()
-        out_file = self.cp_path +"/trained_model_config"
+        model_config = self.weak_model_trained[0].get_config()
+        out_file = save_path + "trained_model_config"
         with open(out_file, "w") as f:
             f.write( str(model_config))
-        print("saved model config at "+str(out_file))
+        print("saved model config at")
+
+        #save alpha
+        alpha = np.asarray(self.alpha_t)
+        np.save(save_path + "alpha", alpha)
 
         # save weights of network
-        out_file = self.cp_path +"/trained_model_weights.h5"
-        self.model.save_weights(out_file)
-        print("wrote trained weights to "+str(out_file))
+        # out_file = self.cp_path +"/trained_model_weights.h5"
+        # self.model.save_weights(out_file)
+        # print("wrote trained weights to "+str(out_file))
 
         # set model as non trainable
-        for layer in self.model.layers:
-            layer.trainable = False
-        self.model.trainable = False
+        # for layer in self.model.layers:
+        #     layer.trainable = False
+        # self.model.trainable = False
 
         # save checkpoint files (needed for c++ implementation)
-        out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Saver()
-        sess = K.get_session()
-        save_path = saver.save(sess, out_file)
-        print("saved checkpoint files to "+str(out_file))
+        # out_file = self.cp_path + "/trained_model"
+        # saver = tf.train.Saver()
+        # sess = K.get_session()
+        # save_path = saver.save(sess, out_file)
+        # print("saved checkpoint files to "+str(out_file))
 
         # produce json file with configs
         configs = self.architecture
@@ -384,6 +401,7 @@ class AdaBoost():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
+        configs["adaboost_epochs"] = self.adaboost_epochs
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -392,17 +410,17 @@ class AdaBoost():
                 "maxValue": 1.,
                 "signals":  signals}
 
-        json_file = self.cp_path + "/net_config.json"
+        json_file = save_path + "/net_config.json"
         with open(json_file, "w") as jf:
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
         # save configurations of variables for plotscript
-        plot_file = self.cp_path+"/plot_config.csv"
-        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
-        variables = variable_configs.loc[self.train_variables]
-        variables.to_csv(plot_file, sep = ",")
-        print("wrote config of input variables to {}".format(plot_file))
+        # plot_file = self.cp_path+"/plot_config.csv"
+        # variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        # variables = variable_configs.loc[self.train_variables]
+        # variables.to_csv(plot_file, sep = ",")
+        # print("wrote config of input variables to {}".format(plot_file))
 
 
 
@@ -434,6 +452,9 @@ class AdaBoost():
         '''evalute trained model'''
         '''Should contain:  -Plot prediciton_fraction
                             -Get roc'''
+        #get saving path
+        save_path = self.path + "plot/"
+        #get the labels
         self.train_label = self.data.get_train_labels(as_categorical = False)
         self.test_label = self.data.get_test_labels(as_categorical = False)
         #get prediction fraction after each adaboost_epoch
@@ -451,9 +472,6 @@ class AdaBoost():
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction_final)
         roc_auc = metrics.auc(fpr, tpr)
         #plot
-        # path = "/home/ngolks/Projects/boosted_dnn/plotts/AdaBoost_binary_discret/"
-        # path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost_M2/"
-        # name = "b10a10_ge6j_ge3t_ada_weak1"
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
 
         plt.figure(1)
@@ -461,7 +479,7 @@ class AdaBoost():
         plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
         plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.legend(loc='lower right')
-        plt.savefig(self.path + self.name +"_frac.pdf")
+        plt.savefig(save_path + self.name + "_frac.pdf")
 
         plt.figure(2)
         plt.title('Receiver Operating Characteristic')
@@ -472,11 +490,11 @@ class AdaBoost():
         plt.ylim([0, 1])
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
-        plt.savefig(self.path + self.name +"_roc.pdf")
+        plt.savefig(save_path + self.name +"_roc.pdf")
 
         plt.figure(3)
         plt.title('Epsilon')
         plt.plot(epoches, self.epsilon, '-')
-        plt.savefig(self.path + self.name +"_eps.pdf")
+        plt.savefig(save_path + self.name +"_eps.pdf")
 
         plt.show()

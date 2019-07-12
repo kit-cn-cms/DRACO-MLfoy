@@ -176,16 +176,16 @@ if options.binary:
 
 # get output path and name
 if m2:
-    path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost_M2/"
+    path = "/home/ngolks/Projects/boosted_dnn/AdaBoost_M2/"
 else:
-    path = "/home/ngolks/Projects/boosted_dnn/plots/AdaBoost"           #needs to be adjusted
+    path = "/home/ngolks/Projects/boosted_dnn/AdaBoost"           #needs to be adjusted
 name = "b"+str(int(options.train_epochs))+"a"+str(int(options.ada_epochs))+"_"+str(options.category)+"_"+options.net_config"
 
 #initializing AdaBoost training class
 ada = ADA.AdaBoost(
     save_path       = outputdir,
     path            = path,
-    names           = name, 
+    names           = name,
     input_samples   = input_samples,        #samples are splitted before training the networks
     event_category  = options.category,
     train_variables = variables,
