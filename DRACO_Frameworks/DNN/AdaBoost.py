@@ -267,6 +267,8 @@ class AdaBoost():
                     weight_false += model_train_weights[i]
             epsilon = weight_false/weight_sum
             alpha = 0.5*np.log((1-epsilon)/epsilon)
+            print("# DEBUG: get_alpha_epsilon, alpha: ", alpha)
+            print("# DEBUG: get_alpha_epsilon, epsilon: ", epsilon)
         #adjust weights
         self.data.ada_adjust_weights(model_train_prediction, model_train_prediction_discret, alpha, self.m2)
         #check if epsilon < 0.5
