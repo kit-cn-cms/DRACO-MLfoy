@@ -428,7 +428,7 @@ class AdaBoost():
         pred = np.asarray(pred)
         if self.m2:
             for i in np.arrange(0,len(alpha)):
-                pred[i] = pred[i]*np.log(1\alpha[i])
+                pred[i] = pred[i]*np.log(1/alpha[i])
         else:
             for i in np.arrange(0,len(alpha)):
                 pred[i] = pred[i]*alpha[i]
