@@ -179,7 +179,7 @@ if m2:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost_M2/"
 else:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost"           #needs to be adjusted
-name = "b"+str(int(options.train_epochs))+"a"+str(int(options.ada_epochs))+"_"+str(options.category)+"_"+options.net_config
+name = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
 
 #initializing AdaBoost training class
 ada = ADA.AdaBoost(
