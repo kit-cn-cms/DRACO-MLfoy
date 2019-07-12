@@ -256,7 +256,7 @@ class AdaBoost():
             for i in np.arange(0, num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
                     counter += 1
-                    if model_train_label[i] != 1:                                          #check if the real value is traget
+                    if model_train_label[i] == 1:                                          #check if the real value is traget
                         # print("# DEBUG: model_train_weights: ", model_train_weights[i])
                         epsilon += model_train_weights[i]*(1-model_train_prediction[i])
                     else:
