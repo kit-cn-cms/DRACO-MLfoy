@@ -272,14 +272,14 @@ class AdaBoost():
                         epsilon += model_train_weights[i]*(1-model_train_prediction[i])
                     else:
                         epsilon += model_train_weights[i]*(model_train_prediction[i])
-            print("# DEBUG: wong predicitons: ", counter)
+            # print("# DEBUG: wong predicitons: ", counter)
             epsilon = epsilon/weight_sum
             alpha = epsilon/(1-epsilon)
             # print("# DEBUG: get_a epsilon, alpha")
         #normal adaboost
         else:
-            print(model_train_prediction[0:10])
-            print(model_train_label[0:10])
+            # print(model_train_prediction[0:10])
+            # print(model_train_label[0:10])
             weight_false = 0
             for i in np.arange(0,num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
@@ -454,13 +454,27 @@ class AdaBoost():
 
     def weight_prediction(self, pred, alpha):
         pred = np.asarray(pred)
+        alpha = np.asarray(alpha)
+        # print("# DEBUG: weight_prediction, pred.shape: ", pred.shape)
+        # print("# DEBUG: weight_prediction, alpha.shape: ", alpha.shape)
+        print("# DEBUG: alpha: ", alpha)
+        sum = 0
+        # print("# DEBUG: len(alpha): ", len(alpha))
+        print("# DEBUG: weight_prediction, initial pred: ", pred[:len(alpha),0:5])
         if self.m2:
             for i in range(0,len(alpha)):
-                pred[i] = pred[i]*np.log(1/alpha[i])
+                factor = np.log(1/alpha[i])
+                pred[i] = pred[i]*factor
+                sum +=  factor
         else:
             for i in range(0,len(alpha)):
                 pred[i] = pred[i]*alpha[i]
-        return pred
+                sum += alpha[i]
+        pred = pred/sum
+        # print("# DEBUG: pred: ", pred[0:len(alpha)][0:5])
+        # final and initial prediction is ok so far
+        print("# DEBUG: weight_prediction, final pred: ", pred[:len(alpha),0:5])
+        return pred[0:len(alpha)]
 
 
     def strong_classification(self, pred, alpha):
@@ -489,8 +503,8 @@ class AdaBoost():
         train_fraction = np.array([])
         test_fraction = np.array([])
         for i in np.arange(0, len(self.train_prediction_vector)):
-            train_prediction, train_prediction_disc = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i])
-            test_prediction, test_prediction_disc = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i])
+            train_prediction, train_prediction_disc = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i+1])
+            test_prediction, test_prediction_disc = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i+1])
             # print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
             train_fraction = np.append(train_fraction,
                         np.count_nonzero(train_prediction_disc==self.train_label)/float(self.train_label.shape[0]))
@@ -501,7 +515,7 @@ class AdaBoost():
         roc_auc = metrics.auc(fpr, tpr)
         #plot
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
-
+        print("# DEBUG: fraction: ", train_fraction, test_fraction)
         plt.figure(1)
         plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
         plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")

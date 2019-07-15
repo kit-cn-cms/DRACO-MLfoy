@@ -222,6 +222,6 @@ ada.train_model()
 ada.eval_model()
 
 # save the trained model
-ada.save_model(signal)
+# ada.save_model(signal)
 
 print("Done")

@@ -1,3 +1,5 @@
 - final_prediction_vector should be discret to
 - adjust path name for normal AdaBoost
 - adjust path names in gerenall to have dir for plots and models
+
+--m2 False does not work
