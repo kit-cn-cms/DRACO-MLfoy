@@ -129,7 +129,7 @@ def plotScatter3D(inputdf, vars=["E1", "E2", "dPhi"], xrange=(300, 900), yrange=
 
 
 if __name__ == "__main__":
-    dfPath= "/ceph/swieland/TP2-WZH/MLInput/data/data.h5"
+    dfPath= "/ceph/swieland/TP2-WZH/MLInput/train/data.h5"
     df = pd.read_hdf(dfPath)
     print(df.loc[df["signal"]==1])
     print(df.loc[df["signal"]==0])

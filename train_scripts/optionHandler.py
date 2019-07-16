@@ -118,7 +118,6 @@ class optionHandler:
 
         #add nJets and nTags to output directory
         self.__run_name = self.__outputdir.split("/")[-1]
-        self.__outputdir += "_"+self.__options.category
 
     def __setNomWeight(self):
         # handle even odd selection

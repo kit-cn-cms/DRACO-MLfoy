@@ -275,7 +275,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
         firstHist = bkgHists[0]
     if plotOptions["logscale"] or logoption:
         firstHist.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
-        canvas.SetLogy()
+        canvas.cd(1).SetLogy()
     else:
         firstHist.GetYaxis().SetRangeUser(0, yMax*1.5)
     firstHist.GetXaxis().SetTitle(displayname)
