@@ -262,8 +262,8 @@ class AdaBoost():
             epsilon = 0
             counter = 0
             model_train_prediction = (model_train_prediction + 1)/2     #shift output to [0,1]
-            print(model_train_prediction[0:10])
-            print(model_train_label[0:10])
+            # print(model_train_prediction[0:10])
+            # print(model_train_label[0:10])
             for i in np.arange(0, num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
                     counter += 1
@@ -350,6 +350,7 @@ class AdaBoost():
             #get prediction vector for training and test
             self.train_prediction_vector.append(self.model.predict(self.data.get_train_data(as_matrix = True)))
             self.test_prediction_vector.append(self.model.predict(self.data.get_test_data(as_matrix = True)))
+            # print("# DEBUG: train_model, train_prediction_vector: ", self.train_prediction_vector[t])
             #get alpha, epsilon and adjust weights
             alpha , epsilon = self.get_alpha_epsilon()
             self.epsilon.append(float(epsilon))
@@ -457,10 +458,10 @@ class AdaBoost():
         alpha = np.asarray(alpha)
         # print("# DEBUG: weight_prediction, pred.shape: ", pred.shape)
         # print("# DEBUG: weight_prediction, alpha.shape: ", alpha.shape)
-        print("# DEBUG: alpha: ", alpha)
+        # print("# DEBUG: alpha: ", alpha)
         sum = 0
         # print("# DEBUG: len(alpha): ", len(alpha))
-        print("# DEBUG: weight_prediction, initial pred: ", pred[:len(alpha),0:5])
+        # print("# DEBUG: weight_prediction, initial pred: ", pred[:len(alpha),0:5])
         if self.m2:
             for i in range(0,len(alpha)):
                 factor = np.log(1/alpha[i])
@@ -473,20 +474,23 @@ class AdaBoost():
         pred = pred/sum
         # print("# DEBUG: pred: ", pred[0:len(alpha)][0:5])
         # final and initial prediction is ok so far
-        print("# DEBUG: weight_prediction, final pred: ", pred[:len(alpha),0:5])
+        # print("# DEBUG: weight_prediction, final pred: ", pred[:len(alpha),0:5])
         return pred[0:len(alpha)]
 
 
     def strong_classification(self, pred, alpha):
         '''builds prediciton vector for strong classifier'''
         pred_array = self.weight_prediction(pred, alpha)
+        # print("# DEBUG: pred_array: ", pred_array[len(alpha)-1,0:5])
         prediction_vector = np.sum(pred_array, axis = 0)
-        final_prediction_vector = np.array([])
+        # print("# DEBUG: prediction_vector: ", prediction_vector[0:5])
+        # print("# DEBUG: labels: ", self.train_label[0:5])
+        prediction_vector_disc = np.array([])
         for x in prediction_vector:
             if x<self.cut_value:
-                prediction_vector_disc = np.append(final_prediction_vector, int(self.binary_bkg_target))
+                prediction_vector_disc = np.append(prediction_vector_disc, int(self.binary_bkg_target))
             else:
-                prediction_vector_disc = np.append(final_prediction_vector, int(1))
+                prediction_vector_disc = np.append(prediction_vector_disc, int(1))
         return prediction_vector, prediction_vector_disc
 
 
@@ -503,8 +507,11 @@ class AdaBoost():
         train_fraction = np.array([])
         test_fraction = np.array([])
         for i in np.arange(0, len(self.train_prediction_vector)):
+            # print("# DEBUG: eval_model, train_prediction_vector: ", self.train_prediction_vector[i][0:5])
             train_prediction, train_prediction_disc = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i+1])
             test_prediction, test_prediction_disc = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i+1])
+            # print("# DEBUG: train_prediction: ", train_prediction[0:5])
+            # print("# DEBUG: train_prediction_disc: ", train_prediction_disc[0:5])
             # print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
             train_fraction = np.append(train_fraction,
                         np.count_nonzero(train_prediction_disc==self.train_label)/float(self.train_label.shape[0]))
