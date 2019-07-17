@@ -5,3 +5,6 @@
 --m2 False does not work
 - implement earlystopping
 - get hole plotting out of eval and in seperate plotting function -> evaluation not needed when loading trained model
+
+Wichtig:
+- test if pred in ada_adjust_weights is [0,1] or [-1,1]
