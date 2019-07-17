@@ -58,7 +58,7 @@ plotopts.add_option("-P", "--privatework", dest="privateWork", action = "store_t
         help="activate to create private work plot label")
 plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix")
-plotopts.add_option("--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
+plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
 parser.add_option_group(plotopts)
 
@@ -125,6 +125,9 @@ class optionHandler:
     def __setNomWeight(self):
         # handle even odd selection
         self.__nom_weight = 1.
+        if self.__options.even_sel is None:
+            return
+
         if self.__options.even_sel:
             self.__outputdir+="_even"
             self.__nom_weight = 2.

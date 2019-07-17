@@ -43,7 +43,9 @@ class Sample:
 
         # add lumi weight
         # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
-        df = df.assign(lumi_weight = lambda x: x.weight * lumi * self.normalization_weight/ self.test_percentage)
+
+        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
+
 
         self.data = df
         print("-"*50)
