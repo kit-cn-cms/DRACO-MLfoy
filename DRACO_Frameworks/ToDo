@@ -1,3 +1,7 @@
 - final_prediction_vector should be discret to
 - adjust path name for normal AdaBoost
 - adjust path names in gerenall to have dir for plots and models
+
+
+Wichtig:
+- think about boosting factor to increase the weights in AdaBoost_M2
