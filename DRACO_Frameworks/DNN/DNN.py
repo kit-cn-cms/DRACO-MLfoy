@@ -66,7 +66,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if current_val < self.best_validation:
             self.best_validation = current_val
             self.best_epoch = epoch
-    
+
         # check loss by percentage difference
         if self.value:
             if (current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
@@ -82,11 +82,11 @@ class EarlyStopping(keras.callbacks.Callback):
                 if self.verbose > 0:
                     print("\nValidation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
                 self.model.stop_training = True
-        
+
 
 
 class DNN():
-    def __init__(self, 
+    def __init__(self,
             save_path,
             input_samples,
             event_category,
@@ -127,36 +127,36 @@ class DNN():
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
-        
+
         # number of train epochs
         self.train_epochs = train_epochs
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
 
-        # load data set
-        self.data = self._load_datasets(shuffle_seed, balanceSamples)
-        self.event_classes = self.data.output_classes
-
-        # save variable norm
-        self.cp_path = self.save_path+"/checkpoints/"
-        if not os.path.exists(self.cp_path):
-            os.makedirs(self.cp_path)
-        out_file = self.cp_path + "/variable_norm.csv"
-        self.data.norm_csv.to_csv(out_file)
-        print("saved variabe norms at "+str(out_file))
-
-        # make plotdir
-        self.plot_path = self.save_path+"/plots/"
-        if not os.path.exists(self.plot_path):
-            os.makedirs(self.plot_path)
+        # # load data set
+        # self.data = self._load_datasets(shuffle_seed, balanceSamples)
+        # self.event_classes = self.data.output_classes
+        #
+        # # save variable norm
+        # self.cp_path = self.save_path+"/checkpoints/"
+        # if not os.path.exists(self.cp_path):
+        #     os.makedirs(self.cp_path)
+        # out_file = self.cp_path + "/variable_norm.csv"
+        # self.data.norm_csv.to_csv(out_file)
+        # print("saved variabe norms at "+str(out_file))
+        #
+        # # make plotdir
+        # self.plot_path = self.save_path+"/plots/"
+        # if not os.path.exists(self.plot_path):
+        #     os.makedirs(self.plot_path)
 
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-           
-        
+
+
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
@@ -187,7 +187,7 @@ class DNN():
 
         for key in config:
             self.architecture[key] = config[key]
-        
+
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
@@ -196,29 +196,29 @@ class DNN():
         self.model = keras.models.load_model(checkpoint_path)
         self.model.summary()
 
-        # evaluate test dataset
-        self.model_eval = self.model.evaluate(
-            self.data.get_test_data(as_matrix = True),
-            self.data.get_test_labels())
-
-        # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
-
-        # save predicted classes with argmax
-        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
-
-        # save confusion matrix
-        from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
-
-        # print evaluations
-        from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        # # evaluate test dataset
+        # self.model_eval = self.model.evaluate(
+        #     self.data.get_test_data(as_matrix = True),
+        #     self.data.get_test_labels())
+        #
+        # # save predicitons
+        # self.model_prediction_vector = self.model.predict(
+        #     self.data.get_test_data(as_matrix = True) )
+        # self.model_train_prediction  = self.model.predict(
+        #     self.data.get_train_data(as_matrix = True) )
+        #
+        # # save predicted classes with argmax
+        # self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+        #
+        # # save confusion matrix
+        # from sklearn.metrics import confusion_matrix
+        # self.confusion_matrix = confusion_matrix(
+        #     self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        #
+        # # print evaluations
+        # from sklearn.metrics import roc_auc_score
+        # self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        # print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
     def predict_event_query(self, query ):
@@ -270,7 +270,7 @@ class DNN():
                 kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
-    
+
             if self.architecture["activation_function"] == "leakyrelu":
                 X = keras.layers.LeakyReLU(alpha=0.3)(X)
 
@@ -279,7 +279,7 @@ class DNN():
                 X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = keras.layers.Dense( 
+        X = keras.layers.Dense(
             units               = self.data.n_output_neurons,
             activation          = output_activation.lower(),
             kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
@@ -400,7 +400,7 @@ class DNN():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
-        
+
         # save information for binary DNN
         if self.data.binary_classification:
             configs["binaryConfig"] = {
@@ -418,7 +418,7 @@ class DNN():
         variables = variable_configs.loc[self.train_variables]
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
-        
+
 
     def eval_model(self):
         ''' evaluate trained model '''
@@ -471,12 +471,12 @@ class DNN():
                 sample.max=round(float(max_[i]),2)
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
 
-                
-        
+
+
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-        # get weights 
+        # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
@@ -546,7 +546,7 @@ class DNN():
 
 
 
-    def plot_outputNodes(self, log = False, printROC = False, signal_class = None, 
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False,
                         nbins = 20, bin_range = [0.,1.]):
 
@@ -643,14 +643,14 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
-    if not os.path.exists(configFile): 
+    if not os.path.exists(configFile):
         sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
 
     with open(configFile) as f:
         config = f.read()
     config = json.loads(config)
 
-    # load samples
+    # load samples.
     input_samples = data_frame.InputSamples(config["inputData"])
 
     for sample in config["eventClasses"]:

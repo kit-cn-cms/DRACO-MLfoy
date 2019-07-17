@@ -51,7 +51,7 @@ class Sample:
 
 
 class Dataset:
-    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000):
+    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, Scale=False):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
@@ -63,6 +63,7 @@ class Dataset:
         # settings for dataset
         self.addMEM     = addMEM
         self.maxEntries = int(maxEntries)
+        self.Scale      = Scale
 
         # default values for some configs
         self.baseSelection  = None
@@ -478,21 +479,7 @@ class Dataset:
         total_nr = df["Jet_Pt[0]"].size
 
         njets_vec       = df["N_Jets"].values
-        # n_tightmuons    = df["N_TightMuons"].values
-        # muon_pt         = df["Muon_Pt[0]"].values
-        # muon_eta        = df["Muon_Eta[0]"].values
-        # muon_phi        = df["Muon_Phi[0]"].values
-        # muon_E          = df["Muon_E[0]"].values
-        # electron_pt     = df["Electron_Pt[0]"].values
-        # electron_eta    = df["Electron_Eta[0]"].values
-        # electron_phi    = df["Electron_Phi[0]"].values
-        # electron_m      = df["Electron_M[0]"].values
-        # pt_met          = df["Evt_MET_Pt"].values
-        # phi_met         = df["Evt_MET_Phi"].values
-        # gentoplep_eta   = df["GenTopLep_Eta"].values
-        # gentoplep_phi   = df["GenTopLep_Phi"].values
-        # gentophad_eta   = df["GenTopHad_Eta"].values
-        # gentophad_phi   = df["GenTopHad_Phi"].values
+
 
         GenTopHad_B_Phi = df["GenTopHad_B_Phi"].values
         GenTopHad_B_Eta = df["GenTopHad_B_Eta"].values
@@ -522,21 +509,18 @@ class Dataset:
                 globals()["reco_" + index + "_" + index2] = np.zeros(total_nr)
 
         is_ttbar = np.zeros(total_nr)
-        # reco_TopHad_M  = np.zeros(total_nr)
-        # reco_TopLep_M  = np.zeros(total_nr)
-        # reco_WHad_M    = np.zeros(total_nr)
-        # reco_log_WHad_M= np.zeros(total_nr)
-        # reco_WLep_M    = np.zeros(total_nr)
-        # reco_log_WLep_M= np.zeros(total_nr)
+        bkg_scale = np.zeros(total_nr)+1
+
         ttbar_Pt_div_Ht_p_Met = np.zeros(total_nr)
         cntr     = 0
-        # idx_bhad, idx_blep, idx_q1, idx_q2, delta_r = np.zeros(total_nr),np.zeros(total_nr),np.zeros(total_nr),np.zeros(total_nr), np.zeros(total_nr)
 
         # loop over all events
         for i in range(total_nr):
 
             # get number of jets
-            njets = min(njets_vec[i],11)
+            njets = min(njets_vec[i],12)
+            bkg = np.zeros((2,4))
+
 
             #create arrays for entries of pepec
             for index in pepec:
@@ -578,12 +562,21 @@ class Dataset:
 
                             total_deltar = deltar_bhad + deltar_blep + deltar_q1 + deltar_q2
                             if(total_deltar<minr):
+                                if self.Scale:
+                                    bkg = np.append(bkg, [[best_comb[0],best_comb[1],best_comb[2],best_comb[3]]], axis=0)
+                                    df=df.append(df.iloc[[i]])
                                 minr = total_deltar
                                 best_comb = [j,k,l,m]
                                 minr_bhad   = deltar_bhad
                                 minr_blep   = deltar_blep
                                 minr_q1     = deltar_q1
                                 minr_q2     = deltar_q2
+
+                            if (total_deltar >= minr and self.Scale):
+                                bkg = np.append(bkg, [[j,k,l,m]], axis = 0)
+                                df=df.append(df.iloc[[i]])
+
+            bkg = np.delete(bkg, (0,1), axis=0)
 
             # combinations with smallest total_deltar and each delta r <0.3 are ttbar-events
             n=0
@@ -610,43 +603,61 @@ class Dataset:
                 print minr, minr_bhad, minr_blep, minr_q1, minr_q2
 
             #for ttbar events: append wrong combination of jets to arrays and df
-            n=0
-            false_comb = np.zeros(4)
-            j1,k1,l1,m1 = 0,0,0,0
-            if is_ttbar[i]==1:
-                df=df.append(df.iloc[[i]])
-                #kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
-                while(j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
-                    j1 = randrange(njets)
-                    k1 = randrange(njets)
-                    l1 = randrange(njets)
-                    m1 = randrange(njets)
-                false_comb = [j1,k1,l1,m1]
-                for index in jets:
-                    for index2 in pepec:
-                        globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-                    n+=1
-                is_ttbar = np.append(is_ttbar,0)
-                # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+            if self.Scale:
+                for nr in range(len(bkg)):
+                    n=0
+                    if is_ttbar[i]==1:
+                        false_comb = [int(bkg[nr][0]),int(bkg[nr][1]),int(bkg[nr][2]),int(bkg[nr][3])]
+                        for index in jets:
+                            for index2 in pepec:
+                                globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+                            n+=1
+                        is_ttbar = np.append(is_ttbar,0)
+                        # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
 
-                reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
-                for index in recos:
-                    globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
-                    globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
-                    globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
-                    globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
-                    globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+                        reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+                        for index in recos:
+                            globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
+                            globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
+                            globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
+                            globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
+                            globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
 
-                ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
+                        ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
+                        cntr +=1
+                        bkg_scale = np.append(bkg_scale, 1./len(bkg))
 
-                # reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_m)
-                # reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_m)
-                # reco_WHad_M     = np.append(reco_WHad_M, reco_whad_m)
-                # reco_log_WHad_M   = np.append(reco_log_WHad_M  , reco_log_whad_m)
-                # reco_WLep_M     = np.append(reco_WLep_M, reco_wlep_m)
-                # reco_log_WLep_M   = np.append(reco_log_WLep_M  , reco_log_wlep_m)
-                # ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met, ttbar_pt_div_ht_p_met)
-                cntr +=1
+
+            if self.Scale==0:
+                n=0
+                false_comb = np.zeros(4)
+                j1,k1,l1,m1 = 0,0,0,0
+                if is_ttbar[i]==1:
+                    df=df.append(df.iloc[[i]])
+                    #kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
+                    while(j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
+                        j1 = randrange(njets)
+                        k1 = randrange(njets)
+                        l1 = randrange(njets)
+                        m1 = randrange(njets)
+                    false_comb = [j1,k1,l1,m1]
+                    for index in jets:
+                        for index2 in pepec:
+                            globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+                        n+=1
+                    is_ttbar = np.append(is_ttbar,0)
+                    # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+
+                    reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+                    for index in recos:
+                        globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
+                        globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
+                        globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
+                        globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
+                        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+
+                    ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
+                    cntr +=1
 
 
 
@@ -672,32 +683,8 @@ class Dataset:
         for ind in variables_toadd:
             df_new[ind] = df[ind].values
 
-        # df_new["N_Jets"]        = df["N_Jets"].values
-        # df_new["N_BTagsM"]      = df["N_BTagsM"].values
-        # df_new["Evt_Run"]       = df["Evt_Run"].values
-        # df_new["Evt_Lumi"]      = df["Evt_Lumi"].values
-        # df_new["Evt_ID"]        = df["Evt_ID"].values
-        # df_new["Evt_MET_Pt"]    = df["Evt_MET_Pt"].values
-        # df_new["Evt_MET_Phi"]   = df["Evt_MET_Phi"].values
-        # df_new["Weight_GEN_nom"]    = df["Weight_GEN_nom"].values
-        # df_new["Weight_XS"]     = df["Weight_XS"].values
-        # df_new["Weight_CSV"]    = df["Weight_CSV"].values
-        # df_new["N_LooseElectrons"]  = df["N_LooseElectrons"].values
-        # df_new["N_TightMuons"]      = df["N_TightMuons"].values
-        # df_new["Muon_Pt"]       = df["Muon_Pt[0]"].values
-        # df_new["Muon_Eta"]      = df["Muon_Eta[0]"].values
-        # df_new["Muon_Phi"]      = df["Muon_Phi[0]"].values
-        # df_new["Muon_E"]        = df["Muon_E[0]"].values
-        # df_new["Electron_Pt"]   = df["Electron_Pt[0]"].values
-        # df_new["Electron_Eta"]  = df["Electron_Eta[0]"].values
-        # df_new["Electron_Phi"]  = df["Electron_Phi[0]"].values
-        # df_new["Electron_E"]    = df["Electron_E[0]"].values
-        # df_new["N_LooseMuons"]   = df["N_LooseMuons"].values
-        # df_new["N_TightElectrons"]   = df["N_TightElectrons"].values
-        # df_new["Evt_Odd"] = df["Evt_Odd"].values
 
-
-        #print df.shape, len(globals()[index + "_" + index2]), len(is_ttbar)
+        print df.shape, len(globals()[index + "_" + index2]), len(is_ttbar)
 
         #add correct and false combinations with their tags to df
         entr=0
@@ -705,47 +692,21 @@ class Dataset:
             for index2 in pepec:
                 df[index + "_" + index2] = globals()[index + "_" + index2]
                 entr+=1
+        if self.Scale: df["bkg_scale"] = bkg_scale
         df["Evt_is_ttbar"]  = is_ttbar
         for index in recos:
             for index2 in pepm:
                 df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
                 entr+=1
-        # df["reco_TopHad_M"] = reco_TopHad_M
-        # df["reco_TopLep_M"] = reco_TopLep_M
-        # df["reco_WHad_M"]   = reco_WHad_M
-        # df["reco_log_WHad_M"] = reco_log_WHad_M
-        # df["reco_WLep_M"]   = reco_WLep_M
-        # df["reco_log_WLep_M"] = reco_log_WLep_M
+
         df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
         #print df,entr, df.columns[0:-entr]
-        df.drop(df.columns[:-(entr+2)],inplace = True, axis = 1)
+        df.drop(df.columns[:-(entr+2 + self.Scale)],inplace = True, axis = 1)
         # # print df
 
         for ind in variables_toadd:
             df[ind] = df_new[ind].values
-        # df["N_Jets"]= df_new["N_Jets"].values
-        # df["N_BTagsM"]   = df_new["N_BTagsM"].values
-        # df["Evt_Run"]   = df_new["Evt_Run"].values
-        # df["Evt_Lumi"]   = df_new["Evt_Lumi"].values
-        # df["Evt_ID"]   = df_new["Evt_ID"].values
-        # df["Evt_MET_Pt"]   = df_new["Evt_MET_Pt"].values
-        # df["Evt_MET_Phi"]   = df_new["Evt_MET_Phi"].values
-        # df["Weight_GEN_nom"]   = df_new["Weight_GEN_nom"].values
-        # df["Weight_XS"]   = df_new["Weight_XS"].values
-        # df["Weight_CSV"]   = df_new["Weight_CSV"].values
-        # df["N_LooseElectrons"]   = df_new["N_LooseElectrons"].values
-        # df["N_TightMuons"]   = df_new["N_TightMuons"].values
-        # df["Muon_Pt"]   = df_new["Muon_Pt"].values
-        # df["Muon_Eta"]      = df_new["Muon_Eta"].values
-        # df["Muon_Phi"]      = df_new["Muon_Phi"].values
-        # df["Muon_E"]        = df_new["Muon_E"].values
-        # df["Electron_Pt"]   = df_new["Electron_Pt"].values
-        # df["Electron_Eta"]  = df_new["Electron_Eta"].values
-        # df["Electron_Phi"]  = df_new["Electron_Phi"].values
-        # df["Electron_E"]    = df_new["Electron_E"].values
-        # df["N_LooseMuons"]   = df_new["N_LooseMuons"].values
-        # df["N_TightElectrons"]   = df_new["N_TightElectrons"].values
-        # df["Evt_Odd"] = df_new["Evt_Odd"].values
+
 
         # delete combinations of events without certain ttbar event
         i,j=0,0

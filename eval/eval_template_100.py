@@ -192,7 +192,7 @@ lcounter = 0
 rcounter = 0
 eventcounter= 0
 
-inputdir = "/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/allvar_all_v1_ge4j_ge3t"
+inputdir = "/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/allvar_all_v2_ge4j_ge3t"
 
 dnn = loadDNN(inputdir, "output")
 
@@ -303,7 +303,7 @@ for event in chain:
       		        globals()["reco_" + index + "_Phi"] = np.append(globals()["reco_" + index +"_Phi"], locals()["reco_" + index + "_4vec"].Phi())
        		        globals()["reco_" + index + "_M"] = np.append(globals()["reco_" + index +"_M"], locals()["reco_" + index + "_4vec"].M())
      		        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index +"_logM"],log( locals()["reco_" + index + "_4vec"].M()))
-
+  
 
                     Pt_div_Ht     = np.append(Pt_div_Ht,     (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(Ht + Pt_MET + lepton_4vec.Pt()))
 
@@ -333,7 +333,7 @@ for event in chain:
 
 
     vars_toadd = ["TopHad","TopLep", "WHad"]
-
+ 
     for index in vars_toadd:
         for index2 in ["Pt","Eta","Phi","M","logM"]:
 	    df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
@@ -552,7 +552,7 @@ leg_had.AddEntry(delta_rhad, "histrogram filled with #Delta r of thads","f")
 leg_had.AddEntry(efficiency_had, "efficiency","l")
 leg_had.AddEntry(line_had, "#Delta r = 0.4", "l")
 leg_had.Draw()
-c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v1_10_100p.pdf")
+c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v2_10_100p.pdf")
 
 #######################################################################################################
 
@@ -580,4 +580,4 @@ delta_r_q2_hist.Draw("HIST")
 # c1.cd(2)
 # delta_eta.Draw("HIST")
 
-c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v1_11_100p.pdf")
+c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v2_11_100p.pdf")

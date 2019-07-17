@@ -119,10 +119,10 @@ def find_n_best(event,n):
     jet_phis = event.Jet_Phi
     jet_ms   = event.Jet_M
     jet_csv  = event.Jet_CSV
-    
+
     #print(event.Evt_Phi_MET)
-    
-    
+
+
     if(event.N_TightMuons==1):
         lepton4=ROOT.TLorentzVector()
         lepton4.SetPtEtaPhiM(event.Muon_Pt[0], event.Muon_Eta[0], event.Muon_Phi[0], event.Muon_M[0])
@@ -146,10 +146,10 @@ def find_n_best(event,n):
                         continue
                     if(jet_csv[j]<0.227 or jet_csv[k]<0.227):
                         continue
-                    
+
                     Pt_MET     = event.Evt_MET_Pt
                     Phi_MET    = event.Evt_MET_Phi
-                    
+
                     bhad = ROOT.TLorentzVector()
                     bhad.SetPtEtaPhiM(jet_pts[j],jet_etas[j],jet_phis[j], jet_ms[j])
                     blep = ROOT.TLorentzVector()
@@ -158,7 +158,7 @@ def find_n_best(event,n):
                     q1.SetPtEtaPhiM(jet_pts[l],jet_etas[l],jet_phis[l], jet_ms[l])
                     q2 = ROOT.TLorentzVector()
                     q2.SetPtEtaPhiM(jet_pts[m],jet_etas[m],jet_phis[m], jet_ms[m])
-                    
+
                     #Neutrino-Berechnung
                     neutrino = ROOT.TLorentzVector(Pt_MET*cos(Phi_MET),Pt_MET*sin(Phi_MET),0.,Pt_MET)
                     mu = ((mW*mW)/2) + lepton4.Px()*neutrino.Px()+ lepton4.Py()*neutrino.Py()
@@ -170,24 +170,24 @@ def find_n_best(event,n):
                     else:
                         pz1=a+(a2-b)**0.5
                         pz2=a-(a2-b)**0.5
-	
+
                         if(abs(pz1) <= abs(pz2)):
                             neutrino.SetPz(pz1)
                         else:
                             neutrino.SetPz(pz2)
-                            
-                            
-                            
+
+
+
                     #Rekonstruktionen
                     whad = q1+q2
                     wlep = neutrino + lepton4
                     thad = whad + bhad
                     tlep = wlep + blep
-                    
+
                     #chi2 = (whad.M() - mWhad)**2/sigmaW**2 + (thad.M()-tlep.M()-mD)**2/sigmaD**2
                     chi2 = (whad.M() - mWhad)**2/sigmaW**2 + (thad.M()-mThad)**2/sigma_thad**2 + (tlep.M()-mTlep)/sigma_tlep**2
-                    
-                    
+
+
                     for i in range(n):
                         #check whether current chi2 value is smaller than any previous value, minchi[0]=0 to be able to set first value into minchi[1]
                         if(chi2>minchi[i] and chi2<minchi[i+1]):
@@ -201,8 +201,8 @@ def find_n_best(event,n):
                             globals()["thadbest" + str(i+1)]    = thad
                             minchi[i+1]     = chi2
                             bestcombi[i][:] = [j,k,l,m]
-                                
-                            
+
+
                     #if(chi2<minchi[0]):
                         #tlepbest2  = tlepbest1
                         #tlepbest1  = tlepbest0
@@ -216,7 +216,7 @@ def find_n_best(event,n):
                         #bestcombi[2][:] = bestcombi[1][:]
                         #bestcombi[1][:] = bestcombi[0][:]
                         #bestcombi[0][:] = [j,k,l,m]
-                            
+
                     #if(chi2>minchi[0] and chi2 < minchi[1]):
                         #tlepbest2  = tlepbest1
                         #tlepbest1  = tlep
@@ -226,13 +226,13 @@ def find_n_best(event,n):
                         #minchi[1]  = chi2
                         #bestcombi[2][:] = bestcombi[1][:]
                         #bestcombi[1][:] = [j,k,l,m]
-                        
+
                     #if(chi2>minchi[1] and chi2<minchi[2]):
                         #tlepbest2  = tlep
                         #thadbest2  = thad
                         #minchi[2]  = chi2
                         #bestcombi[2][:] = [j,k,l,m]
-                        
+
     return bestcombi
 
 ###################################################################################################################################
@@ -266,7 +266,7 @@ pathName2 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/TT
 
 chain = ROOT.TChain("MVATree")
 print(pathName2)
-toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*00_nominal_Tree.root")
+toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*0_nominal_Tree.root")
 #toadd0 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*0_nominal_Tree.root")
 #toadd1 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*1_nominal_Tree.root")
 
@@ -359,7 +359,7 @@ for event in chain:
     presel = find_n_best(event,10)
     #print globals()["Jet_Pt"][0], presel[0][0]
     #print Jet_Pt[int(presel[0][0])]
-    
+
     #print presel
     for j in range(10):
         for index2 in pepec:

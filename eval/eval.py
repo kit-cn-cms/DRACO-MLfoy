@@ -57,7 +57,7 @@ def loadDNN(inputDirectory, outputDirectory):
     return dnn
 
 
-def findttbar(dataframe, inputDirectory):
+def findttbar(dataframe, dnn):
     # evaluate test dataset
     # model_eval = dnn.model.evaluate(dataframe.values, dnn.data.get_test_labels())
 
@@ -73,26 +73,18 @@ def findttbar(dataframe, inputDirectory):
             max1 = model_predict[ind]
             best_index = ind
 
-    if(max1<-1): print "error!!11!!1!1!"
-    # print best_index, (max1), model_predict, len(model_predict)
-    # np.set_printoptions(suppress=True)
-    # np.set_printoptions(precision=75)
-    # print best_index, np.round(max1,20), len(model_predict)
-    # print np.array(model_predict)
+    print type(max1)
+
+    if(max1<0): print "error!!11!!1!1!"
+    print best_index, (max1), model_predict, len(model_predict)
+    np.set_printoptions(suppress=True)
+    np.set_printoptions(precision=75)
+    print best_index, np.round(max1,20), len(model_predict)
+    print np.array(model_predict)
     # if ones_counter>1:
     #     print "warning: more than one index maximal"
     #     best_index = -1
     return best_index
-
-
-def normalize(df,inputdir):
-    unnormed_df = df
-
-    df_norms = pd.read_csv(inputdir+"/checkpoints/variable_norm.csv", index_col=0).transpose()
-    for ind in df.columns:
-        df[ind] = (unnormed_df[ind] - df_norms[ind][0])/df_norms[ind][1]
-    return df
-
 
 def correct_phi(phi):
     if(phi  <=  -np.pi):
@@ -163,13 +155,13 @@ def getTopMass(Pt, Eta, Phi, E, lepton_4vec, Pt_MET, Phi_MET,Ht, j,k,l,m):
     thad_4vec = whad_4vec + TopHad_B_4vec
     tlep_4vec = wlep_4vec + TopLep_B_4vec
 
-    return thad_4vec, tlep_4vec, whad_4vec, wlep_4vec, lepton_4vec
+    return thad_4vec.M(), tlep_4vec.M(), log(whad_4vec.M()), (thad_4vec.Pt() + tlep_4vec.Pt())/(Ht + Pt_MET + lepton_4vec.Pt())
 ################################################################################################################################
 pathName2 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8"
 
 chain = ROOT.TChain("MVATree")
 print(pathName2)
-toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*_nominal_Tree.root")
+toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*00_nominal_Tree.root")
 #toadd0 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*0_nominal_Tree.root")
 #toadd1 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*1_nominal_Tree.root")
 
@@ -188,13 +180,10 @@ print(nchain)
 i=0
 mW = 80.4
 counter = 0
-lcounter = 0
-rcounter = 0
 eventcounter= 0
 
-inputdir = "/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/allvar_all_v1_ge4j_ge3t"
 
-dnn = loadDNN(inputdir, "output")
+dnn = loadDNN("/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/logW_v2_4j_ge3t", "output")
 
 top_mass = ROOT.TH1F("top_mass","mass of top quark", 35, 0 ,700)
 delta_rlep = ROOT.TH1F("delta_rlep", "#Delta r lep;#Delta r of leptonic decaying tops; number of events", 100,0,8)
@@ -212,9 +201,7 @@ delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b;
 for event in chain:
     njets = event.N_Jets
     # print njets
-    # if(njets>12 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
-    if(njets>12 or event.N_BTagsM<3 or event.Evt_Odd ==1):
-
+    if(njets>11 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
         # print "ok cool next one"
         continue
 
@@ -232,6 +219,7 @@ for event in chain:
     Pt_MET = event.Evt_MET_Pt
     Phi_MET= event.Evt_MET_Phi
     Ht     = event.Evt_HT
+
 
     if event.N_TightMuons:
         Muon_Pt = event.Muon_Pt[0]
@@ -263,13 +251,10 @@ for event in chain:
     df = pd.DataFrame()
     #print(event.Evt_Phi_MET)
 
-    # if i==5: break
-    #reco_TopHad_M = np.array([])
-    #reco_TopLep_M = np.array([])
-    #reco_WHad_M   = np.array([])
-    for index in ["TopHad","TopLep", "WHad", "WLep"]:
-        for index2 in ["Pt", "Eta", "Phi", "M", "logM"]:
-	    globals()["reco_" + index + "_" + index2] = np.array([])
+    if i==5: break
+    reco_TopHad_M = np.array([])
+    reco_TopLep_M = np.array([])
+    reco_WHad_M   = np.array([])
     Pt_div_Ht     = np.array([])
 
 
@@ -292,20 +277,11 @@ for event in chain:
                         globals()["TopHad_Q2" + "_" + index2] = np.append(globals()["TopHad_Q2" + "_" + index2], globals()[index2][m])
 
 
-                    reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, lepton_4vec  = getTopMass(Pt, Eta, Phi, E, lepton4, Pt_MET, Phi_MET, Ht, j,k,l,m)
-                    #reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_4vec.M())
-                    #reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_4vec.M())
-                    #reco_WHad_M   = np.append(reco_WHad_M,   reco_whad_4vec.M())
-
-		    for index in ["TopHad","TopLep", "WHad","WLep"]:
-  	                globals()["reco_" + index +"_Pt"] = np.append(globals()["reco_" + index +"_Pt"], locals()["reco_" + index + "_4vec"].Pt())
-       		        globals()["reco_" + index + "_Eta"] = np.append(globals()["reco_" + index +"_Eta"], locals()["reco_" + index + "_4vec"].Eta())
-      		        globals()["reco_" + index + "_Phi"] = np.append(globals()["reco_" + index +"_Phi"], locals()["reco_" + index + "_4vec"].Phi())
-       		        globals()["reco_" + index + "_M"] = np.append(globals()["reco_" + index +"_M"], locals()["reco_" + index + "_4vec"].M())
-     		        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index +"_logM"],log( locals()["reco_" + index + "_4vec"].M()))
-
-
-                    Pt_div_Ht     = np.append(Pt_div_Ht,     (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(Ht + Pt_MET + lepton_4vec.Pt()))
+                    reco_tophad_m, reco_toplep_m, reco_whad_m, pt_div_ht  = getTopMass(Pt, Eta, Phi, E, lepton4, Pt_MET, Phi_MET, Ht, j,k,l,m)
+                    reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_m)
+                    reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_m)
+                    reco_WHad_M   = np.append(reco_WHad_M,   reco_whad_m)
+                    Pt_div_Ht     = np.append(Pt_div_Ht,     pt_div_ht)
 
     eventcounter +=1
     n=0
@@ -315,37 +291,25 @@ for event in chain:
             df[index +"_"+ index2] = globals()[index + "_" + index2]
 
     combis = len(TopHad_B_Phi)
-    df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
-    df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
-    df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
-    df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
-    df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
-    df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
-    df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
-    df["Electron_E[0]"] = np.zeros(combis) + Electron_E
+    df["Muon_Pt"]   = np.zeros(combis) + Muon_Pt
+    df["Muon_Eta"]  = np.zeros(combis) + Muon_Eta
+    df["Muon_Phi"]  = np.zeros(combis) + Muon_Phi
+    df["Muon_E"]    = np.zeros(combis) + Muon_E
+    df["Electron_Pt"] = np.zeros(combis) + Electron_Pt
+    df["Electron_Eta"] = np.zeros(combis) + Electron_Eta
+    df["Electron_Phi"] = np.zeros(combis) + Electron_Phi
+    df["Electron_E"] = np.zeros(combis) + Electron_E
     df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
     df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
-
-
-    #df["reco_TopHad_M"] = reco_TopHad_M
-    #df["reco_TopLep_M"] = reco_TopLep_M
-    #df["reco_WHad_M"]   = reco_WHad_M
-
-
-    vars_toadd = ["TopHad","TopLep", "WHad"]
-
-    for index in vars_toadd:
-        for index2 in ["Pt","Eta","Phi","M","logM"]:
-	    df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
-
+    df["reco_TopHad_M"] = reco_TopHad_M
+    df["reco_TopLep_M"] = reco_TopLep_M
+    df["reco_WHad_M"]   = reco_WHad_M
     df["ttbar_pt_div_ht_p_met"]     = Pt_div_Ht
 
-
-    df_normed = normalize(df,inputdir)
-
-    # print df, df_normed
-    best_index = findttbar(df_normed,dnn)
-
+    # print df.columns
+    # print df
+    best_index = findttbar(df,dnn)
+    # print best_index
     if best_index < 0:
         continue
 
@@ -407,12 +371,6 @@ for event in chain:
     if(deltaRl<0.4 and deltaRh<0.4):
         counter+=1
 
-    if(deltaRl<0.4):
-        lcounter +=1
-
-    if(deltaRh<0.4):
-        rcounter +=1
-
     if(i%1000==0):
         print i, '/', nchain/2., '=', 200.*i/nchain,'%', "      , eff: ", 1.*counter/eventcounter
 
@@ -455,7 +413,7 @@ for event in chain:
 
 
 
-print "eff: ", 1.*counter/eventcounter, "  ", 1.*lcounter/eventcounter, "  ", 1.*rcounter/eventcounter
+print "eff: ", 1.*counter/eventcounter
 
 x,y,r = np.zeros(100),np.zeros(100),np.zeros(100)
 
@@ -464,7 +422,7 @@ for i in range(100):
         x[j] += delta_rlep.GetBinContent(i)/delta_rlep.Integral()*delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())
         y[j] += delta_rhad.GetBinContent(i)/delta_rhad.Integral()*delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())
 ##r+=0.1/2
-    r[i]=(i-0.5)/10.
+    r[i]=(i+0.5)/10.
 
 efficiency_lep = ROOT.TGraph(100, r, x)
 efficiency_had = ROOT.TGraph(100, r, y)
@@ -488,8 +446,8 @@ efficiency_lep.SetLineColor(ROOT.kRed)
 efficiency_lep.SetLineWidth(2)
 efficiency_lep.Draw("SAME")
 
-eff_lep = str(int(10000*x[4]/delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())))
-eff_had = str(int(10000*y[4]/delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())))
+eff_lep = str(int(10000*x[3]/delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())))
+eff_had = str(int(10000*y[3]/delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())))
 eff_comb= str(int(10000.*counter/eventcounter))
 
 line_lep = ROOT.TLine(0.4,0,0.4,delta_rlep.GetMaximum())
@@ -552,7 +510,7 @@ leg_had.AddEntry(delta_rhad, "histrogram filled with #Delta r of thads","f")
 leg_had.AddEntry(efficiency_had, "efficiency","l")
 leg_had.AddEntry(line_had, "#Delta r = 0.4", "l")
 leg_had.Draw()
-c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v1_10_100p.pdf")
+c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/tests/logW_v2_10_1p.pdf")
 
 #######################################################################################################
 
@@ -580,4 +538,4 @@ delta_r_q2_hist.Draw("HIST")
 # c1.cd(2)
 # delta_eta.Draw("HIST")
 
-c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/allvar_all_v1_11_100p.pdf")
+c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/tests/logW_v2_11_1p.pdf")
