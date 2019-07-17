@@ -711,13 +711,14 @@ class plotEventYields:
 
 
 class plotBinaryOutput:
-    def __init__(self, data, predictions, nbins, bin_range, event_category, plotdir, logscale = False):
+    def __init__(self, data, predictions, nbins, bin_range, event_category, plotdir, pltname, logscale = False):
         self.data               = data
         self.predictions        = predictions
         self.nbins              = nbins
         self.bin_range          = bin_range
         self.event_category     = event_category
         self.plotdir            = plotdir
+        self.name               = pltname
         self.logscale           = logscale
 
         self.printROCScore = False
@@ -803,5 +804,5 @@ class plotBinaryOutput:
         # add category label
         setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
-        out_path = self.plotdir + "/binaryDiscriminator.pdf"
+        out_path = self.plotdir + self.name + "_binaryDisc.pdf"
         setup.saveCanvas(canvas, out_path)

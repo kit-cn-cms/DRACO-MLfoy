@@ -209,22 +209,31 @@ if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
 
-# build DNN model
-ada.build_model(config)
+# check if this DNN was already trained
+save_path = path + "save_model/" + name + "/"
+if os.path.exists(save_path):
+    exists = True
+else:
+    exists = False
 
-# perform the training
-ada.train_model()
+if exists:
+    # load trained model
+    ada.load_trained_model(path)
+else:
+    # build DNN model
+    ada.build_model(config)
 
-# load trained model
-# ada.load_trained_model(path)
+    # perform the training
+    ada.train_model()
 
 # evalute the trained model
 ada.eval_model()
 
-# save the trained model
-ada.save_model(signal)
-
 # make discriminator plot
-ada.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
-print("Done")
+if not exists:
+    # save the trained model
+    ada.save_model(signal)
+
+print("Done: ", name)

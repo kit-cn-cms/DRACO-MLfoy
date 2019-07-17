@@ -180,7 +180,9 @@ class AdaBoost():
         for i in range(0, self.alpha_t.shape[0]):
             self.train_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_train_data(as_matrix = True)))
             self.test_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_test_data(as_matrix = True)))
-
+        #get final prediction
+        #not loaded due to no use of eval_model
+        # self.model_prediction_vector = np.load(load_path + "pred_vec.npy")
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
@@ -362,97 +364,6 @@ class AdaBoost():
             self.weak_model_trained.append(self.model)
 
 
-    def save_model(self, signals):
-        ''' save the trained model'''
-
-        # get the path
-        # self.cp_path = "Just to here to avoid error"
-        save_path = self.path + "save_model/" + self.name + "/"
-        # create new dir for the trained net
-        if not os.path.exists(save_path):
-            os.mkdir(save_path)
-        else:
-            print("Dir already exists -> can not save model")
-            sys.exit()
-
-        # save model as h5py file
-        for i in range(0, self.adaboost_epochs):
-            out_file = save_path + "trained_model" + str(i) + ".h5py"
-            self.weak_model_trained[i].save(out_file)
-        print("saved trained model")
-
-        # save config of model
-        model_config = self.weak_model_trained[0].get_config()
-        out_file = save_path + "trained_model_config"
-        with open(out_file, "w") as f:
-            f.write( str(model_config))
-        print("saved model config at")
-
-        #save alpha
-        alpha = np.asarray(self.alpha_t)
-        np.save(save_path + "alpha", alpha)
-
-        #save epsilon
-        epsilon = np.asarray(self.epsilon)
-        np.save(save_path + "epsilon", epsilon)
-
-        # save weights of network
-        # out_file = self.cp_path +"/trained_model_weights.h5"
-        # self.model.save_weights(out_file)
-        # print("wrote trained weights to "+str(out_file))
-
-        # set model as non trainable
-        # for layer in self.model.layers:
-        #     layer.trainable = False
-        # self.model.trainable = False
-
-        # save checkpoint files (needed for c++ implementation)
-        # out_file = self.cp_path + "/trained_model"
-        # saver = tf.train.Saver()
-        # sess = K.get_session()
-        # save_path = saver.save(sess, out_file)
-        # print("saved checkpoint files to "+str(out_file))
-
-        # produce json file with configs
-        configs = self.architecture
-        configs["inputName"] = self.inputName
-        configs["outputName"] = self.outputName+"/"+configs["output_activation"]
-        configs = {key: configs[key] for key in configs if not "optimizer" in key}
-
-        # more information saving
-        configs["inputData"] = self.input_samples.input_path
-        configs["eventClasses"] = self.input_samples.getClassConfig()
-        configs["JetTagCategory"] = self.JTstring
-        configs["categoryLabel"] = self.categoryLabel
-        configs["Selection"] = self.event_category
-        configs["trainEpochs"] = self.train_epochs
-        configs["trainVariables"] = self.train_variables
-        configs["shuffleSeed"] = self.data.shuffleSeed
-        configs["trainSelection"] = self.evenSel
-        configs["evalSelection"] = self.oddSel
-        configs["adaboost_epochs"] = self.adaboost_epochs
-
-        # save information for binary DNN
-        if self.data.binary_classification:
-            configs["binaryConfig"] = {
-                "minValue": self.input_samples.bkg_target,
-                "maxValue": 1.,
-                "signals":  signals}
-
-        json_file = save_path + "/net_config.json"
-        with open(json_file, "w") as jf:
-            json.dump(configs, jf, indent = 2, separators = (",", ": "))
-        print("wrote net configs to "+str(json_file))
-
-        # save configurations of variables for plotscript
-        # plot_file = self.cp_path+"/plot_config.csv"
-        # variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
-        # variables = variable_configs.loc[self.train_variables]
-        # variables.to_csv(plot_file, sep = ",")
-        # print("wrote config of input variables to {}".format(plot_file))
-
-
-
     def weight_prediction(self, pred, alpha):
         pred = np.asarray(pred)
         alpha = np.asarray(alpha)
@@ -518,7 +429,7 @@ class AdaBoost():
             test_fraction = np.append(test_fraction,
                         np.count_nonzero(test_prediction_disc==self.test_label)/float(self.test_label.shape[0]))
         #needed for discriminator plot
-        self.model_prediction_vector = test_prediction_disc
+        self.model_prediction_vector = test_prediction
         #get roc
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction)
         roc_auc = metrics.auc(fpr, tpr)
@@ -528,12 +439,14 @@ class AdaBoost():
         plt.figure(1)
         plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
         plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
-        plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
-        plt.legend(loc='lower right')
+        # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
+        plt.xlabel("Epochen")
+        plt.ylabel("Anteil Richtig Bestimmt")
+        plt.legend(loc='best')
         plt.savefig(save_path + self.name + "_frac.pdf")
 
         plt.figure(2)
-        plt.title('Receiver Operating Characteristic')
+        # plt.title('Receiver Operating Characteristic')
         plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
@@ -544,29 +457,119 @@ class AdaBoost():
         plt.savefig(save_path + self.name +"_roc.pdf")
 
         plt.figure(3)
-        plt.title('Epsilon')
+        # plt.title('Epsilon')
+        plt.xlabel("Epochen")
+        plt.ylabel("Epsilon")
         plt.plot(epoches, self.epsilon, '-')
         plt.savefig(save_path + self.name +"_eps.pdf")
 
         # plt.show()
 
 
+    def save_model(self, signals):
+        ''' save the trained model'''
+
+        # get the path
+        # self.cp_path = "Just to here to avoid error"
+        save_path = self.path + "save_model/" + self.name + "/"
+        # create new dir for the trained net
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+        else:
+            print("Dir already exists -> can not save model")
+            sys.exit()
+
+        # save model as h5py file
+        for i in range(0, self.adaboost_epochs):
+            out_file = save_path + "trained_model" + str(i) + ".h5py"
+            self.weak_model_trained[i].save(out_file)
+        print("saved trained model")
+
+        # save config of model
+        model_config = self.weak_model_trained[0].get_config()
+        out_file = save_path + "trained_model_config"
+        with open(out_file, "w") as f:
+            f.write( str(model_config))
+        print("saved model config at")
+
+        #save alpha
+        alpha = np.asarray(self.alpha_t)
+        np.save(save_path + "alpha", alpha)
+
+        #save epsilon
+        epsilon = np.asarray(self.epsilon)
+        np.save(save_path + "epsilon", epsilon)
+
+        # save final prediciton_vector
+        np.save(save_path + "pred_vec", self.model_prediction_vector)
+
+        # produce json file with configs
+        configs = self.architecture
+        configs["inputName"] = self.inputName
+        configs["outputName"] = self.outputName+"/"+configs["output_activation"]
+        configs = {key: configs[key] for key in configs if not "optimizer" in key}
+
+        # more information saving
+        configs["inputData"] = self.input_samples.input_path
+        configs["eventClasses"] = self.input_samples.getClassConfig()
+        configs["JetTagCategory"] = self.JTstring
+        configs["categoryLabel"] = self.categoryLabel
+        configs["Selection"] = self.event_category
+        configs["trainEpochs"] = self.train_epochs
+        configs["trainVariables"] = self.train_variables
+        configs["shuffleSeed"] = self.data.shuffleSeed
+        configs["trainSelection"] = self.evenSel
+        configs["evalSelection"] = self.oddSel
+        configs["adaboost_epochs"] = self.adaboost_epochs
+
+        # save information for binary DNN
+        if self.data.binary_classification:
+            configs["binaryConfig"] = {
+                "minValue": self.input_samples.bkg_target,
+                "maxValue": 1.,
+                "signals":  signals}
+
+        json_file = save_path + "/net_config.json"
+        with open(json_file, "w") as jf:
+            json.dump(configs, jf, indent = 2, separators = (",", ": "))
+        print("wrote net configs to "+str(json_file))
+
+
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
-    def plot_discriminators(self, log = False, printROC = False, privateWork = False,
-                        signal_class = None, nbins = 20, bin_range = [-1.,1.]):
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
 
-        ''' plot all events classified as one category '''
-        plotDiscrs = plottingScripts.plotDiscriminators(
+        binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
-            prediction_vector   = self.model_prediction_vector,
-            event_classes       = self.event_classes,
+            predictions         = self.model_prediction_vector,
             nbins               = nbins,
             bin_range           = bin_range,
-            signal_class        = signal_class,
             event_category      = self.categoryLabel,
             plotdir             = self.path + "plot/",
+            pltname             = self.name,
             logscale            = log)
 
-        plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+
+
+
+
+
+    # def plot_discriminators(self, log = False, printROC = False, privateWork = False,
+    #                     signal_class = None, nbins = 20, bin_range = [-1.,1.]):
+    #
+    #     ''' plot all events classified as one category '''
+    #     plotDiscrs = plottingScripts.plotDiscriminators(
+    #         data                = self.data,
+    #         prediction_vector   = self.model_prediction_vector,
+    #         event_classes       = self.event_classes,
+    #         nbins               = nbins,
+    #         bin_range           = bin_range,
+    #         signal_class        = signal_class,
+    #         event_category      = self.categoryLabel,
+    #         plotdir             = self.path + "plot/",
+    #         logscale            = log)
+    #
+    #     plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)

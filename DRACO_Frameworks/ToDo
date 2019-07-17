@@ -3,3 +3,5 @@
 - adjust path names in gerenall to have dir for plots and models
 
 --m2 False does not work
+- implement earlystopping
+- get hole plotting out of eval and in seperate plotting function -> evaluation not needed when loading trained model
