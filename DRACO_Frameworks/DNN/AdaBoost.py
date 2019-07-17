@@ -517,6 +517,8 @@ class AdaBoost():
                         np.count_nonzero(train_prediction_disc==self.train_label)/float(self.train_label.shape[0]))
             test_fraction = np.append(test_fraction,
                         np.count_nonzero(test_prediction_disc==self.test_label)/float(self.test_label.shape[0]))
+        #needed for discriminator plot
+        self.model_prediction_vector = test_prediction_disc
         #get roc
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction)
         roc_auc = metrics.auc(fpr, tpr)
@@ -547,3 +549,24 @@ class AdaBoost():
         plt.savefig(save_path + self.name +"_eps.pdf")
 
         # plt.show()
+
+
+    # --------------------------------------------------------------------
+    # result plotting functions
+    # --------------------------------------------------------------------
+    def plot_discriminators(self, log = False, printROC = False, privateWork = False,
+                        signal_class = None, nbins = 20, bin_range = [-1.,1.]):
+
+        ''' plot all events classified as one category '''
+        plotDiscrs = plottingScripts.plotDiscriminators(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.categoryLabel,
+            plotdir             = self.path + "plot/",
+            logscale            = log)
+
+        plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)

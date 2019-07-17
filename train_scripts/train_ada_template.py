@@ -224,4 +224,7 @@ ada.eval_model()
 # save the trained model
 ada.save_model(signal)
 
+# make discriminator plot
+ada.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+
 print("Done")
