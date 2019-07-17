@@ -155,7 +155,7 @@ else:
 #Should AdaBoost.m2_use be used
 m2_use = options.m2_use
 if m2_use:
-    options.binary_bkg_target = 0       #algorithm does not work with different range
+    options.binary_bkg_target = -1       #algorithm does not work with different range
 
 # load samples
 input_samples = df.InputSamples(inPath, options.activateSamples)
@@ -180,7 +180,7 @@ if options.binary:
 if m2_use:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost_M2/"
 else:
-    path = "/home/ngolks/Projects/boosted_dnn/AdaBoost"           #needs to be adjusted
+    path = "/home/ngolks/Projects/boosted_dnn/AdaBoost/"           #needs to be adjusted
 name = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
 
 #initializing AdaBoost training class
@@ -195,7 +195,6 @@ ada = ADA.AdaBoost(
     binary_bkg_target = options.binary_bkg_target,
     # number of epochs
     train_epochs    = int(options.train_epochs),
-    # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2,
@@ -210,11 +209,31 @@ if options.net_config:
     from net_configs import config_dict
     config=config_dict[options.net_config]
 
-# build DNN model
-ada.build_model(config)
+# check if this DNN was already trained
+save_path = path + "save_model/" + name + "/"
+if os.path.exists(save_path):
+    exists = True
+else:
+    exists = False
 
-# perform the training
-ada.train_model()
+if exists:
+    # load trained model
+    ada.load_trained_model(path)
+else:
+    # build DNN model
+    ada.build_model(config)
+
+    # perform the training
+    ada.train_model()
 
 # evalute the trained model
-# ada.eval_model()
+ada.eval_model()
+
+# make discriminator plot
+ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+
+if not exists:
+    # save the trained model
+    ada.save_model(signal)
+
+print("Done: ", name)

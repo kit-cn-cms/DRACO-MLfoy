@@ -164,7 +164,7 @@ class AdaBoost():
 
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
-        load_path = self.path + "save_model/" + self.name + "/"
+        load_path = inputDirectory + "save_model/" + self.name + "/"
         self.weak_model_trained = []
         for i in range(0, self.adaboost_epochs):
             load = load_path + "trained_model" + str(i) + ".h5py"
@@ -172,7 +172,17 @@ class AdaBoost():
             self.weak_model_trained.append(model)
         #load alpha
         self.alpha_t = np.load(load_path + "alpha.npy")
-
+        #load epsilon
+        self.epsilon = np.load(load_path + "epsilon.npy")
+        #get predictions
+        self.train_prediction_vector = []
+        self.test_prediction_vector = []
+        for i in range(0, self.alpha_t.shape[0]):
+            self.train_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_train_data(as_matrix = True)))
+            self.test_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_test_data(as_matrix = True)))
+        #get final prediction
+        #not loaded due to no use of eval_model
+        # self.model_prediction_vector = np.load(load_path + "pred_vec.npy")
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
@@ -232,7 +242,7 @@ class AdaBoost():
         '''Calculate weighted error and return alpha_t after each training'''
         # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
         #hier kann man auch self... verwenden da prediciton vectoren schon in train_model erstellt
-        model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
+        model_train_prediction = self.train_prediction_vector[-1]
         model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
         model_train_weights = self.data.get_train_weights()
         weight_sum = np.sum(model_train_weights)
@@ -250,9 +260,12 @@ class AdaBoost():
         if self.m2:
             #normalize the weights
             model_train_weights = model_train_weights/weight_sum
-            print("# DEBUG: get_alpha_epsilon, normalized? ", np.sum(model_train_weights))
+            # print("# DEBUG: get_alpha_epsilon, normalized? ", np.sum(model_train_weights))
             epsilon = 0
             counter = 0
+            model_train_prediction = (model_train_prediction + 1)/2     #shift output to [0,1]
+            # print(model_train_prediction[0:10])
+            # print(model_train_label[0:10])
             for i in np.arange(0, num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
                     counter += 1
@@ -261,12 +274,14 @@ class AdaBoost():
                         epsilon += model_train_weights[i]*(1-model_train_prediction[i])
                     else:
                         epsilon += model_train_weights[i]*(model_train_prediction[i])
-            print("# DEBUG: wong predicitons: ", counter)
+            # print("# DEBUG: wong predicitons: ", counter)
             epsilon = epsilon/weight_sum
             alpha = epsilon/(1-epsilon)
             # print("# DEBUG: get_a epsilon, alpha")
         #normal adaboost
         else:
+            # print(model_train_prediction[0:10])
+            # print(model_train_label[0:10])
             weight_false = 0
             for i in np.arange(0,num):
                 if model_train_prediction_discret[i] != model_train_label[i]:
@@ -337,17 +352,121 @@ class AdaBoost():
             #get prediction vector for training and test
             self.train_prediction_vector.append(self.model.predict(self.data.get_train_data(as_matrix = True)))
             self.test_prediction_vector.append(self.model.predict(self.data.get_test_data(as_matrix = True)))
+            # print("# DEBUG: train_model, train_prediction_vector: ", self.train_prediction_vector[t])
             #get alpha, epsilon and adjust weights
             alpha , epsilon = self.get_alpha_epsilon()
             self.epsilon.append(float(epsilon))
             self.alpha_t.append(float(alpha))   #make dict alpha -> model
+            # print("# DEBUG: mean pred: ", np.mean(train_prediction_vector))
             # print("# DEBUG: Watch alpha", self.alpha_t)
             # print("# DEBUG: Watch epsilon", self.epsilon)
             #collect weak classifier
             self.weak_model_trained.append(self.model)
 
 
-    def save_model(self):
+    def weight_prediction(self, pred, alpha):
+        pred = np.asarray(pred)
+        alpha = np.asarray(alpha)
+        # print("# DEBUG: weight_prediction, pred.shape: ", pred.shape)
+        # print("# DEBUG: weight_prediction, alpha.shape: ", alpha.shape)
+        # print("# DEBUG: alpha: ", alpha)
+        sum = 0
+        # print("# DEBUG: len(alpha): ", len(alpha))
+        # print("# DEBUG: weight_prediction, initial pred: ", pred[:len(alpha),0:5])
+        if self.m2:
+            for i in range(0,len(alpha)):
+                factor = np.log(1/alpha[i])
+                pred[i] = pred[i]*factor
+                sum +=  factor
+        else:
+            for i in range(0,len(alpha)):
+                pred[i] = pred[i]*alpha[i]
+                sum += alpha[i]
+        pred = pred/sum
+        # print("# DEBUG: pred: ", pred[0:len(alpha)][0:5])
+        # final and initial prediction is ok so far
+        # print("# DEBUG: weight_prediction, final pred: ", pred[:len(alpha),0:5])
+        return pred[0:len(alpha)]
+
+
+    def strong_classification(self, pred, alpha):
+        '''builds prediciton vector for strong classifier'''
+        pred_array = self.weight_prediction(pred, alpha)
+        # print("# DEBUG: pred_array: ", pred_array[len(alpha)-1,0:5])
+        prediction_vector = np.sum(pred_array, axis = 0)
+        # print("# DEBUG: prediction_vector: ", prediction_vector[0:5])
+        # print("# DEBUG: labels: ", self.train_label[0:5])
+        prediction_vector_disc = np.array([])
+        for x in prediction_vector:
+            if x<self.cut_value:
+                prediction_vector_disc = np.append(prediction_vector_disc, int(self.binary_bkg_target))
+            else:
+                prediction_vector_disc = np.append(prediction_vector_disc, int(1))
+        return prediction_vector, prediction_vector_disc
+
+
+    def eval_model(self):
+        '''evalute trained model'''
+        '''Should contain:  -Plot prediciton_fraction
+                            -Get roc'''
+        #get saving path
+        save_path = self.path + "plot/"
+        #get the labels
+        self.train_label = self.data.get_train_labels(as_categorical = False)
+        self.test_label = self.data.get_test_labels(as_categorical = False)
+        #get prediction fraction after each adaboost_epoch
+        train_fraction = np.array([])
+        test_fraction = np.array([])
+        for i in np.arange(0, len(self.train_prediction_vector)):
+            # print("# DEBUG: eval_model, train_prediction_vector: ", self.train_prediction_vector[i][0:5])
+            train_prediction, train_prediction_disc = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i+1])
+            test_prediction, test_prediction_disc = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i+1])
+            # print("# DEBUG: train_prediction: ", train_prediction[0:5])
+            # print("# DEBUG: train_prediction_disc: ", train_prediction_disc[0:5])
+            # print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
+            train_fraction = np.append(train_fraction,
+                        np.count_nonzero(train_prediction_disc==self.train_label)/float(self.train_label.shape[0]))
+            test_fraction = np.append(test_fraction,
+                        np.count_nonzero(test_prediction_disc==self.test_label)/float(self.test_label.shape[0]))
+        #needed for discriminator plot
+        self.model_prediction_vector = test_prediction
+        #get roc
+        fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction)
+        roc_auc = metrics.auc(fpr, tpr)
+        #plot
+        epoches = np.arange(1, len(self.train_prediction_vector)+1)
+        print("# DEBUG: fraction: ", train_fraction, test_fraction)
+        plt.figure(1)
+        plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
+        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
+        # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
+        plt.xlabel("Epochen")
+        plt.ylabel("Anteil Richtig Bestimmt")
+        plt.legend(loc='best')
+        plt.savefig(save_path + self.name + "_frac.pdf")
+
+        plt.figure(2)
+        # plt.title('Receiver Operating Characteristic')
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.legend(loc = 'lower right')
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.savefig(save_path + self.name +"_roc.pdf")
+
+        plt.figure(3)
+        # plt.title('Epsilon')
+        plt.xlabel("Epochen")
+        plt.ylabel("Epsilon")
+        plt.plot(epoches, self.epsilon, '-')
+        plt.savefig(save_path + self.name +"_eps.pdf")
+
+        # plt.show()
+
+
+    def save_model(self, signals):
         ''' save the trained model'''
 
         # get the path
@@ -355,7 +474,7 @@ class AdaBoost():
         save_path = self.path + "save_model/" + self.name + "/"
         # create new dir for the trained net
         if not os.path.exists(save_path):
-            os.makedirs(dir)
+            os.mkdir(save_path)
         else:
             print("Dir already exists -> can not save model")
             sys.exit()
@@ -377,22 +496,12 @@ class AdaBoost():
         alpha = np.asarray(self.alpha_t)
         np.save(save_path + "alpha", alpha)
 
-        # save weights of network
-        # out_file = self.cp_path +"/trained_model_weights.h5"
-        # self.model.save_weights(out_file)
-        # print("wrote trained weights to "+str(out_file))
+        #save epsilon
+        epsilon = np.asarray(self.epsilon)
+        np.save(save_path + "epsilon", epsilon)
 
-        # set model as non trainable
-        # for layer in self.model.layers:
-        #     layer.trainable = False
-        # self.model.trainable = False
-
-        # save checkpoint files (needed for c++ implementation)
-        # out_file = self.cp_path + "/trained_model"
-        # saver = tf.train.Saver()
-        # sess = K.get_session()
-        # save_path = saver.save(sess, out_file)
-        # print("saved checkpoint files to "+str(out_file))
+        # save final prediciton_vector
+        np.save(save_path + "pred_vec", self.model_prediction_vector)
 
         # produce json file with configs
         configs = self.architecture
@@ -425,86 +534,42 @@ class AdaBoost():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
-        # save configurations of variables for plotscript
-        # plot_file = self.cp_path+"/plot_config.csv"
-        # variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
-        # variables = variable_configs.loc[self.train_variables]
-        # variables.to_csv(plot_file, sep = ",")
-        # print("wrote config of input variables to {}".format(plot_file))
+
+    # --------------------------------------------------------------------
+    # result plotting functions
+    # --------------------------------------------------------------------
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
+
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            predictions         = self.model_prediction_vector,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.categoryLabel,
+            plotdir             = self.path + "plot/",
+            pltname             = self.name,
+            logscale            = log)
+
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
 
 
-    def weight_prediction(self, pred, alpha):
-        pred = np.asarray(pred)
-        if self.m2:
-            for i in np.arrange(0,len(alpha)):
-                pred[i] = pred[i]*np.log(1/alpha[i])
-        else:
-            for i in range(0,len(alpha)):
-                pred[i] = pred[i]*alpha[i]
-        return pred
 
 
-    def strong_classification(self, pred, alpha):
-        '''builds prediciton vector for strong classifier'''
-        pred_array = self.weight_prediction(pred, alpha)
-        sum = np.sum(pred_array, axis = 0)
-        final_prediction_vector = np.array([])
-        for x in sum:
-            if x<self.cut_value:
-                final_prediction_vector = np.append(final_prediction_vector, int(self.binary_bkg_target))
-            else:
-                final_prediction_vector = np.append(final_prediction_vector, int(1))
-        return final_prediction_vector
-
-
-    def eval_model(self):
-        '''evalute trained model'''
-        '''Should contain:  -Plot prediciton_fraction
-                            -Get roc'''
-        #get saving path
-        save_path = self.path + "plot/"
-        #get the labels
-        self.train_label = self.data.get_train_labels(as_categorical = False)
-        self.test_label = self.data.get_test_labels(as_categorical = False)
-        #get prediction fraction after each adaboost_epoch
-        train_fraction = np.array([])
-        test_fraction = np.array([])
-        for i in np.arange(0, len(self.train_prediction_vector)):
-            train_prediction_final = self.strong_classification(self.train_prediction_vector, self.alpha_t[0:i])
-            test_prediction_final = self.strong_classification(self.test_prediction_vector, self.alpha_t[0:i])
-            # print("# DEBUG: count_nonzero: ", np.count_nonzero(test_prediction_final==self.test_label))
-            train_fraction = np.append(train_fraction,
-                        np.count_nonzero(train_prediction_final==self.train_label)/float(self.train_label.shape[0]))
-            test_fraction = np.append(test_fraction,
-                        np.count_nonzero(test_prediction_final==self.test_label)/float(self.test_label.shape[0]))
-        #get roc
-        fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction_final)
-        roc_auc = metrics.auc(fpr, tpr)
-        #plot
-        epoches = np.arange(1, len(self.train_prediction_vector)+1)
-
-        plt.figure(1)
-        plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
-        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
-        plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
-        plt.legend(loc='lower right')
-        plt.savefig(save_path + self.name + "_frac.pdf")
-
-        plt.figure(2)
-        plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
-        plt.legend(loc = 'lower right')
-        plt.plot([0, 1], [0, 1],'r--')
-        plt.xlim([0, 1])
-        plt.ylim([0, 1])
-        plt.ylabel('True Positive Rate')
-        plt.xlabel('False Positive Rate')
-        plt.savefig(save_path + self.name +"_roc.pdf")
-
-        plt.figure(3)
-        plt.title('Epsilon')
-        plt.plot(epoches, self.epsilon, '-')
-        plt.savefig(save_path + self.name +"_eps.pdf")
-
-        # plt.show()
+    # def plot_discriminators(self, log = False, printROC = False, privateWork = False,
+    #                     signal_class = None, nbins = 20, bin_range = [-1.,1.]):
+    #
+    #     ''' plot all events classified as one category '''
+    #     plotDiscrs = plottingScripts.plotDiscriminators(
+    #         data                = self.data,
+    #         prediction_vector   = self.model_prediction_vector,
+    #         event_classes       = self.event_classes,
+    #         nbins               = nbins,
+    #         bin_range           = bin_range,
+    #         signal_class        = signal_class,
+    #         event_category      = self.categoryLabel,
+    #         plotdir             = self.path + "plot/",
+    #         logscale            = log)
+    #
+    #     plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)

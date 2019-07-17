@@ -144,6 +144,58 @@ config_dict["ada_weak1"] = {
         "earlystopping_epochs":     50
         }
 
+config_dict["ada_weak2"] = {
+        "layers":                   [100,50],
+        "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.3,
+        "L2_Norm":                  0.,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak3"] = {
+        "layers":                   [100,50],
+        "loss_function":            "hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.3,
+        "L2_Norm":                  0.,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak4"] = {
+        "layers":                   [200,100],
+        "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak5"] = {
+        "layers":                   [50,25],
+        "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.3,
+        "L2_Norm":                  0.,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
 config_dict["ada_m2"] = {
         "layers":                   [100,100],
         "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}

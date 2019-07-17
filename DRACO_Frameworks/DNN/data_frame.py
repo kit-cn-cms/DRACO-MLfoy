@@ -270,7 +270,7 @@ class DataFrame(object):
         '''Adjust the data weights according to Adaboost algorithm -> wight mean is set to 1'''
         # weights = self.df_train.train_weight
         mean = self.df_train.train_weight.mean()
-        print("# DEBUG: data_frame, check if weights were normalized: ", mean)
+        # print("# DEBUG: data_frame, check if weights were normalized: ", mean)
         #add predicted label to df_train
         self.df_train['pred_disc_label'] = pred_disc
         #use AdaBoost.M2 algorithm
