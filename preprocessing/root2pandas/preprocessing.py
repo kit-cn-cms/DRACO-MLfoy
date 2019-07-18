@@ -120,7 +120,8 @@ additional_variables = [
     "Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 
-    "Evt_Lumi"]
+    "Evt_Lumi",
+    "Evt_Odd"]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
