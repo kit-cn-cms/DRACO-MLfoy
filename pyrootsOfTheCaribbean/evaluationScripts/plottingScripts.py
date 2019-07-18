@@ -424,10 +424,10 @@ class plotClosureTest:
                 if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
         
-            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
-            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
 
@@ -825,5 +825,229 @@ class plotBinaryOutput:
 
 
 
+class plotCrossEvaluation:
+    def __init__(self, data_even, test_prediction_even, data_odd, test_prediction_odd, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+        self.data_even              = data_even
+        self.test_prediction_even   = test_prediction_even
+        # self.train_prediction_even  = train_prediction_even
+
+        self.data_odd               = data_odd
+        self.test_prediction_odd    = test_prediction_odd
+        # self.train_prediction_odd   = train_prediction_odd
+
+        self.pred_classes_test_even      = np.argmax(self.test_prediction_even, axis = 1)
+        # self.pred_classes_train_even     = np.argmax(self.train_prediction_even, axis = 1)
+
+        self.pred_classes_test_odd      = np.argmax(self.test_prediction_odd, axis = 1)
+        # self.pred_classes_train_odd     = np.argmax(self.train_prediction_odd, axis = 1)
+
+        self.event_classes      = event_classes
+        self.nbins              = nbins
+        self.bin_range          = bin_range
+        self.signal_class       = signal_class
+        self.event_category     = event_category
+        self.plotdir            = plotdir
+        self.logscale           = logscale
+        self.signalIndex       = []
+
+        if self.signal_class:
+            for signal in signal_class:
+                self.signalIndex.append(self.data_even.class_translation[signal])
 
 
+        # generate sub directory
+        self.plotdir += "/Cross_Eval/"
+        if not os.path.exists(self.plotdir):
+            os.makedirs(self.plotdir)
+
+        # default settings
+        self.privateWork = False
+
+    def plot(self, ratio = False, privateWork = False):
+        self.privateWork = privateWork
+
+        # loop over output nodes
+        for i, node_cls in enumerate(self.event_classes):
+            # get index of node
+            nodeIndex = self.data_even.class_translation[node_cls]
+            if self.signal_class:
+                signalIndex = self.signalIndex
+                signalClass = self.signal_class
+            else:
+                signalIndex = [nodeIndex]
+                signalClass = node_cls
+
+            # get output values of this node
+            test_values_even = self.test_prediction_even[:,i]
+            # train_values_even = self.train_prediction_even[:,i]
+            test_values_odd = self.test_prediction_odd[:,i]
+            # train_values_odd = self.train_prediction_odd[:,i]
+
+            sig_test_values_even = [test_values_even[k] for k in range(len(test_values_even)) \
+                if self.data_even.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_even[k] == nodeIndex]
+            bkg_test_values_even = [test_values_even[k] for k in range(len(test_values_even)) \
+                if not self.data_even.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_even[k] == nodeIndex]
+
+            sig_test_values_odd = [test_values_odd[k] for k in range(len(test_values_odd)) \
+                if self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_odd[k] == nodeIndex]
+            bkg_test_values_odd = [test_values_odd[k] for k in range(len(test_values_odd)) \
+                if not self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_odd[k] == nodeIndex]
+
+            # sig_train_values = [train_values[k] for k in range(len(train_values)) \
+            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
+            #     and self.pred_classes_train[k] == nodeIndex]
+            # bkg_train_values = [train_values[k] for k in range(len(train_values)) \
+            #     if not self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
+            #     and self.pred_classes_train[k] == nodeIndex]
+
+            sig_test_weights_even = [self.data_even.get_lumi_weights()[k] for k in range(len(test_values_even)) \
+                if self.data_even.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_even[k] == nodeIndex]
+            bkg_test_weights_even = [self.data_even.get_lumi_weights()[k] for k in range(len(test_values_even)) \
+                if not self.data_even.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_even[k] == nodeIndex]
+
+            sig_test_weights_odd = [self.data_odd.get_lumi_weights()[k] for k in range(len(test_values_odd)) \
+                if self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_odd[k] == nodeIndex]
+            bkg_test_weights_odd = [self.data_odd.get_lumi_weights()[k] for k in range(len(test_values_odd)) \
+                if not self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
+                and self.pred_classes_test_odd[k] == nodeIndex]
+        
+            # sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
+            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
+            #     and self.pred_classes_train[k] == nodeIndex]
+            # bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
+            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
+            #     and self.pred_classes_train[k] == nodeIndex]
+
+            # setup train histograms
+            # sig_train = setup.setupHistogram(
+            #     values      = sig_train_values,
+            #     weights     = sig_train_weights,
+            #     nbins       = self.nbins,
+            #     bin_range   = self.bin_range,
+            #     color       = ROOT.kBlue,
+            #     xtitle      = "signal train at "+str(node_cls)+" node",
+            #     ytitle      = setup.GetyTitle(privateWork = True),
+            #     filled      = True)
+            # sig_train.Scale(1./sig_train.Integral())
+            # sig_train.SetLineWidth(1)
+            # sig_train.SetFillColorAlpha(ROOT.kBlue, 0.5)
+
+            # bkg_train = setup.setupHistogram(
+            #     values      = bkg_train_values,
+            #     weights     = bkg_train_weights,
+            #     nbins       = self.nbins,
+            #     bin_range   = self.bin_range,
+            #     color       = ROOT.kRed,
+            #     xtitle      = "bkg train at "+str(node_cls)+" node",
+            #     ytitle      = setup.GetyTitle(privateWork = True),
+            #     filled      = True)
+            # bkg_train.Scale(1./bkg_train.Integral())
+            # bkg_train.SetLineWidth(1)
+            # bkg_train.SetFillColorAlpha(ROOT.kRed, 0.5)
+
+            # setup test histograms even
+            sig_test_even = setup.setupHistogram(
+                values      = sig_test_values_even,
+                weights     = sig_test_weights_even,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kBlue,
+                xtitle      = "signal test even at "+str(node_cls)+" node",
+                ytitle      = setup.GetyTitle(privateWork = True),
+                filled      = False)
+            sig_test_even.Scale(1./sig_test_even.Integral())
+            sig_test_even.SetLineWidth(1)
+            sig_test_even.SetFillColorAlpha(ROOT.kBlue, 0.5)
+
+            bkg_test_even = setup.setupHistogram(
+                values      = bkg_test_values_even,
+                weights     = bkg_test_weights_even,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kRed,
+                xtitle      = "bkg test even at "+str(node_cls)+" node",
+                ytitle      = setup.GetyTitle(privateWork = True),
+                filled      = False)
+            bkg_test_even.Scale(1./bkg_test_even.Integral())
+            bkg_test_even.SetLineWidth(1)
+            bkg_test_even.SetFillColorAlpha(ROOT.kRed, 0.5)
+
+            # setup test histograms odd
+            sig_test_odd = setup.setupHistogram(
+                values      = sig_test_values_odd,
+                weights     = sig_test_weights_odd,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kBlue,
+                xtitle      = "signal test odd at "+str(node_cls)+" node",
+                ytitle      = setup.GetyTitle(privateWork = True),
+                filled      = False)
+            sig_test_odd.Scale(1./sig_test_odd.Integral())
+            sig_test_odd.SetLineWidth(1)
+            sig_test_odd.SetMarkerStyle(20)
+            sig_test_odd.SetMarkerSize(2)
+
+            bkg_test_odd = setup.setupHistogram(
+                values      = bkg_test_values_odd,
+                weights     = bkg_test_weights_odd,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kRed,
+                xtitle      = "bkg test odd at "+str(node_cls)+" node",
+                ytitle      = setup.GetyTitle(privateWork = True),
+                filled      = False)
+            bkg_test_odd.Scale(1./bkg_test_odd.Integral())
+            bkg_test_odd.SetLineWidth(1)
+            bkg_test_odd.SetMarkerStyle(20)
+            bkg_test_odd.SetMarkerSize(2)
+
+            plotOptions = {
+                "ratio":      ratio,
+                "ratioTitle": "#frac{DNN_even}{DNN_odd}",
+                "logscale": self.logscale}
+
+            # init canvas
+            canvas = setup.drawCrossEvalOnCanvas(
+                sig_test_even, bkg_test_even, sig_test_odd, bkg_test_odd, plotOptions,
+                canvasName = "cross eval at {} node".format(node_cls))
+                    
+            # setup legend
+            legend = setup.getLegend()
+
+            # add entries
+            legend.AddEntry(sig_test_even, "test even {}".format("+".join(signalClass)), "F")
+            legend.AddEntry(bkg_test_even, "test bkg even", "F")
+            legend.AddEntry(sig_test_odd,  "test odd {}".format("+".join(signalClass)), "L")
+            legend.AddEntry(bkg_test_odd,  "test bkg odd", "L")
+
+            # draw legend
+            legend.Draw("same")
+
+            # print private work label if activated
+            if self.privateWork:
+                setup.printPrivateWork(canvas)
+            # add category label
+            setup.printCategoryLabel(canvas, self.event_category)
+
+            
+
+
+            # add private work label if activated
+            if self.privateWork:
+                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+
+            out_path = self.plotdir+"/CrossEval_at_{}_node.pdf".format(node_cls)
+            setup.saveCanvas(canvas, out_path)
+
+        # add the histograms together
+        workdir = os.path.dirname(os.path.dirname(self.plotdir[:-1]))
+        cmd = "pdfunite "+str(self.plotdir)+"/CrossEval_*.pdf "+str(workdir)+"/CrossEval_.pdf"
+        print(cmd)
+        os.system(cmd)
