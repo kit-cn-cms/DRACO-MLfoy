@@ -8,3 +8,7 @@
 
 Wichtig:
 - test if pred in ada_adjust_weights is [0,1] or [-1,1]
+
+- fraction signal to background in discriminator -> yrange anpassen
+- eventuell likelihood einbauen
+- earlystopping

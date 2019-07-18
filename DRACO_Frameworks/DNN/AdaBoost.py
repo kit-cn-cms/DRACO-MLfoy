@@ -551,7 +551,7 @@ class AdaBoost():
             pltname             = self.name,
             logscale            = log)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        binaryOutput.plot(ratio = True, printROC = printROC, privateWork = privateWork, name = name)
 
 
 
