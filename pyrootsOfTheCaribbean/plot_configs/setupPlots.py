@@ -15,7 +15,7 @@ def GetPlotColor( cls ):
         "ttb":          ROOT.kRed-2,
         "tthf":         ROOT.kRed-3,
         "ttbar":        ROOT.kOrange,
-        "ttmergedb":    ROOT.kRed-1,
+        "ttmb":         ROOT.kRed-1,
         "ST":           ROOT.kRed-8,
         "tH":           ROOT.kWhite,
     
@@ -330,6 +330,96 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
             ROOT.gStyle.SetErrorX(0)
             ratioPlot.DrawCopy("sameP")
         canvas.cd(1)
+    return canvas
+
+
+def drawCrossEvalOnCanvas(sig_test_even, bkg_test_even, sig_test_odd, bkg_test_odd, plotOptions, canvasName):
+    canvas = getCanvas(canvasName, plotOptions["ratio"])
+
+    # move over/underflow bins into plotrange
+    moveOverUnderFlow(sig_test_even)
+    moveOverUnderFlow(bkg_test_even)
+    moveOverUnderFlow(sig_test_odd)
+    moveOverUnderFlow(bkg_test_odd)
+
+    # figure out plotrange
+    canvas.cd(1)
+    yMax = 1e-9
+    yMinMax = 1000.
+    for h in [sig_test_even, bkg_test_even, sig_test_odd, bkg_test_odd]:
+        yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
+        if h.GetBinContent(h.GetMaximumBin()) > 0:
+            yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
+
+    # draw first hist
+    if plotOptions["logscale"]:
+        bkg_test_even.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        canvas.SetLogy()
+    else:
+        bkg_test_even.GetYaxis().SetRangeUser(0, yMax*1.5)
+    bkg_test_even.GetXaxis().SetTitle(canvasName)
+
+    option = "histo"
+    bkg_test_even.DrawCopy(option+"E0")
+
+
+    # draw the other histograms
+    sig_test_even.DrawCopy(option+"E0 same")
+    bkg_test_odd.DrawCopy("E0 same")
+    sig_test_odd.DrawCopy("E0 same")
+
+    # redraw axis
+    canvas.cd(1)
+    bkg_test_even.DrawCopy("axissame")
+
+    if plotOptions["ratio"]:
+        canvas.cd(2)
+        line = sig_test_even.Clone()
+        line.SetFillColor(0)
+        line.Divide(sig_test_even)
+        line.GetYaxis().SetRangeUser(0.5,1.5)
+        line.GetYaxis().SetTitle(plotOptions["ratioTitle"])
+
+        line.GetXaxis().SetLabelSize(line.GetXaxis().GetLabelSize()*2.4)
+        line.GetYaxis().SetLabelSize(line.GetYaxis().GetLabelSize()*2.2)
+        line.GetXaxis().SetTitle(canvasName)
+
+        line.GetXaxis().SetTitleSize(line.GetXaxis().GetTitleSize()*3)
+        line.GetYaxis().SetTitleSize(line.GetYaxis().GetTitleSize()*2.5)
+
+        line.GetYaxis().SetTitleOffset(0.5)
+        line.GetYaxis().SetNdivisions(505)
+        for i in range(line.GetNbinsX()+1):
+            line.SetBinContent(i, 1)
+            line.SetBinError(i, 1)
+        line.SetLineWidth(1)
+        line.SetLineColor(ROOT.kBlack)
+        line.DrawCopy("histo")
+        
+        # ratio plot
+        ratioPlot = sig_test_even.Clone()
+        ratioPlot.Divide(sig_test_odd)
+        ratioPlot.SetTitle(canvasName)
+        ratioPlot.SetLineColor(sig_test_even.GetLineColor())
+        ratioPlot.SetLineWidth(1)
+        ratioPlot.SetMarkerStyle(20)
+        ratioPlot.SetFillColor(0)
+        ratioPlot.SetMarkerColor(sig_test_even.GetMarkerColor())
+        ROOT.gStyle.SetErrorX(0)
+        ratioPlot.DrawCopy("sameP")
+
+        ratioPlot = bkg_test_even.Clone()
+        ratioPlot.Divide(bkg_test_odd)
+        ratioPlot.SetTitle(canvasName)
+        ratioPlot.SetLineColor(bkg_test_even.GetLineColor())
+        ratioPlot.SetLineWidth(1)
+        ratioPlot.SetMarkerStyle(20)
+        ratioPlot.SetFillColor(0)
+        ratioPlot.SetMarkerColor(bkg_test_even.GetMarkerColor())
+        ROOT.gStyle.SetErrorX(0)
+        ratioPlot.DrawCopy("sameP")
+        canvas.cd(1)
+
     return canvas
     
 
