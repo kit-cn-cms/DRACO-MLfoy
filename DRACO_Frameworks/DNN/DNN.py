@@ -693,3 +693,46 @@ def loadDNN(inputDirectory, outputDirectory):
 
 
     return dnn
+
+def loadDNN_crossEval(inputDirectory, outputDirectory):
+
+    # get net config json
+    configFile = inputDirectory+"/checkpoints/net_config.json"
+    if not os.path.exists(configFile): 
+        sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
+
+    with open(configFile) as f:
+        config = f.read()
+    config = json.loads(config)
+
+    # load samples
+    input_samples = data_frame.InputSamples(config["inputData"])
+
+    for sample in config["eventClasses"]:
+        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
+
+    print("shuffle seed: {}".format(config["shuffleSeed"]))
+
+    # select test samples
+    if config["evalSelection"] == "(Evt_Odd==1)":
+        evenSel = False
+    elif config["evalSelection"] == "(Evt_Odd==0)":
+        evenSel = True
+
+    # init DNN class
+    dnn = DNN(
+        save_path       = outputDirectory,
+        input_samples   = input_samples,
+        event_category  = config["JetTagCategory"],
+        train_variables = config["trainVariables"],
+        shuffle_seed    = config["shuffleSeed"],
+        evenSel         = evenSel,
+        test_percentage = 1.
+        )
+
+    # load the trained model
+    dnn.load_trained_model(inputDirectory)
+
+
+    return dnn
+
