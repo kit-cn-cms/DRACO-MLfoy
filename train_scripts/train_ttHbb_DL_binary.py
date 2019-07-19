@@ -160,12 +160,40 @@ input_samples.addSample("ttlf" +naming, label = "ttlf" , normalization_weight = 
 if options.binary:
    input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
+category_cutString_dict = {
+
+    '3j_'+  '2b': '(N_jets == 3) && (N_btags == 2)',
+    '3j_'+  '3b': '(N_jets == 3) && (N_btags == 3)',
+  'ge4j_'+  '2b': '(N_jets >= 4) && (N_btags == 2)',
+  'ge4j_'+  '3b': '(N_jets >= 4) && (N_btags == 3)',
+  'ge4j_'+'ge4b': '(N_jets >= 4) && (N_btags >= 4)',
+
+  'ge4j_'+'ge3b': '(N_jets >= 4) && (N_btags >= 3)',
+}
+
+category_label_dict = {
+
+    '3j_'+  '2b': 'N_jets = 3, N_btags = 2',
+    '3j_'+  '3b': 'N_jets = 3, N_btags = 3',
+  'ge4j_'+  '2b': 'N_jets \geq 4, N_btags = 2',
+  'ge4j_'+  '3b': 'N_jets \geq 4, N_btags = 3',
+  'ge4j_'+'ge4b': 'N_jets \geq 4, N_btags \geq 4',
+
+  'ge4j_'+'ge3b': 'N_{jets} \geq 4, N_{btags} \geq 3',
+}
+
 # initializing DNN training class
+
 dnn = DNN.DNN(
 
     save_path       = outputdir,
     input_samples   = input_samples,
-    event_category  = options.category,
+
+    category_name   = options.category,
+
+    category_cutString = category_cutString_dict[options.category],
+    category_label     = category_label_dict[options.category],
+
     train_variables = variables,
 
     norm_variables = options.norm_variables,
@@ -173,7 +201,7 @@ dnn = DNN.DNN(
     # number of epochs
     train_epochs    = int(options.train_epochs),
     # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
+    eval_metrics    = ['acc'],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = 0.2,
     # balance samples per epoch such that there amount of samples per category is roughly equal

@@ -81,21 +81,22 @@ class EarlyStopping(keras.callbacks.Callback):
                 self.model.stop_training = True
 
 
-
 class DNN():
     def __init__(self,
             save_path,
             input_samples,
-            event_category,
+            category_name,
             train_variables,
-            norm_variables   = True,
-            train_epochs     = 500,
-            test_percentage  = 0.2,
-            eval_metrics     = None,
-            shuffle_seed     = None,
-            balanceSamples   = False,
-            evenSel          = None,
-            norm_variables   = True):
+            category_cutString = None,
+            category_label     = None,
+            norm_variables     = True,
+            train_epochs       = 500,
+            test_percentage    = 0.2,
+            eval_metrics       = None,
+            shuffle_seed       = None,
+            balanceSamples     = False,
+            evenSel            = None,
+            norm_variables     = True):
 
         # save some information
         # list of samples to load into dataframe
@@ -110,9 +111,16 @@ class DNN():
             os.makedirs( self.save_path )
 
         # name of event category (usually nJet/nTag category)
-        self.JTstring       = event_category
-        self.event_category = JTcut.getJTstring(event_category)
-        self.categoryLabel  = JTcut.getJTlabel(event_category)
+        self.category_name = category_name
+
+        # string containing event selection requirements;
+        # if not specified (default), deduced via JTcut
+        self.category_cutString = (category_cutString if category_cutString is not None else JTcut.getJTstring(category_name))
+
+        # category label (string);
+        # if not specified (default), deduced via JTcut
+        self.category_label = (category_label if category_label is not None else JTcut.getJTlabel (category_name))
+
         # selection
         self.evenSel = ""
         self.oddSel = "1."
@@ -166,7 +174,7 @@ class DNN():
         ''' load data set '''
         return data_frame.DataFrame(
             input_samples    = self.input_samples,
-            event_category   = self.event_category,
+            event_category   = self.category_cutString,
             train_variables  = self.train_variables,
             test_percentage  = self.test_percentage,
             norm_variables   = self.norm_variables,
@@ -401,9 +409,9 @@ class DNN():
         # more information saving
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
-        configs["JetTagCategory"] = self.JTstring
-        configs["categoryLabel"] = self.categoryLabel
-        configs["Selection"] = self.event_category
+        configs["JetTagCategory"] = self.category_name
+        configs["categoryLabel"] = self.category_label
+        configs["Selection"] = self.category_cutString
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
         configs["shuffleSeed"] = self.data.shuffleSeed
@@ -527,7 +535,7 @@ class DNN():
                 plt.title("CMS private work", loc = "left", fontsize = 16)
 
             # add title
-            title = self.categoryLabel
+            title = self.category_label
             title = title.replace("\\geq", "$\geq$")
             title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
@@ -558,7 +566,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log,
             sigScale            = sigScale)
@@ -582,7 +590,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log,
             sigScale            = sigScale)
@@ -595,7 +603,7 @@ class DNN():
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
             event_classes       = self.event_classes,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.save_path)
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
@@ -617,7 +625,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log)
 
@@ -628,7 +636,7 @@ class DNN():
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
             event_classes       = self.event_classes,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             signal_class        = signal_class,
             plotdir             = self.save_path,
             logscale            = log,
@@ -649,7 +657,7 @@ class DNN():
             train_predictions   = self.model_train_prediction,
             nbins               = nbins,
             bin_range           = bin_range,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.save_path,
             logscale            = log,
             sigScale            = sigScale)

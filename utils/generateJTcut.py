@@ -3,15 +3,15 @@ def getJTstring(cat):
     # output format is '(N_Jets (>=/==) [NJets] and N_BTagsM (>=/==) [NTags])'
 
     string_parts = cat.split("_")
-
+    
     cutstring = "("
     for part in string_parts:
         if part.endswith("l"):
             cutstring += "N_LooseLeptons"
         elif part.endswith("j"):
-            cutstring += "N_jets"
+            cutstring += "N_Jets"
         elif part.endswith("t"):
-            cutstring += "N_btags"
+            cutstring += "N_BTagsM"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue
@@ -22,10 +22,10 @@ def getJTstring(cat):
             cutstring += " <= "+part[2:-1]
         else:
             cutstring += " == "+part[:-1]
-
+        
         if not part == string_parts[-1]:
             cutstring += " and "
-
+    
     cutstring += ")"
 
     return cutstring
