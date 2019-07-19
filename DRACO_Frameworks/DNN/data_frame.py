@@ -45,7 +45,6 @@ class Sample:
 
         df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
 
-
         self.data = df
         print("-"*50)
 
@@ -116,7 +115,7 @@ class DataFrame(object):
                 input_samples,
                 event_category,
                 train_variables,
-                norm_variables,
+                norm_variables = True,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,

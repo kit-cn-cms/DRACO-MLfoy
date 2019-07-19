@@ -89,6 +89,10 @@ dataset = root2pandas.Dataset(
   tree       = options.treeName,
   addMEM     = options.MEM,
   maxEntries = options.maxEntries,
+
+  varName_Run = "runNumber",
+  varName_LumiBlock = "lumiBlock",
+  varName_Event = "eventNumber",
 )
 
 # add base event selection

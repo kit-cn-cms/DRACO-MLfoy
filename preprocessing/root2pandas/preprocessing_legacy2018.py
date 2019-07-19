@@ -106,15 +106,14 @@ dataset.addSample(
     categories  = ttH_categories,
     even_odd    = options.even_odd_splitting,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-
-    )
+    ) 
 dataset.addSample(
     sampleName  = "ttHNonbb",
     ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttH_categories,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     even_odd    = options.even_odd_splitting,
-    )
+    ) 
 
 dataset.addSample(
     sampleName  = "TTToSL",
@@ -198,7 +197,7 @@ dataset.addSample(
     )
 
 
-# initialize variable list
+# initialize variable list 
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
@@ -211,8 +210,8 @@ additional_variables = [
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
-    "Evt_ID",
-    "Evt_Run",
+    "Evt_ID", 
+    "Evt_Run", 
     "Evt_Lumi"]
 
 # add these variables to the variable list

@@ -4,10 +4,10 @@ Collection of Machine learning frameworks for DNNs, Regressions, Adversaries, CN
 
 ## Refer to READMEs in the corresponding directories for specific information!
 For readability there is a README for each step (this here is only for an overview!):
-- [preprocessing](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/preprocessing/root2pandas/README.md)
-- [training](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/train_scripts/README.md)
-- [variables](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/pyrootsOfTheCaribbean/README.md)
-- [variable plotting](https://github.com/Angelagiraldi/DRACO-MLfoy/blob/devel_DL/variable_sets/README.md) 
+- [preprocessing](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/preprocessing/root2pandas/README.md)
+- [training](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/train_scripts/README.md)
+- [variables](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/pyrootsOfTheCaribbean/README.md)
+- [variable plotting](https://github.com/kit-cn-cms/DRACO-MLfoy/blob/dev_ReleaseVersion/variable_sets/README.md) 
 
 ## ATTENTION
 When working with the combination of
@@ -28,7 +28,7 @@ To circumvent this, first import everything related to `ROOT`, only then start i
 1. Preprocess input data:
     - to create input features you need data in the ntuple format, these get converted into hdf5 dataframes
     - create a list of input features in `variable_sets/` (look at the README for structural advice)
-    - adjust settings in `preprocessing/root2pandas/preprocessing.py`, check README
+    - adjust settings in `preprocessing/root2pandas/preprocessing.py`, check README 
     - execute it on the NAF (tested with `CMSSW_9_4_9`)
     - this creates one dataset for each event category you specified in `preprocessing.py`
 2. Setup training:
@@ -50,7 +50,7 @@ collection of top-level scripts for training
 
 ## pyrootsOfTheCaribbean
 
-collection of scripts for plotting
+collection of scripts for plotting 
 - `plot_configs`: collection of scripts for configuring plots
 
 ## variable_sets
@@ -61,3 +61,4 @@ lists of input variables used for dnn trainings
 ## DRACO_Frameworks
 
 collections of frameworks for training and evaluation of different machine learning frameworks
+

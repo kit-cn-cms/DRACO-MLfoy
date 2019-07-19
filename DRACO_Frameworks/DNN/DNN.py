@@ -88,7 +88,7 @@ class DNN():
             input_samples,
             event_category,
             train_variables,
-            norm_variables,
+            norm_variables  = True,
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
@@ -204,11 +204,10 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset
-        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True),self.data.get_test_labels())
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
-        # save predicitons
-        self.model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True) )
-
+        # save predictions
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
 
         # save predicted classes with argmax
@@ -224,16 +223,21 @@ class DNN():
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
-    def predict_event_query(self):
-        events = self.data.get_full_df()[self.train_variables]
-        print(str(events.shape[0]) + " events.")
+    def predict_event_query(self, query ):
+        events = self.data.get_full_df().query( query )
+        print(str(events.shape[0]) + " events matched the query '"+str(query)+"'.")
+#    def predict_event_query(self):
+#        events = self.data.get_full_df()[self.train_variables]
+#        print(str(events.shape[0]) + " events.")
 
         for index, row in events.iterrows():
             print("========== DNN output ==========")
             print("Event: "+str(index))
-            print(row)
+            for var in row.values:
+                print(var)
+#            print(row)
             print("-------------------->")
-            output = self.model.predict( np.array([list(row.values)]))[0]
+            output = self.model.predict( np.array([list(row.values)]) )[0]
             print("output:" + str(output))
 
             for i, node in enumerate(self.event_classes):
@@ -684,6 +688,6 @@ def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, bina
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
-    #dnn.predict_event_query()
+#    dnn.predict_event_query()
 
     return dnn

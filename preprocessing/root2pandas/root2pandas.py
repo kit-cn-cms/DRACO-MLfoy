@@ -23,7 +23,6 @@ class EventCategories:
                 selections.append(self.categories[cat])
         return selections
 
-
 class Sample:
     def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
         self.sampleName = sampleName
@@ -47,13 +46,11 @@ class Sample:
             else:
                 self.selections = "(Evt_Odd == 1)"
 
-
-
 class Dataset:
-    def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000):
+    def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
         # settings for paths
-        self.outputdir  = outputdir
-        self.naming     = naming
+        self.outputdir = outputdir
+        self.naming = naming
         self.tree = tree
 
         # generating output dir
@@ -227,7 +224,14 @@ class Dataset:
             self.addVariables( self.samples[key].ownVars )
 
             # process the sample
-            self.processSample(self.samples[key])
+            self.processSample(
+
+              sample = self.samples[key]
+
+              varName_Run       = self.varName_Run,
+              varName_LumiBlock = self.varName_LumiBlock,
+              varName_Event     = self.varName_Event,
+            )
 
             # remove the own variables
             self.removeVariables( self.samples[key].ownVars )
@@ -239,7 +243,7 @@ class Dataset:
         # handle old files
         self.handleOldFiles()
 
-    def processSample(self, sample):
+    def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event):
         # print sample info
         sample.printInfo()
 
@@ -320,7 +324,7 @@ class Dataset:
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                 # add indexing
-                concat_df.set_index(["runNumber", "lumiBlock", "eventNumber"], inplace=True, drop=True)
+                concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
 
                 # add MEM variables
                 if self.addMEM:
@@ -410,7 +414,6 @@ class Dataset:
             print("    we will only save events with mem...")
         return df
 
-
     def removeTriggerVariables(self, df):
         df.drop(self.removedVariables, axis = 1, inplace = True)
         return df
@@ -435,45 +438,6 @@ class Dataset:
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
 
-<<<<<<< HEAD
-# function to append a list with sample, label and normalization_weight to a list samples
-def createSampleList(sList, sample, label = None, nWeight = 1):
-    """ takes a List a sample and appends a list with category, label and weight. Checks if even/odd splitting was made and therefore adjusts the normalization weight """
-    if sample.even_odd: nWeight*=2.
-    for cat in sample.categories.categories:
-        if label==None:
-            sList.append([cat, cat, nWeight])
-        else:
-            sList.append([cat, label, nWeight])
-    return sList
-
-# function to create a file with all preprocessed samples
-def createSampleFile(outPath, sampleList):
-    # create file
-    processedSamples=""
-    # write samplenames in file
-    for sample in sampleList:
-        processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
-    with open(outPath+"/sampleFile.dat","w") as sampleFile:
-        sampleFile.write(processedSamples)
-
-# function to read Samplefile
-def readSampleFile(inPath):
-    """ reads file and returns a list with all samples, that are not uncommented. Uncomment samples by adding a '#' in front of the line"""
-    sampleList = []
-    with open(outPath+"/sampleFile.dat","w") as sampleFile:
-        for row in sampleFile:
-            if row[0] != "#":
-                sample = row.split()
-                sampleList.append(dict( sample=sample[0], label=sample[1], normWeight=sample[2]) )
-    return sampleList
-
-# function to add samples to InputSamples
-def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
-    """ adds each sample in samples to the inputSample """
-    for sample in samples:
-        inputSamples.addSample(sample["sample"]+naming, label=sample["label"], normalization_weight = sample["normWeight"])
-=======
     def renameOldFiles(self):
         for key in self.samples:
             sample = self.samples[key]
@@ -506,4 +470,3 @@ def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
             if filename.endswith(".old") and filename.split(".")[0] in rerename:
                 print("re-renaming file {}".format(filename))
                 os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
->>>>>>> angirald/devel_DL
