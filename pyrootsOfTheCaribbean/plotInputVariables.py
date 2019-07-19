@@ -24,7 +24,7 @@ parser.add_option("-i", "--inputdirectory", dest="inputDir",default="combined",
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in preprocessing", metavar="naming")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="DL_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,

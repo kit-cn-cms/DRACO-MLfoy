@@ -9,22 +9,19 @@ sys.path.append(basedir)
 import root2pandas
 
 """
-USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --treeName=STR --maxentries=INT --MEM=BOOL
+USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
 """
 usage="usage=%prog [options] \n"
-usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --treeName=STR --maxentries=INT --MEM=BOOL --name=STR\n"
-usage+="OR: python preprocessing.py -o DIR -v FILE -t STR-e INT -m BOOL -n STR"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
 
 parser = optparse.OptionParser(usage=usage)
 
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="DL_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
-
-parser.add_option("-t", "--treeName", dest="treeName",default="liteTreeTTH_step7_cate8",
-        help="Name of the tree corresponding to the right category", metavar="treeName")
 
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
         help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
@@ -54,130 +51,74 @@ else:
     sys.exit("ERROR: Output Directory does not exist!")
 
 # define a base event selection which is applied for all Samples
+# select only events with GEN weight > 0 because training with negative weights is weird
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_Pt_MET > 20. and Weight_GEN_nom > 0.)"
 
-base_selection = "(N_jets >= 3 and N_btags >= 2)"
+# single lepton selections
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele35_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
 
-ttH_selection = None #"(Evt_Odd == 1)"
+base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
+
+ttH_selection = "(Evt_Odd == 1)"
 
 # define output classes
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttHbb", selection = None)
+ttH_categories.addCategory("ttH", selection = None)
 
-#ttbar_categories = root2pandas.EventCategories()
-#ttbar_categories.addCategory("ttbar")
 
-ttbar_bb = root2pandas.EventCategories()
-ttbar_bb.addCategory("ttbb")
+ttbar_categories = root2pandas.EventCategories()
+ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
-ttbar_b = root2pandas.EventCategories()
-ttbar_b.addCategory("ttb")
-
-ttbar_2b = root2pandas.EventCategories()
-ttbar_2b.addCategory("tt2b")
-
-ttbar_cc = root2pandas.EventCategories()
-ttbar_cc.addCategory("ttcc")
-
-ttbar_lf = root2pandas.EventCategories()
-ttbar_lf.addCategory("ttlf")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
-
-  outputdir  = outputdir,
-  naming     = options.Name,
-  tree       = options.treeName,
-  addMEM     = options.MEM,
-  maxEntries = options.maxEntries,
-)
+    outputdir   = outputdir,
+    naming      = options.Name,
+    addMEM      = options.MEM,
+    maxEntries  = options.maxEntries)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
-ntuplesPath = "/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/6nodes/cate9"
-#ntuplesPath = '/nfs/dust/cms/user/angirald/sandbox/ttHbb/InputFeatures/binary/cate9'
+
+
+ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttH_2018/ntuples/ntuples_v5_forDNN/"
+memPath = "/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
 dataset.addSample(
-
-  sampleName = "ttHbb",
-  ntuples    = ntuplesPath+"/ttHbb_2L_cate9.root",
-  categories = ttH_categories,
-  selections = None,
-)
-
-#!! dataset.addSample(
-#!! 
-#!!   sampleName = "ttbar",
-#!!   ntuples    = ntuplesPath+"/background_cate9.root",
-#!!   categories = ttbar_categories,
-#!!   selections = None,
-#!! )
-
-
-#dataset.addSample(
-#    sampleName  = "ttbb",
-#    ntuples     = ntuplesPath+"/background_cate9.root",
-#    categories  = ttbar_category,
-#    selections  = base_selection,
- #  )
+    sampleName  = "ttHbb",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttH_categories,
+    selections  = ttH_selection,
+    MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+   ) 
 
 dataset.addSample(
-
-    sampleName  = "ttbar_bb",
-    ntuples     = ntuplesPath+"/ttbar_cate9.root",
-    categories  = ttbar_bb,
-    selections  = None
-)
-
-dataset.addSample(
-
-    sampleName  = "ttbar_b",
-    ntuples     = ntuplesPath+"/ttbar_b_cate9.root",
-    categories  = ttbar_b,
-    selections  = ttH_selection
-)
-
-dataset.addSample(
-
-    sampleName  = "ttbar_2b",
-    ntuples     = ntuplesPath+"/ttbar_2b_cate9.root",
-    categories  = ttbar_2b,
-    selections  = ttH_selection
-)
-
-dataset.addSample(
-
-    sampleName  = "ttbar_cc",
-    ntuples     = ntuplesPath+"/ttbar_cc_cate9.root",
-    categories  = ttbar_cc,
-    selections  = ttH_selection
-)
-
-dataset.addSample(
-
-    sampleName  = "ttbar_lf",
-    ntuples     = ntuplesPath+"/ttbar_lf_cate9.root",
-    categories  = ttbar_lf,
-    selections  = ttH_selection
-)
-
-# initialize variable list
+    sampleName  = "TTToSL",
+    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttbar_categories,
+    selections  = None,#ttbar_selection,
+    MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+      )
+# initialize variable list 
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
-
-  "N_jets",
-  "N_btags",
-
-  "runNumber",
-  "lumiBlock",
-  "eventNumber",
-
-#  "weight_GEN",
-  "weight",
-]
+    "N_Jets",
+    "N_BTagsM",
+    "Weight_XS",
+    "Weight_CSV",
+    "Weight_GEN_nom",
+    "Evt_ID", 
+    "Evt_Run", 
+    "Evt_Lumi"]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
