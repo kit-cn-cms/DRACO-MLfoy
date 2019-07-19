@@ -161,7 +161,7 @@ class DataFrame(object):
 #            print(df["class_label"].values)
 
             # add index labelling to dataframe
-            df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )
+            df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
 
             # norm weights to mean(1)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
@@ -318,7 +318,7 @@ class DataFrame(object):
         else:              return self.df_test["index_label"].values
 
     def get_class_flag(self, class_label):
-        return pd.Series( [1 if c==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
+        return pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ")==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
 
     def get_ttH_flag(self):
         return self.df_test["is_ttH"].values
