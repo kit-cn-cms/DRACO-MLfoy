@@ -7,7 +7,7 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2):
+    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2, total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
@@ -16,6 +16,7 @@ class Sample:
         self.test_percentage = test_percentage
         self.min=0.0
         self.max=1.0
+        self.total_weight_expr = total_weight_expr
 
     def load_dataframe(self, event_category, lumi, evenSel = ""):
         print("-"*50)
@@ -33,7 +34,7 @@ class Sample:
         self.nevents = df.shape[0]
 
         # add event weight
-        df = df.assign(total_weight = lambda x: x.weight)
+        df = df.assign(total_weight = lambda x: eval(self.total_weight_expr))
 
         # assign train weight
         weight_sum = sum(df["total_weight"].values)
@@ -43,7 +44,7 @@ class Sample:
         # add lumi weight
         # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
 
-        df = df.assign(lumi_weight = lambda x: x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * lumi * self.normalization_weight / self.test_percentage)
+        df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.normalization_weight / self.test_percentage)
 
         self.data = df
         print("-"*50)
@@ -79,13 +80,13 @@ class InputSamples:
         if self.test_percentage <= 0. or self.test_percentage >= 1.:
             sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
 
-    def addSample(self, sample_path, label, normalization_weight = 1., train_weight = 1.):
+    def addSample(self, sample_path, label, normalization_weight=1., train_weight=1., total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
-        self.samples.append( Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage) )
+        self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr))
 
     def getClassConfig(self):
         configs = []
@@ -107,8 +108,7 @@ class DataFrame(object):
     ''' takes a path to a folder where one h5 per class is located
         the events are cut according to the event_category
         variables in train_variables are used as input variables
-        the dataset is shuffled and split into a test and train sample
-            according to test_percentage
+        the dataset is shuffled and split into a test and train sample according to test_percentage
         for better training, the variables can be normed to std(1) and mu(0) '''
 
     def __init__(self,
@@ -121,7 +121,6 @@ class DataFrame(object):
                 shuffleSeed = None,
                 balanceSamples = True,
                 evenSel = ""):
-
 
         self.event_category = event_category
         self.lumi = lumi
@@ -159,7 +158,7 @@ class DataFrame(object):
             # add flag for ttH to dataframe
             df["is_ttH"] = pd.Series([1 if ((c == "ttHbb") or (c == "ttH")) else 0 for c in df["class_label"].values], index = df.index )
 
-            print(df["class_label"].values)
+#            print(df["class_label"].values)
 
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )

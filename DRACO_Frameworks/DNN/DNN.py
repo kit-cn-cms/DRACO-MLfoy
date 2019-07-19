@@ -88,14 +88,14 @@ class DNN():
             input_samples,
             event_category,
             train_variables,
-            norm_variables  = True,
-            train_epochs    = 500,
-            test_percentage = 0.2,
-            eval_metrics    = None,
-            shuffle_seed    = None,
-            balanceSamples  = False,
-            evenSel         = None,
-            norm_variables  = True):
+            norm_variables   = True,
+            train_epochs     = 500,
+            test_percentage  = 0.2,
+            eval_metrics     = None,
+            shuffle_seed     = None,
+            balanceSamples   = False,
+            evenSel          = None,
+            norm_variables   = True):
 
         # save some information
         # list of samples to load into dataframe
@@ -130,14 +130,14 @@ class DNN():
         # percentage of events saved for testing
         self.test_percentage = test_percentage
 
-        # normalize variables in DataFrame
-        self.norm_variables = norm_variables
-
         # number of train epochs
         self.train_epochs = train_epochs
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
+
+        # normalize variables in DataFrame
+        self.norm_variables = norm_variables
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -165,15 +165,16 @@ class DNN():
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
-            input_samples       = self.input_samples,
-            event_category      = self.event_category,
-            train_variables     = self.train_variables,
-            test_percentage     = self.test_percentage,
-            norm_variables      = self.norm_variables,
-            shuffleSeed         = shuffle_seed,
-            norm_variables      = self.norm_variables,
-            balanceSamples      = balanceSamples,
-            evenSel             = self.evenSel)
+            input_samples    = self.input_samples,
+            event_category   = self.event_category,
+            train_variables  = self.train_variables,
+            test_percentage  = self.test_percentage,
+            norm_variables   = self.norm_variables,
+            shuffleSeed      = shuffle_seed,
+            norm_variables   = self.norm_variables,
+            balanceSamples   = balanceSamples,
+            evenSel          = self.evenSel,
+        )
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
@@ -656,7 +657,7 @@ class DNN():
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
         binaryOutput.saveroot(ratio = False, name = name+".root")
 
-def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None):
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -674,17 +675,17 @@ def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, bina
         input_samples.addBinaryLabel(signal, binary_target)
 
     for sample in config["eventClasses"]:
-        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
+        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
 
     print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
-        save_path       = outputDirectory,
-        input_samples   = input_samples,
-        event_category  = config["JetTagCategory"],
-        train_variables = config["trainVariables"],
-        shuffle_seed    = config["shuffleSeed"]
-        )
+      save_path       = outputDirectory,
+      input_samples   = input_samples,
+      event_category  = config["JetTagCategory"],
+      train_variables = config["trainVariables"],
+      shuffle_seed    = config["shuffleSeed"],
+    )
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)

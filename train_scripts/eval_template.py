@@ -50,6 +50,9 @@ parser.add_option("--binary", dest="binary", action = "store_true", default=Fals
 parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = -1.,
         help="target value for training of background samples (default is 0, signal is always 1)")
 
+parser.add_option("--total-weight-expr", dest="total_weight_expr",default="x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom",
+        help="string containing expression of total event weight (use letter \"x\" for event-object; example: \"x.weight\")", metavar="total_weight_expr")
+
 (options, args) = parser.parse_args()
 
 #get input directory path
@@ -76,7 +79,7 @@ if options.binary:
     if not signal:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-dnn = DNN.loadDNN(inPath, outPath, binary = options.binary, signal = signal, binary_target = options.binary_bkg_target)
+dnn = DNN.loadDNN(inPath, outPath, binary = options.binary, signal = signal, binary_target = options.binary_bkg_target, total_weight_expr=options.total_weight_expr)
 
 # plotting
 if options.plot:
