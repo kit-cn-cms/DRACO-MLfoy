@@ -12,3 +12,8 @@ Wichtig:
 - fraction signal to background in discriminator -> yrange anpassen
 - eventuell likelihood einbauen
 - earlystopping
+
+
+Mounting:
+sshfs
+sftp

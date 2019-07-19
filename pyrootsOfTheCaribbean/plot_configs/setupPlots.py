@@ -16,7 +16,7 @@ def GetPlotColor( cls ):
         "tthf":         ROOT.kRed-3,
         "ttbar":        ROOT.kOrange,
         "ttmergedb":    ROOT.kRed-1,
-    
+
         "sig":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
         }
@@ -33,16 +33,16 @@ def GetyTitle(privateWork = False):
 
 
 # ===============================================
-# SETUP OF HISTOGRAMS 
+# SETUP OF HISTOGRAMS
 # ===============================================
 def setupHistogram(
-        values, weights, 
+        values, weights,
         nbins, bin_range,
-        xtitle, ytitle, 
+        xtitle, ytitle,
         color = ROOT.kBlack, filled = True):
     # define histogram
     histogram = ROOT.TH1D(xtitle, "", nbins, *bin_range)
-    histogram.Sumw2(True)    
+    histogram.Sumw2(True)
 
     for v, w in zip(values, weights):
         histogram.Fill(v, w)
@@ -113,12 +113,12 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     # check if errors for matrix are given
     has_errors = isinstance(errors, np.ndarray)
     #print(has_errors)
-    
+
     # init histogram
     cm = ROOT.TH2D("confusionMatrix", "", ncls, 0, ncls, ncls, 0, ncls)
     cm.SetStats(False)
     ROOT.gStyle.SetPaintTextFormat(".3f")
-        
+
 
     for xit in range(cm.GetNbinsX()):
         for yit in range(cm.GetNbinsY()):
@@ -191,7 +191,7 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
         else:
             latex.DrawLatex(l+0.47,1.-t+0.01, text)
 
-    
+
     return canvas
 
 def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
@@ -234,14 +234,16 @@ def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOption
 
     return canvas
 
-def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=None,logoption=False):
+def drawHistsOnCanvas(sigHists, bkgHists, sigHists_unscaled, plotOptions, canvasName,displayname=None,logoption=False):
     if not displayname:
         displayname=canvasName
     if not isinstance(sigHists, list):
         sigHists = [sigHists]
     if not isinstance(bkgHists, list):
         bkgHists = [bkgHists]
-    
+    if not isinstance(sigHists_unscaled, list):
+        sigHists_unscaled = [sigHists_unscaled]
+
     canvas = getCanvas(canvasName, plotOptions["ratio"])
 
     # move over/underflow bins into plotrange
@@ -249,7 +251,9 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
         moveOverUnderFlow(h)
     for h in sigHists:
         moveOverUnderFlow(h)
-    
+    for h in sigHists_unscaled:
+        moveOverUnderFlow(h)
+
     # stack Histograms
     bkgHists = [bkgHists[len(bkgHists)-1-i] for i in range(len(bkgHists))]
     for i in range(len(bkgHists)-1, 0, -1):
@@ -263,7 +267,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
         yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
         if h.GetBinContent(h.GetMaximumBin()) > 0:
             yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
-    
+
     # draw the first histogram
     if len(bkgHists) == 0:
         firstHist = sigHists[0]
@@ -287,18 +291,19 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
     # redraw axis
     firstHist.DrawCopy("axissame")
 
-    
+
     # draw signal histograms
     for sH in sigHists:
         # draw signal histogram
         sH.DrawCopy(option+" E0 same")
-    
+
 
     if plotOptions["ratio"]:
         canvas.cd(2)
-        line = sigHists[0].Clone()
-        line.Divide(sigHists[0])
-        line.GetYaxis().SetRangeUser(0.5,1.5)
+        # print("# DEBUG: setupPlots, sigHists: ", sigHists)
+        line = sigHists_unscaled[0].Clone()
+        line.Divide(sigHists_unscaled[0])
+        line.GetYaxis().SetRangeUser(0.,1.1)
         line.GetYaxis().SetTitle(plotOptions["ratioTitle"])
 
         line.GetXaxis().SetLabelSize(line.GetXaxis().GetLabelSize()*2.4)
@@ -317,7 +322,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
         line.SetLineColor(ROOT.kBlack)
         line.DrawCopy("histo")
         # ratio plots
-        for sigHist in sigHists:
+        for sigHist in sigHists_unscaled:
             ratioPlot = sigHist.Clone()
             ratioPlot.Divide(bkgHists[0])
             ratioPlot.SetTitle(displayname)
@@ -329,7 +334,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
             ratioPlot.DrawCopy("sameP")
         canvas.cd(1)
     return canvas
-    
+
 
 
 # ===============================================
@@ -396,7 +401,7 @@ def printLumi(pad, lumi = 41.5, ratio = False, twoDim = False):
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextColor(ROOT.kBlack)
-    
+
     if twoDim:  latex.DrawLatex(l+0.40,1.-t+0.01,lumi_text)
     elif ratio: latex.DrawLatex(l+0.60,1.-t+0.04,lumi_text)
     else:       latex.DrawLatex(l+0.53,1.-t+0.02,lumi_text)
@@ -421,7 +426,7 @@ def printROCScore(pad, ROC, ratio = False):
     t = pad.GetTopMargin()
     r = pad.GetRightMargin()
     b = pad.GetBottomMargin()
-    
+
     text = "ROC-AUC = {:.3f}".format(ROC)
 
     latex = ROOT.TLatex()
@@ -432,22 +437,22 @@ def printROCScore(pad, ROC, ratio = False):
     else:       latex.DrawLatex(l,1.-t+0.02, text)
 
 def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
-    pad.cd(1) 
-    l = pad.GetLeftMargin() 
-    t = pad.GetTopMargin() 
-    r = pad.GetRightMargin() 
-    b = pad.GetBottomMargin() 
- 
-    latex = ROOT.TLatex() 
-    latex.SetNDC() 
-    latex.SetTextColor(ROOT.kBlack) 
+    pad.cd(1)
+    l = pad.GetLeftMargin()
+    t = pad.GetTopMargin()
+    r = pad.GetRightMargin()
+    b = pad.GetBottomMargin()
+
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
     latex.SetTextSize(0.04)
 
-    text = "CMS private work" 
+    text = "CMS private work"
 
     if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
-    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text) 
+    elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:           latex.DrawLatex(l,1.-t+0.01, text)
 
 
@@ -467,14 +472,3 @@ def moveOverUnderFlow(h):
 
 def calculateKSscore(stack, sig):
     return stack.KolmogorovTest(sig)
-
-
-
-
-
-
-
-
-
-
-

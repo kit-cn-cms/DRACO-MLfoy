@@ -762,6 +762,8 @@ class plotBinaryOutput:
             filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
+        print("# DEBUG: plottingScripts, scaleFactor: ", scaleFactor)
+        sig_hist_unscaled = sig_hist.Clone()
         sig_hist.Scale(scaleFactor)
 
         # rescale histograms if privateWork enabled
@@ -776,7 +778,7 @@ class plotBinaryOutput:
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
-            sig_hist, bkg_hist, plotOptions,
+            sig_hist, bkg_hist, sig_hist_unscaled, plotOptions,
             canvasName = name)
 
         # setup legend
