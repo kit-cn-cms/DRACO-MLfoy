@@ -22,10 +22,14 @@ def createSampleList(sList, sample, label = None, nWeight = 1):
 # function to create a file with all preprocessed samples
 def createSampleFile(outPath, sampleList):
     # create file
+
+    samples=[]
     processedSamples=""
     # write samplenames in file
     for sample in sampleList:
-        processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
+        if str(sample[0]) not in samples:
+            samples.append(sample[0])
+            processedSamples+=str(sample[0])+" "+str(sample[1])+" "+str(sample[2])+"\n"
     with open(outPath+"/sampleFile.dat","w") as sampleFile:
         sampleFile.write(processedSamples)
 

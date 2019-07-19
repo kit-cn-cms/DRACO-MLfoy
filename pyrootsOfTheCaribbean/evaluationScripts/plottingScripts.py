@@ -194,9 +194,6 @@ class plotDiscriminators:
 
 
 
-
-
-
 class plotOutputNodes:
     def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):
         self.data              = data
@@ -424,10 +421,11 @@ class plotClosureTest:
                 if not self.data.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test[k] == nodeIndex]
 
-            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
+
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
-            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(test_values)) \
+            bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
 
@@ -602,7 +600,7 @@ class plotEventYields:
         self.plotdir            = plotdir
 
         self.logscale           = logscale
-        self.sigScale           = sigScale        
+        self.sigScale           = sigScale
 
         self.privateWork = False
 
@@ -624,7 +622,7 @@ class plotEventYields:
             yTitle = setup.GetyTitle(privateWork)
 
         totalBkgYield = 0
-    
+
         # generate one plot per output node
         for i, truth_cls in enumerate(self.event_classes):
             classIndex = self.data.class_translation[truth_cls]
@@ -633,7 +631,7 @@ class plotEventYields:
 
             # loop over output nodes
             for j, node_cls in enumerate(self.event_classes):
-            
+
                 # get output values of this node
                 out_values = self.prediction_vector[:,i]
 
@@ -645,7 +643,7 @@ class plotEventYields:
                     and self.predicted_classes[k] == nodeIndex])
                 class_yields.append(class_yield)
 
-        
+
 
             if i in self.signalIndex:
                 histogram = setup.setupYieldHistogram(
@@ -660,8 +658,8 @@ class plotEventYields:
                 histogram.SetLineWidth(2)
                 sigHists.append(histogram)
                 sigLabels.append(truth_cls)
-                
-                
+
+
             else:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
@@ -676,7 +674,7 @@ class plotEventYields:
                 totalBkgYield += sum(class_yields)
 
 
-        
+
         # scale histograms according to options
         scaleFactors=[]
         for sig in sigHists:
@@ -723,9 +721,10 @@ class plotEventYields:
 
 
 class plotBinaryOutput:
-    def __init__(self, data, predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1):
+    def __init__(self, data, test_predictions, train_predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1):
         self.data               = data
-        self.predictions        = predictions
+        self.test_predictions   = test_predictions
+        self.train_predictions  = train_predictions
         self.nbins              = nbins
         self.bin_range          = bin_range
         self.event_category     = event_category
@@ -740,13 +739,14 @@ class plotBinaryOutput:
         self.printROCScore = printROC
         self.privateWork = privateWork
 
+
         if self.printROCScore:
-            roc = roc_auc_score(self.data.get_test_labels(), self.predictions)
+            roc = roc_auc_score(self.data.get_test_labels(), self.test_predictions)
             print("ROC: {}".format(roc))
 
-        sig_values = [ self.predictions[k] for k in range(len(self.predictions)) \
+        sig_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
             if self.data.get_test_labels()[k] == 1 ]
-        sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.predictions)) \
+        sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if self.data.get_test_labels()[k] == 1]
         sig_hist = setup.setupHistogram(
             values      = sig_values,
@@ -756,12 +756,12 @@ class plotBinaryOutput:
             color       = ROOT.kCyan,
             xtitle      = "signal",
             ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = False)  
+            filled      = False)
         sig_hist.SetLineWidth(3)
 
-        bkg_values = [ self.predictions[k] for k in range(len(self.predictions)) \
+        bkg_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
             if not self.data.get_test_labels()[k] == 1 ]
-        bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.predictions)) \
+        bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if not self.data.get_test_labels()[k] == 1]
         bkg_hist = setup.setupHistogram(
             values      = bkg_values,
@@ -771,7 +771,7 @@ class plotBinaryOutput:
             color       = ROOT.kOrange,
             xtitle      = "background",
             ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = True)  
+            filled      = True)
 
         if self.sigScale == -1:
             scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
@@ -791,7 +791,7 @@ class plotBinaryOutput:
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
-            sig_hist, bkg_hist, plotOptions, 
+            sig_hist, bkg_hist, plotOptions,
             canvasName = name)
 
         # setup legend
@@ -799,7 +799,7 @@ class plotBinaryOutput:
 
         # add signal entry
         legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
-        
+
         # add background entries
         legend.AddEntry(bkg_hist, "background", "F")
 
@@ -821,6 +821,61 @@ class plotBinaryOutput:
 
         out_path = self.plotdir + "/binaryDiscriminator.pdf"
         setup.saveCanvas(canvas, out_path)
+
+
+    def saveroot(self, ratio = False, name = "binarydiscriminator.root"):
+
+        file = ROOT.TFile(self.plotdir+"/"+name,'recreate')
+
+        test_sig_values = [ self.test_predictions [k] for k in range(len(self.test_predictions )) \
+            if self.data.get_test_labels()[k] == 1 ]
+        test_sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions )) \
+            if self.data.get_test_labels()[k] == 1]
+
+        h_signal_test = ROOT.TH1F("binary_signal_test","binary_signal_test",self.nbins, self.bin_range[0], self.bin_range[1])
+        for i in range(len(test_sig_values)):
+            h_signal_test.Fill(test_sig_values[i],test_sig_weights[i])
+        h_signal_test.Write()
+
+        train_sig_values = [ self.train_predictions [k] for k in range(len(self.train_predictions )) \
+            if self.data.get_train_labels()[k] == 1 ]
+        train_sig_weights =[ self.data.get_train_lumi_weights()[k] for k in range(len(self.train_predictions )) \
+            if self.data.get_train_labels()[k] == 1]
+
+        h_signal_train = ROOT.TH1F("binary_signal_train","binary_signal_train",self.nbins, self.bin_range[0], self.bin_range[1])
+        for i in range(len(train_sig_values)):
+            h_signal_train.Fill(train_sig_values[i],train_sig_weights[i])
+        h_signal_train.Write()
+
+        test_bkg_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
+            if not self.data.get_test_labels()[k] == 1 ]
+        test_bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
+            if not self.data.get_test_labels()[k] == 1]
+
+        h_bkg_test = ROOT.TH1F("binary_bkg_test","binary_bkg_test",self.nbins, self.bin_range[0], self.bin_range[1])
+        for i in range(len(test_bkg_values)):
+            h_bkg_test.Fill(test_bkg_values[i],test_bkg_weights[i])
+        h_bkg_test.Write()
+
+        train_bkg_values = [ self.train_predictions[k] for k in range(len(self.train_predictions)) \
+            if not self.data.get_train_labels()[k] == 1 ]
+        train_bkg_weights =[ self.data.get_train_lumi_weights()[k] for k in range(len(self.train_predictions)) \
+            if not self.data.get_train_labels()[k] == 1]
+
+        h_bkg_train = ROOT.TH1F("binary_bkg_train","binary_bkg_train",self.nbins, self.bin_range[0], self.bin_range[1])
+        for i in range(len(train_bkg_values)):
+            h_bkg_train.Fill(train_bkg_values[i],train_bkg_weights[i])
+        h_bkg_train.Write()
+
+        h_signal = ROOT.TH1F("binary_signal","binary_signal",self.nbins, self.bin_range[0], self.bin_range[1])
+        h_signal.Add(h_signal_train)
+        h_signal.Add(h_signal_test)
+        h_signal.Write()
+
+        h_bkg = ROOT.TH1F("binary_bkg","binary_bkg",self.nbins, self.bin_range[0], self.bin_range[1])
+        h_bkg.Add(h_bkg_train)
+        h_bkg.Add(h_bkg_test)
+        h_bkg.Write()
 
 
 class plotEventYields:

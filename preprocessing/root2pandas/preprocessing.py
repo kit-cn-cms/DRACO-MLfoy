@@ -114,10 +114,18 @@ dataset.addSample(
 #!!   selections = None,
 #!! )
 
+
+#dataset.addSample(
+#    sampleName  = "ttbb",
+#    ntuples     = ntuplesPath+"/background_cate9.root",
+#    categories  = ttbar_category,
+#    selections  = base_selection,
+ #  )
+
 dataset.addSample(
 
     sampleName  = "ttbar_bb",
-    ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
+    ntuples     = ntuplesPath+"/ttbar_cate9.root",
     categories  = ttbar_bb,
     selections  = None
 )

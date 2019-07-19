@@ -28,6 +28,22 @@ config_dict["test_config"] = {
         "earlystopping_epochs":     50,
         }
 
+
+config_dict["ttZ_2018_hf_final"] = {
+        "layers":                   [200,200,200],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               10000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
+
+
 config_dict["ttH_2017"] = {
         "layers":                   [100,100,100],
         "loss_function":            "categorical_crossentropy",
@@ -71,10 +87,10 @@ config_dict["ttZ_2018"] = {
         "layers":                   [300,200,100],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.4,
-        "L2_Norm":                  0.,
+        "L2_Norm":                  1e-5,
         "batch_size":               4096,
         "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "elu",
+        "activation_function":      "selu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     100,
@@ -97,6 +113,18 @@ config_dict["ttZ_2018_v3"] = {
         "loss_function":            "mean_squared_error",
         "Dropout":                  0.3,
         "L2_Norm":                  1e-5,
+        "batch_size":               5000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+config_dict["meme"] = {
+        "layers":                   [],
+        "loss_function":            "mean_squared_error",
+        "Dropout":                  0.,
+        "L2_Norm":                  0.,
         "batch_size":               5000,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "elu",
@@ -168,4 +196,16 @@ config_dict["binary_config_v2"] = {
         "output_activation":        "Sigmoid",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     50,
+        }
+config_dict["ttH_2018"] = {
+        "layers":                   [100,100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
         }

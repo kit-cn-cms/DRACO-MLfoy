@@ -12,10 +12,12 @@ options = optionHandler.optionHandler(sys.argv)
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
+sys.path.append(basedir+"/preprocessing/root2pandas")
 
 # import class for DNN training
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
+import preprocessing_utils as pputils
 
 options.initArguments()
 
@@ -23,13 +25,18 @@ options.initArguments()
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
 
 # define all samples
-input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
+# only ttH sample needs even/odd splitting for 2017 MC
+#input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = 1.)
+sampleDict = pputils.readSampleFile(options.getInputDirectory())
+print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+print sampleDict
+print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+pputils.addToInputSamples(input_samples, sampleDict)
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())

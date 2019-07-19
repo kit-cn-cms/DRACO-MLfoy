@@ -94,11 +94,15 @@ class DNN():
             eval_metrics    = None,
             shuffle_seed    = None,
             balanceSamples  = False,
-            evenSel         = None):
+            evenSel         = None,
+            norm_variables  = True):
 
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
+
+        # norm variables or not
+        self.norm_variables = norm_variables
 
         # output directory for results
         self.save_path = save_path
@@ -167,6 +171,7 @@ class DNN():
             test_percentage     = self.test_percentage,
             norm_variables      = self.norm_variables,
             shuffleSeed         = shuffle_seed,
+            norm_variables      = self.norm_variables,
             balanceSamples      = balanceSamples,
             evenSel             = self.evenSel)
 
@@ -199,24 +204,19 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset
-        self.model_eval = self.model.evaluate(
-            self.data.get_test_data(as_matrix = True),
-            self.data.get_test_labels())
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True),self.data.get_test_labels())
 
         # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True) )
 
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
 
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -233,9 +233,9 @@ class DNN():
             print("Event: "+str(index))
             print(row)
             print("-------------------->")
-            print(row.values)
-            print("-------------------->")
             output = self.model.predict( np.array([list(row.values)]))[0]
+            print("output:" + str(output))
+
             for i, node in enumerate(self.event_classes):
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
@@ -541,7 +541,7 @@ class DNN():
             plt.savefig(out_path)
             print("saved plot of "+str(metric)+" at "+str(out_path))
 
-    def plot_outputNodes(self, log = False, printROC = False, signal_class = None, 
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False, nbins = 30, bin_range = [0.,1.],
                         sigScale = -1):
 
@@ -632,15 +632,16 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = None, bin_range = [0.,1.], name = "binary discriminator",
+                        nbins = None, bin_range = [0.,1.], name = "binary_discriminator",
                         sigScale = -1):
 
         if not nbins:
-            nbins = int(50*(1.-bin_range[0]))
+            nbins = int(10*(1.-bin_range[0]))
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
-            predictions         = self.model_prediction_vector,
+            test_predictions    = self.model_prediction_vector,
+            train_predictions   = self.model_train_prediction,
             nbins               = nbins,
             bin_range           = bin_range,
             event_category      = self.categoryLabel,
@@ -649,8 +650,9 @@ class DNN():
             sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        binaryOutput.saveroot(ratio = False, name = name+".root")
 
-def loadDNN(inputDirectory, outputDirectory):
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -663,6 +665,9 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # load samples
     input_samples = data_frame.InputSamples(config["inputData"])
+
+    if binary:
+        input_samples.addBinaryLabel(signal, binary_target)
 
     for sample in config["eventClasses"]:
         input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
@@ -679,6 +684,6 @@ def loadDNN(inputDirectory, outputDirectory):
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
-    dnn.predict_event_query()
+    #dnn.predict_event_query()
 
     return dnn

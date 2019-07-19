@@ -7,6 +7,8 @@ import os
 import shutil
 import matplotlib.pyplot as plt
 
+import preprocessing_utils as pputils
+
 class EventCategories:
     def __init__(self):
         self.categories = {}
@@ -204,7 +206,8 @@ class Dataset:
 
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
         # remove old files
-        self.removeOldFiles()
+        #self.removeOldFiles()
+        self.renameOldFiles()
 
         if self.addMEM:
             # generate MEM path
@@ -228,10 +231,13 @@ class Dataset:
 
             # remove the own variables
             self.removeVariables( self.samples[key].ownVars )
-            createSampleList(sampleList, self.samples[key])
+            pputils.createSampleList(sampleList, self.samples[key])
             print("done.")
         # write file with preprocessed samples
-        createSampleFile(self.outputdir, sampleList)
+        pputils.createSampleFile(self.outputdir, sampleList)
+
+        # handle old files
+        self.handleOldFiles()
 
     def processSample(self, sample):
         # print sample info
@@ -429,6 +435,7 @@ class Dataset:
                     print("removing file {}".format(outFile))
                     os.remove(outFile)
 
+<<<<<<< HEAD
 # function to append a list with sample, label and normalization_weight to a list samples
 def createSampleList(sList, sample, label = None, nWeight = 1):
     """ takes a List a sample and appends a list with category, label and weight. Checks if even/odd splitting was made and therefore adjusts the normalization weight """
@@ -466,3 +473,37 @@ def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
     """ adds each sample in samples to the inputSample """
     for sample in samples:
         inputSamples.addSample(sample["sample"]+naming, label=sample["label"], normalization_weight = sample["normWeight"])
+=======
+    def renameOldFiles(self):
+        for key in self.samples:
+            sample = self.samples[key]
+            for cat in sample.categories.categories:
+                outFile = self.outputdir+"/"+cat+"_"+self.naming+".h5"
+                if os.path.exists(outFile):
+                    print("renaming file {}".format(outFile))
+                    os.rename(outFile,outFile+".old")
+
+    # deletes old files that were created new and rerenames old files by removing ".old", if no new files were created
+    def handleOldFiles(self):
+        old = []
+        actual = []
+        rerename = []
+        remo = []
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old"):
+                old.append(filename.split(".")[0])
+            else:
+                actual.append(filename.split(".")[0])
+        for name in old:
+            if name in actual:
+                remo.append(name)
+            else:
+                rerename.append(name)
+        for filename in os.listdir(self.outputdir):
+            if filename.endswith(".old") and filename.split(".")[0] in remo:
+                print("removing file {}".format(filename))
+                os.remove(self.outputdir+"/"+filename)
+            if filename.endswith(".old") and filename.split(".")[0] in rerename:
+                print("re-renaming file {}".format(filename))
+                os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
+>>>>>>> angirald/devel_DL
