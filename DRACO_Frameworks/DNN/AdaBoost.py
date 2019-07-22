@@ -1,6 +1,7 @@
 import os
 import sys
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 # plt.use('TkAgg')
 # plt.rcParams['backend'] = 'Agg'
@@ -362,6 +363,19 @@ class AdaBoost():
             # print("# DEBUG: Watch epsilon", self.epsilon)
             #collect weak classifier
             self.weak_model_trained.append(self.model)
+
+    # def binned_likelihood(self, )
+
+
+    def binned_likelihood(self, bkg_binns, tg_binns, mu):
+        '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
+        measured = bkg_binns + mu * tg_binns
+        minimum =
+        mu_draw = np.linspace(mu-2, mu+2, 11, endpoint = True)
+        loglike = np.array([])
+        for i in range(0, mu_draw.shape[0]):        #better use while loglike < 2+y_min
+            tmp = np.log(np.math.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*np.log(bkg_binns + mu_draw[i]*tg_binns)
+            loglike = np.append(loglike, tmp)
 
 
     def weight_prediction(self, pred, alpha):

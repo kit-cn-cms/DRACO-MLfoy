@@ -1,17 +1,17 @@
-- final_prediction_vector should be discret to
-- adjust path name for normal AdaBoost
-- adjust path names in gerenall to have dir for plots and models
+#- final_prediction_vector should be discret to
+#- adjust path name for normal AdaBoost
+#- adjust path names in gerenall to have dir for plots and models
 
---m2 False does not work
-- implement earlystopping
-- get hole plotting out of eval and in seperate plotting function -> evaluation not needed when loading trained model
+?--m2 False does not work
+?- implement earlystopping
+?- get hole plotting out of eval and in seperate plotting function -> evaluation not needed when loading trained model
 
 Wichtig:
-- test if pred in ada_adjust_weights is [0,1] or [-1,1]
+#- test if pred in ada_adjust_weights is [0,1] or [-1,1]
 
-- fraction signal to background in discriminator -> yrange anpassen
-- eventuell likelihood einbauen
-- earlystopping
+#- fraction signal to background in discriminator -> yrange anpassen
+- likelihood mit asimov daten einbauen
+?- earlystopping (zeitlich noch sinnvoll?)
 
 
 Mounting:
