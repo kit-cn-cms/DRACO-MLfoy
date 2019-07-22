@@ -480,6 +480,9 @@ class Dataset:
 
         njets_vec       = df["N_Jets"].values
 
+        r_max = 0.8
+        numb = np.zeros(int(r_max*100))
+
 
         GenTopHad_B_Phi = df["GenTopHad_B_Phi"].values
         GenTopHad_B_Eta = df["GenTopHad_B_Eta"].values
@@ -490,8 +493,6 @@ class Dataset:
         GenTophad_Q1_Eta= df["GenTopHad_Q1_Eta"].values
         Gentophad_Q2_Phi= df["GenTopHad_Q2_Phi"].values
         GenTophad_Q2_Eta= df["GenTopHad_Q2_Eta"].values
-
-        numb = np.zeros(40)
 
 
         jets  = ["TopHad_B", "TopLep_B", "TopHad_Q1", "TopHad_Q2"]
@@ -511,6 +512,7 @@ class Dataset:
         is_ttbar = np.zeros(total_nr)
         bkg_scale = np.zeros(total_nr)+1
 
+        ttbar_phi = np.zeros(total_nr)
         ttbar_Pt_div_Ht_p_Met = np.zeros(total_nr)
         cntr     = 0
 
@@ -549,7 +551,7 @@ class Dataset:
                             #exclude combinations with two identical indices or without B-tags for b-quarks
                             if(j==k or j==l or j==m or k==l or k==m or l==m):
                                 continue
-                            if(CSV[j]<0.227 or CSV[k]<0.227):
+                            if(CSV[j]<0.277 or CSV[k]<0.277):
                                 continue
 
 
@@ -564,7 +566,6 @@ class Dataset:
                             if(total_deltar<minr):
                                 if self.Scale:
                                     bkg = np.append(bkg, [[best_comb[0],best_comb[1],best_comb[2],best_comb[3]]], axis=0)
-                                    df=df.append(df.iloc[[i]])
                                 minr = total_deltar
                                 best_comb = [j,k,l,m]
                                 minr_bhad   = deltar_bhad
@@ -574,7 +575,6 @@ class Dataset:
 
                             if (total_deltar >= minr and self.Scale):
                                 bkg = np.append(bkg, [[j,k,l,m]], axis = 0)
-                                df=df.append(df.iloc[[i]])
 
             bkg = np.delete(bkg, (0,1), axis=0)
 
@@ -597,42 +597,46 @@ class Dataset:
                     globals()["reco_" + index + "_M"][i]    =     locals()["reco_" + index + "_4vec"].M()
                     globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
 
+                ttbar_phi[i] = correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi())
                 ttbar_Pt_div_Ht_p_Met[i] = (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt())
             # idx_bhad[i], idx_blep[i], idx_q1[i], idx_q2[i], delta_r[i] = best_comb[0], best_comb[1],best_comb[2],best_comb[3], minr
             if(i%500 == 0):
                 print minr, minr_bhad, minr_blep, minr_q1, minr_q2
 
+
             #for ttbar events: append wrong combination of jets to arrays and df
-            if self.Scale:
-                for nr in range(len(bkg)):
+            if is_ttbar[i]==1:
+                if self.Scale:
+                        for nr in range(len(bkg)):
+                            n=0
+                            df=df.append(df.iloc[[i]])
+                            false_comb = [int(bkg[nr][0]),int(bkg[nr][1]),int(bkg[nr][2]),int(bkg[nr][3])]
+                            for index in jets:
+                                for index2 in pepec:
+                                    globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+                                n+=1
+                            is_ttbar = np.append(is_ttbar,0)
+                            bkg_scale = np.append(bkg_scale, 1./len(bkg))
+                            # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+
+                            reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
+                            for index in recos:
+                                globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
+                                globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
+                                globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
+                                globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
+                                globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+
+                            ttbar_phi = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi()))
+                            ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
+                            cntr +=1
+
+
+
+                if self.Scale==0:
                     n=0
-                    if is_ttbar[i]==1:
-                        false_comb = [int(bkg[nr][0]),int(bkg[nr][1]),int(bkg[nr][2]),int(bkg[nr][3])]
-                        for index in jets:
-                            for index2 in pepec:
-                                globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-                            n+=1
-                        is_ttbar = np.append(is_ttbar,0)
-                        # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
-
-                        reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
-                        for index in recos:
-                            globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],       locals()["reco_" + index + "_4vec"].Pt())
-                            globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],      locals()["reco_" + index + "_4vec"].Eta())
-                            globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],      locals()["reco_" + index + "_4vec"].Phi())
-                            globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
-                            globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
-
-                        ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
-                        cntr +=1
-                        bkg_scale = np.append(bkg_scale, 1./len(bkg))
-
-
-            if self.Scale==0:
-                n=0
-                false_comb = np.zeros(4)
-                j1,k1,l1,m1 = 0,0,0,0
-                if is_ttbar[i]==1:
+                    false_comb = np.zeros(4)
+                    j1,k1,l1,m1 = 0,0,0,0
                     df=df.append(df.iloc[[i]])
                     #kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
                     while(j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
@@ -646,6 +650,7 @@ class Dataset:
                             globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
                         n+=1
                     is_ttbar = np.append(is_ttbar,0)
+                    bkg_scale = np.append(bkg_scale, 1)
                     # reco_tophad_m, reco_toplep_m, reco_whad_m, reco_log_whad_m, reco_wlep_m, reco_log_wlep_m, ttbar_pt_div_ht_p_met = getTopMass(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
 
                     reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
@@ -656,24 +661,27 @@ class Dataset:
                         globals()["reco_" + index + "_M"]    = np.append(globals()["reco_" + index + "_M"],        locals()["reco_" + index + "_4vec"].M())
                         globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
 
+                    ttbar_phi = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi()))
                     ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
                     cntr +=1
 
 
 
             #Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
-            # for u in range(40):
-            #     if(minr_bhad<u/100. and minr_blep<u/100. and minr_q1<u/100. and minr_q2<u/100.):
-            #         numb[u]+=1
+            """for u in range(int(r_max*100)):
+                if(minr_bhad<u/100. and minr_blep<u/100. and minr_q1<u/100. and minr_q2<u/100.):
+                    numb[u]+=1
 
-                # if(i==total_nr-1 and u%10 == 0):
-                #     print "Anteil verwendeter Daten bei delta r cut ", u/100.," : ", numb[u]/total_nr
+                if(i==total_nr-1 and u%10 == 0):
+                    print "Anteil verwendeter Daten bei delta r cut ", u/100.," : ", numb[u]/total_nr
 
-        # x = np.arange(0,0.4,0.01)
-        # plt.plot(x, numb/total_nr)
-        # plt.title("ratio between number of tolerated events and total number")
-        # plt.xlabel("$\Delta$r cut")
-        # plt.show()
+        x = np.arange(0,r_max,0.01)
+        plt.plot(x, numb/total_nr)
+        plt.title("ratio between number of tolerated events and total number")
+        plt.xlabel("$\Delta$r cut")
+        plt.ylabel("number of tolerated events / total number of events")
+        plt.grid()
+        plt.savefig("ratio.pdf")"""
 
         #delete all variables except for:
         df_new = pd.DataFrame()
@@ -684,7 +692,7 @@ class Dataset:
             df_new[ind] = df[ind].values
 
 
-        print df.shape, len(globals()[index + "_" + index2]), len(is_ttbar)
+        print df.shape, len(globals()["TopHad_B_" + index2]), len(is_ttbar)
 
         #add correct and false combinations with their tags to df
         entr=0
@@ -692,16 +700,17 @@ class Dataset:
             for index2 in pepec:
                 df[index + "_" + index2] = globals()[index + "_" + index2]
                 entr+=1
-        if self.Scale: df["bkg_scale"] = bkg_scale
+        df["bkg_scale"] = bkg_scale
         df["Evt_is_ttbar"]  = is_ttbar
         for index in recos:
             for index2 in pepm:
                 df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
                 entr+=1
 
+        df["ttbar_phi"] = ttbar_phi
         df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
         #print df,entr, df.columns[0:-entr]
-        df.drop(df.columns[:-(entr+2 + self.Scale)],inplace = True, axis = 1)
+        df.drop(df.columns[:-(entr+4)],inplace = True, axis = 1)
         # # print df
 
         for ind in variables_toadd:
