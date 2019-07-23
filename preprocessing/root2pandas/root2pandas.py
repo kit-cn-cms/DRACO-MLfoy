@@ -25,7 +25,7 @@ class EventCategories:
 
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
@@ -43,7 +43,7 @@ class Sample:
     def evenOddSplitting(self):
         if self.even_odd:
             if self.selections:
-                self.selections += "(Evt_Odd == 1)"
+                self.selections += " and (Evt_Odd == 1)"
             else:
                 self.selections = "(Evt_Odd == 1)"
         
