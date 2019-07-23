@@ -95,8 +95,7 @@ class DNN():
             eval_metrics       = None,
             shuffle_seed       = None,
             balanceSamples     = False,
-            evenSel            = None,
-            norm_variables     = True):
+            evenSel            = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -179,7 +178,6 @@ class DNN():
             test_percentage  = self.test_percentage,
             norm_variables   = self.norm_variables,
             shuffleSeed      = shuffle_seed,
-            norm_variables   = self.norm_variables,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
         )
