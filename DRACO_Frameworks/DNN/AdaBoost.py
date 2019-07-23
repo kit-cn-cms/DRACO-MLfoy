@@ -9,6 +9,8 @@ import json
 
 #sklearn imports
 from sklearn import metrics
+#interpolation function to calculate sigma
+from scipy import interpolate
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -370,12 +372,34 @@ class AdaBoost():
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
         '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
         measured = bkg_binns + mu * tg_binns
-        minimum =
-        mu_draw = np.linspace(mu-2, mu+2, 11, endpoint = True)
+        print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
+        minimum = np.sum(2*(np.log(np.math.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*np.log(bkg_binns + mu_draw*tg_binns)))
+        print("# DEBUG: binned_likelihood, minimum: ", minimum)
+        nxvals = 51
+        mu_draw = np.linspace(mu-5, mu+5, nxvals, endpoint = True)
         loglike = np.array([])
         for i in range(0, mu_draw.shape[0]):        #better use while loglike < 2+y_min
-            tmp = np.log(np.math.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*np.log(bkg_binns + mu_draw[i]*tg_binns)
+            tmp = 2*(np.log(np.math.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*np.log(bkg_binns + mu_draw[i]*tg_binns))-minimum
             loglike = np.append(loglike, tmp)
+        #calculate 'sigma1' and 'sigma2'
+        #binned likelihood function is invetable when seperated to left and right of its minimum
+        intp_lefthand = interpolate.interp1d(loglike[:nxvals+1], mu_draw[:nxvals+1])
+        intp_righthand = interpolate.interp1d(loglike[nxvals:], mu_draw[nxvals:])
+        s1x = np.array([intp_lefthand(1), intp_righthand(1)])
+        s2x = np.array([intp_lefthand(4), intp_righthand(4)])
+        #sigma1 and sigma2 y value for plotting
+        s1y = [1, 1]
+        s2y = [4, 4]
+        #plotting
+        plt.figure(4)
+        plt.xlabel("mu")
+        plt.ylabel("-log L")
+        plt.plot(mu_draw, loglike, '-')
+        plt.plot(s1x, s1y, 'b-')
+        plt.plot(s2x, s2y, 'b-')
+        plt.savefig(save_path + self.name +"_loglike.pdf")
+        #to calculate real sigma1 and sigma2 and return it
+        return np.absoulute(s1x-mu), np.absolute(s2y-mu)
 
 
     def weight_prediction(self, pred, alpha):
@@ -477,6 +501,7 @@ class AdaBoost():
         plt.plot(epoches, self.epsilon, '-')
         plt.savefig(save_path + self.name +"_eps.pdf")
 
+        # self.binned_likelihood()
         # plt.show()
 
 
@@ -565,8 +590,10 @@ class AdaBoost():
             pltname             = self.name,
             logscale            = log)
 
-        binaryOutput.plot(ratio = True, printROC = printROC, privateWork = privateWork, name = name)
-
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = True, printROC = printROC, privateWork = privateWork, name = name)
+        # print("# DEBUG: plot_binaryOutput, histos: ", bkg_hist, sig_hist)
+        print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
 
 

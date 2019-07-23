@@ -5,6 +5,8 @@ import ROOT
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 
+from root_numpy import hist2array
+
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
 pyrootdir = os.path.dirname(filedir)
@@ -808,3 +810,6 @@ class plotBinaryOutput:
 
         out_path = self.plotdir + self.name + "_binaryDisc.pdf"
         setup.saveCanvas(canvas, out_path)
+
+        print("# DEBUG: plottingScripts, bkg_hist[5]: ", bkg_hist.GetBinContent(5))
+        return np.round_(hist2array(bkg_hist)), np.round(hist2array(sig_hist_unscaled))
