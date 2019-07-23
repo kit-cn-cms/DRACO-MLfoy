@@ -2,9 +2,10 @@ import os
 import sys
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+# trining to solve some displaying problems (via ssh) here
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 # plt.rcParams['backend'] = 'Agg'
 import json
 
