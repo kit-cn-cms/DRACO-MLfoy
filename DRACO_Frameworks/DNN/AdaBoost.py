@@ -4,7 +4,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 # import matplotlib
-# matplotlib.use('Agg')
+plt.use('Agg')
 # plt.rcParams['backend'] = 'Agg'
 import json
 
