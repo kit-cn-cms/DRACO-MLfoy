@@ -3,7 +3,8 @@ import sys
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-# plt.use('TkAgg')
+# import matplotlib
+# matplotlib.use('Agg')
 # plt.rcParams['backend'] = 'Agg'
 import json
 
@@ -398,7 +399,6 @@ class AdaBoost():
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.figure(4)
         plt.xlabel("mu")
         plt.ylabel("-log L")
         plt.plot(mu_draw, loglike, '-')
