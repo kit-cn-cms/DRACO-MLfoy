@@ -594,7 +594,7 @@ class AdaBoost():
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
+                        nbins = 20, bin_range = [-0.9.,0.9], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
