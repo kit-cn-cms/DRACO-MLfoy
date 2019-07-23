@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import math
 # trining to solve some displaying problems (via ssh) here
+# solution is to use ssh -X ... or the following two lines
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -373,22 +374,26 @@ class AdaBoost():
         return map(lambda x: math.factorial(x), array)
 
 
+    def logarithmic(self, array):\
+        return map(lambda x: math.log(x), array)
+
+
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
         '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
         measured = bkg_binns + mu * tg_binns
         # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
         # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
         print("# DEBUG: factorial: ", self.factorial(measured))
-        print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
+        # print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
         print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
-        print("# DEBUG: bevore sum: ", 2*(np.log(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*np.log(bkg_binns + mu*tg_binns)))
-        minimum = np.sum(2*(np.log(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*np.log(bkg_binns + mu*tg_binns)))
+        print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
+        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
         print("# DEBUG: binned_likelihood, minimum: ", minimum)
         nxvals = 51
         mu_draw = np.linspace(mu-5, mu+5, nxvals, endpoint = True)
         loglike = np.array([])
         for i in range(0, mu_draw.shape[0]):        #better use while loglike < 2+y_min
-            tmp = 2*(np.log(self.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*np.log(bkg_binns + mu_draw[i]*tg_binns))-minimum
+            tmp = 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))-minimum
             loglike = np.append(loglike, tmp)
         #calculate 'sigma1' and 'sigma2'
         #binned likelihood function is invetable when seperated to left and right of its minimum
