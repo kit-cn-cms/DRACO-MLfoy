@@ -366,15 +366,9 @@ class AdaBoost():
             #collect weak classifier
             self.weak_model_trained.append(self.model)
 
-    # def binned_likelihood(self, )
 
     def factorial(self, array):
-        return_array = np.array([])
-        for i in range(0, array.shape[0]):
-            #use math.factorial and map to use on hole array at once
-            return_array = np.append(return_array, np.prod(range(1, array[i]+1), dtype=np.float64))
-            print("# DEBUG: value and array[i]: ", np.prod(range(1, array[i]+1), dtype=np.float64), array[i])
-        return return_array
+        return map(lambda x: math.factorial(x), array)
 
 
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
