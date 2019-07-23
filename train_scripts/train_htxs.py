@@ -125,7 +125,7 @@ pputils.addToInputSamples(input_samples, sampleDict)
 dnn = DNN.DNN(
     save_path       = outputdir,
     input_samples   = input_samples,
-    event_category  = options.category,
+    category_name   = options.category,
     train_variables = variables,
     # number of epochs
     train_epochs    = int(options.train_epochs),

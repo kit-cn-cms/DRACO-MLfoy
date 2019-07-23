@@ -1,12 +1,6 @@
-### import stuff
 import os
 
-
-#####################################################################################
-
-
-
-### some usefull functions
+### some useful functions
 
 # function to append a list with sample, label and normalization_weight to a list samples
 def createSampleList(sList, sample, label = None, nWeight = 1):

@@ -23,12 +23,12 @@ options.initArguments()
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
 
 # define all samples
-input_samples.addSample(options.getDefaultName("ttHbb"),  label = "ttHbb",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttHbb"), label = "ttHbb", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
@@ -37,7 +37,7 @@ if options.isBinary():
 dnn = DNN.DNN(
     save_path       = options.getOutputDir(),
     input_samples   = input_samples,
-    event_category  = options.getCategory(),
+    category_name   = options.getCategory(),
     train_variables = options.getTrainVariables(),
     # number of epochs
     train_epochs    = options.getTrainEpochs(),

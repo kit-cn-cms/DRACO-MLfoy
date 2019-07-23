@@ -23,7 +23,6 @@ class EventCategories:
                 selections.append(self.categories[cat])
         return selections
 
-
 class Sample:
     def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars=[], even_odd = False):
         self.sampleName = sampleName
@@ -47,13 +46,11 @@ class Sample:
             else:
                 self.selections = "(Evt_Odd == 1)"
 
-
-
 class Dataset:
-    def __init__(self, outputdir, tree, naming = "", addMEM = False, maxEntries = 50000):
+    def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
         # settings for paths
-        self.outputdir  = outputdir
-        self.naming     = naming
+        self.outputdir = outputdir
+        self.naming = naming
         self.tree = tree
 
         # generating output dir
@@ -227,7 +224,14 @@ class Dataset:
             self.addVariables( self.samples[key].ownVars )
 
             # process the sample
-            self.processSample(self.samples[key])
+            self.processSample(
+
+              sample = self.samples[key]
+
+              varName_Run       = self.varName_Run,
+              varName_LumiBlock = self.varName_LumiBlock,
+              varName_Event     = self.varName_Event,
+            )
 
             # remove the own variables
             self.removeVariables( self.samples[key].ownVars )
@@ -239,7 +243,7 @@ class Dataset:
         # handle old files
         self.handleOldFiles()
 
-    def processSample(self, sample):
+    def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event):
         # print sample info
         sample.printInfo()
 
@@ -250,7 +254,6 @@ class Dataset:
         if self.addMEM:
             mem_files = glob.glob(sample.MEMs)
             mem_df = self.generateMEMdf(mem_files, sample.sampleName)
-
 
         # initialize loop over ntuple files
         n_entries = 0
@@ -263,17 +266,16 @@ class Dataset:
 
             # open root file
             with root.open(f) as rf:
-                # get MVATree
+                # get TTree
                 try:
                     tree = rf[self.tree]
                 except:
-                    print("could not open MVATree in ROOT file")
+                    print("could not open "+str(self.tree)+" in ROOT file")
                     continue
 
-
             if tree.numentries == 0:
-                print("MVATree has no entries - skipping file")
-                continue
+               print(str(self.tree)+" has no entries - skipping file")
+               continue
 
             # convert to dataframe
             df = tree.pandas.df(self.variables)
@@ -322,12 +324,11 @@ class Dataset:
                 concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                 # add indexing
-                concat_df.set_index(["runNumber", "lumiBlock", "eventNumber"], inplace = True, drop = True)
+                concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
 
                 # add MEM variables
                 if self.addMEM:
-                    concat_df = self.addMEMVariable(concat_df, mem_df)
-
+                   concat_df = self.addMEMVariable(concat_df, mem_df)
 
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
@@ -339,7 +340,6 @@ class Dataset:
                 # reset counters
                 n_entries = 0
                 concat_df = pd.DataFrame()
-
 
     # ====================================================================
 
@@ -413,7 +413,6 @@ class Dataset:
             print("    lost {}/{} events".format(entries_before-entries_after, entries_before))
             print("    we will only save events with mem...")
         return df
-
 
     def removeTriggerVariables(self, df):
         df.drop(self.removedVariables, axis = 1, inplace = True)

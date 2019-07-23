@@ -45,7 +45,7 @@ if options.isBinary():
 dnn = DNN.DNN(
     save_path       = options.getOutputDir(),
     input_samples   = input_samples,
-    event_category  = options.getCategory(),
+    category_name   = options.getCategory(),
     train_variables = options.getTrainVariables(),
     # number of epochs
     train_epochs    = options.getTrainEpochs(),

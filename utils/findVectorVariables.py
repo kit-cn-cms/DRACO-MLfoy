@@ -21,8 +21,8 @@ parser.add_option("-o",dest="outputfile",
     help="specify output file for variable_set.py file")
 (opts, args) = parser.parse_args()
 
-if not opts.file:
-    parser.error("need to specify file")
+if not opts.file: parser.error("need to specify file")
+
 opts.number_of_indices = int(opts.number_of_indices)
 
 # get all variables
@@ -31,7 +31,7 @@ variables = variable_set.all_variables
 new_set_of_variables = []
 # open sample file
 with uproot.open(opts.file) as f:
-    tree = f[self.tree]
+    tree = f["MVATree"]
 
     for v in variables:
         print("looking at variable: {}".format(v))
