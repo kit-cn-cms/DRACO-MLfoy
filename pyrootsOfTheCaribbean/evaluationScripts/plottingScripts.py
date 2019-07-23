@@ -811,5 +811,5 @@ class plotBinaryOutput:
         out_path = self.plotdir + self.name + "_binaryDisc.pdf"
         setup.saveCanvas(canvas, out_path)
 
-        print("# DEBUG: plottingScripts, bkg_hist[5]: ", bkg_hist.GetBinContent(5))
-        return np.round_(hist2array(bkg_hist)), np.round(hist2array(sig_hist_unscaled))
+        # print("# DEBUG: plottingScripts, bkg_hist[5]: ", bkg_hist.GetBinContent(5))
+        return np.round_(hist2array(bkg_hist)).astype(int), np.round(hist2array(sig_hist_unscaled)).astype(int)
