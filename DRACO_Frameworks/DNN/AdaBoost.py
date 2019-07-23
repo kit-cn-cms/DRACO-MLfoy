@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-# import matplotlib
+import matplotlib
 matplotlib.use('Agg')
 # plt.rcParams['backend'] = 'Agg'
 import json
