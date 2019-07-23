@@ -58,11 +58,11 @@ category_label_dict = {
 
     '3j_'+  '2t': 'N_jets = 3, N_btags = 2',
     '3j_'+  '3t': 'N_jets = 3, N_btags = 3',
-  'ge4j_'+  '2t': 'N_jets \geq 4, N_btags = 2',
-  'ge4j_'+  '3t': 'N_jets \geq 4, N_btags = 3',
-  'ge4j_'+'ge4t': 'N_jets \geq 4, N_btags \geq 4',
+  'ge4j_'+  '2t': 'N_jets \\geq 4, N_btags = 2',
+  'ge4j_'+  '3t': 'N_jets \\geq 4, N_btags = 3',
+  'ge4j_'+'ge4t': 'N_jets \\geq 4, N_btags \\geq 4',
 
-  'ge4j_'+'ge3t': 'N_{jets} \geq 4, N_{btags} \geq 3',
+  'ge4j_'+'ge3t': 'N_{jets} \\geq 4, N_{btags} \\geq 3',
 }
 
 # initializing DNN training class
@@ -92,8 +92,9 @@ dnn = DNN.DNN(
 )
 
 
+
 # build DNN model
-dnn.build_model(config)
+dnn.build_model(options.getNetConfig())
 
 # perform the training
 dnn.train_model()
@@ -104,32 +105,57 @@ dnn.eval_model()
 # save information
 dnn.save_model(sys.argv, filedir)
 
+# save configurations of variables for plotscript
+#dnn.variables_configuration()
+
 # save and print variable ranking
 dnn.get_input_weights()
 
 # plotting
-if options.plot:
-
+if options.doPlots():
     # plot the evaluation metrics
-    dnn.plot_metrics(privateWork = options.privateWork)
+    dnn.plot_metrics(privateWork = options.isPrivateWork())
 
-    if options.binary:
+    if options.isBinary():
         # plot output node
-        bin_range = [input_samples.bkg_target, 1.]
-        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
-
+        bin_range = options.getBinaryBinRange()
+        dnn.plot_binaryOutput(
+            log         = options.doLogPlots(),
+            privateWork = options.isPrivateWork(),
+            printROC    = options.doPrintROC(),
+            bin_range   = bin_range,
+            name        = options.getName())
     else:
         # plot the confusion matrix
-        dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_confusionMatrix(
+            privateWork = options.isPrivateWork(),
+            printROC    = options.doPrintROC())
 
         # plot the output discriminators
-        dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_discriminators(
+            log                 = options.doLogPlots(),
+            signal_class        = options.getSignal(),
+            privateWork         = options.isPrivateWork(),
+            printROC            = options.doPrintROC(),
+            sigScale            = options.getSignalScale())
 
         # plot the output nodes
-        dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+        dnn.plot_outputNodes(
+            log                 = options.doLogPlots(),
+            signal_class        = options.getSignal(),
+            privateWork         = options.isPrivateWork(),
+            printROC            = options.doPrintROC(),
+            sigScale            = options.getSignalScale())
 
         # plot event yields
-        dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+        dnn.plot_eventYields(
+            log                 = options.doLogPlots(),
+            signal_class        = options.getSignal(),
+            privateWork         = options.isPrivateWork(),
+            sigScale            = options.getSignalScale())
 
         # plot closure test
-        dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)
+        dnn.plot_closureTest(
+            log                 = options.doLogPlots(),
+            signal_class        = options.getSignal(),
+            privateWork         = options.isPrivateWork())

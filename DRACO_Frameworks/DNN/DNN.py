@@ -430,7 +430,8 @@ class DNN():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
-        # save configurations of variables for plotscript
+    def variables_configuration(self):
+        '''  save configurations of variables for plotscript '''
         plot_file = self.cp_path+"/plot_config.csv"
         variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
         variables = variable_configs.loc[self.train_variables]
