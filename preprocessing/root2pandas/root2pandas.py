@@ -52,6 +52,9 @@ class Dataset:
         self.outputdir = outputdir
         self.naming = naming
         self.tree = tree
+        self.varName_Run = varName_Run
+        self.varName_LumiBlock = varName_LumiBlock
+        self.varName_Event = varName_Event
 
         # generating output dir
         if not os.path.exists(self.outputdir):
@@ -65,6 +68,7 @@ class Dataset:
         self.baseSelection  = None
         self.samples        = {}
         self.variables      = []
+
 
     def addBaseSelection(self, selection):
         self.baseSelection = selection
@@ -226,7 +230,7 @@ class Dataset:
             # process the sample
             self.processSample(
 
-              sample = self.samples[key]
+              sample = self.samples[key],
 
               varName_Run       = self.varName_Run,
               varName_LumiBlock = self.varName_LumiBlock,
