@@ -374,19 +374,22 @@ class AdaBoost():
         return map(lambda x: math.factorial(x), array)
 
 
-    def logarithmic(self, array):\
+    def logarithmic(self, array):
         return map(lambda x: math.log(x), array)
 
 
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
         '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
         measured = bkg_binns + mu * tg_binns
+        for i in measured:
+            if i == 0:
+                print("Bin with zero events")
         # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
         # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
         print("# DEBUG: factorial: ", self.factorial(measured))
         # print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
-        print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
-        print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
+        # print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
+        # print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
         minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
         print("# DEBUG: binned_likelihood, minimum: ", minimum)
         nxvals = 51
