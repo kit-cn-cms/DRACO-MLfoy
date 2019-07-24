@@ -384,6 +384,8 @@ class AdaBoost():
         for i in measured:
             if i == 0:
                 print("Bin with zero events")
+        indices = [i for i, x in enumerate(measured) if x == 0]
+        print("# DEBUG: binned_likelihood, indices of ==0: ", indices)
         # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
         # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
         print("# DEBUG: factorial: ", self.factorial(measured))
@@ -594,7 +596,7 @@ class AdaBoost():
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 20, bin_range = [-0.9,0.9], name = "binary discriminator"):
+                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
