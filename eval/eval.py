@@ -4,6 +4,7 @@ from math import sin, cos, log
 
 import os
 import sys
+import optparse
 import numpy as np
 import pandas as pd
 import json
@@ -16,6 +17,60 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as data_frame
 
+
+"""
+USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
+"""
+usage="usage=%prog [options] \n"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="ttbar_phi",
+        help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="variableSelection")
+
+parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+        help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="category")
+
+parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
+        help="DIR of trained dnn (definition of files to load has to be adjusted in the script itself)", metavar="inputDir")
+
+parser.add_option("-p", "--percentage", dest="percentage", default="100",
+        help="Type 1 for around 1%, 10 for 10 and 100 for 100", metavar="percentage")
+
+(options, args) = parser.parse_args()
+#get input directory path
+if not os.path.isabs(options.inputDir):
+    inPath = basedir+"/workdir/"+options.inputDir + "_" + options.category
+elif os.path.exists(options.inputDir):
+    inPath=options.inputDir
+else:
+    sys.exit("ERROR: Input Directory does not exist!")
+#import Variable Selection
+if not os.path.isabs(options.variableSelection):
+    sys.path.append(basedir+"/variable_sets/")
+    variable_set = __import__(options.variableSelection)
+elif os.path.exists(options.variableSelection):
+    variable_set = __import__(options.variableSelection)
+else:
+    sys.exit("ERROR: Variable Selection File does not exist!")
+    # the input variables are loaded from the variable_set file
+if options.category in variable_set.variables:
+    variables = variable_set.variables[options.category]
+else:
+    variables = variable_set.all_variables
+    print("category {} not specified in variable set {} - using all variables".format(
+        options.category, options.variableSelection))
+
+if options.percentage=="1":
+    xx="*00"
+elif options.percentage=="10":
+    xx="*0"
+elif options.percentage=="100":
+    xx="*"
+else:
+    print("ERROR: Please enter 1, 10 or 100 as percentage of files you want to evaluate")
 #################################################################################################################################
 
 def loadDNN(inputDirectory, outputDirectory):
@@ -45,25 +100,23 @@ def loadDNN(inputDirectory, outputDirectory):
         shuffle_seed    = config["shuffleSeed"]
         )
 
-    # load the trained model
-    # dnn.load_trained_model(inputDirectory)
-
     checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
     # get the model
     dnn.model = keras.models.load_model(checkpoint_path)
     dnn.model.summary()
 
-    return dnn
+    return dnn.model
 
 
-def findttbar(dataframe, dnn):
+def findttbar(dataframe, model):
     # evaluate test dataset
     # model_eval = dnn.model.evaluate(dataframe.values, dnn.data.get_test_labels())
 
     # save predicitons
     ones_counter=0
-    model_predict = dnn.model.predict(dataframe.values)
+    model_predict = model.predict(dataframe.values)
+
     max1 = -10
     best_index=0
     for ind in range(len(model_predict)):
@@ -73,18 +126,26 @@ def findttbar(dataframe, dnn):
             max1 = model_predict[ind]
             best_index = ind
 
-    print type(max1)
-
-    if(max1<0): print "error!!11!!1!1!"
-    print best_index, (max1), model_predict, len(model_predict)
-    np.set_printoptions(suppress=True)
-    np.set_printoptions(precision=75)
-    print best_index, np.round(max1,20), len(model_predict)
-    print np.array(model_predict)
+    if(max1<-1): print "error!!11!!1!1!"
+    #print best_index, (max1), model_predict, len(model_predict)
+    # np.set_printoptions(suppress=True)
+    # np.set_printoptions(precision=75)
+    # print best_index, np.round(max1,20), len(model_predict)
+    # print np.array(model_predict)
     # if ones_counter>1:
     #     print "warning: more than one index maximal"
     #     best_index = -1
     return best_index
+
+
+def normalize(df,inputdir):
+    unnormed_df = df
+
+    df_norms = pd.read_csv(inputdir+"/checkpoints/variable_norm.csv", index_col=0).transpose()
+    for ind in df.columns:
+        df[ind] = (unnormed_df[ind] - df_norms[ind][0])/df_norms[ind][1]
+    return df
+
 
 def correct_phi(phi):
     if(phi  <=  -np.pi):
@@ -114,7 +175,7 @@ def correct_phi(phi):
 pepec = ["Pt", "Eta", "Phi", "E", "CSV"]
 jets  = ["TopHad_B", "TopLep_B", "TopHad_Q1", "TopHad_Q2"]
 
-print "\n  done part 1  \n"
+print "\n  done part 1  \n", variables
 
 
 
@@ -155,13 +216,16 @@ def getTopMass(Pt, Eta, Phi, E, lepton_4vec, Pt_MET, Phi_MET,Ht, j,k,l,m):
     thad_4vec = whad_4vec + TopHad_B_4vec
     tlep_4vec = wlep_4vec + TopLep_B_4vec
 
-    return thad_4vec.M(), tlep_4vec.M(), log(whad_4vec.M()), (thad_4vec.Pt() + tlep_4vec.Pt())/(Ht + Pt_MET + lepton_4vec.Pt())
+    return thad_4vec, tlep_4vec, whad_4vec, wlep_4vec, lepton_4vec
 ################################################################################################################################
 pathName2 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8"
 
 chain = ROOT.TChain("MVATree")
 print(pathName2)
-toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*00_nominal_Tree.root")
+
+
+# toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_"+xx+"_nominal_Tree.root")
+toadd = os.path.join(pathName2, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_"+xx+"_nominal_Tree.root")
 #toadd0 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*0_nominal_Tree.root")
 #toadd1 = os.path.join(pathName, "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_*1_nominal_Tree.root")
 
@@ -180,14 +244,18 @@ print(nchain)
 i=0
 mW = 80.4
 counter = 0
+lcounter = 0
+rcounter = 0
 eventcounter= 0
 
+# inputdir = "/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/" +  options.inputdir + "_" + options.category
+print inPath
 
-dnn = loadDNN("/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/logW_v2_4j_ge3t", "output")
+model = loadDNN(inPath, "output")
 
-top_mass = ROOT.TH1F("top_mass","mass of top quark", 35, 0 ,700)
-delta_rlep = ROOT.TH1F("delta_rlep", "#Delta r lep;#Delta r of leptonic decaying tops; number of events", 100,0,8)
-delta_rhad = ROOT.TH1F("delta_rhad", "#Delta r had;#Delta r of hadronic decaying tops; number of events", 100,0,8)
+top_mass = ROOT.TH1F("top_mass","mass of top quark", 100, 0 ,500)
+delta_rlep = ROOT.TH1F("delta_rlep", "#Delta r lep;#Delta r of leptonic decaying tops; number of events", 60,0,6)
+delta_rhad = ROOT.TH1F("delta_rhad", "#Delta r had;#Delta r of hadronic decaying tops; number of events", 60,0,6)
 delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta r b had;#Delta r of hadronic b; number of events", 100,0,6)
 delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta r b lep;#Delta r of leptonic b; number of events", 100,0,6)
 delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta r q1;#Delta r of q1; number of events", 100,0,6)
@@ -196,12 +264,19 @@ delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta r q2;#Delta r of q2; numb
 delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi of hadronic b; number of events", 100,0,6)
 delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b; number of events", 100,0,6)
 
+rek_thad   = ROOT.TEfficiency("rek_thad", "efficiency for reconstruction of hadronic decaying top; pseudorapidity #eta; transverse momentum Pt [GeV/c]",  200, -5, 5, 200, 0, 500)
+PtRap_thad = ROOT.TH2F("PtRap_thad", "total number of hadronic decaying tops; pseudorapidity #eta; transverse momentum Pt [GeV/c]", 200, -5, 5, 200, 0, 500)
+eff_count_thad = ROOT.TH2F("eff_count_thad", "number of hadronic decaying tops with correct reconstruction (#Delta R < 0.4); pseudorapidity #eta; transverse momentum Pt [GeV/c]", 200, -5, 5, 200, 0, 500)
+# rek_tlep = ROOT.TH2F("rek_tlep", "pseudorapidity vs tranverse momentum of leptonic decaying top", 50, 0, 500, 20, -5,5)
+
 
 
 for event in chain:
     njets = event.N_Jets
     # print njets
-    if(njets>11 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
+    # if(njets>12 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
+    if(njets>12 or event.N_BTagsM<3 or event.Evt_Odd ==1):
+
         # print "ok cool next one"
         continue
 
@@ -216,10 +291,9 @@ for event in chain:
     Phi = event.Jet_Phi
     E   = event.Jet_E
     CSV  = event.Jet_CSV
-    Pt_MET = event.Evt_MET_Pt
-    Phi_MET= event.Evt_MET_Phi
+    Evt_MET_Pt = event.Evt_MET_Pt
+    Evt_MET_Phi= event.Evt_MET_Phi
     Ht     = event.Evt_HT
-
 
     if event.N_TightMuons:
         Muon_Pt = event.Muon_Pt[0]
@@ -251,11 +325,16 @@ for event in chain:
     df = pd.DataFrame()
     #print(event.Evt_Phi_MET)
 
-    if i==5: break
-    reco_TopHad_M = np.array([])
-    reco_TopLep_M = np.array([])
-    reco_WHad_M   = np.array([])
-    Pt_div_Ht     = np.array([])
+    # if i==5: break
+    #reco_TopHad_M = np.array([])
+    #reco_TopLep_M = np.array([])
+    #reco_WHad_M   = np.array([])
+    for index in ["TopHad","TopLep", "WHad", "WLep"]:
+        for index2 in ["Pt", "Eta", "Phi", "M", "logM"]:
+	        globals()["reco_" + index + "_" + index2] = np.array([])
+
+    ttbar_phi     = np.array([])
+    ttbar_pt_div_ht_p_met     = np.array([])
 
 
     for j in range(njets):
@@ -266,7 +345,10 @@ for event in chain:
                 for m in range(njets):
                     if(j==k or j==l or j==m or k==l or k==m or l==m):
                         continue
-                    if(CSV[j]<0.227 or CSV[k]<0.227):
+                    if(CSV[j]<0.277 or CSV[k]<0.277):
+                        continue
+                    #since l!=m and l,m are indices of light flavour quarks, the following describe the same configuration: l=a, m=b ; l=b, m=a.
+                    if m>l:
                         continue
 
                     #filling arrays with different combinations
@@ -277,43 +359,72 @@ for event in chain:
                         globals()["TopHad_Q2" + "_" + index2] = np.append(globals()["TopHad_Q2" + "_" + index2], globals()[index2][m])
 
 
-                    reco_tophad_m, reco_toplep_m, reco_whad_m, pt_div_ht  = getTopMass(Pt, Eta, Phi, E, lepton4, Pt_MET, Phi_MET, Ht, j,k,l,m)
-                    reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_m)
-                    reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_m)
-                    reco_WHad_M   = np.append(reco_WHad_M,   reco_whad_m)
-                    Pt_div_Ht     = np.append(Pt_div_Ht,     pt_div_ht)
+                    reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, lepton_4vec  = getTopMass(Pt, Eta, Phi, E, lepton4, Evt_MET_Pt, Evt_MET_Phi, Ht, j,k,l,m)
+                    #reco_TopHad_M = np.append(reco_TopHad_M, reco_tophad_4vec.M())
+                    #reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_4vec.M())
+                    #reco_WHad_M   = np.append(reco_WHad_M,   reco_whad_4vec.M())
+
+		    for index in ["TopHad","TopLep", "WHad","WLep"]:
+  	                globals()["reco_" + index +"_Pt"] = np.append(globals()["reco_" + index +"_Pt"], locals()["reco_" + index + "_4vec"].Pt())
+       		        globals()["reco_" + index + "_Eta"] = np.append(globals()["reco_" + index +"_Eta"], locals()["reco_" + index + "_4vec"].Eta())
+      		        globals()["reco_" + index + "_Phi"] = np.append(globals()["reco_" + index +"_Phi"], locals()["reco_" + index + "_4vec"].Phi())
+       		        globals()["reco_" + index + "_M"] = np.append(globals()["reco_" + index +"_M"], locals()["reco_" + index + "_4vec"].M())
+     		        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index +"_logM"],log( locals()["reco_" + index + "_4vec"].M()))
+
+                    ttbar_phi     = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi()-reco_TopLep_4vec.Phi()))
+                    ttbar_pt_div_ht_p_met     = np.append(ttbar_pt_div_ht_p_met,     (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(Ht + Evt_MET_Pt + lepton_4vec.Pt()))
+
+
 
     eventcounter +=1
+    combis = len(TopHad_B_Phi)
+
     n=0
     for index in jets:
         for index2 in pepec:
             n+=1
             df[index +"_"+ index2] = globals()[index + "_" + index2]
 
-    combis = len(TopHad_B_Phi)
-    df["Muon_Pt"]   = np.zeros(combis) + Muon_Pt
-    df["Muon_Eta"]  = np.zeros(combis) + Muon_Eta
-    df["Muon_Phi"]  = np.zeros(combis) + Muon_Phi
-    df["Muon_E"]    = np.zeros(combis) + Muon_E
-    df["Electron_Pt"] = np.zeros(combis) + Electron_Pt
-    df["Electron_Eta"] = np.zeros(combis) + Electron_Eta
-    df["Electron_Phi"] = np.zeros(combis) + Electron_Phi
-    df["Electron_E"] = np.zeros(combis) + Electron_E
+    df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
+    df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
+    df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
+    df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
+    df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
+    df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
+    df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
+    df["Electron_E[0]"] = np.zeros(combis) + Electron_E
     df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
     df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
-    df["reco_TopHad_M"] = reco_TopHad_M
-    df["reco_TopLep_M"] = reco_TopLep_M
-    df["reco_WHad_M"]   = reco_WHad_M
-    df["ttbar_pt_div_ht_p_met"]     = Pt_div_Ht
 
-    # print df.columns
-    # print df
-    best_index = findttbar(df,dnn)
-    # print best_index
+
+    #df["reco_TopHad_M"] = reco_TopHad_M
+    #df["reco_TopLep_M"] = reco_TopLep_M
+    #df["reco_WHad_M"]   = reco_WHad_M
+
+
+    vars_toadd = ["TopHad","TopLep", "WHad"]
+
+    for index in vars_toadd:
+        for index2 in ["Pt","Eta","Phi","M","logM"]:
+	        df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
+
+    df["ttbar_phi"] = ttbar_phi
+    df["ttbar_pt_div_ht_p_met"]     = ttbar_pt_div_ht_p_met
+
+    # for var in variables:
+    #     if var[:4] in ["Muon", "Elec"]:
+    #         df[var] = np.zeros(combis)+locals()[var[:-3]]
+    #         continue
+    #     df[var] = globals()[var]
+
+
+    df_normed = normalize(df,inPath)
+
+    # print df, df_normed
+    best_index = findttbar(df_normed,model)
+
     if best_index < 0:
         continue
-
-
 
 
     for index in jets:
@@ -322,7 +433,7 @@ for event in chain:
 
 
     #Neutrino-Berechnung
-    neutrino = ROOT.TLorentzVector(Pt_MET*cos(Phi_MET),Pt_MET*sin(Phi_MET),0.,Pt_MET)
+    neutrino = ROOT.TLorentzVector(Evt_MET_Pt*cos(Evt_MET_Phi),Evt_MET_Pt*sin(Evt_MET_Phi),0.,Evt_MET_Pt)
     mu = ((mW*mW)/2) + lepton4.Px()*neutrino.Px()+ lepton4.Py()*neutrino.Py()
     a = (mu*lepton4.Pz())/(lepton4.Pt()**2)
     a2 = a**2
@@ -356,20 +467,17 @@ for event in chain:
     delta_eta_lep = tlep.Eta() - event.GenTopLep_Eta[0]
     delta_eta_had = thad.Eta() - event.GenTopHad_Eta[0]
 
-    if(delta_phi_lep  <=  -np.pi):
-        delta_phi_lep += 2*np.pi
-    if(delta_phi_lep  >    np.pi):
-        delta_phi_lep -= 2*np.pi
-    if(delta_phi_had  <=  -np.pi):
-        delta_phi_had += 2*np.pi
-    if(delta_phi_had  >    np.pi):
-        delta_phi_had -= 2*np.pi
-
     deltaRl = ((correct_phi(delta_phi_lep))**2. + (delta_eta_lep)**2.)**0.5
     deltaRh = ((correct_phi(delta_phi_had))**2. + (delta_eta_had)**2.)**0.5
 
     if(deltaRl<0.4 and deltaRh<0.4):
         counter+=1
+
+    if(deltaRl<0.4):
+        lcounter +=1
+
+    if(deltaRh<0.4):
+        rcounter +=1
 
     if(i%1000==0):
         print i, '/', nchain/2., '=', 200.*i/nchain,'%', "      , eff: ", 1.*counter/eventcounter
@@ -412,24 +520,29 @@ for event in chain:
     delta_eta.Fill(abs(delta_eta_bhad))
 
 
+    rek_thad.Fill((deltaRh<0.4), thad.Eta(),thad.Pt())
+    PtRap_thad.Fill(thad.Eta(),thad.Pt())
+    if deltaRh<0.4: eff_count_thad.Fill(thad.Eta(),thad.Pt())
 
-print "eff: ", 1.*counter/eventcounter
 
-x,y,r = np.zeros(100),np.zeros(100),np.zeros(100)
 
-for i in range(100):
-    for j in range(i,100):
+print "eff: ", 1.*counter/eventcounter, "  ", 1.*lcounter/eventcounter, "  ", 1.*rcounter/eventcounter
+
+x,y,r = np.zeros(60),np.zeros(60),np.zeros(60)
+
+for i in range(60):
+    for j in range(i,60):
         x[j] += delta_rlep.GetBinContent(i)/delta_rlep.Integral()*delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())
         y[j] += delta_rhad.GetBinContent(i)/delta_rhad.Integral()*delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())
 ##r+=0.1/2
-    r[i]=(i+0.5)/10.
+    r[i]=(i)/10.
 
-efficiency_lep = ROOT.TGraph(100, r, x)
-efficiency_had = ROOT.TGraph(100, r, y)
+efficiency_lep = ROOT.TGraph(60, r, x)
+efficiency_had = ROOT.TGraph(60, r, y)
 
 
-c1=ROOT.TCanvas("c1","delta r and efficiency",1200,500)
-c1.Divide(2,1)
+c1=ROOT.TCanvas("c1","delta r and efficiency",500,500)
+c1.Divide(1,1)
 
 #c1.cd(1)
 #jet_pt.Draw()
@@ -440,14 +553,14 @@ c1.cd(1)
 
 delta_rlep.SetFillColor(ROOT.kCyan-9)
 delta_rlep.SetStats(0)
-delta_rlep.Draw("HIST")
+delta_rlep.Draw("HIST E")
 
 efficiency_lep.SetLineColor(ROOT.kRed)
 efficiency_lep.SetLineWidth(2)
 efficiency_lep.Draw("SAME")
 
-eff_lep = str(int(10000*x[3]/delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())))
-eff_had = str(int(10000*y[3]/delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())))
+eff_lep = str(int(10000*x[4]/delta_rlep.GetBinContent(delta_rlep.GetMaximumBin())))
+eff_had = str(int(10000*y[4]/delta_rhad.GetBinContent(delta_rhad.GetMaximumBin())))
 eff_comb= str(int(10000.*counter/eventcounter))
 
 line_lep = ROOT.TLine(0.4,0,0.4,delta_rlep.GetMaximum())
@@ -455,7 +568,7 @@ line_lep.SetLineColor(ROOT.kBlack)
 line_lep.SetLineWidth(2)
 line_lep.Draw()
 
-axis_lep = ROOT.TGaxis(8,0,8,delta_rlep.GetBinContent(delta_rlep.GetMaximumBin()),0,1)
+axis_lep = ROOT.TGaxis(6,0,6,delta_rlep.GetBinContent(delta_rlep.GetMaximumBin()),0,1)
 axis_lep.SetTitle("efficiency")
 axis_lep.Draw()
 
@@ -463,7 +576,8 @@ axis_lep.Draw()
 #buffer1 = str
 buffer1 = "efficiency at #Delta r < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%"
 text1 = ROOT.TLatex()
-text1.DrawLatex(2,0.4*delta_rlep.GetMaximum(),buffer1)
+text1.SetTextSize(0.025)
+text1.DrawLatex(2.8,0.4*delta_rlep.GetMaximum(),buffer1)
 
 
 leg_lep = ROOT.TLegend(0.5,0.5,0.9,0.65)
@@ -472,8 +586,11 @@ leg_lep.AddEntry(efficiency_lep, "efficiency","l")
 leg_lep.AddEntry(line_lep, "#Delta r = 0.4", "l")
 leg_lep.Draw()
 
+c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection+ "_tlep" + options.percentage + "p.pdf")
 
-c1.cd(2)
+c2=ROOT.TCanvas("c1","delta r and efficiency",500,500)
+c2.Divide(1,1)
+c2.cd(1)
 # delta_rhad.Draw("HIST")
 # efficiency_had.Draw("SAME")
 #efficiency_had.Draw("*","SAME")
@@ -484,7 +601,7 @@ c1.cd(2)
 #c2.SetGrid(2,1)
 delta_rhad.SetFillColor(ROOT.kCyan-9)
 delta_rhad.SetStats(0)
-delta_rhad.Draw("HIST")
+delta_rhad.Draw("HIST E")
 
 efficiency_had.SetLineColor(ROOT.kRed)
 efficiency_had.SetLineWidth(2)
@@ -495,42 +612,65 @@ line_had.SetLineColor(ROOT.kBlack)
 line_had.SetLineWidth(2)
 line_had.Draw()
 
-axis_had = ROOT.TGaxis(8,0,8,delta_rhad.GetBinContent(delta_rhad.GetMaximumBin()),0,1)
+axis_had = ROOT.TGaxis(6,0,6,delta_rhad.GetBinContent(delta_rhad.GetMaximumBin()),0,1)
 axis_had.SetTitle("efficiency")
 axis_had.Draw("SAME")
 
 buffer2 = "efficiency at #Delta r < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%"
 text2 = ROOT.TLatex()
-text2.DrawLatex(2,0.4*delta_rhad.GetMaximum(),buffer2)
+text2.SetTextSize(0.025)
+text2.DrawLatex(2.8,0.4*delta_rhad.GetMaximum(),buffer2)
 text3 = ROOT.TLatex()
-text3.DrawLatex(2,0.3*delta_rhad.GetMaximum(), "combined efficiency:  " + eff_comb[:2] + "," + eff_comb[2:] + "%")
+text3.SetTextSize(0.025)
+text3.DrawLatex(2.8,0.3*delta_rhad.GetMaximum(), "combined efficiency:  " + eff_comb[:2] + "," + eff_comb[2:] + "%")
 
 leg_had = ROOT.TLegend(0.5,0.5,0.9,0.65)
 leg_had.AddEntry(delta_rhad, "histrogram filled with #Delta r of thads","f")
 leg_had.AddEntry(efficiency_had, "efficiency","l")
 leg_had.AddEntry(line_had, "#Delta r = 0.4", "l")
 leg_had.Draw()
-c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/tests/logW_v2_10_1p.pdf")
+c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection + "_thad" + options.percentage + "p.pdf")
 
 #######################################################################################################
 
-c2 = ROOT.TCanvas("c1", "delta r", 1200,1200)
-c2.Divide(2,2)
-c2.cd(1)
-delta_r_bhad_hist.SetFillColor(ROOT.kCyan-9)
-delta_r_bhad_hist.Draw("HIST")
+#c3 = ROOT.TCanvas("c1", "delta r", 500,500)
+#c3.Divide(1,1)
+#c3.cd(1)
+#top_mass.Draw("HIST E")
+#
+#line_had = ROOT.TLine(173,0,173,top_mass.GetMaximum())
+#line_had.SetLineColor(ROOT.kBlack)
+#line_had.SetLineWidth(2)
+#line_had.Draw()
 
-c2.cd(2)
-delta_r_blep_hist.SetFillColor(ROOT.kCyan-9)
-delta_r_blep_hist.Draw("HIST")
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 1800,500)
+c3.Divide(3,1)
+c3.cd(1)
+rek_thad.Draw("COLZ")
 
-c2.cd(3)
-delta_r_q1_hist.SetFillColor(ROOT.kCyan-9)
-delta_r_q1_hist.Draw("HIST")
+c3.cd(2)
+PtRap_thad.SetStats(0)
+PtRap_thad.Draw("COLZ")
 
-c2.cd(4)
-delta_r_q2_hist.SetFillColor(ROOT.kCyan-9)
-delta_r_q2_hist.Draw("HIST")
+c3.cd(3)
+eff_count_thad.SetStats(0)
+eff_count_thad.Draw("COLZ")
+
+# c3.cd(1)
+# delta_r_bhad_hist.SetFillColor(ROOT.kCyan-9)
+# delta_r_bhad_hist.Draw("HIST")
+#
+# c2.cd(2)
+# delta_r_blep_hist.SetFillColor(ROOT.kCyan-9)
+# delta_r_blep_hist.Draw("HIST")
+#
+# c2.cd(3)
+# delta_r_q1_hist.SetFillColor(ROOT.kCyan-9)
+# delta_r_q1_hist.Draw("HIST")
+#
+# c2.cd(4)
+# delta_r_q2_hist.SetFillColor(ROOT.kCyan-9)
+# delta_r_q2_hist.Draw("HIST")
 
 # c1.cd(1)
 # delta_phi.Draw("HIST")
@@ -538,4 +678,4 @@ delta_r_q2_hist.Draw("HIST")
 # c1.cd(2)
 # delta_eta.Draw("HIST")
 
-c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/tests/logW_v2_11_1p.pdf")
+c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection + "_reko_qual_" + options.percentage + "p.pdf")

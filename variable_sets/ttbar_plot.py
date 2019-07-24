@@ -2,9 +2,9 @@ variables = {}
 variables["4j_ge3t"] = [
 	"TopHad_B_Jet_Pt",
 	"TopHad_B_Jet_Eta",
-	"TopHad_B_Jet_CSV",
 	"TopHad_B_Jet_Phi",
 	"TopHad_B_Jet_E",
+	"TopHad_B_Jet_CSV",
 	"TopLep_B_Jet_Pt",
 	"TopLep_B_Jet_Eta",
 	"TopLep_B_Jet_Phi",
