@@ -638,8 +638,7 @@ class DNN():
             event_category      = self.category_label,
             signal_class        = signal_class,
             plotdir             = self.save_path,
-            logscale            = log,
-            sigScale            = sigScale)
+            logscale            = log)
 
         eventYields.plot(privateWork = privateWork)
 

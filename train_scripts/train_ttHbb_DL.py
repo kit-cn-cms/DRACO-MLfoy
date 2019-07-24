@@ -25,7 +25,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 # thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample(options.getDefaultName("ttHbb"), label = "ttHbb", normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
+input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 
 input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
