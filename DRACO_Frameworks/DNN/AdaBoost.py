@@ -384,15 +384,19 @@ class AdaBoost():
         for i in measured:
             if i == 0:
                 print("Bin with zero events")
+        #remove bins with no events -> they will couse problems due to log
         indices = [i for i, x in enumerate(measured) if x == 0]
-        print("# DEBUG: binned_likelihood, indices of ==0: ", indices)
+        measured = np.delete(measured, indices)
+        bkg_binns = np.delete(bkg_binns, indices)
+        tg_binns = np.delete(tg_binns, indices)
+        # print("# DEBUG: binned_likelihood, indices of ==0: ", indices)
         # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
         # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
         print("# DEBUG: factorial: ", self.factorial(measured))
         # print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
         # print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
         # print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
-        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
+        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(measured)))
         print("# DEBUG: binned_likelihood, minimum: ", minimum)
         nxvals = 51
         mu_draw = np.linspace(mu-5, mu+5, nxvals, endpoint = True)
