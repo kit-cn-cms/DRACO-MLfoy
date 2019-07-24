@@ -376,6 +376,8 @@ class AdaBoost():
 
     def logarithmic(self, array):
         indices = [i for i, x in enumerate(array) if x < 0]
+        for i in indices:
+            print("# DEBUG: entries: ", array[i])
         print("# DEBUG: logarithmic, indices: ", indices)
         return map(lambda x: math.log(x), array)
 
