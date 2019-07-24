@@ -200,25 +200,25 @@ class DNN():
         # self.model_eval = self.model.evaluate(
         #     self.data.get_test_data(as_matrix = True),
         #     self.data.get_test_labels())
-        #
-        # # save predicitons
-        # self.model_prediction_vector = self.model.predict(
-        #     self.data.get_test_data(as_matrix = True) )
-        # self.model_train_prediction  = self.model.predict(
-        #     self.data.get_train_data(as_matrix = True) )
-        #
-        # # save predicted classes with argmax
-        # self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
-        #
-        # # save confusion matrix
-        # from sklearn.metrics import confusion_matrix
-        # self.confusion_matrix = confusion_matrix(
-        #     self.data.get_test_labels(as_categorical = False), self.predicted_classes)
-        #
-        # # print evaluations
-        # from sklearn.metrics import roc_auc_score
-        # self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        # print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
+        # save predicitons
+        self.model_prediction_vector = self.model.predict(
+            self.data.get_test_data(as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(
+            self.data.get_train_data(as_matrix = True) )
+
+        # save predicted classes with argmax
+        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+
+        # save confusion matrix
+        from sklearn.metrics import confusion_matrix
+        self.confusion_matrix = confusion_matrix(
+            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+
+        # print evaluations
+        from sklearn.metrics import roc_auc_score
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
     def predict_event_query(self, query ):

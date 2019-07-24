@@ -163,7 +163,7 @@ plotter.addSample(
 
 
 # add JT categories
-plotter.addCategory("4j_ge3t")
+plotter.addCategory("ge4j_ge3t")
 
 
 # perform plotting routine
