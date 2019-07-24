@@ -41,7 +41,7 @@ input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf" , normali
 #input_samples.addSample("tH"+naming,   label = "tH",   normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 
 if options.isBinary():
-   input_samples.addBinaryLabel(signal, options.binary_bkg_target)
+   input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
 category_cutString_dict = {
 
@@ -62,7 +62,7 @@ category_label_dict = {
   'ge4j_'+  '3t': 'N_jets \\geq 4, N_btags = 3',
   'ge4j_'+'ge4t': 'N_jets \\geq 4, N_btags \\geq 4',
 
-  'ge4j_'+'ge3t': 'N_{jets} \\geq 4, N_{btags} \\geq 3',
+  'ge4j_'+'ge3t': 'N_jets \\geq 4, N_btags \\geq 3',
 }
 
 # initializing DNN training class
@@ -110,6 +110,8 @@ dnn.save_model(sys.argv, filedir)
 
 # save and print variable ranking
 dnn.get_input_weights()
+
+
 
 # plotting
 if options.doPlots():

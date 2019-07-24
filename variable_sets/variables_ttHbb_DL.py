@@ -314,8 +314,8 @@ variables["allvar"] = [
      "twist_tag_tag_min_deltaR"
 ]
 
-#variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:]))
-variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:] + variables['jets']))
+variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:]))
+#variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:] + variables['jets']))
 
 #!! variables["ge4j_ge3t"] = ['jet1_pt', 'jet2_pt'] #!!!!
 

@@ -119,8 +119,15 @@ if  options.treeName == "liteTreeTTH_step7_cate9":
     )
 
     dataset.addSample(
-        sampleName  = "ttbar_bb_cate9",
+        sampleName  = "ttbar_cate9",
         ntuples     = ntuplesPath+"/ttbar_cate9.root",
+        categories  = ttbar_categories,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_bb_cate9",
+        ntuples     = ntuplesPath+"/ttbar_bb_cate9.root",
         categories  = ttbar_bb,
         selections  = None
     )
@@ -171,8 +178,15 @@ else:
     )
 
     dataset.addSample(
-        sampleName  = "ttbar_bb",
+        sampleName  = "ttbar",
         ntuples     = ntuplesPath+"/ttbar.root",
+        categories  = ttbar_categories,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_bb",
+        ntuples     = ntuplesPath+"/ttbar_bb.root",
         categories  = ttbar_bb,
         selections  = None
     )

@@ -87,9 +87,9 @@ class optionHandler:
         self.__loadVariables()
         self.__setSignalClass()
         self.__setNetConfig()
-    
+
     # setters
-    
+
     def __importVariableSelection(self):
         if not os.path.isabs(self.__options.variableSelection):
             sys.path.append(basedir+"/variable_sets/")
@@ -154,7 +154,7 @@ class optionHandler:
             if not self.__signal:
                 sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-    
+
     def __setNetConfig(self):
         from net_configs import config_dict
         if self.__options.net_config:
@@ -172,7 +172,7 @@ class optionHandler:
 
     def getActivatedSamples(self):
         return self.__options.activateSamples
-    
+
     def getTestPercentage(self):
         return self.__options.test_percentage
 
@@ -205,7 +205,7 @@ class optionHandler:
 
     def doBalanceSamples(self):
         return self.__options.balanceSamples
-    
+
     def doEvenSelection(self):
         return self.__options.even_sel
 
@@ -222,7 +222,7 @@ class optionHandler:
         return self.__options.privateWork
 
     def getBinaryBinRange(self):
-        return [self.getBinaryBkgTarget(), 1.]
+        return [float(self.getBinaryBkgTarget()), 1.]
 
     def doLogPlots(self):
         return self.__options.log
@@ -235,4 +235,3 @@ class optionHandler:
 
     def getSignalScale(self):
         return self.__options.sigScale
-
