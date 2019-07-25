@@ -104,6 +104,7 @@ class InputSamples:
             else:
                 sample.isSignal = False
 
+
 class DataFrame(object):
     ''' takes a path to a folder where one h5 per class is located
         the events are cut according to the event_category
@@ -176,27 +177,27 @@ class DataFrame(object):
             # class translations
             self.class_translation = {}
             self.class_translation["sig"] = +1
-            self.class_translation["bkg"] = -1
+            self.class_translation["bkg"] = 0
 
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series([(+1 if c in input_samples.signal_classes else -1) for c in df["class_label"].values], index=df.index)
+            df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
 
             sig_df = df.query("index_label == +1")
-            bkg_df = df.query("index_label == -1")
+            bkg_df = df.query("index_label == 0")
 
             sig_weight = sum(sig_df["train_weight"].values)
             bkg_weight = sum(bkg_df["train_weight"].values)
 
-            sig_df.loc[:, "train_weight"] = sig_df["train_weight"].apply(lambda x: x/(2*sig_weight))
-            bkg_df.loc[:, "train_weight"] = bkg_df["train_weight"].apply(lambda x: x/(2*bkg_weight))
-
-            sig_df.loc[:, "class_label"] = sig_df["class_label"].apply(lambda x: 'sig')
-            bkg_df.loc[:, "class_label"] = bkg_df["class_label"].apply(lambda x: 'bkg')
-
-            sig_df.loc[:, "binaryTarget"] = pd.Series([1.0]                   *sig_df.shape[0], index=sig_df.index)
-            bkg_df.loc[:, "binaryTarget"] = pd.Series([float(self.bkg_target)]*bkg_df.shape[0], index=bkg_df.index)
+            signal_weight = sum( sig_df["train_weight"].values )
+            bkg_weight = sum( bkg_df["train_weight"].values )
+            sig_df["train_weight"] = sig_df["train_weight"]/(2*signal_weight)*df.shape[0]
+            bkg_df["train_weight"] = bkg_df["train_weight"]/(2*bkg_weight)*df.shape[0]
+            #sig_df["class_label"] = "sig"
+            #bkg_df["class_label"] = "bkg"
+            sig_df["binaryTarget"] = 1.
+            bkg_df["binaryTarget"] = float(self.bkg_target)
 
             df = pd.concat([sig_df, bkg_df])
 

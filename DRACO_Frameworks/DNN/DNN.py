@@ -647,7 +647,7 @@ class DNN():
                         sigScale = -1):
 
         if not nbins:
-            nbins = int(10*(1.-bin_range[0]))
+            nbins = int(50*(1.-bin_range[0]))
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
