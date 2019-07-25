@@ -187,7 +187,7 @@ class plotDiscriminators:
 
         # add the histograms together
         workdir = os.path.dirname(self.plotdir[:-1])
-        cmd = "pdfmerge "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
+        cmd = "pdfunite "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -345,7 +345,7 @@ class plotOutputNodes:
 
         # add the histograms together
         workdir = os.path.dirname(self.plotdir[:-1])
-        cmd = "pdfmerge "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
+        cmd = "pdfunite "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -522,7 +522,7 @@ class plotClosureTest:
 
         # add the histograms together
         workdir = os.path.dirname(os.path.dirname(self.plotdir[:-1]))
-        cmd = "pdfmerge "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
+        cmd = "pdfunite "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -822,60 +822,6 @@ class plotBinaryOutput:
         out_path = self.plotdir + "/binaryDiscriminator.pdf"
         setup.saveCanvas(canvas, out_path)
 
-
-    def saveroot(self, ratio = False, name = "binarydiscriminator.root"):
-
-        file = ROOT.TFile(self.plotdir+"/"+name,'recreate')
-
-        test_sig_values = [ self.test_predictions [k] for k in range(len(self.test_predictions )) \
-            if self.data.get_test_labels()[k] == 1 ]
-        test_sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions )) \
-            if self.data.get_test_labels()[k] == 1]
-
-        h_signal_test = ROOT.TH1F("binary_signal_test","binary_signal_test",self.nbins, self.bin_range[0], self.bin_range[1])
-        for i in range(len(test_sig_values)):
-            h_signal_test.Fill(test_sig_values[i],test_sig_weights[i])
-        h_signal_test.Write()
-
-        train_sig_values = [ self.train_predictions [k] for k in range(len(self.train_predictions )) \
-            if self.data.get_train_labels()[k] == 1 ]
-        train_sig_weights =[ self.data.get_train_lumi_weights()[k] for k in range(len(self.train_predictions )) \
-            if self.data.get_train_labels()[k] == 1]
-
-        h_signal_train = ROOT.TH1F("binary_signal_train","binary_signal_train",self.nbins, self.bin_range[0], self.bin_range[1])
-        for i in range(len(train_sig_values)):
-            h_signal_train.Fill(train_sig_values[i],train_sig_weights[i])
-        h_signal_train.Write()
-
-        test_bkg_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
-            if not self.data.get_test_labels()[k] == 1 ]
-        test_bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
-            if not self.data.get_test_labels()[k] == 1]
-
-        h_bkg_test = ROOT.TH1F("binary_bkg_test","binary_bkg_test",self.nbins, self.bin_range[0], self.bin_range[1])
-        for i in range(len(test_bkg_values)):
-            h_bkg_test.Fill(test_bkg_values[i],test_bkg_weights[i])
-        h_bkg_test.Write()
-
-        train_bkg_values = [ self.train_predictions[k] for k in range(len(self.train_predictions)) \
-            if not self.data.get_train_labels()[k] == 1 ]
-        train_bkg_weights =[ self.data.get_train_lumi_weights()[k] for k in range(len(self.train_predictions)) \
-            if not self.data.get_train_labels()[k] == 1]
-
-        h_bkg_train = ROOT.TH1F("binary_bkg_train","binary_bkg_train",self.nbins, self.bin_range[0], self.bin_range[1])
-        for i in range(len(train_bkg_values)):
-            h_bkg_train.Fill(train_bkg_values[i],train_bkg_weights[i])
-        h_bkg_train.Write()
-
-        h_signal = ROOT.TH1F("binary_signal","binary_signal",self.nbins, self.bin_range[0], self.bin_range[1])
-        h_signal.Add(h_signal_train)
-        h_signal.Add(h_signal_test)
-        h_signal.Write()
-
-        h_bkg = ROOT.TH1F("binary_bkg","binary_bkg",self.nbins, self.bin_range[0], self.bin_range[1])
-        h_bkg.Add(h_bkg_train)
-        h_bkg.Add(h_bkg_test)
-        h_bkg.Write()
 
 
 class plotEventYields:

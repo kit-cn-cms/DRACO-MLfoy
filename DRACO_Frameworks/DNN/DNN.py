@@ -233,16 +233,10 @@ class DNN():
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
         print(str(events.shape[0]) + " events matched the query '"+str(query)+"'.")
-#    def predict_event_query(self):
-#        events = self.data.get_full_df()[self.train_variables]
-#        print(str(events.shape[0]) + " events.")
 
         for index, row in events.iterrows():
             print("========== DNN output ==========")
             print("Event: "+str(index))
-            for var in row.values:
-                print(var)
-#            print(row)
             print("-------------------->")
             output = self.model.predict( np.array([list(row.values)]) )[0]
             print("output:" + str(output))
@@ -250,8 +244,6 @@ class DNN():
             for i, node in enumerate(self.event_classes):
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
-
-
 
 
     def build_default_model(self):
@@ -273,7 +265,6 @@ class DNN():
         Inputs = keras.layers.Input(
             shape = (number_of_input_neurons,),
             name  = self.inputName)
-
         X = Inputs
         self.layer_list = [X]
 
@@ -418,9 +409,7 @@ class DNN():
 
         # save information for binary DNN
         if self.data.binary_classification:
-
             configs["binaryConfig"] = {
-
               "minValue": self.input_samples.bkg_target,
               "maxValue": 1.,
             }

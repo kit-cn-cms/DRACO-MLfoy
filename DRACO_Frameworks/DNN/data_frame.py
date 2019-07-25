@@ -157,7 +157,7 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series([1 if ((c == "ttHbb") or (c == "ttH")) else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
 
 #            print(df["class_label"].values)
 
@@ -176,7 +176,7 @@ class DataFrame(object):
 
             # class translations
             self.class_translation = {}
-            self.class_translation["sig"] = +1
+            self.class_translation["sig"] = 1
             self.class_translation["bkg"] = 0
 
             self.classes = ["sig", "bkg"]
@@ -184,7 +184,7 @@ class DataFrame(object):
 
             df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
 
-            sig_df = df.query("index_label == +1")
+            sig_df = df.query("index_label == 1")
             bkg_df = df.query("index_label == 0")
 
             sig_weight = sum(sig_df["train_weight"].values)
@@ -286,7 +286,7 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
     # train data -----------------------------------
-    def get_train_data(self, as_matrix=True):
+    def get_train_data(self, as_matrix = True):
         if as_matrix: return self.df_train[ self.train_variables ].values
         else:         return self.df_train[ self.train_variables ]
 
