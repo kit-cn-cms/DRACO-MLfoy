@@ -38,6 +38,13 @@ import pandas as pd
 # Limit gpu usage
 import tensorflow as tf
 
+# Use latex style in plots
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 K.tensorflow_backend.set_session(tf.Session(config=config))
@@ -375,57 +382,76 @@ class AdaBoost():
 
 
     def logarithmic(self, array):
-        indices = [i for i, x in enumerate(array) if x < 0]
+        indices = [i for i, x in enumerate(array) if x <= 0]
         for i in indices:
-            print("# DEBUG: entries: ", array[i])
-        print("# DEBUG: logarithmic, indices: ", indices)
+            print("# DEBUG: logarithmic, entries: ", array[i])
+        # print("# DEBUG: logarithmic, indices: ", indices)
         return map(lambda x: math.log(x), array)
 
 
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
         '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
+        mu_range = 1.5
+        save_path = self.path + "plot/"
         measured = bkg_binns + mu * tg_binns
         for i in measured:
             if i == 0:
                 print("Bin with zero events")
-        #remove bins with no events -> they will couse problems due to log
-        indices = [i for i, x in enumerate(measured) if x == 0]
+        avoid_problems = bkg_binns - (mu_range-mu) * tg_binns
+        #remove bins with no bkg events -> they will couse problems due to log
+        indices = [i for i, x in enumerate(avoid_problems) if x <= 0]
+        print("# DEBUG: binned_likelihood, indices: ", indices)
         measured = np.delete(measured, indices)
         bkg_binns = np.delete(bkg_binns, indices)
         tg_binns = np.delete(tg_binns, indices)
         # print("# DEBUG: binned_likelihood, indices of ==0: ", indices)
         # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
         # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
-        print("# DEBUG: factorial: ", self.factorial(measured))
+        # print("# DEBUG: factorial: ", self.factorial(measured))
         # print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
         # print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
         # print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
-        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(measured)))
-        print("# DEBUG: binned_likelihood, minimum: ", minimum)
-        nxvals = 51
-        mu_draw = np.linspace(mu-5, mu+5, nxvals, endpoint = True)
+        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - measured*self.logarithmic(measured)))
+        # print("# DEBUG: binned_likelihood, minimum: ", minimum)
+        nxvals = 51     #51/2 hard coded in interpolate
+        mu_draw = np.linspace(mu-mu_range, mu+mu_range, nxvals, endpoint = True)
         loglike = np.array([])
         for i in range(0, mu_draw.shape[0]):        #better use while loglike < 2+y_min
-            tmp = 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))-minimum
-            loglike = np.append(loglike, tmp)
+            tmp = 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - measured*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))
+            # if i < 4:
+            #     print("+ ", self.logarithmic(self.factorial(measured)))
+            #     print("+ ", bkg_binns + mu_draw[i]*tg_binns)
+            #     print("- ", bkg_binns*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))
+            loglike = np.append(loglike, np.sum(tmp)-minimum)
         #calculate 'sigma1' and 'sigma2'
         #binned likelihood function is invetable when seperated to left and right of its minimum
-        intp_lefthand = interpolate.interp1d(loglike[:nxvals+1], mu_draw[:nxvals+1])
-        intp_righthand = interpolate.interp1d(loglike[nxvals:], mu_draw[nxvals:])
+        # print("# DEBUG: binned_likelihood, loglike: ", loglike)
+        # print("# DEBUG: binned_likelihood, maximum: ", np.amax(loglike))
+        # print("# DEBUG: shapes in interpolate: ", loglike.shape, mu_draw.shape)
+        intp_lefthand = interpolate.interp1d(loglike[:26], mu_draw[:26])
+        intp_righthand = interpolate.interp1d(loglike[26:], mu_draw[26:])
         s1x = np.array([intp_lefthand(1), intp_righthand(1)])
         s2x = np.array([intp_lefthand(4), intp_righthand(4)])
+        #real sigma1 and sigma2 values
+        sigma1 = np.absolute(s1x-mu)
+        sigma2 = np.absolute(s2x-mu)
         #sigma1 and sigma2 y value for plotting
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.xlabel("mu")
-        plt.ylabel("-log L")
-        plt.plot(mu_draw, loglike, '-')
-        plt.plot(s1x, s1y, 'b-')
-        plt.plot(s2x, s2y, 'b-')
-        plt.savefig(save_path + self.name +"_loglike.pdf")
+        plt.xlabel(r'$\mu$')
+        plt.ylabel(r'$- \log L$')
+        plt.plot(mu_draw, loglike, 'k-')
+        plt.xlim(left=mu_draw[0], right=mu_draw[-1])
+        plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
+        plt.plot(s1x, s1y, 'b-', label = r'$\sigma_1=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
+        plt.plot(s2x, s2y, 'g-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.legend(loc='best')
+        plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
+        plt.clf()
+        # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         #to calculate real sigma1 and sigma2 and return it
-        return np.absoulute(s1x-mu), np.absolute(s2y-mu)
+        return sigma1, sigma2
 
 
     def weight_prediction(self, pred, alpha):
