@@ -650,7 +650,7 @@ class DNN():
             sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-        binaryOutput.saveroot(ratio = False, name = name+".root")
+
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
 
