@@ -395,6 +395,11 @@ def drawCrossEvalOnCanvas(sig_test_even, bkg_test_even, sig_test_odd, bkg_test_o
         line.SetLineWidth(1)
         line.SetLineColor(ROOT.kBlack)
         line.DrawCopy("histo")
+
+        #KS Score
+        print("\nKS score {}: {}".format(canvasName, sig_test_even.KolmogorovTest(sig_test_odd, "D")))
+        print("\nKS score {}: {}".format(canvasName, bkg_test_even.KolmogorovTest(bkg_test_odd)))
+
         
         # ratio plot
         ratioPlot = sig_test_even.Clone()

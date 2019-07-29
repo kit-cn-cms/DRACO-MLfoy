@@ -512,12 +512,6 @@ class plotClosureTest:
             # add category label
             setup.printCategoryLabel(canvas, self.event_category)
 
-            
-
-
-            # add private work label if activated
-            if self.privateWork:
-                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
 
             out_path = self.plotdir+"/closureTest_at_{}_node.pdf".format(node_cls)
             setup.saveCanvas(canvas, out_path)
@@ -897,13 +891,6 @@ class plotCrossEvaluation:
                 if not self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test_odd[k] == nodeIndex]
 
-            # sig_train_values = [train_values[k] for k in range(len(train_values)) \
-            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
-            #     and self.pred_classes_train[k] == nodeIndex]
-            # bkg_train_values = [train_values[k] for k in range(len(train_values)) \
-            #     if not self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
-            #     and self.pred_classes_train[k] == nodeIndex]
-
             sig_test_weights_even = [self.data_even.get_lumi_weights()[k] for k in range(len(test_values_even)) \
                 if self.data_even.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test_even[k] == nodeIndex]
@@ -917,40 +904,6 @@ class plotCrossEvaluation:
             bkg_test_weights_odd = [self.data_odd.get_lumi_weights()[k] for k in range(len(test_values_odd)) \
                 if not self.data_odd.get_test_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_test_odd[k] == nodeIndex]
-        
-            # sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
-            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
-            #     and self.pred_classes_train[k] == nodeIndex]
-            # bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
-            #     if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
-            #     and self.pred_classes_train[k] == nodeIndex]
-
-            # setup train histograms
-            # sig_train = setup.setupHistogram(
-            #     values      = sig_train_values,
-            #     weights     = sig_train_weights,
-            #     nbins       = self.nbins,
-            #     bin_range   = self.bin_range,
-            #     color       = ROOT.kBlue,
-            #     xtitle      = "signal train at "+str(node_cls)+" node",
-            #     ytitle      = setup.GetyTitle(privateWork = True),
-            #     filled      = True)
-            # sig_train.Scale(1./sig_train.Integral())
-            # sig_train.SetLineWidth(1)
-            # sig_train.SetFillColorAlpha(ROOT.kBlue, 0.5)
-
-            # bkg_train = setup.setupHistogram(
-            #     values      = bkg_train_values,
-            #     weights     = bkg_train_weights,
-            #     nbins       = self.nbins,
-            #     bin_range   = self.bin_range,
-            #     color       = ROOT.kRed,
-            #     xtitle      = "bkg train at "+str(node_cls)+" node",
-            #     ytitle      = setup.GetyTitle(privateWork = True),
-            #     filled      = True)
-            # bkg_train.Scale(1./bkg_train.Integral())
-            # bkg_train.SetLineWidth(1)
-            # bkg_train.SetFillColorAlpha(ROOT.kRed, 0.5)
 
             # setup test histograms even
             sig_test_even = setup.setupHistogram(
@@ -1022,32 +975,31 @@ class plotCrossEvaluation:
             legend = setup.getLegend()
 
             # add entries
-            legend.AddEntry(sig_test_even, "test even {}".format("+".join(signalClass)), "F")
-            legend.AddEntry(bkg_test_even, "test bkg even", "F")
-            legend.AddEntry(sig_test_odd,  "test odd {}".format("+".join(signalClass)), "L")
-            legend.AddEntry(bkg_test_odd,  "test bkg odd", "L")
+            legend.AddEntry(sig_test_even, "even {}".format("".join(signalClass)), "F")
+            legend.AddEntry(bkg_test_even, "bkg even", "F")
+            legend.AddEntry(sig_test_odd,  "odd {}".format("".join(signalClass)), "L")
+            legend.AddEntry(bkg_test_odd,  "bkg odd", "L")
+            legend.AddEntry(sig_test_even, "KS: {:.3f}".format(setup.calculateKSscore(sig_test_even, sig_test_odd)))
+            legend.AddEntry(bkg_test_even, "KS: {:.3f}".format(setup.calculateKSscore(bkg_test_even, bkg_test_odd)))
 
             # draw legend
             legend.Draw("same")
 
             # print private work label if activated
             if self.privateWork:
-                setup.printPrivateWork(canvas)
+                setup.printPrivateWork(canvas, plotOptions["ratio"])
             # add category label
-            setup.printCategoryLabel(canvas, self.event_category)
+            setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+            # add KS score
+            #KSScore = setup.calculateKSscore(sig_test_even, sig_test_odd)
+            #setup.printKSScore(canvas, KSScore, plotOptions["ratio"])
 
-            
-
-
-            # add private work label if activated
-            if self.privateWork:
-                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
 
             out_path = self.plotdir+"/CrossEval_at_{}_node.pdf".format(node_cls)
             setup.saveCanvas(canvas, out_path)
 
         # add the histograms together
         workdir = os.path.dirname(os.path.dirname(self.plotdir[:-1]))
-        cmd = "pdfunite "+str(self.plotdir)+"/CrossEval_*.pdf "+str(workdir)+"/CrossEval_.pdf"
+        cmd = "pdfunite "+str(self.plotdir)+"/CrossEval_*.pdf "+str(workdir)+"/CrossEval.pdf"
         print(cmd)
         os.system(cmd)
