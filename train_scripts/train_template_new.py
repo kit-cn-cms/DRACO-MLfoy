@@ -15,9 +15,11 @@ import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
 import keras.optimizers as optimizers
+
+print("imports done")
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
-python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config" --binary -t -1 --signalclass ttH -c ge6j_ge3t
+python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config --binary -t -1 --signalclass ttH -c ge6j_ge3t
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
@@ -205,7 +207,7 @@ dnn.save_model(signal)
 
 # plotting
 dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
-
+dnn.plot_metrics()
 # save and print variable ranking
 # dnn.get_input_weights()
 

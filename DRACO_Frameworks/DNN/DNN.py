@@ -112,6 +112,7 @@ class DNN():
             input_samples,
             event_category,
             train_variables,
+            binary_bkg_target,
             train_epochs    = 500,
             test_percentage = 0.2,
             eval_metrics    = None,
@@ -149,6 +150,12 @@ class DNN():
 
         # list of input variables
         self.train_variables = train_variables
+
+        # get cutting value to dedide if event is background or target
+        self.cut_value = (1+int(binary_bkg_target))/2
+
+        #get background target value
+        self.binary_bkg_target = binary_bkg_target
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
@@ -552,7 +559,7 @@ class DNN():
 
         # plt.figure(1)
         # plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.3f' % roc_auc)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])
@@ -560,6 +567,7 @@ class DNN():
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         plt.savefig(save_path + self.name +"_roc.pdf")
+        plt.clf()
 
 
     def get_ranges(self):
@@ -702,8 +710,8 @@ class DNN():
             epochs = np.arange(1,n_epochs+1,1)
 
             # plot histories
-            plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(best_train))
-            plt.plot(epochs, val_history, "g-", label = "Testdaten - Max: " + str(best_test))
+            plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(round(best_train, 3)))
+            plt.plot(epochs, val_history, "g-", label = "Testdaten - Max: " + str(round(best_test, 3)))
             if privateWork:
                 plt.title("CMS private work", loc = "left", fontsize = 16)
 
@@ -809,7 +817,7 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
+                        nbins = 20, bin_range = [0.,1.], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
@@ -821,7 +829,7 @@ class DNN():
             pltname             = self.name,
             logscale            = log)
 
-        bkg_hist, sig_hist, binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
         print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 0))
         print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 

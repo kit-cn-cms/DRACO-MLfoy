@@ -17,3 +17,7 @@ Wichtig:
 Mounting:
 sshfs
 sftp
+
+Kosmetik:
+epochen vs ada_epochen
+mehr nachkommastellen beim roc
