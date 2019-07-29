@@ -23,7 +23,7 @@ usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_4j_ge3t",
+parser.add_option("-i", "--inputdirectory", dest="inputDir",default="test_training_ge4j_ge4t",
         help="DIR of trained net data", metavar="inputDir")
 
 parser.add_option("-o", "--outputdirectory", dest="outDir",default=None,
@@ -44,6 +44,15 @@ parser.add_option("--signalclass", dest="signal_class", default=None,
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix", metavar="printROC")
 
+parser.add_option("--binary", dest="binary", action = "store_true", default=False,
+        help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
+
+parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = -1.,
+        help="target value for training of background samples (default is 0, signal is always 1)")
+
+parser.add_option("--total-weight-expr", dest="total_weight_expr",default="x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom",
+        help="string containing expression of total event weight (use letter \"x\" for event-object; example: \"x.weight\")", metavar="total_weight_expr")
+
 (options, args) = parser.parse_args()
 
 #get input directory path
@@ -61,19 +70,33 @@ elif not os.path.isabs(options.outDir):
 else:
     outPath = options.outDir
 
-dnn = DNN.loadDNN(inPath, outPath)
+if options.signal_class:
+    signal=options.signal_class.split(",")
+else:
+    signal=None
 
+if options.binary:
+    if not signal:
+        sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-# plotting 
+dnn = DNN.loadDNN(inPath, outPath, binary = options.binary, signal = signal, binary_target = options.binary_bkg_target, total_weight_expr=options.total_weight_expr)
+
+# plotting
 if options.plot:
-    # plot the confusion matrix
-    dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+    if options.binary:
+        # plot output node
+        bin_range = [options.binary_bkg_target, 1.]
+        dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range)
 
-    # plot the output discriminators
-    dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    else:
+        # plot the confusion matrix
+        dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
-    # plot the output nodes
-    dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+        # plot the output discriminators
+        dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
 
-    # plot closure test
-    dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+        # plot the output nodes
+        dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+
+        # plot closure test
+        dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)

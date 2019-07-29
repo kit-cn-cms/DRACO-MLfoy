@@ -1,12 +1,6 @@
-### import stuff
 import os
 
-
-#####################################################################################
-
-
-
-### some usefull functions
+### some useful functions
 
 # function to append a list with sample, label and normalization_weight to a list samples
 def createSampleList(sList, sample, label = None, nWeight = 1):
@@ -22,6 +16,7 @@ def createSampleList(sList, sample, label = None, nWeight = 1):
 # function to create a file with all preprocessed samples
 def createSampleFile(outPath, sampleList):
     # create file
+
     samples=[]
     processedSamples=""
     # write samplenames in file
