@@ -97,7 +97,8 @@ class DNN():
             shuffle_seed    = None,
             balanceSamples  = False,
             evenSel         = None,
-            norm_variables  = True):
+            norm_variables  = True,
+            xEval           = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -735,4 +736,31 @@ def loadDNN_crossEval(inputDirectory, outputDirectory):
 
 
     return dnn
+
+
+def plot_crossEval(dnn_even, dnn_odd, plotdir, log = False, privateWork = False,
+                    signal_class = None, nbins = None, bin_range = None):
+    ''' plot comparison between train and test samples '''
+
+    if not bin_range:
+        bin_range = [round(1./dnn_even.data.n_output_neurons,2), 1.]
+    if not nbins:
+        nbins = int(50*(1.-bin_range[0]))
+
+    crossEval = plottingScripts.plotCrossEvaluation(
+        data_even               = dnn_even.data,
+        test_prediction_even    = dnn_even.model_prediction_vector,
+        # train_prediction_even   = dnn_even.model_train_prediction,
+        data_odd                = dnn_odd.data,
+        test_prediction_odd     = dnn_odd.model_prediction_vector,
+        # train_prediction_odd    = dnn_odd.model_train_prediction,
+        event_classes           = dnn_even.event_classes,
+        nbins                   = nbins,
+        bin_range               = bin_range,
+        signal_class            = signal_class,
+        event_category          = dnn_even.categoryLabel,
+        plotdir                 = plotdir,
+        logscale                = log)
+
+    crossEval.plot(ratio = True, privateWork = privateWork)
 

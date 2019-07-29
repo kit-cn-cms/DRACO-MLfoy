@@ -77,7 +77,7 @@ else:
     sys.exit("ERROR: Input Directory for even DNN does not exist!")
 
 if not options.outDir:
-    outPath = inPath+"_Xeval"
+    outPath = inPath+"_xEval"
 elif not os.path.isabs(options.outDir):
     outPath = basedir+"/workdir/"+options.outDir
 else:
@@ -92,47 +92,28 @@ else:
 dnn_odd = DNN.loadDNN_crossEval(inPath+"_odd", outPath)
 dnn_even = DNN.loadDNN_crossEval(inPath+"_even", outPath)
 
-def plot_crossEval(dnn_even, dnn_odd, log = False, privateWork = False,
-                    signal_class = None, nbins = None, bin_range = None):
-    ''' plot comparison between train and test samples '''
-
-    if not bin_range:
-        bin_range = [round(1./dnn_even.data.n_output_neurons,2), 1.]
-    if not nbins:
-        nbins = int(50*(1.-bin_range[0]))
-
-    crossEval = plottingScripts.plotCrossEvaluation(
-        data_even               = dnn_even.data,
-        test_prediction_even    = dnn_even.model_prediction_vector,
-        # train_prediction_even   = dnn_even.model_train_prediction,
-        data_odd                = dnn_odd.data,
-        test_prediction_odd     = dnn_odd.model_prediction_vector,
-        # train_prediction_odd    = dnn_odd.model_train_prediction,
-        event_classes           = dnn_even.event_classes,
-        nbins                   = nbins,
-        bin_range               = bin_range,
-        signal_class            = signal_class,
-        event_category          = dnn_even.categoryLabel,
-        plotdir                 = dnn_even.plot_path,
-        logscale                = log)
-
-    crossEval.plot(ratio = True, privateWork = privateWork)
-
 # plotting 
 if options.plot:
     # # plot the confusion matrix
-    # dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_odd.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_even.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
 
     # # plot the output discriminators
-    # dnn.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_odd.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_even.plot_discriminators(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+
 
     # # plot the output nodes
-    # dnn.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_odd.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+    # dnn_even.plot_outputNodes(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork, printROC = options.printROC)
+
 
     # # plot closure test
-    # dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+    # dnn_odd.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+    # dnn_even.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+
 
     # plot cross evaluation
-    plot_crossEval(dnn_even = dnn_even, dnn_odd = dnn_odd, log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+    DNN.plot_crossEval(dnn_even = dnn_even, dnn_odd = dnn_odd, plotdir = outPath, log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
 
 
