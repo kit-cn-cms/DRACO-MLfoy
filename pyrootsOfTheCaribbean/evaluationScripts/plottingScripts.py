@@ -764,7 +764,7 @@ class plotBinaryOutput:
             filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
-        print("# DEBUG: plottingScripts, scaleFactor: ", scaleFactor)
+        # print("# DEBUG: plottingScripts, scaleFactor: ", scaleFactor)
         sig_hist_unscaled = sig_hist.Clone()
         sig_hist.Scale(scaleFactor)
 

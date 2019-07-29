@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-epoches=("25") # "100" "150") #"200") -> overfitting
-ada_epoches=("200" "300")
+epoches=("50") # "100" "150") #"200") -> overfitting
+ada_epoches=("50")
 # configs=("ada_weak1" "ada_weak2" "ada_weak3")
 # configs=("ada_weak4" "ada_weak4_1" "ada_weak4_2")
-configs=("ada_weak4_1" "ada_rel_weak3")
+# configs=("ada_weak4_1" "ada_rel_weak3")
+configs=("ada_weak6_1" "ada_weak6_2" "ada_weak6_3" "ada_weak6_4" "ada_weak6_5" "ada_weak6_6") #test some loss functions
 
 for i in ${ada_epoches[*]};
 do

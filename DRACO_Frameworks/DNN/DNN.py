@@ -829,7 +829,7 @@ class DNN():
             pltname             = self.name,
             logscale            = log)
 
-        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = True, printROC = printROC, privateWork = privateWork, name = name)
         print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 0))
         print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 

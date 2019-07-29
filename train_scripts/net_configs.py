@@ -235,6 +235,84 @@ config_dict["ada_weak5"] = {
         "earlystopping_epochs":     50
         }
 
+config_dict["ada_weak6_1"] = {
+        "layers":                   [100,50],
+        "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak6_2"] = {
+        "layers":                   [100,50],
+        "loss_function":            "hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak6_3"] = {
+        "layers":                   [100,50],
+        "loss_function":            "mean_squared_error",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak6_4"] = {
+        "layers":                   [100,50],
+        "loss_function":            "binary_crossentropy",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak6_5"] = {
+        "layers":                   [100,50],
+        "loss_function":            "logcosh",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
+config_dict["ada_weak6_6"] = {
+        "layers":                   [100,50],
+        "loss_function":            "kullback_leibler_divergence",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
 config_dict["ada_rel_weak1"] = {
         "layers":                   [20],
         "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
