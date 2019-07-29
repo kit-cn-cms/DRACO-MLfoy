@@ -526,9 +526,12 @@ class AdaBoost():
         #plot
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
         print("# DEBUG: fraction: ", train_fraction, test_fraction)
+        best_train = np.amax(train_fraction)
+        best_test = np.amax(test_fraction)
+
         plt.figure(1)
-        plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten")
-        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten")
+        plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten - Max: " + str(best_train))
+        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten - Max: " + str(best_test))
         # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.xlabel("Epochen")
         plt.ylabel("Anteil Richtig Bestimmt")

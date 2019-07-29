@@ -1,7 +1,19 @@
 import os
 import sys
 import numpy as np
+import math
+# trining to solve some displaying problems (via ssh) here
+# solution is to use ssh -X ... or the following two lines
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+# plt.rcParams['backend'] = 'Agg'
 import json
+
+#sklearn imports
+from sklearn import metrics
+#interpolation function to calculate sigma
+from scipy import interpolate
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -25,6 +37,13 @@ import pandas as pd
 
 # Limit gpu usage
 import tensorflow as tf
+
+# Use latex style in plots
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -88,6 +107,8 @@ class EarlyStopping(keras.callbacks.Callback):
 class DNN():
     def __init__(self,
             save_path,
+            path,
+            name,
             input_samples,
             event_category,
             train_variables,
@@ -96,11 +117,13 @@ class DNN():
             eval_metrics    = None,
             shuffle_seed    = None,
             balanceSamples  = False,
-            use_adaboost    = False,
-            adaboost_epochs = 100,
             evenSel         = None):
 
         # save some information
+        #path and name to save model and plots
+        self.path = path
+        self.name = name
+
         # list of samples to load into dataframe
         self.input_samples = input_samples
 
@@ -135,10 +158,6 @@ class DNN():
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
-
-        #should adaboost be used
-        self.use_adaboost = use_adaboost
-        self.adaboost_epochs = adaboost_epochs
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -297,34 +316,34 @@ class DNN():
         return model
 
 
-    def ada_eval_training(self):
-        '''Calculate weighted error and return alpha_t after each training'''
-        # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
-        model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
-        model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
-        model_train_weights = self.data.get_train_weights()
-        #Calculate epsilon and alpha
-        num = model_train_prediction.shape[0]
-        # make_discret = lambda x: -1 if x<0 else 1
-        model_train_prediction_discret = np.array([])
-        for x in model_train_prediction:
-            if x<0:
-                model_train_prediction_discret = np.append(model_train_prediction_discret, -1)
-            else:
-                model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
-        weight_sum = np.sum(model_train_weights)
-        weight_false = 0
-        for i in np.arange(0,num):
-            if model_train_prediction_discret[i] != model_train_label[i]:
-                weight_false += model_train_weights[i]
-        epsilon = weight_false/weight_sum
-        alpha = 0.5*np.log((1-epsilon)/epsilon)
-        #adjust weights
-        self.data.ada_adjust_weights(model_train_prediction_discret, alpha)
-        #check if epsilon < 0.5
-        if epsilon > 0.5:
-            print("# DEBUG: In ada_eval_training epsilon > 0.5")
-        return alpha
+    # def ada_eval_training(self):
+    #     '''Calculate weighted error and return alpha_t after each training'''
+    #     # model_prediction_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
+    #     model_train_prediction = self.model.predict(self.data.get_train_data(as_matrix = True))
+    #     model_train_label = self.data.get_train_labels(as_categorical = False) #not sure if should be True
+    #     model_train_weights = self.data.get_train_weights()
+    #     #Calculate epsilon and alpha
+    #     num = model_train_prediction.shape[0]
+    #     # make_discret = lambda x: -1 if x<0 else 1
+    #     model_train_prediction_discret = np.array([])
+    #     for x in model_train_prediction:
+    #         if x<0:
+    #             model_train_prediction_discret = np.append(model_train_prediction_discret, -1)
+    #         else:
+    #             model_train_prediction_discret = np.append(model_train_prediction_discret, 1)
+    #     weight_sum = np.sum(model_train_weights)
+    #     weight_false = 0
+    #     for i in np.arange(0,num):
+    #         if model_train_prediction_discret[i] != model_train_label[i]:
+    #             weight_false += model_train_weights[i]
+    #     epsilon = weight_false/weight_sum
+    #     alpha = 0.5*np.log((1-epsilon)/epsilon)
+    #     #adjust weights
+    #     self.data.ada_adjust_weights(model_train_prediction_discret, alpha)
+    #     #check if epsilon < 0.5
+    #     if epsilon > 0.5:
+    #         print("# DEBUG: In ada_eval_training epsilon > 0.5")
+    #     return alpha
 
 
     def build_model(self, config = None, model = None):
@@ -368,76 +387,77 @@ class DNN():
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
 
-        if self.use_adaboost:
-            # train with adaboost algorithm
-            self.weak_model_trainout = [] #does not contain the trained model
-            self.weak_model_trained = [] #trained weak Classifier
-            self.alpha_t = []
-            for t in np.arange(0,self.adaboost_epochs):
-                self.weak_model_trainout.append(self.model.fit(
-                    x = self.data.get_train_data(as_matrix = True),
-                    y = self.data.get_train_labels(),
-                    batch_size          = self.architecture["batch_size"],
-                    epochs              = self.train_epochs,
-                    shuffle             = True,
-                    callbacks           = callbacks,
-                    validation_split    = 0.25,
-                    sample_weight       = self.data.get_train_weights()))
-                self.alpha_t.append(self.ada_eval_training())   #make dict alpha -> model
-                self.weak_model_trained.append(self.model)
+        # if self.use_adaboost:
+        #     # train with adaboost algorithm
+        #     self.weak_model_trainout = [] #does not contain the trained model
+        #     self.weak_model_trained = [] #trained weak Classifier
+        #     self.alpha_t = []
+        #     for t in np.arange(0,self.adaboost_epochs):
+        #         self.weak_model_trainout.append(self.model.fit(
+        #             x = self.data.get_train_data(as_matrix = True),
+        #             y = self.data.get_train_labels(),
+        #             batch_size          = self.architecture["batch_size"],
+        #             epochs              = self.train_epochs,
+        #             shuffle             = True,
+        #             callbacks           = callbacks,
+        #             validation_split    = 0.25,
+        #             sample_weight       = self.data.get_train_weights()))
+        #         self.alpha_t.append(self.ada_eval_training())   #make dict alpha -> model
+        #         self.weak_model_trained.append(self.model)
 
-        else:
-            # train main net
-            self.trained_model = self.model.fit(
-                x = self.data.get_train_data(as_matrix = True),
-                y = self.data.get_train_labels(),
-                batch_size          = self.architecture["batch_size"],
-                epochs              = self.train_epochs,
-                shuffle             = True,
-                callbacks           = callbacks,
-                validation_split    = 0.25,
-                sample_weight       = self.data.get_train_weights())
+        # train main net
+        self.trained_model = self.model.fit(
+            x = self.data.get_train_data(as_matrix = True),
+            y = self.data.get_train_labels(),
+            batch_size          = self.architecture["batch_size"],
+            epochs              = self.train_epochs,
+            shuffle             = True,
+            callbacks           = callbacks,
+            validation_split    = 0.25,
+            sample_weight       = self.data.get_train_weights())
 
 
-    def save_model(self, argv, execute_dir, signals):
+    def save_model(self, signals):
         ''' save the trained model '''
 
+        save_path = self.path + "save_model/" + self.name + "_"
+
         # save executed command
-        argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
-        execute_string = "python "+" ".join(argv)
-        out_file = self.cp_path+"/command.sh"
-        with open(out_file, "w") as f:
-            f.write(execute_string)
-        print("saved executed command to {}".format(out_file))
+        # argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
+        # execute_string = "python "+" ".join(argv)
+        # out_file = self.cp_path+"/command.sh"
+        # with open(out_file, "w") as f:
+        #     f.write(execute_string)
+        # print("saved executed command to {}".format(out_file))
 
         # save model as h5py file
-        out_file = self.cp_path + "/trained_model.h5py"
+        out_file = save_path + "trained_model.h5py"
         self.model.save(out_file)
         print("saved trained model at "+str(out_file))
 
         # save config of model
         model_config = self.model.get_config()
-        out_file = self.cp_path +"/trained_model_config"
+        out_file = save_path +"trained_model_config"
         with open(out_file, "w") as f:
             f.write( str(model_config))
         print("saved model config at "+str(out_file))
 
         # save weights of network
-        out_file = self.cp_path +"/trained_model_weights.h5"
-        self.model.save_weights(out_file)
-        print("wrote trained weights to "+str(out_file))
+        # out_file = self.cp_path +"/trained_model_weights.h5"
+        # self.model.save_weights(out_file)
+        # print("wrote trained weights to "+str(out_file))
 
         # set model as non trainable
-        for layer in self.model.layers:
-            layer.trainable = False
-        self.model.trainable = False
+        # for layer in self.model.layers:
+        #     layer.trainable = False
+        # self.model.trainable = False
 
         # save checkpoint files (needed for c++ implementation)
-        out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Saver()
-        sess = K.get_session()
-        save_path = saver.save(sess, out_file)
-        print("saved checkpoint files to "+str(out_file))
+        # out_file = self.cp_path + "/trained_model"
+        # saver = tf.train.Saver()
+        # sess = K.get_session()
+        # save_path = saver.save(sess, out_file)
+        # print("saved checkpoint files to "+str(out_file))
 
         # produce json file with configs
         configs = self.architecture
@@ -464,65 +484,82 @@ class DNN():
                 "maxValue": 1.,
                 "signals":  signals}
 
-        json_file = self.cp_path + "/net_config.json"
+        json_file = save_path + "net_config.json"
         with open(json_file, "w") as jf:
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
         # save configurations of variables for plotscript
-        plot_file = self.cp_path+"/plot_config.csv"
-        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
-        variables = variable_configs.loc[self.train_variables]
-        variables.to_csv(plot_file, sep = ",")
-        print("wrote config of input variables to {}".format(plot_file))
+        # plot_file = self.cp_path+"/plot_config.csv"
+        # variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        # variables = variable_configs.loc[self.train_variables]
+        # variables.to_csv(plot_file, sep = ",")
+        # print("wrote config of input variables to {}".format(plot_file))
 
-
-    def eval_adamodel(self):
-        '''Evaluate a model trained with adaboost after each trainround t'''
-        # print("# DEBUG: evalv_adamodel size of weak_model_trained: ", len(self.weak_model_trained))
-        pass
+    #
+    # def eval_adamodel(self):
+    #     '''Evaluate a model trained with adaboost after each trainround t'''
+    #     # print("# DEBUG: evalv_adamodel size of weak_model_trained: ", len(self.weak_model_trained))
+    #     pass
 
     def eval_model(self):
         ''' evaluate trained model '''
 
-        if self.use_adaboost:
-            self.eval_adamodel()
+        #get saving path
+        save_path = self.path + "plot/"
+        #get the labels
+        self.train_label = self.data.get_train_labels(as_categorical = False)
+        self.test_label = self.data.get_test_labels(as_categorical = False)
 
-        else:
-            # evaluate test dataset
-            self.model_eval = self.model.evaluate(
-                self.data.get_test_data(as_matrix = True),
-                self.data.get_test_labels())
+        # evaluate test dataset
+        self.model_eval = self.model.evaluate(
+            self.data.get_test_data(as_matrix = True),
+            self.data.get_test_labels())
 
-            # save history of eval metrics
-            self.model_history = self.trained_model.history
+        # save history of eval metrics
+        self.model_history = self.trained_model.history
 
-            # save predicitons
-            self.model_prediction_vector = self.model.predict(
-                self.data.get_test_data(as_matrix = True) )
-            self.model_train_prediction  = self.model.predict(
-                self.data.get_train_data(as_matrix = True) )
+        # save predicitons
+        self.model_prediction_vector = self.model.predict(
+            self.data.get_test_data(as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(
+            self.data.get_train_data(as_matrix = True) )
 
-            #figure out ranges
-            self.get_ranges()
+        #figure out ranges
+        self.get_ranges()
 
-            # save predicted classes with argmax
-            self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+        # save predicted classes with argmax
+        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
-            # save confusion matrix
-            from sklearn.metrics import confusion_matrix
-            self.confusion_matrix = confusion_matrix(
-                self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        # save confusion matrix
+        from sklearn.metrics import confusion_matrix
+        self.confusion_matrix = confusion_matrix(
+            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
-            # print evaluations
-            from sklearn.metrics import roc_auc_score
-            self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-            print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        # print evaluations
+        from sklearn.metrics import roc_auc_score
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-            if self.eval_metrics:
-                print("model test loss: {}".format(self.model_eval[0]))
-                for im, metric in enumerate(self.eval_metrics):
-                    print("model test {}: {}".format(metric, self.model_eval[im+1]))
+        if self.eval_metrics:
+            print("model test loss: {}".format(self.model_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("model test {}: {}".format(metric, self.model_eval[im+1]))
+
+        #get roc
+        fpr, tpr, thresholds = metrics.roc_curve(self.test_label, self.model_prediction_vector)
+        roc_auc = metrics.auc(fpr, tpr)
+
+        # plt.figure(1)
+        # plt.title('Receiver Operating Characteristic')
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+        plt.legend(loc = 'lower right')
+        plt.plot([0, 1], [0, 1],'r--')
+        plt.xlim([0, 1])
+        plt.ylim([0, 1])
+        plt.ylabel('True Positive Rate')
+        plt.xlabel('False Positive Rate')
+        plt.savefig(save_path + self.name +"_roc.pdf")
 
 
     def get_ranges(self):
@@ -560,6 +597,83 @@ class DNN():
         print("wrote weight ranking to "+str(rank_path))
 
 
+    def factorial(self, array):
+        return map(lambda x: math.factorial(x), array)
+
+
+    def logarithmic(self, array):
+        indices = [i for i, x in enumerate(array) if x <= 0]
+        for i in indices:
+            print("# DEBUG: logarithmic, entries: ", array[i])
+        # print("# DEBUG: logarithmic, indices: ", indices)
+        return map(lambda x: math.log(x), array)
+
+
+    def binned_likelihood(self, bkg_binns, tg_binns, mu):
+        '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
+        mu_range = 1.5
+        save_path = self.path + "plot/"
+        measured = bkg_binns + mu * tg_binns
+        for i in measured:
+            if i == 0:
+                print("Bin with zero events")
+        avoid_problems = bkg_binns - (mu_range-mu) * tg_binns
+        #remove bins with no bkg events -> they will couse problems due to log
+        indices = [i for i, x in enumerate(avoid_problems) if x <= 0]
+        print("# DEBUG: binned_likelihood, indices: ", indices)
+        measured = np.delete(measured, indices)
+        bkg_binns = np.delete(bkg_binns, indices)
+        tg_binns = np.delete(tg_binns, indices)
+        # print("# DEBUG: binned_likelihood, indices of ==0: ", indices)
+        # print("# DEBUG: binned_likelihood, measured.shape: ", measured.shape)
+        # print("# DEBUG: bkg_binns.shape : ", bkg_binns.shape)
+        # print("# DEBUG: factorial: ", self.factorial(measured))
+        # print("# DEBUG: np.log(factorial): ", np.log(self.factorial(measured)))
+        # print("# DEBUG: np.log(bkg_binns + mu*tg_binns): ", np.log(bkg_binns + mu*tg_binns))
+        # print("# DEBUG: bevore sum: ", 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - bkg_binns*self.logarithmic(bkg_binns + mu*tg_binns)))
+        minimum = np.sum(2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu*tg_binns - measured*self.logarithmic(measured)))
+        # print("# DEBUG: binned_likelihood, minimum: ", minimum)
+        nxvals = 51     #51/2 hard coded in interpolate
+        mu_draw = np.linspace(mu-mu_range, mu+mu_range, nxvals, endpoint = True)
+        loglike = np.array([])
+        for i in range(0, mu_draw.shape[0]):        #better use while loglike < 2+y_min
+            tmp = 2*(self.logarithmic(self.factorial(measured)) + bkg_binns + mu_draw[i]*tg_binns - measured*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))
+            # if i < 4:
+            #     print("+ ", self.logarithmic(self.factorial(measured)))
+            #     print("+ ", bkg_binns + mu_draw[i]*tg_binns)
+            #     print("- ", bkg_binns*self.logarithmic(bkg_binns + mu_draw[i]*tg_binns))
+            loglike = np.append(loglike, np.sum(tmp)-minimum)
+        #calculate 'sigma1' and 'sigma2'
+        #binned likelihood function is invetable when seperated to left and right of its minimum
+        # print("# DEBUG: binned_likelihood, loglike: ", loglike)
+        # print("# DEBUG: binned_likelihood, maximum: ", np.amax(loglike))
+        # print("# DEBUG: shapes in interpolate: ", loglike.shape, mu_draw.shape)
+        intp_lefthand = interpolate.interp1d(loglike[:26], mu_draw[:26])
+        intp_righthand = interpolate.interp1d(loglike[26:], mu_draw[26:])
+        s1x = np.array([intp_lefthand(1), intp_righthand(1)])
+        s2x = np.array([intp_lefthand(4), intp_righthand(4)])
+        #real sigma1 and sigma2 values
+        sigma1 = np.absolute(s1x-mu)
+        sigma2 = np.absolute(s2x-mu)
+        #sigma1 and sigma2 y value for plotting
+        s1y = [1, 1]
+        s2y = [4, 4]
+        #plotting
+        plt.xlabel(r'$\mu$')
+        plt.ylabel(r'$- \log L$')
+        plt.plot(mu_draw, loglike, 'k-')
+        plt.xlim(left=mu_draw[0], right=mu_draw[-1])
+        plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
+        plt.plot(s1x, s1y, 'b-', label = r'$\sigma_1=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
+        plt.plot(s2x, s2y, 'g-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.legend(loc='best')
+        plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
+        plt.clf()
+        # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
+        #to calculate real sigma1 and sigma2 and return it
+        return sigma1, sigma2
+
+
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -568,8 +682,11 @@ class DNN():
         import matplotlib.pyplot as plt
         plt.rc('text', usetex=True)
 
+        #get saving path
+        save_path = self.path + "plot/"
+
         ''' plot history of loss function and evaluation metrics '''
-        metrics = ["loss"]
+        metrics = ["acc"]
         if self.eval_metrics: metrics += self.eval_metrics
 
         # loop over metrics and generate matplotlib plot
@@ -578,34 +695,36 @@ class DNN():
             # get history of train and validation scores
             train_history = self.model_history[metric]
             val_history = self.model_history["val_"+metric]
+            best_train = max(train_history)
+            best_test = max(val_history)
 
             n_epochs = len(train_history)
             epochs = np.arange(1,n_epochs+1,1)
 
             # plot histories
-            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
-            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(best_train))
+            plt.plot(epochs, val_history, "g-", label = "Testdaten - Max: " + str(best_test))
             if privateWork:
                 plt.title("CMS private work", loc = "left", fontsize = 16)
 
             # add title
-            title = self.categoryLabel
-            title = title.replace("\\geq", "$\geq$")
-            title = title.replace("\\leq", "$\leq$")
-            plt.title(title, loc = "right", fontsize = 16)
+            # title = self.categoryLabel
+            # title = title.replace("\\geq", "$\geq$")
+            # title = title.replace("\\leq", "$\leq$")
+            # plt.title(title, loc = "right", fontsize = 16)
 
             # make it nicer
-            plt.grid()
-            plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            # plt.grid()
+            plt.xlabel("Epochen")
+            plt.ylabel("Anteil Richtig Bestimmt")
 
             # add legend
-            plt.legend()
+            plt.legend(loc='best')
 
             # save
-            out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
-            plt.savefig(out_path)
-            print("saved plot of "+str(metric)+" at "+str(out_path))
+            # out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
+            plt.savefig(save_path + self.name + "_frac.pdf")
+            # print("saved plot of "+str(metric)+" at "+str(out_path))
 
 
 
@@ -690,7 +809,7 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 30, bin_range = [0.,1.], name = "binary discriminator"):
+                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
@@ -698,10 +817,14 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             event_category      = self.categoryLabel,
-            plotdir             = self.save_path,
+            plotdir             = self.path + "plot/",
+            pltname             = self.name,
             logscale            = log)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        bkg_hist, sig_hist, binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        print("sigma: ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
 
 def loadDNN(inputDirectory, outputDirectory):
 

@@ -17,7 +17,7 @@ import DRACO_Frameworks.DNN.data_frame as df
 import keras.optimizers as optimizers
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
-python train_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /home/swieland/ttH/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig ada_weak1 --adaboost 5 --binary -t -1 --signalclass ttH -c ge6j_ge3t
+python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config" --binary -t -1 --signalclass ttH -c ge6j_ge3t
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
@@ -72,14 +72,8 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
-parser.add_option("-b", "--boost", dest = "boost", default = None,
-        help = "INT number of networks trained parallel")
-
-parser.add_option("--adaboost", dest = "adaboost", default = None,
-        help = "INT number of epoches Adaboost should perform")
-
-parser.add_option("--m2", dest = "m2", default = False,
-        help = "Should AdaBoost.M2 algorithm be used")
+# parser.add_option("-b", "--boost", dest = "boost", default = None,
+#         help = "INT number of networks trained parallel")
 
 (options, args) = parser.parse_args()
 
@@ -131,11 +125,9 @@ if options.binary:
     if not signal:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-#get number of dnns to train
-if options.boost:
-    n_boost = int(options.boost)
-else:
-    n_boost = 1
+# Everything gets saved here
+path = "/home/ngolks/Projects/boosted_dnn/BinaryNN/"
+name = "b"+str(int(options.train_epochs))+"_"+str(options.category)+"_"+options.net_config
 
 #get number of epoches adaboost should perform and set default signal
 # if options.adaboost:
@@ -174,72 +166,70 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
-#loop dnn training to use boosting
-for i in range(1, n_boost+1):   #due to naming
-    print("\n", "\n")
-    print("Loop i: ", i, " of ", n_boost)
-    # print("Signal: ", signal)
+# initializing DNN training class
+dnn = DNN.DNN(
+    save_path       = outputdir,
+    path            = path,
+    name            = name,
+    input_samples   = input_samples,        #samples are splitted before training the networks
+    event_category  = options.category,
+    train_variables = variables,
+    #binary_bkg_target
+    binary_bkg_target = options.binary_bkg_target,
+    # number of epochs
+    train_epochs    = int(options.train_epochs),
+    # metrics for evaluation (c.f. KERAS metrics)
+    eval_metrics    = ["acc"],
+    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+    test_percentage = 0.2,
+    # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.balanceSamples,
+    shuffle_seed = 9)
 
-    # initializing DNN training class
-    dnn = DNN.DNN(
-        save_path       = outputdir + "_" + str(i),
-        input_samples   = input_samples,        #samples are splitted before training the networks
-        event_category  = options.category,
-        train_variables = variables,
-        # number of epochs
-        train_epochs    = int(options.train_epochs),
-        # metrics for evaluation (c.f. KERAS metrics)
-        eval_metrics    = ["acc"],
-        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-        test_percentage = 0.2,
-        # balance samples per epoch such that there amount of samples per category is roughly equal
-        balanceSamples  = options.balanceSamples,
-        shuffle_seed = 9)
+# import file with net configs if option is used
+if options.net_config:
+    from net_configs import config_dict
+    config=config_dict[options.net_config]
 
-    # import file with net configs if option is used
-    if options.net_config:
-        from net_configs import config_dict
-        config=config_dict[options.net_config]
+# build DNN model
+dnn.build_model(config)
 
-    # build DNN model
-    dnn.build_model(config)
+# perform the training
+dnn.train_model()
 
-    # perform the training
-    dnn.train_model()
+# evalute the trained model
+dnn.eval_model()
 
-    # evalute the trained model
-    dnn.eval_model()
+# save information
+dnn.save_model(signal)
 
-    # save information
-    dnn.save_model(sys.argv, filedir, signal)
+# plotting
+dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
-    # plotting
-    dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+# save and print variable ranking
+# dnn.get_input_weights()
 
-    # save and print variable ranking
-    # dnn.get_input_weights()
-
-    # plotting
-    # if options.plot:
-    #     # plot the evaluation metrics
-    #     dnn.plot_metrics(privateWork = options.privateWork)
-    #
-    #     if options.binary:
-    #         # plot output node
-    #         bin_range = [input_samples.bkg_target, 1.]
-    #         dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
-    #     else:
-    #         # plot the confusion matrix
-    #         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
-    #
-    #         # plot the output discriminators
-    #         dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
-    #
-    #         # plot the output nodes
-    #         dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
-    #
-    #         # plot event yields
-    #         dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
-    #
-    #         # plot closure test
-    #         # dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)     #doesn't work so far
+# plotting
+# if options.plot:
+#     # plot the evaluation metrics
+#     dnn.plot_metrics(privateWork = options.privateWork)
+#
+#     if options.binary:
+#         # plot output node
+#         bin_range = [input_samples.bkg_target, 1.]
+#         dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC, bin_range = bin_range, name = run_name)
+#     else:
+#         # plot the confusion matrix
+#         dnn.plot_confusionMatrix(privateWork = options.privateWork, printROC = options.printROC)
+#
+#         # plot the output discriminators
+#         dnn.plot_discriminators(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+#
+#         # plot the output nodes
+#         dnn.plot_outputNodes(log = options.log, signal_class = signal, privateWork = options.privateWork, printROC = options.printROC)
+#
+#         # plot event yields
+#         dnn.plot_eventYields(log = options.log, signal_class = signal, privateWork = options.privateWork)
+#
+#         # plot closure test
+#         # dnn.plot_closureTest(log = options.log, signal_class = signal, privateWork = options.privateWork)     #doesn't work so far
