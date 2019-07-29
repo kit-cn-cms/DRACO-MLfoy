@@ -101,13 +101,13 @@ dataset.addSample(
     even_odd    = options.even_odd_splitting,
     #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
     ) 
-#dataset.addSample(
-#    sampleName  = "ttHNonbb",
-#    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-#    categories  = ttH_categories,
-#    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    even_odd    = options.even_odd_splitting,
-#    ) 
+dataset.addSample(
+    sampleName  = "ttHNonbb",
+    ntuples     = ntuplesPath+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttH_categories,
+    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+    even_odd    = options.even_odd_splitting,
+    ) 
 
 
 dataset.addSample(
@@ -117,20 +117,20 @@ dataset.addSample(
     even_odd    = options.even_odd_splitting,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
-#dataset.addSample(
-#    sampleName  = "TTToDL",
-#    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-#    categories  = ttbar_categories,
-#    even_odd    = options.even_odd_splitting,
-#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    )
-#dataset.addSample(
-#    sampleName  = "TTToFH",
-#    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-#    categories  = ttbar_categories,
-#    even_odd    = options.even_odd_splitting,
-#    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    )
+dataset.addSample(
+    sampleName  = "TTToDL",
+    ntuples     = ntuplesPath+"/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttbar_categories,
+    even_odd    = options.even_odd_splitting,
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    )
+dataset.addSample(
+    sampleName  = "TTToFH",
+    ntuples     = ntuplesPath+"/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    categories  = ttbar_categories,
+    even_odd    = options.even_odd_splitting,
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    )
 
 
 dataset.addSample(
@@ -141,20 +141,20 @@ dataset.addSample(
     selections  = "(GenEvt_I_TTZ==1)"
     )
 
-#dataset.addSample(
-#    sampleName  = "ttZll",
-#    ntuples     = ntuplesPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
-#    categories  = ttZ_categories,
-#    even_odd    = options.even_odd_splitting,
-#    selections  = "(GenEvt_I_TTZ==0)"
-#    )
+dataset.addSample(
+    sampleName  = "ttZll",
+    ntuples     = ntuplesPath+"/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    categories  = ttZ_categories,
+    even_odd    = options.even_odd_splitting,
+    selections  = "(GenEvt_I_TTZ==0)"
+    )
 
 dataset.addSample(
     sampleName  = "ttZqq",
     ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
     categories  = ttZ_categories,
     even_odd    = options.even_odd_splitting,
-    selections  = "(GenEvt_I_TTZ==1)"
+    selections  = "(GenEvt_I_TTZ==0)"
     )
 
 # initialize variable list 
