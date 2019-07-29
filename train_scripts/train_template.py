@@ -78,7 +78,8 @@ if options.doPlots():
             privateWork = options.isPrivateWork(), 
             printROC    = options.doPrintROC(), 
             bin_range   = bin_range, 
-            name        = options.getName())
+            name        = options.getName(),
+            sigScale    = options.getSignalScale())
     else:
         # plot the confusion matrix
         dnn.plot_confusionMatrix(

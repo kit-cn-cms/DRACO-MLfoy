@@ -27,20 +27,32 @@ config_dict["test_config"] = {
         "earlystopping_epochs":     50,
         }
 
-
-config_dict["ttZ_2018_hf_final"] = {
-        "layers":                   [200,200,200],
+config_dict["ttZ_2018_4node"] = {
+        "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.4,
         "L2_Norm":                  1e-5,
-        "batch_size":               10000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "leakyrelu",
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "elu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
+        "earlystopping_epochs":     10,
         }
 
+
+config_dict["ttZ_2018_4node_v4"] = {
+        "layers":                   [50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-4,
+        "batch_size":               100,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.1,
+        "earlystopping_epochs":     50,
+        }
 
 
 config_dict["ttH_2017"] = {
