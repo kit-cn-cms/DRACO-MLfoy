@@ -21,8 +21,8 @@ parser.add_option("-o",dest="outputfile",
     help="specify output file for variable_set.py file")
 (opts, args) = parser.parse_args()
 
-if not opts.file:
-    parser.error("need to specify file")
+if not opts.file: parser.error("need to specify file")
+
 opts.number_of_indices = int(opts.number_of_indices)
 
 # get all variables
@@ -37,7 +37,7 @@ with uproot.open(opts.file) as f:
         print("looking at variable: {}".format(v))
         df = tree.pandas.df([v])
         if "subentry" in df.index.names:
-            if "LooseLepton" in v: 
+            if "LooseLepton" in v:
                 new_set_of_variables += [v+"[0]"]
             else:
                 new_set_of_variables += [v+"[{}]".format(i) for i in range(opts.number_of_indices)]
@@ -62,7 +62,3 @@ if opts.generateSet:
         print("variable set printout:")
         print(out)
         print("-"*50)
-
-
-
-

@@ -30,9 +30,6 @@ config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 K.tensorflow_backend.set_session(tf.Session(config=config))
 
-
-
-
 class EarlyStopping(keras.callbacks.Callback):
     ''' custom implementation of early stopping
         with options for
@@ -66,7 +63,7 @@ class EarlyStopping(keras.callbacks.Callback):
         if current_val < self.best_validation:
             self.best_validation = current_val
             self.best_epoch = epoch
-    
+
         # check loss by percentage difference
         if self.value:
             if (current_val-current_train)/(current_train) > self.value and epoch > self.min_epochs:
@@ -82,22 +79,23 @@ class EarlyStopping(keras.callbacks.Callback):
                 if self.verbose > 0:
                     print("\nValidation loss has not decreased for {} epochs".format( epoch - self.best_epoch ))
                 self.model.stop_training = True
-        
 
 
 class DNN():
-    def __init__(self, 
+    def __init__(self,
             save_path,
             input_samples,
-            event_category,
+            category_name,
             train_variables,
-            train_epochs    = 500,
-            test_percentage = 0.2,
-            eval_metrics    = None,
-            shuffle_seed    = None,
-            balanceSamples  = False,
-            evenSel         = None,
-            norm_variables  = True):
+            category_cutString = None,
+            category_label     = None,
+            norm_variables     = True,
+            train_epochs       = 500,
+            test_percentage    = 0.2,
+            eval_metrics       = None,
+            shuffle_seed       = None,
+            balanceSamples     = False,
+            evenSel            = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -112,9 +110,16 @@ class DNN():
             os.makedirs( self.save_path )
 
         # name of event category (usually nJet/nTag category)
-        self.JTstring       = event_category
-        self.event_category = JTcut.getJTstring(event_category)
-        self.categoryLabel  = JTcut.getJTlabel(event_category)
+        self.category_name = category_name
+
+        # string containing event selection requirements;
+        # if not specified (default), deduced via JTcut
+        self.category_cutString = (category_cutString if category_cutString is not None else JTcut.getJTstring(category_name))
+
+        # category label (string);
+        # if not specified (default), deduced via JTcut
+        self.category_label = (category_label if category_label is not None else JTcut.getJTlabel (category_name))
+
         # selection
         self.evenSel = ""
         self.oddSel = "1."
@@ -131,12 +136,15 @@ class DNN():
 
         # percentage of events saved for testing
         self.test_percentage = test_percentage
-        
+
         # number of train epochs
         self.train_epochs = train_epochs
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
+
+        # normalize variables in DataFrame
+        self.norm_variables = norm_variables
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -146,9 +154,11 @@ class DNN():
         self.cp_path = self.save_path+"/checkpoints/"
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
-        out_file = self.cp_path + "/variable_norm.csv"
-        self.data.norm_csv.to_csv(out_file)
-        print("saved variabe norms at "+str(out_file))
+
+        if self.norm_variables:
+           out_file = self.cp_path + "/variable_norm.csv"
+           self.data.norm_csv.to_csv(out_file)
+           print("saved variabe norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -159,40 +169,39 @@ class DNN():
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-           
-        
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
-            input_samples       = self.input_samples,
-            event_category      = self.event_category,
-            train_variables     = self.train_variables,
-            test_percentage     = self.test_percentage,
-            shuffleSeed         = shuffle_seed,
-            norm_variables      = self.norm_variables,
-            balanceSamples      = balanceSamples,
-            evenSel             = self.evenSel)
-
+            input_samples    = self.input_samples,
+            event_category   = self.category_cutString,
+            train_variables  = self.train_variables,
+            test_percentage  = self.test_percentage,
+            norm_variables   = self.norm_variables,
+            shuffleSeed      = shuffle_seed,
+            balanceSamples   = balanceSamples,
+            evenSel          = self.evenSel,
+        )
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
-        # defnie default network configuration
+
+        # define default network configuration
         self.architecture = {
-            "layers":                   [200],
-            "loss_function":            "categorical_crossentropy",
-            "Dropout":                  0.2,
-            "L2_Norm":                  1e-5,
-            "batch_size":               5000,
-            "optimizer":                optimizers.Adagrad(decay=0.99),
-            "activation_function":      "elu",
-            "output_activation":        "Softmax",
-            "earlystopping_percentage": None,
-            "earlystopping_epochs":     None,
-            }
+          "layers":                   [200],
+          "loss_function":            "categorical_crossentropy",
+          "Dropout":                  0.2,
+          "L2_Norm":                  1e-5,
+          "batch_size":               5000,
+          "optimizer":                optimizers.Adagrad(decay=0.99),
+          "activation_function":      "elu",
+          "output_activation":        "Softmax",
+          "earlystopping_percentage": None,
+          "earlystopping_epochs":     None,
+        }
 
         for key in config:
             self.architecture[key] = config[key]
-        
+
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
@@ -202,23 +211,18 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset
-        self.model_eval = self.model.evaluate(
-            self.data.get_test_data(as_matrix = True),
-            self.data.get_test_labels())
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
-        # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
+        # save predictions
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
 
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -233,15 +237,13 @@ class DNN():
         for index, row in events.iterrows():
             print("========== DNN output ==========")
             print("Event: "+str(index))
-            for var in row.values:
-                print(var)
             print("-------------------->")
             output = self.model.predict( np.array([list(row.values)]) )[0]
+            print("output:" + str(output))
+
             for i, node in enumerate(self.event_classes):
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
-
-
 
 
     def build_default_model(self):
@@ -263,7 +265,6 @@ class DNN():
         Inputs = keras.layers.Input(
             shape = (number_of_input_neurons,),
             name  = self.inputName)
-
         X = Inputs
         self.layer_list = [X]
 
@@ -275,7 +276,7 @@ class DNN():
                 kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
-    
+
             if self.architecture["activation_function"] == "leakyrelu":
                 X = keras.layers.LeakyReLU(alpha=0.3)(X)
 
@@ -284,7 +285,7 @@ class DNN():
                 X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = keras.layers.Dense( 
+        X = keras.layers.Dense(
             units               = self.data.n_output_neurons,
             activation          = output_activation.lower(),
             kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
@@ -397,33 +398,34 @@ class DNN():
         # more information saving
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
-        configs["JetTagCategory"] = self.JTstring
-        configs["categoryLabel"] = self.categoryLabel
-        configs["Selection"] = self.event_category
+        configs["JetTagCategory"] = self.category_name
+        configs["categoryLabel"] = self.category_label
+        configs["Selection"] = self.category_cutString
         configs["trainEpochs"] = self.train_epochs
         configs["trainVariables"] = self.train_variables
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
-        
+
         # save information for binary DNN
         if self.data.binary_classification:
             configs["binaryConfig"] = {
-                "minValue": self.input_samples.bkg_target,
-                "maxValue": 1.}
+              "minValue": self.input_samples.bkg_target,
+              "maxValue": 1.,
+            }
 
         json_file = self.cp_path + "/net_config.json"
         with open(json_file, "w") as jf:
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
-        # save configurations of variables for plotscript
+    def variables_configuration(self):
+        '''  save configurations of variables for plotscript '''
         plot_file = self.cp_path+"/plot_config.csv"
         variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
         variables = variable_configs.loc[self.train_variables]
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
-        
 
     def eval_model(self):
         ''' evaluate trained model '''
@@ -437,10 +439,8 @@ class DNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector = self.model.predict(
-            self.data.get_test_data(as_matrix = True) )
-        self.model_train_prediction  = self.model.predict(
-            self.data.get_train_data(as_matrix = True) )
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
 
         #figure out ranges
         self.get_ranges()
@@ -450,8 +450,7 @@ class DNN():
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -462,7 +461,6 @@ class DNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
-
 
     def get_ranges(self):
         if not self.data.binary_classification:
@@ -475,12 +473,11 @@ class DNN():
                 sample.max=round(float(max_[i]),2)
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
 
-                
-        
+
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-        # get weights 
+        # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
@@ -497,9 +494,6 @@ class DNN():
                 print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
-
-
-
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -529,7 +523,7 @@ class DNN():
                 plt.title("CMS private work", loc = "left", fontsize = 16)
 
             # add title
-            title = self.categoryLabel
+            title = self.category_label
             title = title.replace("\\geq", "$\geq$")
             title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
@@ -538,6 +532,7 @@ class DNN():
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
             plt.ylabel(metric.replace("_"," "), fontsize = 16)
+#            plt.ylim(ymin=0.)
 
             # add legend
             plt.legend()
@@ -547,10 +542,7 @@ class DNN():
             plt.savefig(out_path)
             print("saved plot of "+str(metric)+" at "+str(out_path))
 
-
-
-
-    def plot_outputNodes(self, log = False, printROC = False, signal_class = None, 
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False, nbins = 30, bin_range = [0.,1.],
                         sigScale = -1):
 
@@ -562,13 +554,12 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log,
             sigScale            = sigScale)
 
         plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
-
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
                         signal_class = None, nbins = None, bin_range = None,
@@ -587,13 +578,12 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log,
             sigScale            = sigScale)
 
         plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
-
 
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
         ''' plot confusion matrix '''
@@ -601,7 +591,7 @@ class DNN():
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
             event_classes       = self.event_classes,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.save_path)
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
@@ -623,7 +613,7 @@ class DNN():
             nbins               = nbins,
             bin_range           = bin_range,
             signal_class        = signal_class,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.plot_path,
             logscale            = log)
 
@@ -634,16 +624,15 @@ class DNN():
             data                = self.data,
             prediction_vector   = self.model_prediction_vector,
             event_classes       = self.event_classes,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             signal_class        = signal_class,
             plotdir             = self.save_path,
-            logscale            = log,
-            sigScale            = sigScale)
+            logscale            = log)
 
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = None, bin_range = [0.,1.], name = "binary discriminator",
+                        nbins = None, bin_range = [0.,1.], name = "binary_discriminator",
                         sigScale = -1):
 
         if not nbins:
@@ -651,21 +640,23 @@ class DNN():
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
-            predictions         = self.model_prediction_vector,
+            test_predictions    = self.model_prediction_vector,
+            train_predictions   = self.model_train_prediction,
             nbins               = nbins,
             bin_range           = bin_range,
-            event_category      = self.categoryLabel,
+            event_category      = self.category_label,
             plotdir             = self.save_path,
             logscale            = log,
             sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-def loadDNN(inputDirectory, outputDirectory):
+
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
-    if not os.path.exists(configFile): 
+    if not os.path.exists(configFile):
         sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
 
     with open(configFile) as f:
@@ -675,21 +666,24 @@ def loadDNN(inputDirectory, outputDirectory):
     # load samples
     input_samples = data_frame.InputSamples(config["inputData"])
 
+    if binary:
+        input_samples.addBinaryLabel(signal, binary_target)
+
     for sample in config["eventClasses"]:
-        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"])
+        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
 
     print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
     dnn = DNN(
-        save_path       = outputDirectory,
-        input_samples   = input_samples,
-        event_category  = config["JetTagCategory"],
-        train_variables = config["trainVariables"],
-        shuffle_seed    = config["shuffleSeed"]
-        )
+      save_path       = outputDirectory,
+      input_samples   = input_samples,
+      event_category  = config["JetTagCategory"],
+      train_variables = config["trainVariables"],
+      shuffle_seed    = config["shuffleSeed"],
+    )
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
-
+#    dnn.predict_event_query()
 
     return dnn
