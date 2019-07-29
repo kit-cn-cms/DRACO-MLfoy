@@ -60,3 +60,29 @@ The function `root2pandas.generateMEMdf` reads the MEM values (more specifically
 At later steps in the `preprocessing` these MEM values are added to the output files. Only events where a MEM value was found (matching IDs) are added to the output files.
 
 The MEM variable is saved as `memDBp` in the output files to match the naming scheme used in the single-lepton analysis.
+
+------------------------------------------------------------------------------------------
+
+## Instructions specific to ttHbb dilepton channel (inputs in DESY-format)
+
+- `ntuplesPath` as absolute path to ntuples
+- change `additional_variables` for variables needed to preprocess, that are not defined in the selection and not needed for training
+
+## Usage
+To execute with default options use
+```bash
+python preprocessing/root2pandas/preprocessing_ttHbb_DL.py -o cate8 -t liteTreeTTH_step7_cate8
+```
+or use the following for options
+- `-o DIR` to change the name of the ouput directory, can be either a string or absolute path (default is `InputFeatures`)
+- `-v FILE` to change the variable Selection, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed (for DL analysis default is `variables_ttHbb_DL` )
+- `-e STR` to select the tree corresponding to the right category  (default is `liteTreeTTH_step7_cate8`)
+- `-e INT` to change the maximal number of entries for each batch to restrict memory usage (default is `50000`)
+- `-n STR` to change the naming of the output file
+- `-m` to activate using MEMs
+
+```bash
+python preprocessing_ttHbb_DL.py -o DIR -v FILE -e INT -m -n STR
+```
+
+------------------------------------------------------------------------------------------

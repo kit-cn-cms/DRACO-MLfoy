@@ -16,7 +16,7 @@ plotter.addSample(
     sampleFile      = data_dir+"FILENAME",
     plotColor       = ROOT.COLOR)
 ```
-- add/change categories to plot (example category name is `4j_ge3t`)
+- add/change categories to plot (example category name is `ge4j_ge4t`)
 ```python
 plotter.addCategory("(ge)[nJets]j_(ge)[nTags]t")
 ```
@@ -37,15 +37,15 @@ or use the following options
 1. File Options
 	- `-o DIR` to change the name of the ouput directory, can be either a string or absolute path
 	(default is `plots_InputFeatures`)
-	- `-i DIR` to change the name of the input directory, can be either a string or absolute path 
+	- `-i DIR` to change the name of the input directory, can be either a string or absolute path
 	(default is `InputFeatures`)
-	- `-v FILE` to change the variable Selection to plot, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed 
+	- `-v FILE` to change the variable Selection to plot, if the file is in `/variable_sets/` the name is sufficient, else the absolute path is needed
 	(default is `example_variables`)
 2. Plot Options
 	- `-l` to create logarithmic plots
-	- `-r` to deactivate additional ratio plots 
+	- `-r` to deactivate additional ratio plots
 	- `--ratiotitle=STR` change the Title of the ratio plot (default is `"#frac{signal}{background}"`)
-	- `-k` to deactivate KS score 
+	- `-k` to deactivate KS score
 3. Scaling Options
 	- `--scalesignal` to scale signal (default is `1`), possible options:
 		- `1` to scale Signal to background Integral
@@ -54,7 +54,7 @@ or use the following options
 	- `--lumiscale` to scale number of events according to luminosity (default is `1`)
 
 4. Private Work Option
-	`-p` to activate Private work Option, 
+	`-p` to activate Private work Option,
 	- will add "private work"- label to plots
 	- ATTENTION: deactivates scaling options, therefore changes y-axis title to "normalized to unit area" instead of "Events expected"
 
@@ -62,4 +62,3 @@ Example:
 ```bash
 python plotInputVariables.py -i /path/to/input/files -o testPlots -v test_set  --scalesignal=False --lumiscale=41 --ratiotitle=#frac{ttH}{ttbar}
 ```
-

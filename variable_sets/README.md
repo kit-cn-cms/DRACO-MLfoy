@@ -2,7 +2,7 @@
 - each variable set consists of a dictionary `variables`
 - for each jet-tag category add a list to the `variables` dictionary containing the input features used for the training of this category, e.g.
 ```python
-variables["4j_ge3t"] = [
+variables["ge4j_ge4t"] = [
     "some_variable",
     "some_other_variable",
     "vector_variable[1]",
