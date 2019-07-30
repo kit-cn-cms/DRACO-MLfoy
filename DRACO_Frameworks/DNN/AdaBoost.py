@@ -533,7 +533,7 @@ class AdaBoost():
         plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten - Max: " + str(round(best_train, 3)))
         plt.plot(epoches, test_fraction, 'g-', label = "Testdaten - Max: " + str(round(best_test, 3)))
         # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
-        plt.xlabel("Ada_Epochen")
+        plt.xlabel("Ada-Epochen")
         plt.ylabel("Anteil Richtig Bestimmt")
         plt.legend(loc='best')
         plt.savefig(save_path + self.name + "_frac.pdf")
