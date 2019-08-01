@@ -68,6 +68,8 @@ ttH_categories.addCategory("ttH", selection = None)
 
 
 ttbar_categories = root2pandas.EventCategories()
+ttbar_categories.addCategory("tthf", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttmb", selection = "((GenEvt_I_TTPlusBB == 1 or GenEvt_I_TTPlusBB == 3) and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
@@ -118,7 +120,8 @@ additional_variables = [
     "Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 
-    "Evt_Lumi"]
+    "Evt_Lumi",
+    "Evt_Odd"]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)

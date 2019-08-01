@@ -591,7 +591,7 @@ class plotEventYields:
             for signal in signal_class:
                 self.signalIndex.append(self.data.class_translation[signal])
         else:
-            self.signalIndex = [self.data.class_translation["ttHbb"]]
+            self.signalIndex = [self.data.class_translation["ttH"]]
 
         self.event_category     = event_category
         self.plotdir            = plotdir

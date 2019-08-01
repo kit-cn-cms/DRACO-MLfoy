@@ -107,6 +107,9 @@ class DNN():
         # norm variables or not
         self.norm_variables = norm_variables
 
+        # make cross evaluation or not
+        self.xEval = xEval
+
         # output directory for results
         self.save_path = save_path
         if not os.path.exists(self.save_path):
@@ -172,7 +175,8 @@ class DNN():
             shuffleSeed         = shuffle_seed,
             norm_variables      = self.norm_variables,
             balanceSamples      = balanceSamples,
-            evenSel             = self.evenSel)
+            evenSel             = self.evenSel,
+            xEval               = self.xEval)
 
 
     def _load_architecture(self, config):

@@ -82,7 +82,7 @@ parser.add_option("--even",dest="even_sel",action="store_true",default=None,
 parser.add_option("--odd",dest="even_sel",action="store_false",default=None,
         help="only select events with Evt_Odd==1")
 
-parser.add_option("--xEval",dest="xEval",action="store_true",default=False,
+parser.add_option("--xeval",dest="xEval",action="store_true",default=False,
         help="activate to perform cross evaluation of data with 2 DNNs")
 
 
@@ -123,10 +123,10 @@ outputdir += "_"+options.category
 dnn_type = [["", 0.2, None]]
 nom_weight = 1.
 if options.even_sel==True:
-    dnn_type = [["_even", 0.1, True]]
+    dnn_type = [["_even", 0.2, True]]
     nom_weight = 2.
 elif options.even_sel==False:
-    dnn_type = [["_odd", 0.1, False]]
+    dnn_type = [["_odd", 0.2, False]]
     nom_weight = 2.
 
 # the input variables are loaded from the variable_set file
@@ -152,7 +152,7 @@ naming = options.naming
 
 # handle xEval selection
 if options.xEval:
-    dnn_type = [["/EVEN", 0.1, True],["/ODD", 0.1, False]]
+    dnn_type = [["/EVEN", 0.2, True],["/ODD", 0.2, False]]
     nom_weight = 2.
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
@@ -188,7 +188,8 @@ for types in dnn_type:
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.balanceSamples,
         evenSel         = types[2],
-        norm_variables  = options.norm_variables))
+        norm_variables  = options.norm_variables,
+        xEval           = options.xEval))
 
 # import file with net configs if option is used
 if options.net_config:

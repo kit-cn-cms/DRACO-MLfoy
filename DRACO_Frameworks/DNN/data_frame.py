@@ -115,11 +115,13 @@ class DataFrame(object):
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
-                evenSel = ""):
+                evenSel = "",
+                xEval = False):
 
         self.event_category = event_category
         self.lumi = lumi
         self.evenSel = evenSel
+        self.xEval = xEval
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
@@ -130,13 +132,24 @@ class DataFrame(object):
 
         # loop over all input samples and load dataframe
         train_samples = []
+        test_samples = []
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel)
             train_samples.append(sample.data)
+            # add test sample for xEval
+            if self.xEval:
+                if self.evenSel == "(Evt_Odd==0)":
+                    sample.load_dataframe(self.event_category, self.lumi, "(Evt_Odd==1)")
+                elif self.evenSel == "(Evt_Odd==1)":
+                    sample.load_dataframe(self.event_category, self.lumi, "(Evt_Odd==0)")
+                test_samples.append(sample.data)
+                    
         
         # concatenating all dataframes
         df = pd.concat( train_samples, sort = True )
+        df_test = pd.concat( test_samples, sort = True )
         del train_samples
+        del test_samples
 
         # multiclassification labelling
         if not self.binary_classification:
@@ -153,9 +166,11 @@ class DataFrame(object):
 
             # add flag for ttH to dataframe
             df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            df_test["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df_test["class_label"].values], index = df_test.index )
 
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
+            df_test["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df_test["class_label"].values], index = df_test.index )
 
             # norm weights to mean(1)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
@@ -197,9 +212,11 @@ class DataFrame(object):
             self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
         print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
         df = shuffle(df, random_state = self.shuffleSeed)
+        df_test = shuffle(df_test, random_state = self.shuffleSeed)
 
         # norm variables if activated
         unnormed_df = df.copy()
+        unnormed_df_test = df_test.copy()
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
         if norm_variables:
             for v in train_variables:
@@ -212,15 +229,21 @@ class DataFrame(object):
                 norm_csv["mu"][v] = 0.
                 norm_csv["std"][v] = 1.
         df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+        df_test[train_variables] = (df_test[train_variables] - df_test[train_variables].mean())/df_test[train_variables].std()
         self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
 
-        # split test sample
-        n_test_samples = int( df.shape[0]*test_percentage )
-        self.df_test = df.head(n_test_samples)
-        self.df_train = df.tail(df.shape[0] - n_test_samples )
-        self.df_test_unnormed = unnormed_df.head(n_test_samples)
+        # split test sample or use even/odd as test sample
+        if xEval:
+            self.df_test = df_test
+            self.df_test_unnormed = unnormed_df
+            self.df_train = df
+        else:
+            n_test_samples = int( df.shape[0]*test_percentage )
+            self.df_test = df.head(n_test_samples)
+            self.df_train = df.tail(df.shape[0] - n_test_samples )
+            self.df_test_unnormed = unnormed_df.head(n_test_samples)
 
         # save variable lists
         self.train_variables = train_variables
@@ -236,6 +259,7 @@ class DataFrame(object):
         print("events used for training: "+str(self.df_train.shape[0]))
         print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
+        del df_test
 
 
     def balanceTrainSample(self):
