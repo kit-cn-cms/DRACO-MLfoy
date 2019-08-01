@@ -56,7 +56,7 @@ else:
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
 # N<13 could be removed, because in the given dataset there is no event with N>12
-base = "(N_Jets<14 and N_Jets >= 4 and N_BTagsM >= 3 and Weight_GEN_nom > 0.)"
+base = "(N_Jets<14 and N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
 
 
 # single lepton selections
@@ -87,7 +87,8 @@ dataset.addBaseSelection(base_selection)
 
 #ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
 # ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ/"
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
+# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
+ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/forJost/ntuple/"
 
 
 

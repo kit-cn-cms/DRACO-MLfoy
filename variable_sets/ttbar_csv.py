@@ -1,7 +1,5 @@
 variables = {}
-variables["4j_ge3t"] = [
-	#"N_Jets",
-	#"N_BTags_M",
+variables["ge4j_ge3t"] = [
 	"TopHad_B_Pt",
 	"TopHad_B_Eta",
 	"TopHad_B_Phi",
@@ -21,19 +19,8 @@ variables["4j_ge3t"] = [
 	"TopHad_Q2_Eta",
 	"TopHad_Q2_Phi",
 	"TopHad_Q2_E",
-	"TopHad_Q2_CSV",
-	"Muon_Pt",
-	"Muon_Eta",
-	"Muon_Phi",
-	"Muon_E",
-	"Electron_Pt",
-	"Electron_Eta",
-	"Electron_Phi",
-	"Electron_E",
-	"Evt_MET_Pt",
-	"Evt_MET_Phi",
-	"reco_TopHad_M",
-	"reco_TopLep_M",
-	"reco_WHad_M",
-	"ttbar_pt_div_ht_p_met"
+	"TopHad_Q2_CSV"
 	]
+
+
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))

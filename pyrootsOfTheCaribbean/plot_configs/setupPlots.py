@@ -382,7 +382,7 @@ def saveCanvas(canvas, path):
 # ===============================================
 # PRINT STUFF ON CANVAS
 # ===============================================
-def printLumi(pad, lumi = 41.5, ratio = False, twoDim = False):
+def printLumi(pad, lumi = 59.7, ratio = False, twoDim = False):
     if lumi == 0.: return
 
     lumi_text = str(lumi)+" fb^{-1} (13 TeV)"

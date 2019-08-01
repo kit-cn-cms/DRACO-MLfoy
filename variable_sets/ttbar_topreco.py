@@ -51,7 +51,5 @@ variables["ge4j_ge3t"] = [
 	"reco_WLep_Eta",
 	"reco_WLep_Phi",
 	"reco_WLep_M",
-	"reco_WLep_logM",
-	"ttbar_phi",
-	"ttbar_pt_div_ht_p_met"
+	"reco_WLep_logM"
 	]

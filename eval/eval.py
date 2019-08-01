@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from math import sin, cos, log
@@ -245,29 +246,40 @@ i=0
 mW = 80.4
 counter = 0
 lcounter = 0
-rcounter = 0
+hcounter = 0
 eventcounter= 0
+jetcounter = 0
+effcounter = 0
+
+blep_counter = 0
+bhad_counter = 0
+q1_counter   = 0
+q2_counter   = 0
+
+
 
 # inputdir = "/nfs/dust/cms/user/jdriesch/draco/DRACO-MLfoy/workdir/" +  options.inputdir + "_" + options.category
 print inPath
 
 model = loadDNN(inPath, "output")
 
-top_mass = ROOT.TH1F("top_mass","mass of top quark", 100, 0 ,500)
-delta_rlep = ROOT.TH1F("delta_rlep", "#Delta r lep;#Delta r of leptonic decaying tops; number of events", 60,0,6)
-delta_rhad = ROOT.TH1F("delta_rhad", "#Delta r had;#Delta r of hadronic decaying tops; number of events", 60,0,6)
-delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta r b had;#Delta r of hadronic b; number of events", 100,0,6)
-delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta r b lep;#Delta r of leptonic b; number of events", 100,0,6)
-delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta r q1;#Delta r of q1; number of events", 100,0,6)
-delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta r q2;#Delta r of q2; number of events", 100,0,6)
+top_mass = ROOT.TH1F("top_mass","Top-Quark-Masse; gemittelte Masse des hadronischen und leptonischen Top-Quarks; Anzahl Ereignisse", 100, 0 ,500)
+delta_rlep = ROOT.TH1F("delta_rlep", "#Delta R; #Delta R des leptonischen Top-Quarks; Anzahl Ereignisse", 60,0,6)
+delta_rhad = ROOT.TH1F("delta_rhad", "#Delta R had;#Delta R des hadronischen Top-Quarks; Anzahl Ereignisse", 60,0,6)
+delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta R; #Delta R des hadronischen B-Quarks; Anzahl Ereignisse", 100,0,6)
+delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta R; #Delta R des leptonischen Bottom-Quarks; Anzahl Ereignisse", 100,0,6)
+delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta R; #Delta R von leichtem Quark 1; Anzahl Ereignisse", 100,0,6)
+delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta R; #Delta R von leichtem Quark 2; Anzahl Ereignisse", 100,0,6)
 
 delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi of hadronic b; number of events", 100,0,6)
 delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b; number of events", 100,0,6)
 
-rek_thad   = ROOT.TEfficiency("rek_thad", "efficiency for reconstruction of hadronic decaying top; pseudorapidity #eta; transverse momentum Pt [GeV/c]",  200, -5, 5, 200, 0, 500)
-PtRap_thad = ROOT.TH2F("PtRap_thad", "total number of hadronic decaying tops; pseudorapidity #eta; transverse momentum Pt [GeV/c]", 200, -5, 5, 200, 0, 500)
-eff_count_thad = ROOT.TH2F("eff_count_thad", "number of hadronic decaying tops with correct reconstruction (#Delta R < 0.4); pseudorapidity #eta; transverse momentum Pt [GeV/c]", 200, -5, 5, 200, 0, 500)
+rek_thad   = ROOT.TEfficiency("rek_thad", "Pseudorapiditaet #eta; Transversalimpuls Pt in GeV/c",  150, -5, 5, 150, 0, 500)
+PtRap_thad = ROOT.TH2F("PtRap_thad", "Gesamtzahl der hadronischen Top-Quarks; Pseudorapiditaet #eta; Transversalimpuls Pt [GeV/c]", 150, -5, 5, 150, 0, 500)
+eff_count_thad = ROOT.TH2F("eff_count_thad", "Anzahl richtig rekonstruierter hadronischer Top-Quarks (#Delta R < 0.4); Pseudorapiditaet #eta; Transversalimpuls Pt in GeV/c", 150, -5, 5, 150, 0, 500)
+pt_eff = ROOT.TEfficiency("pt_eff", "Effizienz der Rekonstruktion des hadronischen Top-Quarks; Transversalimpuls Pt in GeV/c; Effizienz", 50,0,500)
 # rek_tlep = ROOT.TH2F("rek_tlep", "pseudorapidity vs tranverse momentum of leptonic decaying top", 50, 0, 500, 20, -5,5)
+pt_eff_2 = ROOT.TH1F("pt_eff_2", "Transversalimpuls Pt in GeV/c; Effizienz", 50,0,500)
 
 
 
@@ -275,7 +287,7 @@ for event in chain:
     njets = event.N_Jets
     # print njets
     # if(njets>12 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
-    if(njets>12 or event.N_BTagsM<3 or event.Evt_Odd ==1):
+    if(njets>13 or event.N_BTagsM<2 or event.Evt_Odd ==1):
 
         # print "ok cool next one"
         continue
@@ -379,22 +391,22 @@ for event in chain:
     eventcounter +=1
     combis = len(TopHad_B_Phi)
 
-    n=0
-    for index in jets:
-        for index2 in pepec:
-            n+=1
-            df[index +"_"+ index2] = globals()[index + "_" + index2]
-
-    df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
-    df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
-    df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
-    df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
-    df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
-    df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
-    df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
-    df["Electron_E[0]"] = np.zeros(combis) + Electron_E
-    df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
-    df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
+    # n=0
+    # for index in jets:
+    #     for index2 in pepec:
+    #         n+=1
+    #         df[index +"_"+ index2] = globals()[index + "_" + index2]
+    #
+    # df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
+    # df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
+    # df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
+    # df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
+    # df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
+    # df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
+    # df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
+    # df["Electron_E[0]"] = np.zeros(combis) + Electron_E
+    # df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
+    # df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
 
 
     #df["reco_TopHad_M"] = reco_TopHad_M
@@ -402,20 +414,21 @@ for event in chain:
     #df["reco_WHad_M"]   = reco_WHad_M
 
 
-    vars_toadd = ["TopHad","TopLep", "WHad"]
+    # vars_toadd = ["TopHad","TopLep", "WHad"]
+    #
+    # for index in vars_toadd:
+    #     for index2 in ["Pt","Eta","Phi","M","logM"]:
+	#         df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
+    #
+    # df["ttbar_phi"] = ttbar_phi
+    # df["ttbar_pt_div_ht_p_met"]     = ttbar_pt_div_ht_p_met
 
-    for index in vars_toadd:
-        for index2 in ["Pt","Eta","Phi","M","logM"]:
-	        df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
-
-    df["ttbar_phi"] = ttbar_phi
-    df["ttbar_pt_div_ht_p_met"]     = ttbar_pt_div_ht_p_met
-
-    # for var in variables:
-    #     if var[:4] in ["Muon", "Elec"]:
-    #         df[var] = np.zeros(combis)+locals()[var[:-3]]
-    #         continue
-    #     df[var] = globals()[var]
+    for var in variables:
+        if var[:4] in ["Muon", "Elec"]:
+            df[var] = np.zeros(combis)+locals()[var[:-3]]
+            continue
+        df[var] = globals()[var]
+    # print df
 
 
     df_normed = normalize(df,inPath)
@@ -477,7 +490,7 @@ for event in chain:
         lcounter +=1
 
     if(deltaRh<0.4):
-        rcounter +=1
+        hcounter +=1
 
     if(i%1000==0):
         print i, '/', nchain/2., '=', 200.*i/nchain,'%', "      , eff: ", 1.*counter/eventcounter
@@ -503,8 +516,8 @@ for event in chain:
 
 
     #falls q1 und q2 falsch herum zugeordnet sind:
-    delta_r_q12 = ((correct_phi(TopHad_Q1_Phi[best_index] - event.GenTopHad_Q2_Phi))**2 + (TopHad_Q1_Eta[best_index] - event.GenTopHad_Q2_Eta)**2)**0.5
-    delta_r_q21 = ((correct_phi(TopHad_Q2_Phi[best_index] - event.GenTopHad_Q1_Phi))**2 + (TopHad_Q2_Eta[best_index] - event.GenTopHad_Q1_Eta)**2)**0.5
+    delta_r_q12 = ((correct_phi(TopHad_Q1_Phi[best_index] - event.GenTopHad_Q2_Phi[0]))**2 + (TopHad_Q1_Eta[best_index] - event.GenTopHad_Q2_Eta[0])**2)**0.5
+    delta_r_q21 = ((correct_phi(TopHad_Q2_Phi[best_index] - event.GenTopHad_Q1_Phi[0]))**2 + (TopHad_Q2_Eta[best_index] - event.GenTopHad_Q1_Eta[0])**2)**0.5
 
     if(delta_r_q1+delta_r_q2 > delta_r_q12 + delta_r_q21):
         delta_r_q1 = delta_r_q12
@@ -515,6 +528,18 @@ for event in chain:
     delta_r_q1_hist.Fill(delta_r_q1)
     delta_r_q2_hist.Fill(delta_r_q2)
 
+    if (delta_r_q1 < 0.4 and delta_r_q2 < 0.4 and delta_r_blep < 0.4 and delta_r_bhad < 0.4):
+        jetcounter += 1
+        if(deltaRl<0.4 and deltaRh<0.4):
+            effcounter += 1
+
+    if delta_r_q1 < 0.4: q1_counter+=1
+    if delta_r_q2 < 0.4: q2_counter+=1
+    if delta_r_blep < 0.4: blep_counter+=1
+    if delta_r_bhad < 0.4: bhad_counter+=1
+
+    if(i%3000==0):
+        print "Effizienzen: blep ", 1.*blep_counter/eventcounter, "         bhad ", 1.*bhad_counter/eventcounter, "       q1 ", 1.*q1_counter/eventcounter, "       q2 ", 1.*q2_counter/eventcounter
 
     delta_phi.Fill(correct_phi(delta_phi_bhad))
     delta_eta.Fill(abs(delta_eta_bhad))
@@ -523,10 +548,9 @@ for event in chain:
     rek_thad.Fill((deltaRh<0.4), thad.Eta(),thad.Pt())
     PtRap_thad.Fill(thad.Eta(),thad.Pt())
     if deltaRh<0.4: eff_count_thad.Fill(thad.Eta(),thad.Pt())
+    pt_eff.Fill((deltaRh<0.4), thad.Pt())
 
 
-
-print "eff: ", 1.*counter/eventcounter, "  ", 1.*lcounter/eventcounter, "  ", 1.*rcounter/eventcounter
 
 x,y,r = np.zeros(60),np.zeros(60),np.zeros(60)
 
@@ -541,8 +565,11 @@ efficiency_lep = ROOT.TGraph(60, r, x)
 efficiency_had = ROOT.TGraph(60, r, y)
 
 
-c1=ROOT.TCanvas("c1","delta r and efficiency",500,500)
+c1=ROOT.TCanvas("c1","delta r and efficiency",600,600)
 c1.Divide(1,1)
+c1.SetRightMargin(0.09)
+c1.SetLeftMargin(0.15)
+c1.SetBottomMargin(0.15)
 
 #c1.cd(1)
 #jet_pt.Draw()
@@ -568,29 +595,32 @@ line_lep.SetLineColor(ROOT.kBlack)
 line_lep.SetLineWidth(2)
 line_lep.Draw()
 
-axis_lep = ROOT.TGaxis(6,0,6,delta_rlep.GetBinContent(delta_rlep.GetMaximumBin()),0,1)
-axis_lep.SetTitle("efficiency")
+axis_lep = ROOT.TGaxis(6,0,6,delta_rlep.GetBinContent(delta_rlep.GetMaximumBin()),0,1,510,"+L")
+axis_lep.SetTitle("#bf{Effizienz}")
 axis_lep.Draw()
 
 
 #buffer1 = str
-buffer1 = "efficiency at #Delta r < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%"
+buffer1 = "Effizienz bei #Delta R < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%"
 text1 = ROOT.TLatex()
-text1.SetTextSize(0.025)
-text1.DrawLatex(2.8,0.4*delta_rlep.GetMaximum(),buffer1)
+text1.SetTextSize(0.04)
+text1.DrawLatex(2.,0.4*delta_rlep.GetMaximum(),buffer1)
 
 
-leg_lep = ROOT.TLegend(0.5,0.5,0.9,0.65)
-leg_lep.AddEntry(delta_rlep, "histrogram filled with #Delta r of tleps","f")
-leg_lep.AddEntry(efficiency_lep, "efficiency","l")
-leg_lep.AddEntry(line_lep, "#Delta r = 0.4", "l")
+leg_lep = ROOT.TLegend(0.45,0.5,0.8,0.65)
+leg_lep.AddEntry(delta_rlep, "Verteilung der #Delta R","f")
+leg_lep.AddEntry(efficiency_lep, "Effizienz","l")
+leg_lep.AddEntry(line_lep, "#Delta R = 0.4", "l")
 leg_lep.Draw()
 
-c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection+ "_tlep" + options.percentage + "p.pdf")
+c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection+ "_tlep" + options.percentage + "p.pdf")
 
-c2=ROOT.TCanvas("c1","delta r and efficiency",500,500)
+c2=ROOT.TCanvas("c1","delta r and efficiency",600,600)
 c2.Divide(1,1)
 c2.cd(1)
+c2.SetRightMargin(0.09)
+c2.SetLeftMargin(0.15)
+c2.SetBottomMargin(0.15)
 # delta_rhad.Draw("HIST")
 # efficiency_had.Draw("SAME")
 #efficiency_had.Draw("*","SAME")
@@ -612,24 +642,24 @@ line_had.SetLineColor(ROOT.kBlack)
 line_had.SetLineWidth(2)
 line_had.Draw()
 
-axis_had = ROOT.TGaxis(6,0,6,delta_rhad.GetBinContent(delta_rhad.GetMaximumBin()),0,1)
-axis_had.SetTitle("efficiency")
+axis_had = ROOT.TGaxis(6,0,6,delta_rhad.GetBinContent(delta_rhad.GetMaximumBin()),0,1,510,"+L")
+axis_had.SetTitle("#bf{Effizienz}")
 axis_had.Draw("SAME")
 
-buffer2 = "efficiency at #Delta r < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%"
+buffer2 = "Effizienz bei #Delta R < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%"
 text2 = ROOT.TLatex()
-text2.SetTextSize(0.025)
-text2.DrawLatex(2.8,0.4*delta_rhad.GetMaximum(),buffer2)
+text2.SetTextSize(0.04)
+text2.DrawLatex(2.,0.4*delta_rhad.GetMaximum(), "#bf{buffer2}")
 text3 = ROOT.TLatex()
-text3.SetTextSize(0.025)
-text3.DrawLatex(2.8,0.3*delta_rhad.GetMaximum(), "combined efficiency:  " + eff_comb[:2] + "," + eff_comb[2:] + "%")
+text3.SetTextSize(0.04)
+text3.DrawLatex(2.,0.3*delta_rhad.GetMaximum(), "Gesamteffizienz:  " + eff_comb[:2] + "," + eff_comb[2:] + "%")
 
-leg_had = ROOT.TLegend(0.5,0.5,0.9,0.65)
-leg_had.AddEntry(delta_rhad, "histrogram filled with #Delta r of thads","f")
-leg_had.AddEntry(efficiency_had, "efficiency","l")
-leg_had.AddEntry(line_had, "#Delta r = 0.4", "l")
+leg_had = ROOT.TLegend(0.45,0.5,0.8,0.65)
+leg_had.AddEntry(delta_rhad, "Verteilung der #Delta R","f")
+leg_had.AddEntry(efficiency_had, "Effizienz","l")
+leg_had.AddEntry(line_had, "#Delta R = 0.4", "l")
 leg_had.Draw()
-c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection + "_thad" + options.percentage + "p.pdf")
+c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_thad" + options.percentage + "p.pdf")
 
 #######################################################################################################
 
@@ -642,40 +672,81 @@ c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_
 #line_had.SetLineColor(ROOT.kBlack)
 #line_had.SetLineWidth(2)
 #line_had.Draw()
+for i in range(50):
+    pt_eff_2.SetBinContent(pt_eff.GetEfficiency(i))
+    pt_eff_2.SetBinError(pt_eff.GetEfficiencyErrorLow(i))
 
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 1800,500)
-c3.Divide(3,1)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3.Divide(1,1)
+c3.SetRightMargin(0.09)
+c3.SetLeftMargin(0.15)
+c3.SetBottomMargin(0.15)
+c3.cd(1)
+pt_eff_2.SetFillColor(ROOT.kBlue)
+pt_eff_2.SetTitleFontSize(.1)
+pt_eff_2.Draw("E3")
+
+c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual1_" + options.percentage + "p.pdf")
+
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3.Divide(1,1)
+c3.SetRightMargin(0.09)
+c3.SetLeftMargin(0.15)
+c3.SetBottomMargin(0.15)
 c3.cd(1)
 rek_thad.Draw("COLZ")
+c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual2_" + options.percentage + "p.pdf")
 
-c3.cd(2)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3.Divide(1,1)
+c3.SetRightMargin(0.09)
+c3.SetLeftMargin(0.15)
+c3.SetBottomMargin(0.15)
+c3.cd(1)
 PtRap_thad.SetStats(0)
 PtRap_thad.Draw("COLZ")
+c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual3_" + options.percentage + "p.pdf")
 
-c3.cd(3)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3.Divide(1,1)
+c3.SetRightMargin(0.09)
+c3.SetLeftMargin(0.15)
+c3.SetBottomMargin(0.15)
+c3.cd(1)
 eff_count_thad.SetStats(0)
 eff_count_thad.Draw("COLZ")
+c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual4_" + options.percentage + "p.pdf")
 
-# c3.cd(1)
-# delta_r_bhad_hist.SetFillColor(ROOT.kCyan-9)
-# delta_r_bhad_hist.Draw("HIST")
-#
-# c2.cd(2)
-# delta_r_blep_hist.SetFillColor(ROOT.kCyan-9)
-# delta_r_blep_hist.Draw("HIST")
-#
-# c2.cd(3)
-# delta_r_q1_hist.SetFillColor(ROOT.kCyan-9)
-# delta_r_q1_hist.Draw("HIST")
-#
-# c2.cd(4)
-# delta_r_q2_hist.SetFillColor(ROOT.kCyan-9)
-# delta_r_q2_hist.Draw("HIST")
+c4 = ROOT.TCanvas("c4", "Efficiency", 1200,1200)
+c4.Divide(2,2)
+
+c4.cd(1)
+delta_r_bhad_hist.SetFillColor(ROOT.kCyan-9)
+delta_r_bhad_hist.Draw("HIST")
+
+c4.cd(2)
+delta_r_blep_hist.SetFillColor(ROOT.kCyan-9)
+delta_r_blep_hist.Draw("HIST")
+
+c4.cd(3)
+delta_r_q1_hist.SetFillColor(ROOT.kCyan-9)
+delta_r_q1_hist.Draw("HIST")
+
+c4.cd(4)
+delta_r_q2_hist.SetFillColor(ROOT.kCyan-9)
+delta_r_q2_hist.Draw("HIST")
+
+c4.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_jet_eff_" + options.percentage + "p.pdf")
+
+
+print "Effizienz der Jet-Zuordnung: ", 1.*jetcounter/eventcounter
+
+print "Effizienzen: Gesamt / tlep / thad: ", 1.*counter/eventcounter, " / ", 1.*lcounter/eventcounter, " / ", 1.*hcounter/eventcounter
+
+print "Anzahl beides richtig zugeordnet / Anzahl richtige Jet-Zuordnung ; Anzahl beides richtig zugeordnet / Anzahl richtiges ttbar-System : ", 1.* effcounter/jetcounter, " ; ", 1.*effcounter/counter
 
 # c1.cd(1)
 # delta_phi.Draw("HIST")
 #
 # c1.cd(2)
 # delta_eta.Draw("HIST")
-
-c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/results/" + options.inputDir + "_" + options.variableSelection + "_reko_qual_" + options.percentage + "p.pdf")

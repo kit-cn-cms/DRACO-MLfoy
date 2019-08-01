@@ -46,7 +46,7 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
         help="-1 to scale Signal to background Integral, FLOAT to scale Signal with float value, False to not scale Signal",
         metavar="scaleSignal")
 
-parser.add_option("--lumiscale", dest="lumiScale", default=41.5,
+parser.add_option("--lumiscale", dest="lumiScale", default=59.7,
         help="FLOAT to scale Luminosity", metavar="lumiScale")
 
 

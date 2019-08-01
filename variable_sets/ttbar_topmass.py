@@ -1,5 +1,5 @@
 variables = {}
-variables["4j_ge3t"] = [
+variables["ge4j_ge3t"] = [
 	#"N_Jets",
 	#"N_BTags_M",
 	"TopHad_B_Pt",
@@ -33,7 +33,5 @@ variables["4j_ge3t"] = [
 	"Evt_MET_Pt",
 	"Evt_MET_Phi",
 	"reco_TopHad_M",
-	"reco_TopLep_M",
-	"reco_WHad_M",
-	"ttbar_pt_div_ht_p_met"
+	"reco_TopLep_M"
 	]
