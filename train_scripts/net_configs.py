@@ -209,6 +209,19 @@ config_dict["ada_weak1_2_3"] = {
         "earlystopping_epochs":     50
         }
 
+config_dict["ada_weak1_2_3_opt"] = {
+        "layers":                   [75,50],
+        "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
+        "Dropout":                  0.25,
+        "L2_Norm":                  5e-6,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50
+        }
+
 config_dict["ada_weak1_3"] = {
         "layers":                   [100,50],
         "loss_function":            "squared_hinge",        #choose loss function like hinge for y in {-1, 1}
