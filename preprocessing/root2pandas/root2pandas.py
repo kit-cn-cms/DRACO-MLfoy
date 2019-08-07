@@ -24,7 +24,7 @@ class EventCategories:
         return selections
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, dataera=None):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
@@ -32,6 +32,7 @@ class Sample:
         self.MEMs       = MEMs
         self.ownVars    = ownVars
         self.even_odd   = even_odd
+        self.dataera    = dataera
         self.evenOddSplitting()
 
     def printInfo(self):
@@ -337,6 +338,9 @@ class Dataset:
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
 
+                # add data era
+                if not sample.dataera is None:
+                    concat_df = self.addDataEra(concat_df,sample.dataera)
                 # write data to file
                 self.createDatasets(concat_df, sample.categories.categories)
                 print("*"*50)
@@ -398,6 +402,10 @@ class Dataset:
 
         # concatenate the split dataframes again
         df = pd.concat(split_dfs)
+        return df
+
+    def addDataEra(self, df, dataera):
+        df["data_era"] = pd.Series([dataera]*df.shape[0], index = df.index)
         return df
 
     def addMEMVariable(self, df, memdf):
