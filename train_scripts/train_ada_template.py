@@ -74,8 +74,8 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
-parser.add_option("-b", "--boost", dest = "boost", default = None,
-        help = "INT number of networks trained parallel")
+parser.add_option("-b", "--simultan", dest = "simultan", default = None,
+        help = "INT number of networks trained simultaneously")
 
 parser.add_option("--adaboost", dest = "adaboost", default = None,
         help = "INT number of epoches Adaboost should perform")
@@ -134,11 +134,10 @@ if options.binary:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
 #get number of dnns to train
-if options.boost:
-    n_boost = int(options.boost)
-    options.binary_bkg_target = -1
+if options.simultan:
+    n_simoular = int(options.simultan)
 else:
-    n_boost = 1
+    n_simoular = 1
 
 #get number of epoches adaboost should perform and set default signal
 if options.adaboost:
@@ -183,57 +182,63 @@ else:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost/"           #needs to be adjusted
 name = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
 
-#initializing AdaBoost training class
-ada = ADA.AdaBoost(
-    save_path       = outputdir,
-    path            = path,
-    name            = name,
-    input_samples   = input_samples,        #samples are splitted before training the networks
-    event_category  = options.category,
-    train_variables = variables,
-    #binary_bkg_target
-    binary_bkg_target = options.binary_bkg_target,
-    # number of epochs
-    train_epochs    = int(options.train_epochs),
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2,
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.balanceSamples,
-    adaboost_epochs = ada_epochs,
-    shuffle_seed = 9,
-    m2 = m2_use)
+#loop over training to use simultaneously training of nets with same data (data is initialized before) 
+for i in range(1, n_simoular+1):   #due to naming
+    print("\n", "\n")
+    print("Loop i: ", i, " of ", n_simoular)
+    name = name + '_s' + str(i)
 
-# import file with net configs if option is used
-if options.net_config:
-    from net_configs import config_dict
-    config=config_dict[options.net_config]
+    #initializing AdaBoost training class
+    ada = ADA.AdaBoost(
+        save_path       = outputdir,
+        path            = path,
+        name            = name,
+        input_samples   = input_samples,        #samples are splitted before training the networks
+        event_category  = options.category,
+        train_variables = variables,
+        #binary_bkg_target
+        binary_bkg_target = options.binary_bkg_target,
+        # number of epochs
+        train_epochs    = int(options.train_epochs),
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = 0.2,
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.balanceSamples,
+        adaboost_epochs = ada_epochs,
+        shuffle_seed = 9,
+        m2 = m2_use)
 
-# check if this DNN was already trained
-save_path = path + "save_model/" + name + "/"
-if os.path.exists(save_path):
-    exists = True
-else:
-    exists = False
+    # import file with net configs if option is used
+    if options.net_config:
+        from net_configs import config_dict
+        config=config_dict[options.net_config]
 
-if exists:
-    # load trained model
-    ada.load_trained_model(path)
-else:
-    # build DNN model
-    ada.build_model(config)
+    # check if this DNN was already trained
+    save_path = path + "save_model/" + name + "/"
+    if os.path.exists(save_path):
+        exists = True
+    else:
+        exists = False
 
-    # perform the training
-    ada.train_model()
+    if exists:
+        # load trained model
+        ada.load_trained_model(path)
+    else:
+        # build DNN model
+        ada.build_model(config)
 
-# evalute the trained model
-ada.eval_model()
+        # perform the training
+        ada.train_model()
 
-# make discriminator plot
-ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    # evalute the trained model
+    ada.eval_model()
 
-if not exists:
-    # save the trained model
-    ada.save_model(signal)
+    # make discriminator plot
+    ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+
+    if not exists:
+        # save the trained model
+        ada.save_model(signal)
 
 print("Done: ", name)
