@@ -74,10 +74,10 @@ if options.doPlots():
         # plot output node
         bin_range = options.getBinaryBinRange()
         dnn.plot_binaryOutput(
-            log         = options.doLogPlots(), 
-            privateWork = options.isPrivateWork(), 
-            printROC    = options.doPrintROC(), 
-            bin_range   = bin_range, 
+            log         = options.doLogPlots(),
+            privateWork = options.isPrivateWork(),
+            printROC    = options.doPrintROC(),
+            bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
     else:
