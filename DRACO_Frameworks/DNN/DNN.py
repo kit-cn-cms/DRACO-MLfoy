@@ -494,7 +494,7 @@ class DNN():
         with open(rank_path, "w") as f:
             f.write("variable,weight_sum\n")
             for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
-                print("{:50s}: {}".format(key, val))
+                #print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
 
@@ -504,7 +504,7 @@ class DNN():
         # get weights
         for i,layer in enumerate(self.model.layers):
             #odd layers correspond to dropout layers
-            if (i % 2 == 0):
+            if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
                 continue
             else:
                 weights = layer.get_weights()[0]
@@ -519,10 +519,10 @@ class DNN():
                 with open(rank_path, "w") as f:
                     f.write("variable,weight_sum\n")
                     for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
-                        print("{:50s}: {}".format(key, val))
+                        #print("{:50s}: {}".format(key, val))
                         f.write("{},{}\n".format(key,val))
                 print("wrote weight ranking to "+str(rank_path))
-
+        exit()
 
     # --------------------------------------------------------------------
     # result plotting functions
