@@ -81,7 +81,7 @@ python eval_template.py -i testRun_ge6j_ge3t -o eval_testRun --plot --printroc
 ```
 
 
-Compute the average of the weights for different layers and different seeds
+Compute the average of the weights for different layers and different seeds:
 
 Run train_template.py calling the function get_weights() (not only get_input_weights()) in order to have the "absolute_weight_sum_layer *.csv" for the input layer and each dropout layer.
 If you want to compute the average over multiple trainings with different seed, run train_template.py several times and copy all the folders inside one folder (/path/to/trained/networks/)
