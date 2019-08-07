@@ -15,7 +15,7 @@ def GetPlotColor( cls ):
         "ttb":          ROOT.kRed-2,
         "tthf":         ROOT.kRed-3,
         "ttbar":        ROOT.kOrange,
-        "ttmergedb":    ROOT.kRed-1,
+        "ttmb":         ROOT.kRed-1,
         "ST":           ROOT.kRed-8,
         "tH":           ROOT.kWhite,
         "sig":   ROOT.kCyan,

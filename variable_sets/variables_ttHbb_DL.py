@@ -1,6 +1,6 @@
 variables = {}
 
-variables["ge3j_ge2t"] = [
+variables["cate9"] = [
     "N_jets",
     "N_btags",
     "MEM",
@@ -20,6 +20,36 @@ variables["ge3j_ge2t"] = [
     "H0_jet",
     "twist_tag_tag_max_mass",
     "multiplicity_higgsLikeDijet15"
+    ]
+
+variables["ge3j_ge3t"] = [
+    "N_jets",
+    "N_btags",
+    "MEM",
+    "HT_tags",
+    "ptSum_jets_leptons",
+    "btagDiscriminatorAverage_untagged",
+    "btagDiscriminatorAverage_tagged",
+    "mass_tag_tag_min_deltaR",
+    "mass_jet_tag_min_deltaR",
+    "mass_tag_tag_max_mass",
+    "mass_jet_jet_jet_max_pT",
+    "pT_tag_tag_min_deltaR",
+    "avgDeltaR_tag_tag",
+    "minDeltaR_tag_tag",
+    "maxDeltaEta_jet_jet",
+    "maxDeltaEta_tag_tag",
+    "H0_jet",
+    "twist_tag_tag_max_mass",
+    "multiplicity_higgsLikeDijet15",
+    "mass_higgsLikeDijet",
+    "mass_jet_jet_min_deltaR",
+    "pT_jet_jet_min_deltaR",
+    "avgDeltaR_jet_jet",
+    "minDeltaR_jet_jet",
+    "C_jet",
+    "R1_jet",
+    "twist_jet_jet_max_mass"
     ]
 
 variables["jets"]= [
@@ -95,7 +125,7 @@ variables["jets"]= [
 #    "bjet3_btag",
 ]
 
-variables["ge4j_ge4t"] = [
+variables["cate8"] = [
     "MEM",
     "HT_tags",
     "btagDiscriminatorAverage_tagged",
@@ -110,7 +140,7 @@ variables["ge4j_ge4t"] = [
     "multiplicity_higgsLikeDijet15"
     ]
 
-variables["ge4j_3t"] = [
+variables["cate7"] = [
     "MEM",
     "ptSum_jets_leptons",
     "btagDiscriminatorAverage_untagged",
@@ -125,7 +155,7 @@ variables["ge4j_3t"] = [
     "twist_tag_tag_max_mass"
     ]
 
-variables["ge4j_2t"] = [
+variables["cate6"] = [
     "btagDiscriminatorAverage_untagged",
     "mass_tag_tag_min_deltaR",
     "mass_jet_tag_min_deltaR",
@@ -140,7 +170,7 @@ variables["ge4j_2t"] = [
     "multiplicity_higgsLikeDijet15"
     ]
 
-variables["3j_3t"] = [
+variables["cate4"] = [
     "ptSum_jets_leptons",
     "btagDiscriminatorAverage_tagged",
     "mass_higgsLikeDijet",
@@ -155,7 +185,7 @@ variables["3j_3t"] = [
     "twist_jet_jet_max_mass"
     ]
 
-variables["3j_2t"] = [
+variables["cate3"] = [
     "HT_tags",
     "ptSum_jets_leptons",
     "btagDiscriminatorAverage_untagged",
@@ -171,7 +201,7 @@ variables["3j_2t"] = [
     "H0_jet"
     ]
 
-variables["allvar"] = [
+variables["ge4j_ge3t"] = [
      "lepton1_pt",
      "lepton2_pt",
 
@@ -231,8 +261,6 @@ variables["allvar"] = [
      "aplanarity_jet",
      "aplanarity_tag",
 
-     "circularity_jet",
-     "circularity_tag",
 
      "isotropy_jet",
      "isotropy_tag",
@@ -281,8 +309,6 @@ variables["allvar"] = [
      "mass_higgsLikeDijet",
      "mass_higgsLikeDijet2",
 
-     "isotropy_jet",
-     "isotropy_tag",
 
      "mass_jet_jet_min_deltaR",
      "mass_jet_tag_min_deltaR",
@@ -314,9 +340,8 @@ variables["allvar"] = [
      "twist_tag_tag_min_deltaR"
 ]
 
-variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:]))
+#variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:]))
 #variables["ge4j_ge3t"] = list(set(variables["ge4j_ge4t"][:] + variables["ge4j_3t"][:] + variables['jets']))
-
 #!! variables["ge4j_ge3t"] = ['jet1_pt', 'jet2_pt'] #!!!!
 
 all_variables = set( [v for key in variables for v in variables[key] ] )

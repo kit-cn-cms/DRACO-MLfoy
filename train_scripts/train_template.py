@@ -62,8 +62,12 @@ dnn.eval_model()
 # save information
 dnn.save_model(sys.argv, filedir)
 
-# save and print variable ranking
+# save and print variable ranking according to the input layer weights
 dnn.get_input_weights()
+
+# save and print variable ranking according to all layer weights
+dnn.get_weights()
+
 
 # plotting
 if options.doPlots():
@@ -74,10 +78,10 @@ if options.doPlots():
         # plot output node
         bin_range = options.getBinaryBinRange()
         dnn.plot_binaryOutput(
-            log         = options.doLogPlots(), 
-            privateWork = options.isPrivateWork(), 
-            printROC    = options.doPrintROC(), 
-            bin_range   = bin_range, 
+            log         = options.doLogPlots(),
+            privateWork = options.isPrivateWork(),
+            printROC    = options.doPrintROC(),
+            bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
     else:

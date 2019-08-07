@@ -47,6 +47,7 @@ category_cutString_dict = {
 
     '3j_'+  '2t': '(N_jets == 3) & (N_btags == 2)',
     '3j_'+  '3t': '(N_jets == 3) & (N_btags == 3)',
+  'ge3j_'+'ge3t': '(N_jets >= 3) & (N_btags >= 3)',
   'ge4j_'+  '2t': '(N_jets >= 4) & (N_btags == 2)',
   'ge4j_'+  '3t': '(N_jets >= 4) & (N_btags == 3)',
   'ge4j_'+'ge4t': '(N_jets >= 4) & (N_btags >= 4)',
@@ -58,6 +59,7 @@ category_label_dict = {
 
     '3j_'+  '2t': 'N_jets = 3, N_btags = 2',
     '3j_'+  '3t': 'N_jets = 3, N_btags = 3',
+  'ge3j_'+'ge3t': 'N_jets \\geq 3, N_btags \\geq 3',
   'ge4j_'+  '2t': 'N_jets \\geq 4, N_btags = 2',
   'ge4j_'+  '3t': 'N_jets \\geq 4, N_btags = 3',
   'ge4j_'+'ge4t': 'N_jets \\geq 4, N_btags \\geq 4',
@@ -108,9 +110,11 @@ dnn.save_model(sys.argv, filedir)
 # save configurations of variables for plotscript
 #dnn.variables_configuration()
 
-# save and print variable ranking
+# save and print variable ranking according to the input layer weights
 dnn.get_input_weights()
 
+# save and print variable ranking according to all layer weights
+dnn.get_weights()
 
 
 # plotting
