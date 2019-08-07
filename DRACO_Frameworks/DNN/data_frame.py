@@ -27,6 +27,7 @@ class Sample:
 
         # apply event category cut
         query = event_category
+
         if not evenSel == "":
             query+=" and "+evenSel
         df.query(query, inplace = True)
@@ -116,6 +117,8 @@ class DataFrame(object):
                 input_samples,
                 event_category,
                 train_variables,
+                category_cutString = None,
+                category_label     = None,
                 norm_variables = True,
                 test_percentage = 0.2,
                 lumi = 41.5,

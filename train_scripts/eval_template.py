@@ -53,6 +53,11 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("--total-weight-expr", dest="total_weight_expr",default="x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom",
         help="string containing expression of total event weight (use letter \"x\" for event-object; example: \"x.weight\")", metavar="total_weight_expr")
 
+parser.add_option("-d", "--derivatives", dest="derivatives", action = "store_true", default=False,
+        help="activate to get first and second order derivatives", metavar="dev")
+
+parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+                help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
 (options, args) = parser.parse_args()
 
 #get input directory path
@@ -74,12 +79,34 @@ if options.signal_class:
     signal=options.signal_class.split(",")
 else:
     signal=None
+category_cutString_dict = {
+
+    '3j_'+  '2t': '(N_jets == 3) & (N_btags == 2)',
+    '3j_'+  '3t': '(N_jets == 3) & (N_btags == 3)',
+  'ge4j_'+  '2t': '(N_jets >= 4) & (N_btags == 2)',
+  'ge4j_'+  '3t': '(N_jets >= 4) & (N_btags == 3)',
+  'ge4j_'+'ge4t': '(N_jets >= 4) & (N_btags >= 4)',
+
+  'ge4j_'+'ge3t': '(N_jets >= 4) & (N_btags >= 3)',
+}
+
+category_label_dict = {
+
+    '3j_'+  '2t': 'N_jets = 3, N_btags = 2',
+    '3j_'+  '3t': 'N_jets = 3, N_btags = 3',
+  'ge4j_'+  '2t': 'N_jets \\geq 4, N_btags = 2',
+  'ge4j_'+  '3t': 'N_jets \\geq 4, N_btags = 3',
+  'ge4j_'+'ge4t': 'N_jets \\geq 4, N_btags \\geq 4',
+
+  'ge4j_'+'ge3t': 'N_jets \\geq 4, N_btags \\geq 3',
+}
 
 if options.binary:
     if not signal:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-dnn = DNN.loadDNN(inPath, outPath, binary = options.binary, signal = signal, binary_target = options.binary_bkg_target, total_weight_expr=options.total_weight_expr)
+dnn = DNN.loadDNN(inPath, outPath, binary = options.binary, signal = signal, binary_target = options.binary_bkg_target, total_weight_expr=options.total_weight_expr,
+                    category_cutString = category_cutString_dict[options.category], category_label = category_label_dict[options.category])
 
 # plotting
 if options.plot:
