@@ -72,8 +72,8 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
-parser.add_option("-b", "--boost", dest = "boost", default = None,
-        help = "INT number of networks trained parallel")
+parser.add_option("-b", "--simultan", dest = "simultan", default = None,
+        help = "INT number of networks trained simultaneously")
 
 parser.add_option("--adaboost", dest = "adaboost", default = None,
         help = "INT number of epoches Adaboost should perform")
@@ -132,10 +132,10 @@ if options.binary:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
 #get number of dnns to train
-if options.boost:
-    n_boost = int(options.boost)
+if options.simultan:
+    n_simoular = int(options.simultan)
 else:
-    n_boost = 1
+    n_simoular = 1
 
 #get number of epoches adaboost should perform and set default signal
 # if options.adaboost:
@@ -175,9 +175,9 @@ if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
 #loop dnn training to use boosting
-for i in range(1, n_boost+1):   #due to naming
+for i in range(1, n_simoular+1):   #due to naming
     print("\n", "\n")
-    print("Loop i: ", i, " of ", n_boost)
+    print("Loop i: ", i, " of ", n_simoular)
     # print("Signal: ", signal)
 
     # initializing DNN training class
