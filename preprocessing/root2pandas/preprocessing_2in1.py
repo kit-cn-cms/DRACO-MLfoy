@@ -92,7 +92,7 @@ ntuplesPath2018 = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2018"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "ttH",
+    sampleName  = "ttH2017",
     ntuples     = ntuplesPath2017+"/ttH*/*nominal*.root",
     categories  = ttH_categories,
     dataera     = 2017,
@@ -100,7 +100,15 @@ dataset.addSample(
    ) 
 
 dataset.addSample(
-    sampleName  = "TTTo",
+    sampleName  = "ttH2018",
+    ntuples     = ntuplesPath2018+"/ttH*/*nominal*.root",
+    categories  = ttH_categories,
+    dataera     = 2018,
+    even_odd    = options.even_odd_splitting,
+   ) 
+
+dataset.addSample(
+    sampleName  = "TTTo2017",
     ntuples     = ntuplesPath2017+"/TTTo*/*nominal*.root",
     categories  = ttbar_categories,
     dataera     = 2017,
@@ -108,7 +116,7 @@ dataset.addSample(
       )
 
 dataset.addSample(
-    sampleName  = "TTTo",
+    sampleName  = "TTTo2018",
     ntuples     = ntuplesPath2018+"/TTTo*/*nominal*.root",
     categories  = ttbar_categories,
     dataera     = 2018,
