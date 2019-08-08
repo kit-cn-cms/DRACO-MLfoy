@@ -20,6 +20,8 @@ print("imports done")
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
 python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config --binary -t -1 --signalclass ttH -c ge6j_ge3t
+#latest one
+python train_template_new.py -o /home/ngolks/Templates/DM_output/BinaryNN -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config2 --binary -t 0 --signalclass ttH -c ge6j_ge3t --simultan 5
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
@@ -74,6 +76,8 @@ parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default =
 parser.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
 
+parser.add_option("-b", "--simultan", dest = "simultan", default = None,
+        help = "INT number of networks trained simultaneously")
 # parser.add_option("-b", "--boost", dest = "boost", default = None,
 #         help = "INT number of networks trained parallel")
 
@@ -127,9 +131,16 @@ if options.binary:
     if not signal:
         sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
+#get number of dnns to train
+if options.simultan:
+    n_simoular = int(options.simultan)
+else:
+    n_simoular = 1
+
+
 # Everything gets saved here
 path = "/home/ngolks/Projects/boosted_dnn/BinaryNN/"
-name = "b"+str(int(options.train_epochs))+"_"+str(options.category)+"_"+options.net_config
+name_raw = "b"+str(int(options.train_epochs))+"_"+str(options.category)+"_"+options.net_config
 
 #get number of epoches adaboost should perform and set default signal
 # if options.adaboost:
@@ -168,46 +179,53 @@ input_samples.addSample("ttlf"+naming,  label = "ttlf")
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)
 
-# initializing DNN training class
-dnn = DNN.DNN(
-    save_path       = outputdir,
-    path            = path,
-    name            = name,
-    input_samples   = input_samples,        #samples are splitted before training the networks
-    event_category  = options.category,
-    train_variables = variables,
-    #binary_bkg_target
-    binary_bkg_target = options.binary_bkg_target,
-    # number of epochs
-    train_epochs    = int(options.train_epochs),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2,
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.balanceSamples,
-    shuffle_seed = 9)
 
-# import file with net configs if option is used
-if options.net_config:
-    from net_configs import config_dict
-    config=config_dict[options.net_config]
+#loop dnn training to use boosting
+for i in range(1, n_simoular+1):   #due to naming
+    print("\n", "\n")
+    print("Loop i: ", i, " of ", n_simoular)
+    name = name_raw + '_s' + str(i)
 
-# build DNN model
-dnn.build_model(config)
+    # initializing DNN training class
+    dnn = DNN.DNN(
+        save_path       = outputdir,
+        path            = path,
+        name            = name,
+        input_samples   = input_samples,        #samples are splitted before training the networks
+        event_category  = options.category,
+        train_variables = variables,
+        #binary_bkg_target
+        binary_bkg_target = options.binary_bkg_target,
+        # number of epochs
+        train_epochs    = int(options.train_epochs),
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = 0.2,
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.balanceSamples,
+        shuffle_seed = 9)   #shuffle_seed is for data not for weights
 
-# perform the training
-dnn.train_model()
+    # import file with net configs if option is used
+    if options.net_config:
+        from net_configs import config_dict
+        config=config_dict[options.net_config]
 
-# evalute the trained model
-dnn.eval_model()
+    # build DNN model
+    dnn.build_model(config)
 
-# save information
-dnn.save_model(signal)
+    # perform the training
+    dnn.train_model()
 
-# plotting
-dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
-dnn.plot_metrics()
+    # evalute the trained model
+    dnn.eval_model()
+
+    # save information
+    dnn.save_model(signal)
+
+    # plotting
+    dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    dnn.plot_metrics()
 # save and print variable ranking
 # dnn.get_input_weights()
 

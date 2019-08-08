@@ -522,7 +522,7 @@ class AdaBoost():
         self.model_prediction_vector = test_prediction
         #get roc
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, test_prediction)
-        roc_auc = metrics.auc(fpr, tpr)
+        self.roc_auc = metrics.auc(fpr, tpr)
         #plot
         epoches = np.arange(1, len(self.train_prediction_vector)+1)
         print("# DEBUG: fraction: ", train_fraction, test_fraction)
@@ -531,7 +531,7 @@ class AdaBoost():
 
         plt.figure(1)
         plt.plot(epoches, train_fraction, 'r-', label = "Trainingsdaten - Max: " + str(round(best_train, 3)))
-        plt.plot(epoches, test_fraction, 'g-', label = "Testdaten - Max: " + str(round(best_test, 3)))
+        plt.plot(epoches, test_fraction, 'b-', label = "Testdaten - Max: " + str(round(best_test, 3)))
         # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.xlabel("Ada-Epochen")
         plt.ylabel("Anteil Richtig Bestimmt")
@@ -540,7 +540,7 @@ class AdaBoost():
 
         plt.figure(2)
         # plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.3f' % roc_auc)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.3f' % self.roc_auc)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])
@@ -596,6 +596,9 @@ class AdaBoost():
 
         # save final prediciton_vector
         np.save(save_path + "pred_vec", self.model_prediction_vector)
+
+        # save roc-aux score
+        np.save(save_path + "roc", np.array([self.roc_auc]))
 
         # produce json file with configs
         configs = self.architecture
