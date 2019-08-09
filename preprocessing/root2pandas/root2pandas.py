@@ -198,6 +198,9 @@ class Dataset:
 
 
     # ====================================================================
+    def parallelPreprocessing(self):
+        for key in self.samples:
+            print key
 
     def runPreprocessing(self):
         # add variables for triggering and event category selection

@@ -144,4 +144,4 @@ additional_variables = [
 dataset.addVariables(additional_variables)
 
 # run the preprocessing
-dataset.runPreprocessing()
+dataset.parallelPreprocessing()
