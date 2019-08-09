@@ -95,7 +95,8 @@ class DNN():
             eval_metrics       = None,
             shuffle_seed       = None,
             balanceSamples     = False,
-            evenSel            = None):
+            evenSel            = None,
+            dataEra            = None):
 
         # save some information
         # list of samples to load into dataframe
@@ -129,6 +130,10 @@ class DNN():
             elif evenSel == False:
                 self.evenSel = "(Evt_Odd==1)"
                 self.oddSel  = "(Evt_Odd==0)"
+
+        self.dataEra = dataEra
+        if not self.dataEra is None:
+            train_variables.remove("data_era")
 
         # list of input variables
         self.train_variables = train_variables
@@ -181,6 +186,7 @@ class DNN():
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
+            dataEra          = self.dataEra
         )
 
     def _load_architecture(self, config):

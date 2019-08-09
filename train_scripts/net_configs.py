@@ -82,6 +82,19 @@ config_dict["ttH_2017_baseline"] = {
         "earlystopping_epochs":     100,
         }
 
+config_dict["dnnstudies"] = {
+        "layers":                   [100,100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.1,
+        "earlystopping_epochs":     100,
+        }
+
 config_dict["legacy_2018"] = {
         "layers":                   [200,100,50],
         "loss_function":            "categorical_crossentropy",

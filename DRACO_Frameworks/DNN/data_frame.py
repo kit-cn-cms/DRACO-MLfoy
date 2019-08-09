@@ -18,7 +18,7 @@ class Sample:
         self.max=1.0
         self.total_weight_expr = total_weight_expr
 
-    def load_dataframe(self, event_category, lumi, evenSel = ""):
+    def load_dataframe(self, event_category, lumi, evenSel = "", dataEra = ""):
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
@@ -30,6 +30,9 @@ class Sample:
 
         if not evenSel == "":
             query+=" and "+evenSel
+        if not dataEra == "" and not None:
+            query+=" and (data_era=="+str(dataEra)+")"
+        print query
         df.query(query, inplace = True)
         print("number of events after selections:  "+str(df.shape[0]))
         self.nevents = df.shape[0]
@@ -124,11 +127,13 @@ class DataFrame(object):
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
-                evenSel = ""):
+                evenSel = "",
+                dataEra = ""):
 
         self.event_category = event_category
         self.lumi = lumi
         self.evenSel = evenSel
+        self.dataEra = dataEra
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
@@ -139,7 +144,7 @@ class DataFrame(object):
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
-            sample.load_dataframe(self.event_category, self.lumi, self.evenSel)
+            sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.dataEra)
             train_samples.append(sample.data)
 
         # concatenating all dataframes

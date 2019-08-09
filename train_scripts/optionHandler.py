@@ -30,6 +30,8 @@ sampleopts.add_option("--even",dest="even_sel",action="store_true",default=None,
         help="only select events with Evt_Odd==0")
 sampleopts.add_option("--odd",dest="even_sel",action="store_false",default=None,
         help="only select events with Evt_Odd==1")
+sampleopts.add_option("--dataera",dest="data_era",default=None,
+        help="only select events with this data era")
 parser.add_option_group(sampleopts)
 
 trainopts = optparse.OptionGroup(parser, "Train Configurations")
@@ -84,6 +86,7 @@ class optionHandler:
         self.__importVariableSelection()
         self.__setPaths()
         self.__setNomWeight()
+        self.__setDataEra()
         self.__loadVariables()
         self.__setSignalClass()
         self.__setNetConfig()
@@ -134,6 +137,11 @@ class optionHandler:
         elif not self.__options.even_sel:
             self.__outputdir+="_odd"
             self.__nom_weight = 2.
+
+    def __setDataEra(self):
+        #handle data era
+        if not self.__options.data_era is None:
+            self.__outputdir+=str(self.__options.data_era)
 
     def __loadVariables(self):
         # the input variables are loaded from the variable_set file
@@ -208,6 +216,9 @@ class optionHandler:
 
     def doEvenSelection(self):
         return self.__options.even_sel
+
+    def doDataEra(self):
+        return self.__options.data_era
 
     def doNormVariables(self):
         return self.__options.norm_variables

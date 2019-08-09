@@ -86,14 +86,13 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-
 ntuplesPath2017 = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2017"
 ntuplesPath2018 = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2018"
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttH2017",
-    ntuples     = ntuplesPath2017+"/ttH*/*nominal*.root",
+    ntuples     = ntuplesPath2017+"/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttH_categories,
     dataera     = 2017,
     even_odd    = options.even_odd_splitting,
@@ -101,7 +100,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "ttH2018",
-    ntuples     = ntuplesPath2018+"/ttH*/*nominal*.root",
+    ntuples     = ntuplesPath2018+"/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttH_categories,
     dataera     = 2018,
     even_odd    = options.even_odd_splitting,
@@ -109,7 +108,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "TTTo2017",
-    ntuples     = ntuplesPath2017+"/TTTo*/*nominal*.root",
+    ntuples     = ntuplesPath2017+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
     dataera     = 2017,
     even_odd    = options.even_odd_splitting,
@@ -117,7 +116,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "TTTo2018",
-    ntuples     = ntuplesPath2018+"/TTTo*/*nominal*.root",
+    ntuples     = ntuplesPath2018+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
     dataera     = 2018,
     even_odd    = options.even_odd_splitting,

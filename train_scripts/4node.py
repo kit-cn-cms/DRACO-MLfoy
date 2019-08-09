@@ -46,7 +46,9 @@ dnn = DNN.DNN(
     # balance samples per epoch such that there amount of samples per category is roughly equal
     balanceSamples  = options.doBalanceSamples(),
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables())
+    norm_variables  = options.doNormVariables(), 
+    dataEra         = options.doDataEra(),
+    )
 
 # build DNN model
 dnn.build_model(options.getNetConfig())
