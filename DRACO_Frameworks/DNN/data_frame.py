@@ -30,7 +30,7 @@ class Sample:
 
         if not evenSel == "":
             query+=" and "+evenSel
-        if not dataEra == "" and not None:
+        if not dataEra == "" and not dataEra == None:
             query+=" and (data_era=="+str(dataEra)+")"
         print query
         df.query(query, inplace = True)
