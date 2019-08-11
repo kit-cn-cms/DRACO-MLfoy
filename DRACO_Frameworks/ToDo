@@ -13,6 +13,7 @@ Wichtig:
 #- likelihood mit asimov daten einbauen
 ?- earlystopping (zeitlich noch sinnvoll?)
 
+Wird gerade der richtige vector an klassifizierten daten gespeichert (Sprich Testdaten)
 
 Mounting:
 sshfs
