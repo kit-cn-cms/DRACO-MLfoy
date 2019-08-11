@@ -744,6 +744,7 @@ class DNN():
             # save
             # out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
             plt.savefig(save_path + self.name + "_frac.pdf")
+            plt.clf()
             # print("saved plot of "+str(metric)+" at "+str(out_path))
 
 

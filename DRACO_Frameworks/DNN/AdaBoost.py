@@ -555,6 +555,7 @@ class AdaBoost():
         plt.ylabel("Epsilon")
         plt.plot(epoches, self.epsilon, '-')
         plt.savefig(save_path + self.name +"_eps.pdf")
+        plt.clf()
 
         # self.binned_likelihood()
         # plt.show()
