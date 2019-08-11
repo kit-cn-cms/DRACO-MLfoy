@@ -427,7 +427,13 @@ class DNN():
     def save_model(self, signals):
         ''' save the trained model '''
 
-        save_path = self.path + "save_model/" + self.name + "_"
+        save_path = self.path + "save_model/" + self.name + "/"
+        # create new dir for the trained net
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+        else:
+            print("Dir already exists -> can not save model")
+            sys.exit()
 
         # save executed command
         # argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
@@ -448,6 +454,12 @@ class DNN():
         with open(out_file, "w") as f:
             f.write( str(model_config))
         print("saved model config at "+str(out_file))
+
+        # save final prediciton_vector
+        np.save(save_path + "pred_vec", self.model_prediction_vector)
+
+        # save roc-aux score
+        np.save(save_path + "roc", np.array([self.roc_auc]))
 
         # save weights of network
         # out_file = self.cp_path +"/trained_model_weights.h5"
@@ -555,11 +567,11 @@ class DNN():
 
         #get roc
         fpr, tpr, thresholds = metrics.roc_curve(self.test_label, self.model_prediction_vector)
-        roc_auc = metrics.auc(fpr, tpr)
+        self.roc_auc = metrics.auc(fpr, tpr)
 
         # plt.figure(1)
         # plt.title('Receiver Operating Characteristic')
-        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.3f' % roc_auc)
+        plt.plot(fpr, tpr, 'b', label = 'AUC = %0.3f' % self.roc_auc)
         plt.legend(loc = 'lower right')
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])
@@ -711,7 +723,7 @@ class DNN():
 
             # plot histories
             plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(round(best_train, 3)))
-            plt.plot(epochs, val_history, "g-", label = "Testdaten - Max: " + str(round(best_test, 3)))
+            plt.plot(epochs, val_history, "b-", label = "Testdaten - Max: " + str(round(best_test, 3)))
             if privateWork:
                 plt.title("CMS private work", loc = "left", fontsize = 16)
 

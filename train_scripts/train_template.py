@@ -18,6 +18,7 @@ import keras.optimizers as optimizers
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
 python train_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /home/swieland/ttH/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig ada_weak1 --adaboost 5 --binary -t -1 --signalclass ttH -c ge6j_ge3t
+
 """
 usage="usage=%prog [options] \n"
 usage+="USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc "
@@ -75,11 +76,11 @@ parser.add_option("-a", "--activateSamples", dest = "activateSamples", default =
 parser.add_option("-b", "--simultan", dest = "simultan", default = None,
         help = "INT number of networks trained simultaneously")
 
-parser.add_option("--adaboost", dest = "adaboost", default = None,
-        help = "INT number of epoches Adaboost should perform")
-
-parser.add_option("--m2", dest = "m2", default = False,
-        help = "Should AdaBoost.M2 algorithm be used")
+# parser.add_option("--adaboost", dest = "adaboost", default = None,
+#         help = "INT number of epoches Adaboost should perform")
+#
+# parser.add_option("--m2", dest = "m2", default = False,
+#         help = "Should AdaBoost.M2 algorithm be used")
 
 (options, args) = parser.parse_args()
 
@@ -182,7 +183,7 @@ for i in range(1, n_simoular+1):   #due to naming
 
     # initializing DNN training class
     dnn = DNN.DNN(
-        save_path       = outputdir + "_" + str(i),
+        save_path       = outputdir + "_s" + str(i),
         input_samples   = input_samples,        #samples are splitted before training the networks
         event_category  = options.category,
         train_variables = variables,

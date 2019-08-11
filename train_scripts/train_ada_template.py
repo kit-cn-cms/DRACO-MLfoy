@@ -180,13 +180,13 @@ if m2_use:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost_M2/"
 else:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost/"           #needs to be adjusted
-name = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
+name_raw = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
 
-#loop over training to use simultaneously training of nets with same data (data is initialized before) 
+#loop over training to use simultaneously training of nets with same data (data is initialized before)
 for i in range(1, n_simoular+1):   #due to naming
     print("\n", "\n")
     print("Loop i: ", i, " of ", n_simoular)
-    name = name + '_s' + str(i)
+    name = name_raw + '_s' + str(i)
 
     #initializing AdaBoost training class
     ada = ADA.AdaBoost(
@@ -206,7 +206,7 @@ for i in range(1, n_simoular+1):   #due to naming
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.balanceSamples,
         adaboost_epochs = ada_epochs,
-        shuffle_seed = 9,
+        shuffle_seed = 9,   #shuffle_seed is for data
         m2 = m2_use)
 
     # import file with net configs if option is used
