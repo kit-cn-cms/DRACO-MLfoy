@@ -46,6 +46,36 @@ class Sample:
             else:
                 self.selections = "(Evt_Odd == 1)"
 
+class ImageConfig():
+    ''' configuration of image/2dhist data written to h5 file for CNNs '''
+    def __init__(self, channels, xRange, yRange, imageSize, logNorm=False, x="Eta", y="Phi", ):
+        # image size with [x,y,z] size
+        self.x          = x
+        self.y          = y
+        self.z          = channels # a lists of strings like ["Jet_Pt", "Electron_Pt"]
+        self.imageSize  = imageSize # array like [12,34]
+        self.xRange     = xRange
+        self.yRange     = yRange
+
+        self.lognorm = logNorm
+
+        # generates a list of the form [["Jet_Eta", "Jet_Phi", "Jet_Pt"], ["Electron_Eta", "Electron_Phi", "Electron_Pt"]]
+        self.images = []
+        for channel in channels:
+            ch=re.split("_", channel)
+            if len(ch)!=2:
+                print("The string '"+channel+"' has more then one _ symbol. Exit.")
+                exit()
+            self.images.append([ch[0]+"_"+x,ch[0]+"_"+y,channel])
+
+        # flattens a list of lists
+        self.variables = []
+        for image in self.images:
+            for v in image:
+                self.variables.append(v)
+
+
+
 class Dataset:
     def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
         # settings for paths
@@ -195,10 +225,60 @@ class Dataset:
         self.variables = variables
         self.vector_variables = vector_variables
 
+    # ========================== CNN SPECIFIC STUFF ===============================
+
+    def get_2dhist(candidates, ImageConfig):
+        ''' create 2d histogram of event 
+            returns flattened matrix ready to be saved in dataframe '''
+        eta = [ c.eta for c in candidates ]
+        phi = [ c.phi for c in candidates ]
+        weights = [ c.weight for c in candidates ]
+        H, _, _ = np.histogram2d(
+            x =             eta, 
+            y =             phi, 
+            bins =          ImageConfig.imageSize, 
+            range =         [ImageConfig.etaRange, ImageConfig.phiRange], 
+            weights =       weights )
+        # transpose histogram (makes reshaping easier) and flatten into 1d string
+        flattened = H.flatten()
+
+        if ImageConfig.lognorm:
+            flattened = np.array([ np.log(f) if f > 1. else 0. for f in flattened])
+
+        # norm entries between 0 and 1
+        maximum = np.max(flattened)
+        flattened = [np.uint8(f/maximum*255) for f in flattened]
+        return flattened
+
+    def yan_2dhist(self, ImageConfig):
+        ''' create 2d histogram of event '''
+        x =       np.sort([v for v in self.variables if re.search("_Eta", v)])
+        y =       np.sort([v for v in self.variables if re.search("_Phi", v)])
+        weights = np.sort([v for v in self.variables if re.search("_Pt", v)])
+        H, _, _ = np.histogram2d(
+            x =             df[x],
+            y =             y, 
+            bins =          ImageConfig.imageSize, 
+            range =         [ImageConfig.etaRange, ImageConfig.phiRange], 
+            weights =       weights )
+        # transpose histogram (makes reshaping easier) and flatten into 1d string
+        #flattened = H.flatten()
+
+        if ImageConfig.lognorm:
+            print("Lets log this! But not now.")
+
+        # norm entries between 0 and 1
+        # to be added
+
+        return H
 
     # ====================================================================
 
-    def runPreprocessing(self):
+    def runPreprocessing(self, Image_Config=None):
+        # add variables as configured in the Image_Config
+        if Image_Config is not None:
+            self.addVariables(Image_Config.variables)
+
         # add variables for triggering and event category selection
         self.gatherTriggerVariables()
 
@@ -228,7 +308,7 @@ class Dataset:
             self.addVariables( self.samples[key].ownVars )
 
             # process the sample
-            self.processSample(
+            self.processSample(Image_Config=Image_Config,
 
               sample = self.samples[key],
 
@@ -247,7 +327,7 @@ class Dataset:
         # handle old files
         self.handleOldFiles()
 
-    def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event):
+    def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event, Image_Config=None):
         # print sample info
         sample.printInfo()
 
@@ -311,6 +391,37 @@ class Dataset:
 
             # apply event selection
             df = self.applySelections(df, sample.selections)
+
+            # generate 2d histogram if ImageConfig was passed
+            for x in df.columns: print(x)
+            print(df)
+            if Image_Config is not None:
+                print("*"*50)
+                print("Processing data to become a 2D-histogramm!")
+
+                #loop over the differet "color" channels of the image
+                for image in Image_Config.images:
+                    varname_x      = image[0]
+                    varname_y      = image[1]
+                    varname_weight = image[2]
+
+                    #print(df[varname_weight])
+
+                    H, _, _ = np.histogram2d(
+                        x =             df[varname_x],
+                        y =             df[varname_y], 
+                        bins =          Image_Config.imageSize, 
+                        range =         [Image_Config.xRange, Image_Config.yRange], 
+                        weights =       df[varname_weight] )
+                    print(H)
+                    #print(H.size)
+
+                    plt.imshow( H, cmap = "Greens",extent = (-2.5,2.5,-np.pi,np.pi), aspect = 'equal', interpolation="none")
+                    plt.xlabel("eta")
+                    plt.ylabel("phi")
+                    plt.tight_layout()
+                    plt.show()
+                    exit()
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
