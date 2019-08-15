@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import preprocessing_utils as pputils
 
 class EventCategories:
-    def __init__(self):
+    def __init__(self,name):
+        self.name=name
         self.categories = {}
 
     def addCategory(self, name, selection = None):
@@ -22,6 +23,15 @@ class EventCategories:
             if self.categories[cat]:
                 selections.append(self.categories[cat])
         return selections
+
+    def __str__(self):
+        s = []
+        s.append("{} = root2pands.EventCategories({})".format(self.name,self.name))
+        for category in self.categories:
+            selection = self.categories[category]
+            s.append(('{}.addCategory("{}", selection = "{}")').format(self.name,category,selection))
+        return "\n".join(s)
+
 
 class Sample:
     def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, dataera=None):
@@ -198,9 +208,12 @@ class Dataset:
 
 
     # ====================================================================
-    def parallelPreprocessing(self):
-        for key in self.samples:
-            print key
+    # def parallelPreprocessing(self):
+    #     for sample in self.samples:
+    #         # collect ntuple files
+    #         ntuple_files = sorted(glob.glob(sample.ntuples))
+    #         for file in ntuple_files:
+    #             print file
 
     def runPreprocessing(self):
         # add variables for triggering and event category selection
@@ -485,3 +498,38 @@ class Dataset:
             if filename.endswith(".old") and filename.split(".")[0] in rerename:
                 print("re-renaming file {}".format(filename))
                 os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
+
+    def printVariables(self):
+        s = []
+        s.append("variables = [")
+        for variable in self.variables:
+            s.append(('    "{}",').format(variable))
+        s.append("]")
+        s.append("dataset.addVariables(variables)")
+        return "\n".join(s)
+
+    def printBaseSelection(self):
+        s = []
+        s.append(('base_selection = "{}"').format(self.baseSelection))
+        s.append("dataset.addBaseSelection(base_selection)")
+        return "\n".join(s)
+
+    def printOptionSample(self,even_odd=False):
+        s = []
+        s.append("dataset.addSample(")
+        s.append('sampleName  = options.sampleName,')
+        s.append('ntuples     = options.ntuples,')
+        s.append('categories  = options.categories,')
+        s.append('dataera     = options.dataera,')
+        s.append(('even_odd    = {},').format(even_odd))
+        s.append(")")
+        return "\n".join(s)
+
+    def __str__(self):
+        s = []
+        s.append("dataset = root2pandas.Dataset(")
+        s.append(('    outputdir   = "{}",').format(self.outputdir))
+        s.append(('    naming      = "{}",').format(self.naming))
+        s.append(("    addMEM      = {},").format(self.addMEM))
+        s.append(("    maxEntries  = {})").format(self.maxEntries))
+        return "\n".join(s)
