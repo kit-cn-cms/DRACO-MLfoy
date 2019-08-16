@@ -17,8 +17,11 @@ parser.add_option("-o", "--output", dest="outFile", default="mergedHDFfiles",
 parser.add_option("-i", "--input", dest="inFiles", default=None,
     help="comma separated list with all .h5 files to add", metavar="inFiles")
 
-parser.add_option("-d", "--directory", dest="directory", default=None,
+parser.add_option("-d", "--directory", dest="directory", default=".",
     help="adds directory from path to systems working directory", metavar="directory")
+
+parser.add_option("-n", "--naming", dest="naming", default="_dnn.h5",
+    help="adds naming to input, so only ttlf... must be given", metavar="naming")
 
 (options, args) = parser.parse_args()
 
@@ -36,6 +39,6 @@ if os.path.exists(options.outFile):
 with pd.HDFStore(options.outFile, "a") as store:
     for h5file in inList:
         if options.directory:  
-            store.append("data", pd.read_hdf(os.path.join(options.directory+"/",h5file)))
+            store.append("data", pd.read_hdf(os.path.join(options.directory+"/",h5file+options.naming)), index=False)
         else:
             store.append("data", pd.read_hdf(h5file), index=False)
