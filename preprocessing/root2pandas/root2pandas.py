@@ -76,19 +76,23 @@ class ImageConfig():
                     exit()
                 indexstart=m.group(2)
                 indexend=m.group(3)
-                print(indexstart)
-                print(indexend)
+                j=channels.index(channel)
+                self.images.append([])
                 for i in range(int(indexstart),int(indexend)+1):
-                    self.images.append([ch[0]+"_"+x+"["+str(i)+"]",ch[0]+"_"+y+"["+str(i)+"]",m.group(1)+"["+str(i)+"]"])
+                    self.images[j].append([ch[0]+"_"+x+"["+str(i)+"]",ch[0]+"_"+y+"["+str(i)+"]",m.group(1)+"["+str(i)+"]"])
 
 
 
 
-        # flattens a list of lists
+        # flattens a list of lists of lists
         self.variables = []
         for image in self.images:
             for v in image:
-                self.variables.append(v)
+                if isinstance(v,list):
+                    for v2 in v:
+                        self.variables.append(v2)
+                else:
+                    self.variables.append(v)
 
 
 
@@ -243,50 +247,56 @@ class Dataset:
 
     # ========================== CNN SPECIFIC STUFF ===============================
 
-    def get_2dhist(candidates, ImageConfig):
-        ''' create 2d histogram of event 
-            returns flattened matrix ready to be saved in dataframe '''
-        eta = [ c.eta for c in candidates ]
-        phi = [ c.phi for c in candidates ]
-        weights = [ c.weight for c in candidates ]
-        H, _, _ = np.histogram2d(
-            x =             eta, 
-            y =             phi, 
-            bins =          ImageConfig.imageSize, 
-            range =         [ImageConfig.etaRange, ImageConfig.phiRange], 
-            weights =       weights )
-        # transpose histogram (makes reshaping easier) and flatten into 1d string
-        flattened = H.flatten()
-
-        if ImageConfig.lognorm:
-            flattened = np.array([ np.log(f) if f > 1. else 0. for f in flattened])
-
-        # norm entries between 0 and 1
-        maximum = np.max(flattened)
-        flattened = [np.uint8(f/maximum*255) for f in flattened]
-        return flattened
-
-    def yan_2dhist(self, ImageConfig):
+    def yan_2dhist(self, Image_Config, image, df, draw=False):
         ''' create 2d histogram of event '''
-        x =       np.sort([v for v in self.variables if re.search("_Eta", v)])
-        y =       np.sort([v for v in self.variables if re.search("_Phi", v)])
-        weights = np.sort([v for v in self.variables if re.search("_Pt", v)])
-        H, _, _ = np.histogram2d(
-            x =             df[x],
-            y =             y, 
-            bins =          ImageConfig.imageSize, 
-            range =         [ImageConfig.etaRange, ImageConfig.phiRange], 
-            weights =       weights )
-        # transpose histogram (makes reshaping easier) and flatten into 1d string
-        #flattened = H.flatten()
+        varname_x      = image[0]
+        varname_y      = image[1]
+        varname_weight = image[2]
 
-        if ImageConfig.lognorm:
-            print("Lets log this! But not now.")
+        print("processing "+varname_weight+"-layer to become a 2d histogram")
 
-        # norm entries between 0 and 1
-        # to be added
+        H, xedges, yedges = np.histogram2d(
+            x       = df[varname_x],
+            y       = df[varname_y], 
+            weights = df[varname_weight],
+            range   = [Image_Config.xRange, Image_Config.yRange], 
+            bins    = Image_Config.imageSize)
+        
+        #print(H.shape, H.size)
 
+        if Image_Config.logNorm:
+            H = np.where(H > 1, np.log(H), 0)
+
+        if draw:
+            plt.figure(figsize=(8,10))
+            #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
+            plt.imshow(H.T, extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
+                aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
+            plt.xlabel(varname_x)
+            plt.ylabel(varname_y)
+            plt.title(varname_weight)
+            plt.tight_layout()
+            #plt.savefig(self.outputdir+"/"+varname_weight+"_100nominal_tree_Blues.pdf")
+
+            #plt.figure(figsize=(8,10))
+            #h,_,_,_=plt.hist2d(
+            #    x       = df[varname_x],
+            #    y       = df[varname_y],
+            #    weights = df[varname_weight],
+            #    range   = [Image_Config.xRange, Image_Config.yRange],
+            #    bins    = Image_Config.imageSize)
+            #plt.xlabel(varname_x)
+            #plt.ylabel(varname_y)
+            #print(h)
+            #print(h.size)
+            #print(h.shape)
+            
+            plt.show()
+            exit()
+        #print(H)
         return H
+
+        
 
     # ====================================================================
 
@@ -409,67 +419,20 @@ class Dataset:
             df = self.applySelections(df, sample.selections)
 
             # generate 2d histogram if ImageConfig was passed
-            for x in df.columns: print(x)
-            print(df)
+            # ===============================================
             if Image_Config is not None:
                 print("*"*50)
-                print("Processing data to become a 2D-histogramm!")
+                print("processing data from file for use with CNN")
 
                 #loop over the differet "color" channels of the image
                 for image in Image_Config.images:
-                    varname_x      = image[0]
-                    varname_y      = image[1]
-                    varname_weight = image[2]
-
-                    H, xedges, yedges = np.histogram2d(
-                        x       = df[varname_x],
-                        y       = df[varname_y], 
-                        weights = df[varname_weight],
-                        range   = [Image_Config.xRange, Image_Config.yRange], 
-                        bins    = Image_Config.imageSize)
-                    print(H.size)
-
-                    if Image_Config.logNorm:
-                        H = np.where(H > 1, np.log(H), 0)
-
-                    plt.figure(figsize=(8,10))
-                    #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
-                    plt.imshow(H.T, extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
-                        aspect = 'equal', interpolation="none", origin="lower", cmap="Reds")
-                    plt.xlabel(varname_x)
-                    plt.ylabel(varname_y)
-                    plt.title(varname_weight)
-                    plt.tight_layout()
-                    #plt.savefig(self.outputdir+"/"+varname_weight+"_100nominal_tree_Reds.pdf")
-
-                    #plt.figure(figsize=(8,10))
-                    #h,_,_,_=plt.hist2d(
-                    #    x       = df[varname_x],
-                    #    y       = df[varname_y],
-                    #    weights = df[varname_weight],
-                    #    range   = [Image_Config.xRange, Image_Config.yRange],
-                    #    bins    = Image_Config.imageSize)
-                    #plt.xlabel(varname_x)
-                    #plt.ylabel(varname_y)
-                    #print(h)
-                    #print(h.size)
-                    #print(h.shape)
-
-                    #plt.figure()
-                    #plt.hist(x=df[varname_x],weights=df[varname_weight],bins=50)
-                    #plt.xlabel(varname_x)
-                    #plt.ylabel(varname_weight)
-                    #plt.savefig(self.outputdir+"/"+varname_x+"_100nominal_tree.pdf")
-
-                    #plt.figure()
-                    #plt.hist(x=df[varname_y],weights=df[varname_weight],bins=50)
-                    #plt.xlabel(varname_y)
-                    #plt.ylabel(varname_weight)
-                    #plt.savefig(self.outputdir+"/"+varname_y+"_100nominal_tree.pdf")
-                    
-                    plt.show()
-
-                    exit()
+                    if isinstance(image[0], list):
+                        H=np.zeros(Image_Config.imageSize)
+                        for img in image:
+                            H+=self.yan_2dhist(Image_Config, img, df, 0)
+                    else: 
+                        H=self.yan_2dhist(Image_Config, image, df, 0)
+                exit()
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df

@@ -131,7 +131,7 @@ print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt"],
+    channels  = ["Jet_Pt[0-2]","Electron_Pt"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
