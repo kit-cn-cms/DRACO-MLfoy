@@ -1,14 +1,13 @@
 #!/bin/bash
 
 #Preprocessing and multi-class/binary training steps for cate9
-TAG=test_230719_cate9
+TAG=test_290719_cate9
 
 rm -rf workdir/${TAG}
 python -B preprocessing/root2pandas/preprocessing_ttHbb_DL.py -o ${TAG}/cate9 -t liteTreeTTH_step7_cate9
 
 rm -rf workdir/${TAG}_training_multiclass
-python -B train_scripts/train_ttHbb_DL.py -i ${TAG}/cate9 -o ${TAG}_training_multiclass/cate9 -v variables_ttHbb_DL -n ttHbb_2017_DL -c ge4j_ge3t -p -R
-
+python -B train_scripts/train_ttHbb_DL.py -i ${TAG}/cate9 -o ${TAG}_training_multiclass/cate9 -v variables_ttHbb_DL -n ttHbb_2017_DL -c ge4j_ge3t -p -R 
 rm -rf workdir/${TAG}_training_binary
 python -B train_scripts/train_ttHbb_DL.py -i ${TAG}/cate9 -o ${TAG}_training_binary/cate9 -v variables_ttHbb_DL -n binary_DL -c ge4j_ge3t -p -R  --binary -t -1. --signal ttH
 unset -v TAG

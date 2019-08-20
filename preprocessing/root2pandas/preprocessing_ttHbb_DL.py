@@ -26,7 +26,7 @@ parser.add_option("-v", "--variableselection", dest="variableSelection",default=
 parser.add_option("-t", "--treeName", dest="treeName",default="liteTreeTTH_step7_cate8",
         help="Name of the tree corresponding to the right category", metavar="treeName")
 
-parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
+parser.add_option("-e", "--maxentries", dest="maxEntries", default=100000,
         help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
 
 parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,
@@ -159,9 +159,65 @@ if  options.treeName == "liteTreeTTH_step7_cate9":
         categories  = ttbar_lf,
         selections  = None
     )
+elif  options.treeName == "liteTreeTTH_step7_cate10":
+
+    dataset.addSample(
+      sampleName = "ttH_cate10",
+      ntuples    = ntuplesPath+"/ttHbb_2L_cate10.root",
+      categories = ttH_categories,
+      selections = None,
+    )
+
+    dataset.addSample(
+       sampleName = "background_10",
+       ntuples    = ntuplesPath+"/background_cate10.root",
+       categories = background_categories,
+       selections = None,
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_10",
+        ntuples     = ntuplesPath+"/ttbar_cate10.root",
+        categories  = ttbar_categories,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_bb_10",
+        ntuples     = ntuplesPath+"/ttbar_bb_cate10.root",
+        categories  = ttbar_bb,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_b_10",
+        ntuples     = ntuplesPath+"/ttbar_b_cate10.root",
+        categories  = ttbar_b,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_2b_10",
+        ntuples     = ntuplesPath+"/ttbar_2b_cate10.root",
+        categories  = ttbar_2b,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_cc_10",
+        ntuples     = ntuplesPath+"/ttbar_cc_cate10.root",
+        categories  = ttbar_cc,
+        selections  = None
+    )
+
+    dataset.addSample(
+        sampleName  = "ttbar_lf_10",
+        ntuples     = ntuplesPath+"/ttbar_lf_cate10.root",
+        categories  = ttbar_lf,
+        selections  = None
+    )
 
 else:
-
     # add samples to dataset
     dataset.addSample(
       sampleName = "ttH",

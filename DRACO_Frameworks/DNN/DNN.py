@@ -115,7 +115,6 @@ class DNN():
         # string containing event selection requirements;
         # if not specified (default), deduced via JTcut
         self.category_cutString = (category_cutString if category_cutString is not None else JTcut.getJTstring(category_name))
-
         # category label (string);
         # if not specified (default), deduced via JTcut
         self.category_label = (category_label if category_label is not None else JTcut.getJTlabel (category_name))
@@ -137,8 +136,10 @@ class DNN():
         # percentage of events saved for testing
         self.test_percentage = test_percentage
 
+
         # number of train epochs
         self.train_epochs = train_epochs
+
 
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
@@ -206,28 +207,29 @@ class DNN():
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
-        # get the model
+        # get the keras model
         self.model = keras.models.load_model(checkpoint_path)
         self.model.summary()
 
-        # evaluate test dataset
+        # evaluate test dataset with keras model
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
-        # save predictions
+        # save predictions  with keras model
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
 
-        # save predicted classes with argmax
+        # save predicted classes with argmax  with keras model
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
         self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
-        # print evaluations
+        # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
 
 
     def predict_event_query(self, query ):
@@ -419,7 +421,6 @@ class DNN():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
-    def variables_configuration(self):
         '''  save configurations of variables for plotscript '''
         plot_file = self.cp_path+"/plot_config.csv"
         variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
@@ -474,10 +475,11 @@ class DNN():
                 sample.min=round(float(1./len(self.input_samples.samples)),2)
 
 
+
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-        # get weights
+         # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
@@ -491,9 +493,35 @@ class DNN():
         with open(rank_path, "w") as f:
             f.write("variable,weight_sum\n")
             for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
-                print("{:50s}: {}".format(key, val))
+                #print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
+
+    def get_weights(self):
+        ''' get the weights of the all hidden layers and sort input variables by weight sum'''
+
+        # get weights
+        for i,layer in enumerate(self.model.layers):
+            #odd layers correspond to dropout layers
+            if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
+                continue
+            else:
+                weights = layer.get_weights()[0]
+
+                self.weight_dict = {}
+                for out_weights, variable in zip(weights, self.train_variables):
+                    w_sum = np.sum(np.abs(out_weights))
+                    self.weight_dict[variable] = w_sum
+
+                # sort weight dict
+                rank_path = self.save_path + "/absolute_weight_sum_layer"+str(i)+".csv"
+                with open(rank_path, "w") as f:
+                    f.write("variable,weight_sum\n")
+                    for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                        #print("{:50s}: {}".format(key, val))
+                        f.write("{},{}\n".format(key,val))
+                print("wrote weight ranking to "+str(rank_path))
+        exit()
 
     # --------------------------------------------------------------------
     # result plotting functions
@@ -652,7 +680,8 @@ class DNN():
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
 
-def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
+category_label= None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -662,6 +691,7 @@ def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, bina
     with open(configFile) as f:
         config = f.read()
     config = json.loads(config)
+
 
     # load samples
     input_samples = data_frame.InputSamples(config["inputData"])
@@ -677,10 +707,12 @@ def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, bina
     dnn = DNN(
       save_path       = outputDirectory,
       input_samples   = input_samples,
-      event_category  = config["JetTagCategory"],
+      category_name  = config["JetTagCategory"],
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
     )
+
+
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
