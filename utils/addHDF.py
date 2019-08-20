@@ -17,11 +17,11 @@ parser.add_option("-o", "--output", dest="outName", default="mergedHDFfiles",
 parser.add_option("-i", "--input", dest="inFiles", default=None,
     help="comma separated list with all .h5 files to add", metavar="inFiles")
 
-parser.add_option("-id", "--inputDirectory", dest="inDirectory", default=".",
-    help="path to the directory where the input files are", metavar="inDirectory")
+parser.add_option("-d", "--inputDirectory", dest="inDirectory", default=".",
+    help="directory where the input files are", metavar="inDirectory")
 
-parser.add_option("-od", "--outputDirectory", dest="outDirectory", default=".",
-    help="path to the directory where the input files are", metavar="outDirectory")
+parser.add_option("-p", "--outputDirectory", dest="outDirectory", default=".",
+    help="path to output file", metavar="outDirectory")
 
 parser.add_option("-n", "--naming", dest="naming", default="_dnn.h5",
     help="adds naming to input, so only ttlf... must be given", metavar="naming")
@@ -35,11 +35,11 @@ else:
 
 inList=options.inFiles.split(",")
 
-if os.path.exists(options.outName+".h5"):
+if os.path.exists(options.outName+options.naming):
     print("renaming file {}".format(options.outName))
     os.rename(options.outName,options.outName+".old")
 
-with pd.HDFStore(options.outDirectory+"/"+options.outName+".h5", "a") as store:
+with pd.HDFStore(options.outDirectory+"/"+options.outName+options.naming, "a") as store:
     for h5file in inList:
         if options.inDirectory:
             tmp_df=pd.read_hdf(os.path.join(options.inDirectory+"/",h5file+options.naming))
