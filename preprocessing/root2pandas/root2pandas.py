@@ -57,16 +57,32 @@ class ImageConfig():
         self.xRange     = xRange
         self.yRange     = yRange
 
-        self.lognorm = logNorm
+        self.logNorm = logNorm
 
         # generates a list of the form [["Jet_Eta", "Jet_Phi", "Jet_Pt"], ["Electron_Eta", "Electron_Phi", "Electron_Pt"]]
         self.images = []
         for channel in channels:
-            ch=re.split("_", channel)
-            if len(ch)!=2:
-                print("The string '"+channel+"' has more then one _ symbol. Exit.")
-                exit()
-            self.images.append([ch[0]+"_"+x,ch[0]+"_"+y,channel])
+            m=re.match("(\w+)\[(\d+)\-(\d+)\]", channel)
+            if m==None:
+                ch=re.split("_", channel)
+                if len(ch)!=2:
+                    print("The string '"+channel+"' has more then one _ symbol. Exit.")
+                    exit()
+                self.images.append([ch[0]+"_"+x,ch[0]+"_"+y,channel])
+            else:
+                ch=re.split("_", m.group(1))
+                if len(ch)!=2:
+                    print("The string '"+channel+"' has more then one _ symbol. Exit.")
+                    exit()
+                indexstart=m.group(2)
+                indexend=m.group(3)
+                print(indexstart)
+                print(indexend)
+                for i in range(int(indexstart),int(indexend)+1):
+                    self.images.append([ch[0]+"_"+x+"["+str(i)+"]",ch[0]+"_"+y+"["+str(i)+"]",m.group(1)+"["+str(i)+"]"])
+
+
+
 
         # flattens a list of lists
         self.variables = []
@@ -405,22 +421,54 @@ class Dataset:
                     varname_y      = image[1]
                     varname_weight = image[2]
 
-                    #print(df[varname_weight])
+                    H, xedges, yedges = np.histogram2d(
+                        x       = df[varname_x],
+                        y       = df[varname_y], 
+                        weights = df[varname_weight],
+                        range   = [Image_Config.xRange, Image_Config.yRange], 
+                        bins    = Image_Config.imageSize)
+                    print(H.size)
 
-                    H, _, _ = np.histogram2d(
-                        x =             df[varname_x],
-                        y =             df[varname_y], 
-                        bins =          Image_Config.imageSize, 
-                        range =         [Image_Config.xRange, Image_Config.yRange], 
-                        weights =       df[varname_weight] )
-                    print(H)
-                    #print(H.size)
+                    if Image_Config.logNorm:
+                        H = np.where(H > 1, np.log(H), 0)
 
-                    plt.imshow( H, cmap = "Greens",extent = (-2.5,2.5,-np.pi,np.pi), aspect = 'equal', interpolation="none")
-                    plt.xlabel("eta")
-                    plt.ylabel("phi")
+                    plt.figure(figsize=(8,10))
+                    #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
+                    plt.imshow(H.T, extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
+                        aspect = 'equal', interpolation="none", origin="lower", cmap="Reds")
+                    plt.xlabel(varname_x)
+                    plt.ylabel(varname_y)
+                    plt.title(varname_weight)
                     plt.tight_layout()
+                    #plt.savefig(self.outputdir+"/"+varname_weight+"_100nominal_tree_Reds.pdf")
+
+                    #plt.figure(figsize=(8,10))
+                    #h,_,_,_=plt.hist2d(
+                    #    x       = df[varname_x],
+                    #    y       = df[varname_y],
+                    #    weights = df[varname_weight],
+                    #    range   = [Image_Config.xRange, Image_Config.yRange],
+                    #    bins    = Image_Config.imageSize)
+                    #plt.xlabel(varname_x)
+                    #plt.ylabel(varname_y)
+                    #print(h)
+                    #print(h.size)
+                    #print(h.shape)
+
+                    #plt.figure()
+                    #plt.hist(x=df[varname_x],weights=df[varname_weight],bins=50)
+                    #plt.xlabel(varname_x)
+                    #plt.ylabel(varname_weight)
+                    #plt.savefig(self.outputdir+"/"+varname_x+"_100nominal_tree.pdf")
+
+                    #plt.figure()
+                    #plt.hist(x=df[varname_y],weights=df[varname_weight],bins=50)
+                    #plt.xlabel(varname_y)
+                    #plt.ylabel(varname_weight)
+                    #plt.savefig(self.outputdir+"/"+varname_y+"_100nominal_tree.pdf")
+                    
                     plt.show()
+
                     exit()
 
             # add to list of dataframes

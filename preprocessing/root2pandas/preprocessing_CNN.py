@@ -121,21 +121,24 @@ dataset.addVariables(additional_variables)
 d_eta = 0.1
 d_phi = 0.1
 # range definitions
-eta_range = [-2.5,2.5]
+eta_range = [-2.4,2.4]
 phi_range = [-3.14159265358979, 3.14159265358979]
 # pixel converter
 n_px_eta = int( (eta_range[1]-eta_range[0])/d_eta )
 n_px_phi = int( (phi_range[1]-phi_range[0])/d_phi )
 print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
-# putting this info into following object
+
+# putting above info into following object
 imageconfig = root2pandas.ImageConfig(
+    x ="Eta", y="Phi",
     channels  = ["Jet_Pt"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
-
     # pixel intensity linear or logarithmic
     logNorm     = False)
+
+print(imageconfig.images)
 
 # run the preprocessing
 dataset.runPreprocessing(imageconfig)
