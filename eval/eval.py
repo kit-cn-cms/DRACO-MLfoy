@@ -40,6 +40,12 @@ parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatur
 parser.add_option("-p", "--percentage", dest="percentage", default="100",
         help="Type 1 for around 1%, 10 for 10 and 100 for 100", metavar="percentage")
 
+parser.add_option("-e", "--events", dest="events", default=10000000,
+        help="maximum number of events (default 10M)", metavar="events")
+
+parser.add_option("-s", "--schalter", dest="schalter", default="0",
+        help="number of plots of reconstruction you want to create", metavar="schalter")
+
 (options, args) = parser.parse_args()
 #get input directory path
 if not os.path.isabs(options.inputDir):
@@ -72,6 +78,13 @@ elif options.percentage=="100":
     xx="*"
 else:
     print("ERROR: Please enter 1, 10 or 100 as percentage of files you want to evaluate")
+
+if int(options.events):
+    EVENTS = int(options.events)
+else:
+    print("ERROR: Please enter number bigger than 0")
+
+schalter = int(options.schalter)
 #################################################################################################################################
 
 def loadDNN(inputDirectory, outputDirectory):
@@ -219,7 +232,8 @@ def getTopMass(Pt, Eta, Phi, E, lepton_4vec, Pt_MET, Phi_MET,Ht, j,k,l,m):
 
     return thad_4vec, tlep_4vec, whad_4vec, wlep_4vec, lepton_4vec
 ################################################################################################################################
-pathName2 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8"
+# pathName2 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8"
+pathName2 = "/nfs/dust/cms/user/swieland/ttH_legacy/forJost/ntuple/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8"
 
 chain = ROOT.TChain("MVATree")
 print(pathName2)
@@ -263,9 +277,9 @@ print inPath
 
 model = loadDNN(inPath, "output")
 
-top_mass = ROOT.TH1F("top_mass","Top-Quark-Masse; gemittelte Masse des hadronischen und leptonischen Top-Quarks; Anzahl Ereignisse", 100, 0 ,500)
-delta_rlep = ROOT.TH1F("delta_rlep", "#Delta R; #Delta R des leptonischen Top-Quarks; Anzahl Ereignisse", 60,0,6)
-delta_rhad = ROOT.TH1F("delta_rhad", "#Delta R had;#Delta R des hadronischen Top-Quarks; Anzahl Ereignisse", 60,0,6)
+top_mass = ROOT.TH1F("top_mass",";gemittelte Masse des hadronischen und leptonischen Top-Quarks; Anzahl Ereignisse", 100, 0 ,500)
+delta_rlep = ROOT.TH1F("delta_rlep", " ; #Delta R des leptonischen Top-Quarks; Anteil an ", 60,0,6)
+delta_rhad = ROOT.TH1F("delta_rhad", " ;#Delta R des hadronischen Top-Quarks; Anzahl Ereignisse", 60,0,6)
 delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta R; #Delta R des hadronischen B-Quarks; Anzahl Ereignisse", 100,0,6)
 delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta R; #Delta R des leptonischen Bottom-Quarks; Anzahl Ereignisse", 100,0,6)
 delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta R; #Delta R von leichtem Quark 1; Anzahl Ereignisse", 100,0,6)
@@ -274,12 +288,17 @@ delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta R; #Delta R von leichtem 
 delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi of hadronic b; number of events", 100,0,6)
 delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b; number of events", 100,0,6)
 
-rek_thad   = ROOT.TEfficiency("rek_thad", "Pseudorapiditaet #eta; Transversalimpuls Pt in GeV/c",  150, -5, 5, 150, 0, 500)
-PtRap_thad = ROOT.TH2F("PtRap_thad", "Gesamtzahl der hadronischen Top-Quarks; Pseudorapiditaet #eta; Transversalimpuls Pt [GeV/c]", 150, -5, 5, 150, 0, 500)
-eff_count_thad = ROOT.TH2F("eff_count_thad", "Anzahl richtig rekonstruierter hadronischer Top-Quarks (#Delta R < 0.4); Pseudorapiditaet #eta; Transversalimpuls Pt in GeV/c", 150, -5, 5, 150, 0, 500)
-pt_eff = ROOT.TEfficiency("pt_eff", "Effizienz der Rekonstruktion des hadronischen Top-Quarks; Transversalimpuls Pt in GeV/c; Effizienz", 50,0,500)
+rek_thad   = ROOT.TEfficiency("rek_thad", " ;Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c",  150, -5, 5, 200, 0, 700)
+PtRap_thad = ROOT.TH2F("PtRap_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 700)
+eff_count_thad = ROOT.TH2F("eff_count_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 700)
+pt_eff = ROOT.TEfficiency("pt_eff", " ; Transversalimpuls p_{T} in GeV/c; Effizienz", 70,0,700)
 # rek_tlep = ROOT.TH2F("rek_tlep", "pseudorapidity vs tranverse momentum of leptonic decaying top", 50, 0, 500, 20, -5,5)
-pt_eff_2 = ROOT.TH1F("pt_eff_2", "Transversalimpuls Pt in GeV/c; Effizienz", 50,0,500)
+
+empty_rek_thad = ROOT.TH2F("empty_rek_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 700)
+
+pt_eff_2 = ROOT.TH1F("pt_eff_2", " ;Transversalimpuls p_{T} in GeV/c; Effizienz", 70,0,700)
+
+reko_plot = ROOT.TH2F("reko_plot", "; Pseudorapiditaet #eta; Azimutalwinkel #Phi",  30,-5, 5, 30, -3.15, 3.15)
 
 
 
@@ -287,10 +306,12 @@ for event in chain:
     njets = event.N_Jets
     # print njets
     # if(njets>12 or event.N_BTagsM<3 or event.Evt_MET_Pt < 20. or event.Weight_GEN_nom < 0. or (event.N_TightMuons==1 and event.Muon_Pt < 29.) or event.Evt_Odd ==1):
-    if(njets>13 or event.N_BTagsM<2 or event.Evt_Odd ==1):
+    if(njets>13 or njets<4 or event.N_BTagsM<2 or event.Evt_Odd ==1):
 
         # print "ok cool next one"
         continue
+    if( eventcounter > EVENTS):
+        break
 
     for index in jets:
         for index2 in pepec:
@@ -299,6 +320,7 @@ for event in chain:
     #print(njets)
     i+=1
     Pt  = event.Jet_Pt
+    # print Pt
     Eta = event.Jet_Eta
     Phi = event.Jet_Phi
     E   = event.Jet_E
@@ -493,7 +515,7 @@ for event in chain:
         hcounter +=1
 
     if(i%1000==0):
-        print i, '/', nchain/2., '=', 200.*i/nchain,'%', "      , eff: ", 1.*counter/eventcounter
+        print i, '/', min(nchain/2.,EVENTS), '=', 100.*i/min(nchain/2.,EVENTS),'%', "      , eff: ", 1.*counter/eventcounter
 
     delta_rlep.Fill(deltaRl)
     delta_rhad.Fill(deltaRh)
@@ -541,6 +563,73 @@ for event in chain:
     if(i%3000==0):
         print "Effizienzen: blep ", 1.*blep_counter/eventcounter, "         bhad ", 1.*bhad_counter/eventcounter, "       q1 ", 1.*q1_counter/eventcounter, "       q2 ", 1.*q2_counter/eventcounter
 
+    # Rekonstruktionsveranschaulichung
+    if (delta_r_q1 < 0.4 and delta_r_q2 < 0.4 and delta_r_blep < 0.4 and delta_r_bhad < 0.4):
+        jetcounter += 1
+        if(deltaRl<0.4 and deltaRh<0.4):
+            effcounter += 1
+            if njets > 5 and schalter:
+                schalter -= 1
+                for ind in range(njets):
+                    globals()["circle_" + str(ind)] = ROOT.TEllipse(Eta[ind], Phi[ind], 0.02)
+                    # reko_plot.Fill(Eta[ind], Phi[ind])
+                circle1 = ROOT.TEllipse(event.GenTopLep_B_Eta[0], event.GenTopLep_B_Phi[0], 0.4)
+                circle2 = ROOT.TEllipse(event.GenTopHad_B_Eta[0], event.GenTopHad_B_Phi[0], 0.4)
+                circle3 = ROOT.TEllipse(event.GenTopHad_Q1_Eta[0], event.GenTopHad_Q1_Phi[0], 0.4)
+                circle4 = ROOT.TEllipse(event.GenTopHad_Q2_Eta[0], event.GenTopHad_Q2_Phi[0], 0.4)
+
+                c0 = ROOT.TCanvas("c0", "richtige Jets in #eta - #phi - Ebene", 800,600)
+                reko_plot.SetStats(0)
+                reko_plot.SetTitleSize(0.05,"xy")
+                reko_plot.SetTitleOffset(0.85, "xy")
+                reko_plot.Draw()
+                for ind in range(4):
+                    if ind in [0,1]:
+                        globals()["circle" +str(ind+1)].SetFillColor(ROOT.kGreen-9)
+                    else:
+                        globals()["circle" +str(ind+1)].SetFillColor(ROOT.kCyan-9)
+                    globals()["circle" +str(ind+1)].SetLineWidth(1)
+                    globals()["circle" +str(ind+1)].Draw("SAME")
+
+
+
+
+                    # reko_plot.Fill(Eta[ind], Phi[ind])
+                circle_tlep1 = ROOT.TEllipse(event.GenTopLep_Eta[0], event.GenTopLep_Phi[0], 0.4)
+                circle_tlep1.SetFillColor(ROOT.kRed-9)
+                circle_tlep1.SetLineWidth(1)
+                circle_tlep1.Draw("SAME")
+                circle_thad1 = ROOT.TEllipse(event.GenTopHad_Eta[0], event.GenTopHad_Phi[0], 0.4)
+                circle_thad1.SetFillColor(ROOT.kRed-9)
+                circle_thad1.SetLineWidth(1)
+                circle_thad1.Draw("SAME")
+
+                for ind in range(njets):
+                    globals()["circle_"+str(ind)].Draw("SAME")
+
+                circle_tlep = ROOT.TEllipse(tlep.Eta(), tlep.Phi(), 0.02)
+                circle_tlep.SetLineColor(ROOT.kRed)
+                circle_tlep.Draw("SAME")
+                circle_thad = ROOT.TEllipse(thad.Eta(), thad.Phi(), 0.02)
+                circle_thad.SetLineColor(ROOT.kRed)
+                circle_thad.Draw("SAME")
+
+
+		legend = ROOT.TLegend(0.65,0.65,0.9,0.9)
+		legend.AddEntry(circle1, "Gen-B-Jets", "f")
+		legend.AddEntry(circle3, "Gen-lf-Jets", "f")
+		legend.AddEntry(circle_tlep1, "Gen-Tops", "f")
+		legend.AddEntry(circle_0, "Jets", "l")
+		legend.AddEntry(circle_tlep, "reco-Tops", "l")
+		legend.Draw()
+
+
+
+
+                c0.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection+ "_reko_etaphi" + str(schalter)+ "_ge_6_" + options.events + "e.pdf")
+                if schalter==0:
+                    print "========================done========================="
+
     delta_phi.Fill(correct_phi(delta_phi_bhad))
     delta_eta.Fill(abs(delta_eta_bhad))
 
@@ -550,6 +639,8 @@ for event in chain:
     if deltaRh<0.4: eff_count_thad.Fill(thad.Eta(),thad.Pt())
     pt_eff.Fill((deltaRh<0.4), thad.Pt())
 
+# delta_rlep.Scale(1./delta_rlep.Integral())
+# delta_rhad.Scale(1./delta_rhad.Integral())
 
 
 x,y,r = np.zeros(60),np.zeros(60),np.zeros(60)
@@ -565,10 +656,10 @@ efficiency_lep = ROOT.TGraph(60, r, x)
 efficiency_had = ROOT.TGraph(60, r, y)
 
 
-c1=ROOT.TCanvas("c1","delta r and efficiency",600,600)
+c1=ROOT.TCanvas("c1","delta r and efficiency",700,600)
 c1.Divide(1,1)
-c1.SetRightMargin(0.09)
-c1.SetLeftMargin(0.15)
+c1.SetRightMargin(0.20)
+c1.SetLeftMargin(0.35)
 c1.SetBottomMargin(0.15)
 
 #c1.cd(1)
@@ -580,6 +671,8 @@ c1.cd(1)
 
 delta_rlep.SetFillColor(ROOT.kCyan-9)
 delta_rlep.SetStats(0)
+delta_rlep.SetTitleSize(0.05,"xy")
+delta_rlep.SetTitleOffset(0.87, "y")
 delta_rlep.Draw("HIST E")
 
 efficiency_lep.SetLineColor(ROOT.kRed)
@@ -597,13 +690,15 @@ line_lep.Draw()
 
 axis_lep = ROOT.TGaxis(6,0,6,delta_rlep.GetBinContent(delta_rlep.GetMaximumBin()),0,1,510,"+L")
 axis_lep.SetTitle("#bf{Effizienz}")
+axis_lep.SetLabelFont(42)
+axis_lep.SetTitleSize(0.05)
 axis_lep.Draw()
 
 
 #buffer1 = str
-buffer1 = "Effizienz bei #Delta R < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%"
+buffer1 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%}"
 text1 = ROOT.TLatex()
-text1.SetTextSize(0.04)
+text1.SetTextSize(0.045)
 text1.DrawLatex(2.,0.4*delta_rlep.GetMaximum(),buffer1)
 
 
@@ -613,13 +708,13 @@ leg_lep.AddEntry(efficiency_lep, "Effizienz","l")
 leg_lep.AddEntry(line_lep, "#Delta R = 0.4", "l")
 leg_lep.Draw()
 
-c1.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection+ "_tlep" + options.percentage + "p.pdf")
+c1.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection+ "_tlep" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
-c2=ROOT.TCanvas("c1","delta r and efficiency",600,600)
+c2=ROOT.TCanvas("c1","delta r and efficiency",700,600)
 c2.Divide(1,1)
 c2.cd(1)
-c2.SetRightMargin(0.09)
-c2.SetLeftMargin(0.15)
+c2.SetRightMargin(0.20)
+c2.SetLeftMargin(0.30)
 c2.SetBottomMargin(0.15)
 # delta_rhad.Draw("HIST")
 # efficiency_had.Draw("SAME")
@@ -631,6 +726,8 @@ c2.SetBottomMargin(0.15)
 #c2.SetGrid(2,1)
 delta_rhad.SetFillColor(ROOT.kCyan-9)
 delta_rhad.SetStats(0)
+delta_rhad.SetTitleSize(0.05,"xy")
+delta_rhad.SetTitleOffset(0.87, "y")
 delta_rhad.Draw("HIST E")
 
 efficiency_had.SetLineColor(ROOT.kRed)
@@ -644,22 +741,24 @@ line_had.Draw()
 
 axis_had = ROOT.TGaxis(6,0,6,delta_rhad.GetBinContent(delta_rhad.GetMaximumBin()),0,1,510,"+L")
 axis_had.SetTitle("#bf{Effizienz}")
+axis_had.SetLabelFont(42)
+axis_had.SetTitleSize(0.05)
 axis_had.Draw("SAME")
 
-buffer2 = "Effizienz bei #Delta R < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%"
+buffer2 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%}"
 text2 = ROOT.TLatex()
-text2.SetTextSize(0.04)
-text2.DrawLatex(2.,0.4*delta_rhad.GetMaximum(), "#bf{buffer2}")
+text2.SetTextSize(0.045)
+text2.DrawLatex(2.,0.4*delta_rhad.GetMaximum(), buffer2)
 text3 = ROOT.TLatex()
-text3.SetTextSize(0.04)
-text3.DrawLatex(2.,0.3*delta_rhad.GetMaximum(), "Gesamteffizienz:  " + eff_comb[:2] + "," + eff_comb[2:] + "%")
+text3.SetTextSize(0.045)
+text3.DrawLatex(2.,0.3*delta_rhad.GetMaximum(), "#bf{Gesamteffizienz:  " + eff_comb[:2] + "," + eff_comb[2:] + "%}")
 
 leg_had = ROOT.TLegend(0.45,0.5,0.8,0.65)
 leg_had.AddEntry(delta_rhad, "Verteilung der #Delta R","f")
 leg_had.AddEntry(efficiency_had, "Effizienz","l")
 leg_had.AddEntry(line_had, "#Delta R = 0.4", "l")
 leg_had.Draw()
-c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_thad" + options.percentage + "p.pdf")
+c2.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection + "_thad_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
 #######################################################################################################
 
@@ -672,50 +771,66 @@ c2.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" 
 #line_had.SetLineColor(ROOT.kBlack)
 #line_had.SetLineWidth(2)
 #line_had.Draw()
-for i in range(50):
-    pt_eff_2.SetBinContent(pt_eff.GetEfficiency(i))
-    pt_eff_2.SetBinError(pt_eff.GetEfficiencyErrorLow(i))
+for i in range(70):
+    pt_eff_2.SetBinContent(i, pt_eff.GetEfficiency(i))
+    pt_eff_2.SetBinError(i, pt_eff.GetEfficiencyErrorLow(i))
 
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.Divide(1,1)
-c3.SetRightMargin(0.09)
-c3.SetLeftMargin(0.15)
-c3.SetBottomMargin(0.15)
 c3.cd(1)
+c3.SetRightMargin(0.05)
+c3.SetLeftMargin(0.30)
+c3.SetBottomMargin(0.20)
+
 pt_eff_2.SetFillColor(ROOT.kBlue)
-pt_eff_2.SetTitleFontSize(.1)
+pt_eff_2.SetStats(0)
+pt_eff_2.SetTitleSize(0.05,"xy")
+pt_eff_2.SetTitleOffset(0.87, "x")
+pt_eff_2.SetTitleOffset(0.87, "y")
 pt_eff_2.Draw("E3")
 
-c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual1_" + options.percentage + "p.pdf")
+c3.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection + "_reko_qual1_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 800,600)
 c3.Divide(1,1)
-c3.SetRightMargin(0.09)
-c3.SetLeftMargin(0.15)
-c3.SetBottomMargin(0.15)
+c3.SetRightMargin(0.40)
+c3.SetLeftMargin(0.50)
+c3.SetBottomMargin(0.2)
 c3.cd(1)
+# rek_thad.SetTitleSize(.05)
+#rek_thad.SetTitleSize(0.05,"xy")
+#rek_thad.SetTitleOffset(0.87,"x")
+#rek_thad.SetTitleOffset(0.87,"y")
+#rek_thad.SetStats(0)
 rek_thad.Draw("COLZ")
-c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual2_" + options.percentage + "p.pdf")
+c3.SaveAs(inPath +"/" + options.inputDir + "_" + options.variableSelection + "_reko_qual2_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.Divide(1,1)
-c3.SetRightMargin(0.09)
-c3.SetLeftMargin(0.15)
-c3.SetBottomMargin(0.15)
+c3.SetRightMargin(0.15)
+c3.SetLeftMargin(0.30)
+c3.SetBottomMargin(0.20)
 c3.cd(1)
 PtRap_thad.SetStats(0)
+PtRap_thad.SetTitleSize(.05, "xy")
+PtRap_thad.SetTitleOffset(0.87,"x")
+PtRap_thad.SetTitleOffset(0.87,"y")
 PtRap_thad.Draw("COLZ")
-c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual3_" + options.percentage + "p.pdf")
+c3.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection + "_reko_qual3_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 600,600)
+c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.Divide(1,1)
-c3.SetRightMargin(0.09)
-c3.SetLeftMargin(0.15)
-c3.SetBottomMargin(0.15)
 c3.cd(1)
+c3.SetRightMargin(0.15)
+c3.SetLeftMargin(0.30)
+c3.SetBottomMargin(0.20)
+
 eff_count_thad.SetStats(0)
+eff_count_thad.SetTitleSize(.05, "xy")
+eff_count_thad.SetTitleOffset(0.87,"x")
+eff_count_thad.SetTitleOffset(0.87,"y")
 eff_count_thad.Draw("COLZ")
-c3.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_reko_qual4_" + options.percentage + "p.pdf")
+c3.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection + "_reko_qual4_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
 c4 = ROOT.TCanvas("c4", "Efficiency", 1200,1200)
 c4.Divide(2,2)
@@ -736,7 +851,7 @@ c4.cd(4)
 delta_r_q2_hist.SetFillColor(ROOT.kCyan-9)
 delta_r_q2_hist.Draw("HIST")
 
-c4.SaveAs("/nfs/dust/cms/user/jdriesch/results/final/" + options.inputDir + "_" + options.variableSelection + "_jet_eff_" + options.percentage + "p.pdf")
+c4.SaveAs(inPath + "/" + options.inputDir + "_" + options.variableSelection + "_jet_eff_" + str(min(int(options.events),nchain/2.)) + "e.pdf")
 
 
 print "Effizienz der Jet-Zuordnung: ", 1.*jetcounter/eventcounter
