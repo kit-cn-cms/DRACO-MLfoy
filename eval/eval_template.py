@@ -263,6 +263,9 @@ delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta r q2;#Delta r of q2; numb
 delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi of hadronic b; number of events", 100,0,6)
 delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b; number of events", 100,0,6)
 
+rek_thad = ROOT.TEfficiency("rek_thad", "pseudorapidity vs tranverse momentum of hadronic decaying top", 50, 0, 500, 20, -5,5)
+rek_tlep = ROOT-TH2F("rek_tlep", "pseudorapidity vs tranverse momentum of leptonic decaying top", 50, 0, 500, 20, -5,5)
+
 
 
 for event in chain:
@@ -358,17 +361,17 @@ for event in chain:
                     #reco_TopLep_M = np.append(reco_TopLep_M, reco_toplep_4vec.M())
                     #reco_WHad_M   = np.append(reco_WHad_M,   reco_whad_4vec.M())
 
-		    for index in ["TopHad","TopLep", "WHad","WLep"]:
-  	                globals()["reco_" + index +"_Pt"] = np.append(globals()["reco_" + index +"_Pt"], locals()["reco_" + index + "_4vec"].Pt())
-       		        globals()["reco_" + index + "_Eta"] = np.append(globals()["reco_" + index +"_Eta"], locals()["reco_" + index + "_4vec"].Eta())
-      		        globals()["reco_" + index + "_Phi"] = np.append(globals()["reco_" + index +"_Phi"], locals()["reco_" + index + "_4vec"].Phi())
-       		        globals()["reco_" + index + "_M"] = np.append(globals()["reco_" + index +"_M"], locals()["reco_" + index + "_4vec"].M())
-     		        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index +"_logM"],log( locals()["reco_" + index + "_4vec"].M()))
+		            for index in ["TopHad","TopLep", "WHad","WLep"]:
+      	                globals()["reco_" + index +"_Pt"] = np.append(globals()["reco_" + index +"_Pt"], locals()["reco_" + index + "_4vec"].Pt())
+           		        globals()["reco_" + index + "_Eta"] = np.append(globals()["reco_" + index +"_Eta"], locals()["reco_" + index + "_4vec"].Eta())
+          		        globals()["reco_" + index + "_Phi"] = np.append(globals()["reco_" + index +"_Phi"], locals()["reco_" + index + "_4vec"].Phi())
+           		        globals()["reco_" + index + "_M"] = np.append(globals()["reco_" + index +"_M"], locals()["reco_" + index + "_4vec"].M())
+         		        globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index +"_logM"],log( locals()["reco_" + index + "_4vec"].M()))
 
                     ttbar_phi     = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi()-reco_TopLep_4vec.Phi()))
                     ttbar_pt_div_ht_p_met     = np.append(ttbar_pt_div_ht_p_met,     (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(Ht + Evt_MET_Pt + lepton_4vec.Pt()))
 
-
+                    #wahrscheinlich schneller, wenn man nicht alle in großes df schreibt sondern einzelne rekombinationen in einzelne arrays schreibt, die einzeln durchs dnn jagt und nur output merkt
 
     eventcounter +=1
     combis = len(TopHad_B_Phi)
@@ -379,31 +382,31 @@ for event in chain:
             n+=1
             df[index +"_"+ index2] = globals()[index + "_" + index2]
 
-    df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
-    df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
-    df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
-    df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
-    df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
-    df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
-    df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
-    df["Electron_E[0]"] = np.zeros(combis) + Electron_E
-    df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
-    df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
-
-
-    #df["reco_TopHad_M"] = reco_TopHad_M
-    #df["reco_TopLep_M"] = reco_TopLep_M
-    #df["reco_WHad_M"]   = reco_WHad_M
-
-
-    vars_toadd = ["TopHad","TopLep", "WHad"]
-
-    for index in vars_toadd:
-        for index2 in ["Pt","Eta","Phi","M","logM"]:
-	        df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
-
-    df["ttbar_phi"] = ttbar_phi
-    df["ttbar_pt_div_ht_p_met"]     = ttbar_pt_div_ht_p_met
+    # df["Muon_Pt[0]"]   = np.zeros(combis) + Muon_Pt
+    # df["Muon_Eta[0]"]  = np.zeros(combis) + Muon_Eta
+    # df["Muon_Phi[0]"]  = np.zeros(combis) + Muon_Phi
+    # df["Muon_E[0]"]    = np.zeros(combis) + Muon_E
+    # df["Electron_Pt[0]"] = np.zeros(combis) + Electron_Pt
+    # df["Electron_Eta[0]"] = np.zeros(combis) + Electron_Eta
+    # df["Electron_Phi[0]"] = np.zeros(combis) + Electron_Phi
+    # df["Electron_E[0]"] = np.zeros(combis) + Electron_E
+    # df["Evt_MET_Pt"]    = np.zeros(combis) + event.Evt_MET_Pt
+    # df["Evt_MET_Phi"]   = np.zeros(combis) + event.Evt_MET_Phi
+    #
+    #
+    # #df["reco_TopHad_M"] = reco_TopHad_M
+    # #df["reco_TopLep_M"] = reco_TopLep_M
+    # #df["reco_WHad_M"]   = reco_WHad_M
+    #
+    #
+    # vars_toadd = ["TopHad","TopLep", "WHad"]
+    #
+    # for index in vars_toadd:
+    #     for index2 in ["Pt","Eta","Phi","M","logM"]:
+	#         df["reco_" + index + "_" + index2] = globals()["reco_" + index + "_" + index2]
+    #
+    # df["ttbar_phi"] = ttbar_phi
+    # df["ttbar_pt_div_ht_p_met"]     = ttbar_pt_div_ht_p_met
 
     # for var in variables:
     #     if var[:4] in ["Muon", "Elec"]:
@@ -512,6 +515,9 @@ for event in chain:
 
     delta_phi.Fill(correct_phi(delta_phi_bhad))
     delta_eta.Fill(abs(delta_eta_bhad))
+
+
+    rek_thad.Fill(delta_Rh<0.4, thad.Eta(),thad.Pt())
 
 
 
