@@ -25,7 +25,7 @@ def getAllVariables(infile):
     f = ROOT.TFile(infile)
     t = f.Get("MVATree")
     variables = []
-    vetos = ["Weight", "Gen", "Prescale", 
+    vetos = ["Weight", "HTXS", "Gen", "Prescale", 
             "Electron", "Muon", "AK8", 
             "Triggered", "DeepFlavour", 
             "common5_output", "Untagged", 
