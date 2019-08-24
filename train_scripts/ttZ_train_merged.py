@@ -66,6 +66,9 @@ dnn.save_model(sys.argv, filedir)
 # save and print variable ranking
 dnn.get_input_weights()
 
+# save and print variable ranking according to all layer weights
+dnn.get_propagated_weights()
+
 # plotting 
 if options.doPlots():
     # plot the evaluation metrics

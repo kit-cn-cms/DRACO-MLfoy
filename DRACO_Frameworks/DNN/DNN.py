@@ -489,7 +489,7 @@ class DNN():
             self.weight_dict[variable] = w_sum
 
         # sort weight dict
-        rank_path = self.save_path + "/absolute_weight_sum.csv"
+        rank_path = self.save_path + "/first_layer_weight_sums.csv"
         with open(rank_path, "w") as f:
             f.write("variable,weight_sum\n")
             for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
@@ -501,7 +501,7 @@ class DNN():
         ''' get the weights of the all hidden layers and sort input variables by weight sum'''
 
         # get weights
-        for i,layer in enumerate(self.model.layers):
+        for i, layer in enumerate(self.model.layers):
             #odd layers correspond to dropout layers
             if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
                 continue
@@ -514,15 +514,57 @@ class DNN():
                     self.weight_dict[variable] = w_sum
 
                 # sort weight dict
-                rank_path = self.save_path + "/absolute_weight_sum_layer"+str(i)+".csv"
+                rank_path = self.save_path + "/layer_"+str(i)+"_weight_sums.csv"
                 with open(rank_path, "w") as f:
                     f.write("variable,weight_sum\n")
                     for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
                         #print("{:50s}: {}".format(key, val))
                         f.write("{},{}\n".format(key,val))
                 print("wrote weight ranking to "+str(rank_path))
-        exit()
+    
+    def get_propagated_weights(self):
+        weight_layers = []
+        for i, layer in enumerate(self.model.layers):
+            if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
+                continue
+            
+            weights = layer.get_weights()[0]
 
+            print("="*30)
+            print("layer {}".format(i))
+            print(weights)
+            print("="*30)
+            weight_layers.append(weights)
+            
+        # iteratively generate sums
+        print("propagating weights")
+        propagated_weights = []
+        for i in range(len(weight_layers)):
+            index = (len(weight_layers)-i)-1
+            print(index)
+            if i == 0:
+                propagated_weights.append(
+                    np.array([np.sum(np.abs(out_weights)) for out_weights in weight_layers[index]])
+                    )
+            else:
+                propagated_weights.append(
+                    [np.sum(np.abs(out_weights)*propagated_weights[i-1]) for out_weights in weight_layers[index]]
+#                    [propagated_weights[i-1][j]*weight_layers[index][j] for j in range(len(weight_layers[index]))]
+                    )
+            print(propagated_weights[i])
+
+        weight_dict = {}
+        for weight, variable in zip(propagated_weights[-1], self.train_variables):
+            weight_dict[variable] = weight
+
+        rank_path = self.save_path+"/propagated_weight_sums.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,weight_sum\n")
+            for key, val in sorted(weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                print("{:50s}: {}".format(key, val))
+                f.write("{},{}\n".format(key, val))
+        print("wrote propagated weight ranking to "+str(rank_path))
+        
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
