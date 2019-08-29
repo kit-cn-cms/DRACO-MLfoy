@@ -241,11 +241,11 @@ data_len = prediction_vector.shape[1]
 for h in np.arange(0, n_simoular-1):
     for j in np.arange(1+h, n_simoular):
         title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
-        out = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff" + str(h) + "_" + str(j) + ".pdf"
+        out = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         c1.Divide(2,1)
         c1.cd(1)
-        hist = ROOT.TH1D("hist", "", 20,0,1)
+        hist = ROOT.TH1D("hist", "", 15,0,0.1)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
         hist.SetTitle(title)
