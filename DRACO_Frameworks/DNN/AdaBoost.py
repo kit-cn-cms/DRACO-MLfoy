@@ -535,8 +535,9 @@ class AdaBoost():
         # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.xlabel("Ada-Epochen")
         plt.ylabel("Anteil Richtig Bestimmt")
-        plt.legend(loc='best')
+        plt.legend(loc='lower right')
         plt.savefig(save_path + self.name + "_frac.pdf")
+        plt.clf()
 
         plt.figure(2)
         # plt.title('Receiver Operating Characteristic')
@@ -548,6 +549,7 @@ class AdaBoost():
         plt.ylabel('True Positive Rate')
         plt.xlabel('False Positive Rate')
         plt.savefig(save_path + self.name +"_roc.pdf")
+        plt.clf()
 
         plt.figure(3)
         # plt.title('Epsilon')

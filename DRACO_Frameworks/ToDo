@@ -23,3 +23,8 @@ Kosmetik:
 epochen vs ada_epochen
 mehr nachkommastellen beim roc
 test some loss function -> choose some good configuration in general
+
+ToDo:
+Root plots Achsen beschriften
+Plots generell auf deutsch
+Für Compare sollte bei ADA und ADA.M2 noch die Größe angepasst werden

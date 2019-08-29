@@ -241,23 +241,30 @@ data_len = prediction_vector.shape[1]
 for h in np.arange(0, n_simoular-1):
     for j in np.arange(1+h, n_simoular):
         title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
-        out = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
+        out1 = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
+        out2 = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff2" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
-        c1.Divide(2,1)
+        # c1.Divide(2,1)
         c1.cd(1)
-        hist = ROOT.TH1D("hist", "", 15,0,0.1)
+        hist = ROOT.TH1D("hist", "", 15,0,0.08)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
         hist.SetTitle(title)
+        hist.GetXaxis().SetTitle("Differenz der Vorhersage")
+        hist.GetYaxis().SetTitle("Anzahl")
         hist.Draw()
+        c1.Print(out1)
         # label_roc(h, j, roc_vector[h], roc_vector[j])      #write down the roc output
-        c1.cd(2)
+        c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
+        c2.cd(1)
         hist2=ROOT.TH2D("hist", "", 40, 0, 1, 40, 0, 1)
         for i in np.arange(0, data_len):
             hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
+        hist.GetXaxis().SetTitle("Vorhersage B")
+        hist.GetYaxis().SetTitle("Vorhersage A")
         hist2.Draw("colz")
         # label_correlation(hist2.GetCorrelationFactor())
-        c1.Print(out)
+        c2.Print(out2)
 
 
 # save and print variable ranking
