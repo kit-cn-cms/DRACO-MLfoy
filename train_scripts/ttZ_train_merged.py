@@ -69,6 +69,8 @@ dnn.get_input_weights()
 # save and print variable ranking according to all layer weights
 dnn.get_propagated_weights()
 
+dnn.get_variations()
+
 # plotting 
 if options.doPlots():
     # plot the evaluation metrics

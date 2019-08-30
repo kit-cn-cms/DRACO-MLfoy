@@ -55,6 +55,19 @@ config_dict["ttZ_2018_4node_v4"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["ttZ_2018_final"] = {
+        "layers":                   [50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-4,
+        "batch_size":               1000,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.1,
+        "earlystopping_epochs":     50,
+        }
+
 
 config_dict["ttH_2017"] = {
         "layers":                   [100,100,100],
