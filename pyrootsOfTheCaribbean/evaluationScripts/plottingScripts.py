@@ -726,7 +726,7 @@ class plotBinaryOutput:
         self.printROCScore = False
         self.privateWork = False
 
-    def plot(self, ratio = False, printROC = False, privateWork = False, name = "binary discriminator"):
+    def plot(self, ratio = False, printROC = False, privateWork = False, name = "Binary Discriminator"):
         self.printROCScore = printROC
         self.privateWork = privateWork
 
@@ -760,7 +760,7 @@ class plotBinaryOutput:
             bin_range   = self.bin_range,
             color       = ROOT.kOrange,
             xtitle      = "background",
-            ytitle      = setup.GetyTitle(self.privateWork),
+            ytitle      = "Number of Events", #setup.GetyTitle(self.privateWork),
             filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
@@ -775,13 +775,13 @@ class plotBinaryOutput:
 
         plotOptions = {
             "ratio":      ratio,
-            "ratioTitle": "#frac{scaled Signal}{Background}",
+            "ratioTitle": "#frac{unscaled Signal}{Background}",
             "logscale":   self.logscale}
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
             sig_hist, bkg_hist, sig_hist_unscaled, plotOptions,
-            canvasName = name)
+            canvasName = name) #,            xtitle = "Pediction")
 
         # setup legend
         legend = setup.getLegend()

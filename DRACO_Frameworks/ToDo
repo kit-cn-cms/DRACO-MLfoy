@@ -24,10 +24,7 @@ epochen vs ada_epochen
 mehr nachkommastellen beim roc
 test some loss function -> choose some good configuration in general
 
-
-
-ToDo (29.08):
-- reconstruct which functions are needed from use_boosted_dnns1
-- implement these function in train_template and train_ada_template
-- check all plots if they look good
-- make full run for NN, Ada and AdaM2 to create all necessary plots
+ToDo:
+Root plots Achsen beschriften
+Plots generell auf deutsch
+Für Compare sollte bei ADA und ADA.M2 noch die Größe angepasst werden

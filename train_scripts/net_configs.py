@@ -131,6 +131,19 @@ config_dict["binary_config2"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["binary_config_overfit"] = {
+        "layers":                   [200,100, 100],
+        "loss_function":            "squared_hinge",
+        "Dropout":                  0,
+        "L2_Norm":                  0.,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "selu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
 config_dict["binary_config_v2"] = {
         "layers":                   [200,100],
         "loss_function":            "binary_crossentropy",

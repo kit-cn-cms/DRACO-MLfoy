@@ -14,6 +14,7 @@ import DRACO_Frameworks.DNN.AdaBoost as ADA
 import DRACO_Frameworks.DNN.data_frame as df
 
 import keras.optimizers as optimizers
+import numpy as np
 """
 USE: python train_ada_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
 python train_ada_template.py -o /home/ngolks/Templates/DM_output/ada_first_test/ -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline/ -n _LegacyStrategyStudyBaseline.h5 --trainepochs 100 --netconfig ada_weak1 --adaboost 2 --binary -t -1 --signalclass ttH -c ge6j_ge3t
@@ -182,6 +183,8 @@ else:
     path = "/home/ngolks/Projects/boosted_dnn/AdaBoost/"           #needs to be adjusted
 name_raw = "b"+str(int(options.train_epochs))+"a"+str(int(ada_epochs))+"_"+str(options.category)+"_"+options.net_config
 
+prediction_list = []
+
 #loop over training to use simultaneously training of nets with same data (data is initialized before)
 for i in range(1, n_simoular+1):   #due to naming
     print("\n", "\n")
@@ -240,5 +243,39 @@ for i in range(1, n_simoular+1):   #due to naming
     if not exists:
         # save the trained model
         ada.save_model(signal)
+
+    #for comparison of the DNNs
+    if n_simoular > 1:
+        #store prediction_vector
+        prediction_list.append(ada.model_prediction_vector)
+
+
+#make comparison plots
+prediction_vector = np.asarray(prediction_list)
+data_len = prediction_vector.shape[1]
+
+for h in np.arange(0, n_simoular-1):
+    for j in np.arange(1+h, n_simoular):
+        title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
+        out1 = path + "plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
+        out2 = path + "plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
+        c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
+        # c1.Divide(2,1)
+        c1.cd(1)
+        hist = ROOT.TH1D("hist", "", 15,-0.4,0.4)
+        for i in np.arange(0, data_len):
+            hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
+        hist.SetTitle(title)
+        hist.Draw()
+        c1.Print(out1)
+        # label_roc(h, j, roc_vector[h], roc_vector[j])      #write down the roc output
+        c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
+        c2.cd(1)
+        hist2=ROOT.TH2D("hist", "", 40, 0, 1, 40, 0, 1)
+        for i in np.arange(0, data_len):
+            hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
+        hist2.Draw("colz")
+        # label_correlation(hist2.GetCorrelationFactor())
+        c2.Print(out2)
 
 print("Done: ", name)

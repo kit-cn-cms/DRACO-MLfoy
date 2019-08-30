@@ -739,7 +739,7 @@ class DNN():
             plt.ylabel("Anteil Richtig Bestimmt")
 
             # add legend
-            plt.legend(loc='best')
+            plt.legend(loc='lower right')
 
             # save
             # out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
