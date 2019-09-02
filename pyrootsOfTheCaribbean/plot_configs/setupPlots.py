@@ -145,6 +145,10 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
     cm.SetMarkerSize(2.)
+    if cm.GetNbinsX()>6:
+        cm.SetMarkerSize(1.5)
+    if cm.GetNbinsX()>8:
+        cm.SetMarkerSize(1.)
 
     return cm
 
