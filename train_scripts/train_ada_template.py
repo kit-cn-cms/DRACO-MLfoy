@@ -258,7 +258,7 @@ for h in np.arange(0, n_simoular-1):
     for j in np.arange(1+h, n_simoular):
         title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
         out1 = path + "plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
-        out2 = path + "plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
+        out2 = path + "plot/Compare/diff2" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         # c1.Divide(2,1)
         c1.cd(1)
