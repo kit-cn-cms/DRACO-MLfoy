@@ -197,6 +197,21 @@ class AdaBoost():
         #not loaded due to no use of eval_model
         # self.model_prediction_vector = np.load(load_path + "pred_vec.npy")
 
+    def load_needed(self, inputDirectory):
+        '''Dont load the hole Net, but the needed data'''
+        load_path = inputDirectory + "save_model/" + self.name + "/"
+        #load alpha
+        self.alpha_t = np.load(load_path + "alpha.npy")
+        #load epsilon
+        self.epsilon = np.load(load_path + "epsilon.npy")
+        #get predictions
+        self.train_prediction_vector = []
+        self.test_prediction_vector = []
+        for i in range(0, self.alpha_t.shape[0]):
+            self.train_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_train_data(as_matrix = True)))
+            self.test_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_test_data(as_matrix = True)))
+
+
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
 

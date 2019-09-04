@@ -227,7 +227,8 @@ for i in range(1, n_simoular+1):   #due to naming
 
     if exists:
         # load trained model
-        ada.load_trained_model(path)
+        ada.load_trained_model(path)    #loading the hole model takes like forever
+        ada.load_needed(path)
     else:
         # build DNN model
         ada.build_model(config)
