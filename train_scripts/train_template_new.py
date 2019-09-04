@@ -240,7 +240,7 @@ data_len = prediction_vector.shape[1]
 
 for h in np.arange(0, n_simoular-1):
     for j in np.arange(1+h, n_simoular):
-        title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
+        # title = "Compare prediction between two DNNs"# (" + str(h) + "," + str(j) +")"
         out1 = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff1" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         out2 = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff2" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
@@ -249,8 +249,8 @@ for h in np.arange(0, n_simoular-1):
         hist = ROOT.TH1D("hist", "", 15,0,0.08)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
-        hist.SetTitle(title)
-        hist.GetXaxis().SetTitle("Differenz der Vorhersage")
+        # hist.SetTitle(title)
+        hist.GetXaxis().SetTitle("Differenz der Ausgabe")
         hist.GetYaxis().SetTitle("Anzahl")
         hist.Draw()
         c1.Print(out1)

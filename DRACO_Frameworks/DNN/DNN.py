@@ -576,8 +576,10 @@ class DNN():
         plt.plot([0, 1], [0, 1],'r--')
         plt.xlim([0, 1])
         plt.ylim([0, 1])
-        plt.ylabel('True Positive Rate')
-        plt.xlabel('False Positive Rate')
+        # plt.ylabel('True Positive Rate')
+        plt.ylabel('Anteil an wahrem Signal')
+        # plt.xlabel('False Positive Rate')
+        plt.xlabel('Anteil an falschem Signal')
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
 
@@ -685,7 +687,7 @@ class DNN():
         plt.xlim(left=mu_draw[0], right=mu_draw[-1])
         plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
         plt.plot(s1x, s1y, 'b-', label = r'$\sigma_1=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
-        plt.plot(s2x, s2y, 'g-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.plot(s2x, s2y, 'r-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
         plt.legend(loc='best')
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         plt.clf()
@@ -736,7 +738,7 @@ class DNN():
             # make it nicer
             # plt.grid()
             plt.xlabel("Epochen")
-            plt.ylabel("Anteil Richtig Bestimmt")
+            plt.ylabel("Anteil Richtig Klassifiziert")
 
             # add legend
             plt.legend(loc='lower right')

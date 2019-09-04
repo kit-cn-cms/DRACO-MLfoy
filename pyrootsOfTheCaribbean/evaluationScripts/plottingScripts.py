@@ -744,7 +744,7 @@ class plotBinaryOutput:
             nbins       = self.nbins,
             bin_range   = self.bin_range,
             color       = ROOT.kCyan,
-            xtitle      = "signal",
+            xtitle      = "Signal",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = False)
         sig_hist.SetLineWidth(3)
@@ -759,8 +759,8 @@ class plotBinaryOutput:
             nbins       = self.nbins,
             bin_range   = self.bin_range,
             color       = ROOT.kOrange,
-            xtitle      = "background",
-            ytitle      = "Number of Events", #setup.GetyTitle(self.privateWork),
+            xtitle      = "Hintergrund",
+            ytitle      = "Effektive Anzahl an Ereignissen", #setup.GetyTitle(self.privateWork),
             filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
@@ -775,22 +775,23 @@ class plotBinaryOutput:
 
         plotOptions = {
             "ratio":      ratio,
-            "ratioTitle": "#frac{unscaled Signal}{Background}",
+            # "ratioTitle": "#frac{unscaled Signal}{Background}",
+            "ratioTitle": "#frac{Unskaliertes Signal}{Hintergrund}",
             "logscale":   self.logscale}
 
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
-            sig_hist, bkg_hist, sig_hist_unscaled, plotOptions,
-            canvasName = name) #,            xtitle = "Pediction")
+            sig_hist, bkg_hist, sig_hist_unscaled, plotOptions)
+            # canvasName = name) #,            xtitle = "Pediction")
 
         # setup legend
         legend = setup.getLegend()
 
         # add signal entry
-        legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
+        legend.AddEntry(sig_hist, "Signal x {:4.0f}".format(scaleFactor), "L")
 
         # add background entries
-        legend.AddEntry(bkg_hist, "background", "F")
+        legend.AddEntry(bkg_hist, "Hintergrund", "F")
 
         # draw legend
         legend.Draw("same")
