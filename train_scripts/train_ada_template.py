@@ -223,6 +223,7 @@ for i in range(1, n_simoular+1):   #due to naming
         exists = True
     else:
         exists = False
+    print("# DEBUG: exists: ", exists)
 
     if exists:
         # load trained model
@@ -234,9 +235,11 @@ for i in range(1, n_simoular+1):   #due to naming
         # perform the training
         ada.train_model()
 
+    print("# DEBUG: eval_model")
     # evalute the trained model
     ada.eval_model()
 
+    print("# DEBUG: plot_binaryOutput")
     # make discriminator plot
     ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
@@ -244,11 +247,13 @@ for i in range(1, n_simoular+1):   #due to naming
         # save the trained model
         ada.save_model(signal)
 
+    print("# DEBUG: appending to prediction_list")
     #for comparison of the DNNs
     if n_simoular > 1:
         #store prediction_vector
         prediction_list.append(ada.model_prediction_vector)
 
+print("# DEBUG: starting comparison")
 
 #make comparison plots
 prediction_vector = np.asarray(prediction_list)
