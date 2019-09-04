@@ -726,7 +726,7 @@ class plotBinaryOutput:
         self.printROCScore = False
         self.privateWork = False
 
-    def plot(self, ratio = False, printROC = False, privateWork = False, name = "Binärer Diskriminator"):
+    def plot(self, ratio = False, printROC = False, privateWork = False, name = "Diskriminator"):
         self.printROCScore = printROC
         self.privateWork = privateWork
 
