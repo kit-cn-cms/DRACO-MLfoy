@@ -620,11 +620,11 @@ class AdaBoost():
 
         # save train_prediction_vector
         with open(save_path+"pred_vec_train.txt", "wb") as fp:   #Pickling
-            pickle.dump(train_prediction_vector, fp)
+            pickle.dump(self.train_prediction_vector, fp)
 
         # save test_prediction_vector
         with open(save_path+"pred_vec_test.txt", "wb") as fp:   #Pickling
-            pickle.dump(test_prediction_vector, fp)
+            pickle.dump(self.test_prediction_vector, fp)
 
         # produce json file with configs
         configs = self.architecture
