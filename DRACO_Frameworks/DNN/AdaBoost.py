@@ -199,6 +199,7 @@ class AdaBoost():
 
     def load_needed(self, inputDirectory):
         '''Dont load the hole Net, but the needed data'''
+        print("# DEBUG: Starting to load stuff")
         load_path = inputDirectory + "save_model/" + self.name + "/"
         #load alpha
         self.alpha_t = np.load(load_path + "alpha.npy")
