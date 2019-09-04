@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import math
+import pickle
 # trining to solve some displaying problems (via ssh) here
 # solution is to use ssh -X ... or the following two lines
 import matplotlib
@@ -176,7 +177,7 @@ class AdaBoost():
 
 
     def load_trained_model(self, inputDirectory):
-        ''' load an already trained model '''
+        ''' load an already trained model -> prediction_vector can be calculated again'''
         load_path = inputDirectory + "save_model/" + self.name + "/"
         self.weak_model_trained = []
         for i in range(0, self.adaboost_epochs):
@@ -198,7 +199,7 @@ class AdaBoost():
         # self.model_prediction_vector = np.load(load_path + "pred_vec.npy")
 
     def load_needed(self, inputDirectory):
-        '''Dont load the hole Net, but the needed data'''
+        '''Load Complete Data as when trained'''
         print("# DEBUG: Starting to load stuff")
         load_path = inputDirectory + "save_model/" + self.name + "/"
         #load alpha
@@ -206,12 +207,10 @@ class AdaBoost():
         #load epsilon
         self.epsilon = np.load(load_path + "epsilon.npy")
         #get predictions
-        self.train_prediction_vector = []
-        self.test_prediction_vector = []
-        for i in range(0, self.alpha_t.shape[0]):
-            self.train_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_train_data(as_matrix = True)))
-            self.test_prediction_vector.append(self.weak_model_trained[i].predict(self.data.get_test_data(as_matrix = True)))
-
+        with open(load_path+"pred_vec_train.txt", "rb") as fp:   # Unpickling
+            self.train_prediction_vector = pickle.load(fp)
+        with open(load_path+"pred_vec_test.txt", "rb") as fp:
+            self.test_prediction_vector = pickle.load(fp)
 
     def build_default_model(self):
         ''' build default straight forward DNN from architecture dictionary '''
@@ -618,6 +617,14 @@ class AdaBoost():
 
         # save roc-aux score
         np.save(save_path + "roc", np.array([self.roc_auc]))
+
+        # save train_prediction_vector
+        with open(save_path+"pred_vec_train.txt", "wb") as fp:   #Pickling
+            pickle.dump(train_prediction_vector, fp)
+
+        # save test_prediction_vector
+        with open(save_path+"pred_vec_test.txt", "wb") as fp:   #Pickling
+            pickle.dump(test_prediction_vector, fp)
 
         # produce json file with configs
         configs = self.architecture

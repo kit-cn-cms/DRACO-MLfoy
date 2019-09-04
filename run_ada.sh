@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-epoches=("100") # "100" "150") #"200") -> overfitting
-ada_epoches=("300")  #300
+epoches=("10") # "100" "150") #"200") -> overfitting
+ada_epoches=("3")  #300
 # configs=("ada_weak1" "ada_weak2" "ada_weak3")
 # configs=("ada_weak4" "ada_weak4_1" "ada_weak4_2")
 configs=("ada_weak6_4_2_opt")
