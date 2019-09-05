@@ -437,7 +437,7 @@ def printROCScore(pad, ROC, ratio = False):
     else:       latex.DrawLatex(l,1.-t+0.02, text)
 
 def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
-    pad.cd(1)
+    pad.cd(3)
     l = pad.GetLeftMargin()
     t = pad.GetTopMargin()
     r = pad.GetRightMargin()

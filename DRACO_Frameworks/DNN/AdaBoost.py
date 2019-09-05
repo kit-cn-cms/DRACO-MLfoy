@@ -1,3 +1,5 @@
+# -*- # -*- coding: utf-8 -*-
+
 import os
 import sys
 import numpy as np
@@ -550,7 +552,7 @@ class AdaBoost():
         plt.plot(epoches, test_fraction, 'b-', label = "Testdaten - Max: " + str(round(best_test, 3)))
         # plt.title("Anteil richtig Bestimmt - AdaBoost_binary_discret")
         plt.xlabel("Ada-Epochen")
-        plt.ylabel("Anteil Richtig Klassifiziert")
+        plt.ylabel("Anteil richtig Klassifizierter")
         plt.legend(loc='lower right')
         plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name + "_frac.pdf")
@@ -567,9 +569,9 @@ class AdaBoost():
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
         # plt.ylabel('True Positive Rate')
-        plt.ylabel('Anteil an wahrem Signal')
+        plt.ylabel('Anteil richtig positiv', fontsize=12)
         # plt.xlabel('False Positive Rate')
-        plt.xlabel('Anteil an falschem Signal')
+        plt.xlabel('Anteil falsch positiv', fontsize=12)
         plt.title("CMS private work", loc="left", fontsize=12)
         plt.figure(3)
         # plt.title('Epsilon')
@@ -668,7 +670,7 @@ class AdaBoost():
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 20, bin_range = [-1.,1.], name = "binary discriminator"):
+                        nbins = 20, bin_range = [-1.,1.], name = "Bin#ddot{a}rer Diskriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,

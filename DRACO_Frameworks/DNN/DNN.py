@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 import os
 import sys
 import numpy as np
@@ -577,9 +579,9 @@ class DNN():
         plt.xlim([0, 1])
         plt.ylim([0, 1])
         # plt.ylabel('True Positive Rate')
-        plt.ylabel('Anteil an wahrem Signal')
+        plt.ylabel('Anteil richtig positiv')
         # plt.xlabel('False Positive Rate')
-        plt.xlabel('Anteil an falschem Signal')
+        plt.xlabel('Anteil falsch positiv')
         plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
@@ -682,13 +684,13 @@ class DNN():
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.xlabel(r'$\mu$')
-        plt.ylabel(r'$- \log L$')
+        plt.xlabel(r'$\mu$', fontsize=12)
+        plt.ylabel(r'$-2 \log L$', fontsize=12)
         plt.plot(mu_draw, loglike, 'k-')
         plt.xlim(left=mu_draw[0], right=mu_draw[-1])
         plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
-        plt.plot(s1x, s1y, 'b-', label = r'$\sigma_1=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
-        plt.plot(s2x, s2y, 'r-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
+        plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
         plt.legend(loc='best')
         plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
@@ -740,7 +742,7 @@ class DNN():
             # make it nicer
             # plt.grid()
             plt.xlabel("Epochen")
-            plt.ylabel("Anteil Richtig Klassifiziert")
+            plt.ylabel("Anteil richtig Klassifizierter")
 
             # add legend
             plt.legend(loc='lower right')
@@ -836,7 +838,7 @@ class DNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = 20, bin_range = [0.,1.], name = "binary discriminator"):
+                        nbins = 20, bin_range = [0.,1.], name = "Bin#ddot{a}rer Diskriminator"):
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,

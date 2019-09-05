@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 import os
 import sys
 import numpy as np
@@ -759,8 +761,8 @@ class plotBinaryOutput:
             nbins       = self.nbins,
             bin_range   = self.bin_range,
             color       = ROOT.kOrange,
-            xtitle      = "Hintergrund",
-            ytitle      = "Effektive Anzahl an Ereignissen", #setup.GetyTitle(self.privateWork),
+            xtitle      = "Untergrund",
+            ytitle      = "Ereignisse (beliebige Einheiten)", #setup.GetyTitle(self.privateWork),
             filled      = True)
 
         scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
@@ -776,7 +778,7 @@ class plotBinaryOutput:
         plotOptions = {
             "ratio":      ratio,
             # "ratioTitle": "#frac{unscaled Signal}{Background}",
-            "ratioTitle": "#frac{Signal}{Hintergrund}",
+            "ratioTitle": "#frac{Signal}{Untergrund}",
             "logscale":   self.logscale}
 
         # initialize canvas
@@ -791,7 +793,7 @@ class plotBinaryOutput:
         legend.AddEntry(sig_hist, "Signal x {:4.0f}".format(scaleFactor), "L")
 
         # add background entries
-        legend.AddEntry(bkg_hist, "Hintergrund", "F")
+        legend.AddEntry(bkg_hist, "Untergrund", "F")
 
         # draw legend
         legend.Draw("same")
@@ -804,6 +806,7 @@ class plotBinaryOutput:
         self.privateWork = True #hacked
         if self.privateWork:
             setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+            setup.printLumi(canvas, ratio = plotOptions["ratio"])
         else:
             setup.printLumi(canvas, ratio = plotOptions["ratio"])
 
