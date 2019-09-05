@@ -20,7 +20,7 @@ import numpy as np
 print("imports done")
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
-python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 500 --netconfig binary_config --binary -t -1 --signalclass ttH -c ge6j_ge3t
+python train_template_new.py -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 300 --netconfig binary_config --binary -t -1 --signalclass ttH -c ge6j_ge3t
 #latest one
 python train_template_new.py -o /home/ngolks/Templates/DM_output/BinaryNN -i /ceph/swieland/ttH/h5Files/LegacyStrategy/Baseline -n _LegacyStrategyStudyBaseline.h5 --trainepochs 300 --netconfig binary_config2 --binary -t 0 --signalclass ttH -c ge6j_ge3t --simultan 5
 """

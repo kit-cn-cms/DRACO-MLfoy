@@ -776,7 +776,7 @@ class plotBinaryOutput:
         plotOptions = {
             "ratio":      ratio,
             # "ratioTitle": "#frac{unscaled Signal}{Background}",
-            "ratioTitle": "#frac{Unskaliertes Signal}{Hintergrund}",
+            "ratioTitle": "#frac{Signal}{Hintergrund}",
             "logscale":   self.logscale}
 
         # initialize canvas
