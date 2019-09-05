@@ -801,6 +801,7 @@ class plotBinaryOutput:
             setup.printROCScore(canvas, roc, plotOptions["ratio"])
 
         # add lumi or private work label to plot
+        self.privateWork = True #hacked
         if self.privateWork:
             setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
         else:

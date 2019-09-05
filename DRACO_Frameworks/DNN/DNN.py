@@ -580,6 +580,7 @@ class DNN():
         plt.ylabel('Anteil an wahrem Signal')
         # plt.xlabel('False Positive Rate')
         plt.xlabel('Anteil an falschem Signal')
+        plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
 
@@ -689,6 +690,7 @@ class DNN():
         plt.plot(s1x, s1y, 'b-', label = r'$\sigma_1=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
         plt.plot(s2x, s2y, 'r-', label = r'$\sigma_2=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
         plt.legend(loc='best')
+        plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         plt.clf()
         # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
@@ -742,6 +744,8 @@ class DNN():
 
             # add legend
             plt.legend(loc='lower right')
+            # add CMS private work
+            plt.title("CMS private work", loc="left", fontsize=12)
 
             # save
             # out_path = self.save_path + "/model_history_"+str(metric)+".pdf"

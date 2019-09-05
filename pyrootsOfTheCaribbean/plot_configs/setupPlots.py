@@ -450,10 +450,10 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
 
     text = "CMS private work"
 
-    if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
+    if nodePlot:    latex.DrawLatex(l+0.07,1.-t+0.05, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
-    else:           latex.DrawLatex(l,1.-t+0.01, text)
+    else:           latex.DrawLatex(l,1.-t+0.05, text)
 
 
 def moveOverUnderFlow(h):

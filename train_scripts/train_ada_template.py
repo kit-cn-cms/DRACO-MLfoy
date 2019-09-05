@@ -276,6 +276,20 @@ for h in np.arange(0, n_simoular-1):
         hist.GetXaxis().SetTitle("Differenz der Ausgabe")
         hist.GetYaxis().SetTitle("Anzahl")
         hist.Draw()
+
+        c1.cd(2)
+        l = c1.GetLeftMargin()
+        t = c1.GetTopMargin()
+        r = c1.GetRightMargin()
+        b = c1.GetBottomMargin()
+
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+        latex.SetTextSize(0.04)
+        text = "CMS private work"
+        latex.DrawLatex(l+0.57,1.-t+0.03, text)
+
         c1.Print(out1)
         # label_roc(h, j, roc_vector[h], roc_vector[j])      #write down the roc output
         c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
@@ -286,6 +300,19 @@ for h in np.arange(0, n_simoular-1):
         hist.GetXaxis().SetTitle("Vorhersage B")
         hist.GetYaxis().SetTitle("Vorhersage A")
         hist2.Draw("colz")
+
+        c2.cd(2)
+        l = c2.GetLeftMargin()
+        t = c2.GetTopMargin()
+        r = c2.GetRightMargin()
+        b = c2.GetBottomMargin()
+
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+        latex.SetTextSize(0.04)
+        text = "CMS private work"
+        latex.DrawLatex(l+0.57,1.-t+0.03, text)
         # label_correlation(hist2.GetCorrelationFactor())
         c2.Print(out2)
 
