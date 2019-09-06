@@ -41,7 +41,7 @@ dnn = DNN.DNN(
     # number of epochs
     train_epochs    = options.getTrainEpochs(),
     # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc","mse","mae"],
+    eval_metrics    = ["acc","mean_squared_error","mean_absolute_error"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = options.getTestPercentage(),
     # balance samples per epoch such that there amount of samples per category is roughly equal

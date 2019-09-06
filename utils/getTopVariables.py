@@ -32,7 +32,7 @@ parser.add_option("-v","--variableset",dest="generate_variableset",default=False
 parser.add_option("--nvset",dest="nvset",default=30,type=int,
     help = "number of variables written to variable set (-1 for all).")
 parser.add_option("-t", "--type", dest = "weight_type",default="absolute",
-    help = "type of variable ranking (i.e. name of weight file TYPE_weight_sum.csv), e.g. 'absolute', 'propagated'")
+    help = "type of variable ranking (i.e. name of weight file TYPE_weight_sum.csv), e.g. 'absolute', 'propagated', 'first_layer'")
 
 (opts, args) = parser.parse_args()
 inputdir = opts.workdir+"/"+opts.inputdir
