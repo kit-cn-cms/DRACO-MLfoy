@@ -579,9 +579,9 @@ class DNN():
         plt.xlim([0, 1])
         plt.ylim([0, 1])
         # plt.ylabel('True Positive Rate')
-        plt.ylabel('Anteil richtig positiv')
+        plt.ylabel('Anteil richtig positiv', fontsize=11)
         # plt.xlabel('False Positive Rate')
-        plt.xlabel('Anteil falsch positiv')
+        plt.xlabel('Anteil falsch positiv', fontsize=11)
         plt.title("CMS private work", loc="left", fontsize=12)
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
@@ -684,8 +684,8 @@ class DNN():
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.xlabel(r'$\mu$', fontsize=12)
-        plt.ylabel(r'$-2 \log L$', fontsize=12)
+        plt.xlabel(r'$\mu$', fontsize=11)
+        plt.ylabel(r'$-2 \log L$', fontsize=11)
         plt.plot(mu_draw, loglike, 'k-')
         plt.xlim(left=mu_draw[0], right=mu_draw[-1])
         plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
