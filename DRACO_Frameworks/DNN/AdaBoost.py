@@ -408,7 +408,7 @@ class AdaBoost():
 
     def binned_likelihood(self, bkg_binns, tg_binns, mu):
         '''Calculares sigma1 and sigma2 for asimov data set and makes a plot'''
-        mu_range = 1.4  #Ada.M2 worked fine with 1.3
+        mu_range = 1.1  #Ada.M2 worked fine with 1.3
         save_path = self.path + "plot/"
         measured = bkg_binns + mu * tg_binns
         for i in measured:
