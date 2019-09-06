@@ -25,9 +25,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttmb"), label = "ttmb", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
 
@@ -43,7 +41,7 @@ dnn = DNN.DNN(
     # number of epochs
     train_epochs    = options.getTrainEpochs(),
     # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
+    eval_metrics    = ["acc","mse","mae"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
     test_percentage = options.getTestPercentage(),
     # balance samples per epoch such that there amount of samples per category is roughly equal

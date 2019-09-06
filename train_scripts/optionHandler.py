@@ -18,13 +18,13 @@ parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_trai
         help="DIR for output (allows relative path to workdir or absolute path)", metavar="outputDir")
 
 sampleopts = optparse.OptionGroup(parser, "Sample Settings")
-sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
+sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="/storage/8/vanderlinden/ttZAnalysis/workdir/InputFeatures/",
         help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="INPUTDIR")
 sampleopts.add_option("--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
-sampleopts.add_option("-c", "--category", dest="category",default="4j_ge3t",
+sampleopts.add_option("-c", "--category", dest="category",default="ge6j_ge3t",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
-sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
+sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = "ttZ,ttH,ttbb,ttcc,ttlf",
         help="give comma separated list of samples to be used. ignore option if all should be used")
 sampleopts.add_option("--even",dest="even_sel",action="store_true",default=None,
         help="only select events with Evt_Odd==0")
@@ -33,13 +33,13 @@ sampleopts.add_option("--odd",dest="even_sel",action="store_false",default=None,
 parser.add_option_group(sampleopts)
 
 trainopts = optparse.OptionGroup(parser, "Train Configurations")
-trainopts.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+trainopts.add_option("-v", "--variableselection", dest="variableSelection",default="finalVariables",
         help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="VARIABLESET")
-trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttH_2017",
+trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttZAnalysis",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="NETCONFIG")
 trainopts.add_option("-e", "--epochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="TRAINEPOCHS")
-trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.2,type=float,
+trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.3,type=float,
         help="set fraction of events used for testing, rest is used for training", metavar="TESTFRACTION")
 trainopts.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.")
@@ -58,7 +58,7 @@ plotopts.add_option("-P", "--privatework", dest="privateWork", action = "store_t
         help="activate to create private work plot label")
 plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix")
-plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
+plotopts.add_option("-S","--signalclass", dest="signal_class", default="ttH,ttZ", metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
 parser.add_option_group(plotopts)
 
