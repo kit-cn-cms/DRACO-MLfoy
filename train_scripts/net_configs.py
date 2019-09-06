@@ -28,39 +28,12 @@ config_dict["test_config"] = {
         "earlystopping_epochs":     50,
         }
 
-config_dict["ttZ_2018_4node"] = {
-        "layers":                   [50,50],
-        "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.4,
-        "L2_Norm":                  1e-5,
-        "batch_size":               200,
-        "optimizer":                optimizers.Adagrad(),
-        "activation_function":      "elu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     10,
-        }
-
-
-config_dict["ttZ_2018_4node_v4"] = {
-        "layers":                   [50,50],
-        "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.4,
-        "L2_Norm":                  1e-4,
-        "batch_size":               100,
-        "optimizer":                optimizers.Adagrad(),
-        "activation_function":      "leakyrelu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.1,
-        "earlystopping_epochs":     50,
-        }
-
 config_dict["ttZ_2018_final"] = {
         "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.4,
         "L2_Norm":                  1e-4,
-        "batch_size":               1000,
+        "batch_size":               200,
         "optimizer":                optimizers.Adagrad(),
         "activation_function":      "leakyrelu",
         "output_activation":        "Softmax",
@@ -106,56 +79,6 @@ config_dict["legacy_2018"] = {
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     100,
-        }
-
-config_dict["ttZ_2018"] = {
-        "layers":                   [300,200,100],
-        "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.4,
-        "L2_Norm":                  1e-5,
-        "batch_size":               4096,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "selu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     100,
-        }
-
-config_dict["ttZ_2018_v2"] = {
-        "layers":                   [300,200,100,50],
-        "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.4,
-        "L2_Norm":                  1e-5,
-        "batch_size":               5000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "elu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
-config_dict["ttZ_2018_v3"] = {
-        "layers":                   [200,100,50],
-        "loss_function":            "mean_squared_error",
-        "Dropout":                  0.3,
-        "L2_Norm":                  1e-5,
-        "batch_size":               5000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "elu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
-config_dict["meme"] = {
-        "layers":                   [],
-        "loss_function":            "mean_squared_error",
-        "Dropout":                  0.,
-        "L2_Norm":                  0.,
-        "batch_size":               5000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "elu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
         }
 
 

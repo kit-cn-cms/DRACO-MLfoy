@@ -493,12 +493,15 @@ class plotClosureTest:
 
             # setup legend
             legend = setup.getLegend()
-
+    
+            legend.SetTextSize(0.02)
+            ksSig = sig_train.KolmogorovTest(sig_test)
+            ksBkg = bkg_train.KolmogorovTest(bkg_test)
             # add entries
             legend.AddEntry(sig_train, "train {}".format("+".join(signalClass)), "F")
             legend.AddEntry(bkg_train, "train bkg", "F")
-            legend.AddEntry(sig_test,  "test {}".format("+".join(signalClass)), "L")
-            legend.AddEntry(bkg_test,  "test bkg", "L")
+            legend.AddEntry(sig_test,  "test {} (KS = {:.3f})".format("+".join(signalClass),ksSig), "L")
+            legend.AddEntry(bkg_test,  "test bkg (KS = {:.3f})".format(ksBkg), "L")
 
             # draw legend
             legend.Draw("same")

@@ -716,7 +716,7 @@ class DNN():
         if not bin_range:
             bin_range = [round(1./self.data.n_output_neurons,2), 1.]
         if not nbins:
-            nbins = int(25*(1.-bin_range[0]))
+            nbins = int(20*(1.-bin_range[0]))
 
         closureTest = plottingScripts.plotClosureTest(
             data                = self.data,
