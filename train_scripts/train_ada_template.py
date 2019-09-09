@@ -277,6 +277,10 @@ for h in np.arange(0, n_simoular-1):
         hist.GetYaxis().SetTitle("Anzahl")
         hist.Draw()
 
+        diff = prediction_vector[h] - prediction_vector[j]
+        abs_mean = np.mean(np.absolute(diff))
+        print("absolute mean ", h, "_", j, " : ", abs_mean)
+
         c1.cd(2)
         l = c1.GetLeftMargin()
         t = c1.GetTopMargin()

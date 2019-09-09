@@ -246,13 +246,17 @@ for h in np.arange(0, n_simoular-1):
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         # c1.Divide(2,1)
         c1.cd(1)
-        hist = ROOT.TH1D("hist", "", 15,0,0.08)
+        hist = ROOT.TH1D("hist", "", 15,-0.08,0.08)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
         # hist.SetTitle(title)
         hist.GetXaxis().SetTitle("Differenz der Ausgabe")
         hist.GetYaxis().SetTitle("Anzahl")
         hist.Draw()
+
+        diff = prediction_vector[h] - prediction_vector[j]
+        abs_mean = np.mean(np.absolute(diff))
+        print("absolute mean ", h, "_", j, " : ", abs_mean)
 
         c1.cd(2)
         l = c1.GetLeftMargin()
