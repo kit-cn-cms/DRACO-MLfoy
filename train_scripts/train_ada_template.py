@@ -294,7 +294,7 @@ for h in np.arange(0, n_simoular-1):
         # label_roc(h, j, roc_vector[h], roc_vector[j])      #write down the roc output
         c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         c2.cd(1)
-        hist2=ROOT.TH2D("hist", "", 40, -0.4, 0.4, 40, -0.4, 0.4)
+        hist2=ROOT.TH2D("hist", "", 40, -0.3, 0.3, 40, -0.3, 0.3)
         for i in np.arange(0, data_len):
             hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
         hist.GetXaxis().SetTitle("Vorhersage B")
