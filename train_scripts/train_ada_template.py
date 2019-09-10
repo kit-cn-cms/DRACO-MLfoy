@@ -238,7 +238,7 @@ for i in range(1, n_simoular+1):   #due to naming
 
     print("# DEBUG: eval_model")
     # evalute the trained model
-    # ada.eval_model()
+    ada.eval_model()
 
     print("# DEBUG: plot_binaryOutput")
     # make discriminator plot
