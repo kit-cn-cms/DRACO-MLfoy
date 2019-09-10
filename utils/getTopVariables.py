@@ -5,14 +5,23 @@ import pandas as pd
 import glob
 from collections import Counter
 import operator
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 import matplotlib.pyplot as plt
 import numpy as np
 import optparse
+
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
+import generateJTcut
+nameConfig = basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv"
+translationFile = pd.read_csv(nameConfig, sep = ",").set_index("variablename", drop = True)
 
 usage = "python getTopVariables.py [options] [jtCategories]"
 parser = optparse.OptionParser(usage=usage)
@@ -61,7 +70,7 @@ for jtcat in args:
         sum_of_weights = csv["weight_sum"].sum()
         for row in csv.iterrows():
             if not row[1][0] in variables: variables[row[1][0]] = []
-            variables[row[1][0]].append(row[1][1]/sum_of_weights)
+            variables[row[1][0]].append(100*row[1][1]/sum_of_weights)
 
 
     # collect mean values of variables
@@ -78,7 +87,7 @@ for jtcat in args:
     for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
         i += 1
         val.append(i)
-        var.append(v)
+        var.append(translationFile.loc[v,"displayname"].replace("#","\\"))
         mean.append(m)
         std.append( np.std(variables[v]) )
         print(v,m)
@@ -94,13 +103,13 @@ for jtcat in args:
             var = var[-opts.nplot :]
 
         nvariables = len(var)
-        plt.figure(figsize = [10,nvariables/4.5])
+        plt.figure(figsize = [10,nvariables/4])
         plt.errorbar(mean, val, xerr = std, fmt = "o")
         plt.xlim([0.,1.1*maxvalue])
         plt.grid()
         plt.yticks(val, var)
-        plt.title(jtcat)
-        plt.xlabel("mean of sum of input weights (in percent)")
+        plt.title(generateJTcut.getJTlabel(jtcat), loc = "right", fontsize = 16)
+        plt.xlabel(r"mean of sum of input weights (in percent)", fontsize = 16)
         plt.tight_layout()
         outfile = opts.outdir+"/"+opts.weight_type+"_weight_sums_"+jtcat+".pdf"
         plt.savefig(outfile)
