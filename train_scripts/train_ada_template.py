@@ -238,11 +238,11 @@ for i in range(1, n_simoular+1):   #due to naming
 
     print("# DEBUG: eval_model")
     # evalute the trained model
-    ada.eval_model()
+    # ada.eval_model()
 
     print("# DEBUG: plot_binaryOutput")
     # make discriminator plot
-    ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    # ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
     if not exists:
         # save the trained model
