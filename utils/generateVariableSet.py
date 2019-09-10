@@ -26,9 +26,9 @@ def getAllVariables(infile):
     t = f.Get("MVATree")
     variables = []
     vetos = ["Weight", "HTXS", "Gen", "Prescale", 
-            "Electron", "Muon", "AK8", 
-            "Triggered", "DeepFlavour", 
-            "common5_output", "Untagged", 
+            "Electron", "Muon", "AK8", "Untagged",
+            "Triggered", "DeepJet", 
+            "common5_output", "_Charge", "_Flav",
             "CSV_DNN", "PileUp", "Evt_ID", 
             "Evt_Lumi", "Evt_Odd", "Evt_Run",
             "PartonFlav", "GoodTags",]
@@ -84,7 +84,7 @@ def generateVariableSet(variables, categories, path):
 variables = getAllVariables(opts.file)
 new_variables = figureOutVectors(variables, opts.file)
 if opts.generateSet:
-    generateVariableSet(new_variables, ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"], opts.outputfile)
+    generateVariableSet(new_variables, ["4j_ge3t","5j_ge3t","ge6j_ge3t"], opts.outputfile)
 else:
     print("variables:")
     for v in variables: print(v)
