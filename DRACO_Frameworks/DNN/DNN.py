@@ -280,7 +280,7 @@ class DNN():
                 )(X)
 
             if self.architecture["activation_function"] == "leakyrelu":
-                X = keras.layers.LeakyReLU(alpha=0.3)(X)
+                X = keras.layers.LeakyReLU(alpha=0.1)(X)
 
             # add dropout percentage to layer if activated
             if not dropout == 0:

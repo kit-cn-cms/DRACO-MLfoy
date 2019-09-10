@@ -3,6 +3,23 @@ ROOT.gROOT.SetBatch(True)
 import re
 import numpy as np
 
+def translateName(name):
+    name = name.replace("ljets","")
+    name = name.replace("ge6j_ge3t","")
+    name = name.replace("ge4j_ge3t","")
+    name = name.replace("ge4j_3t","")
+    name = name.replace("ge4j_ge4t","")
+    name = name.replace("4j_ge3t","")
+    name = name.replace("le5j_ge3t","")
+    name = name.replace("5j_ge3t","")
+
+    name = name.replace("ttZ","t#bar{t}+Z")
+    name = name.replace("ttH","t#bar{t}+H")
+    name = name.replace("ttbb","t#bar{t}+b#bar{t}")
+    name = name.replace("ttlf","t#bar{t}+lf")
+    name = name.replace("ttcc","t#bar{t}+c#bar{c}")
+
+
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
@@ -138,9 +155,9 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.GetZaxis().SetRangeUser(minimum, maximum)
 
     for xit in range(ncls):
-        cm.GetXaxis().SetBinLabel(xit+1, binlabel[xit])
+        cm.GetXaxis().SetBinLabel(xit+1, translateName(binlabel[xit]))
     for yit in range(ncls):
-        cm.GetYaxis().SetBinLabel(yit+1, binlabel[yit])
+        cm.GetYaxis().SetBinLabel(yit+1, translateName(binlabel[yit]))
 
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
