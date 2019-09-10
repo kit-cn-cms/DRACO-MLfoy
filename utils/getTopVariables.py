@@ -1,16 +1,11 @@
 # global imports
+import ROOT
 import os
 import sys
 import pandas as pd
 import glob
 from collections import Counter
 import operator
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-## for Palatino and other serif fonts use:
-#rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
-import matplotlib.pyplot as plt
 import numpy as np
 import optparse
 
@@ -70,7 +65,7 @@ for jtcat in args:
         sum_of_weights = csv["weight_sum"].sum()
         for row in csv.iterrows():
             if not row[1][0] in variables: variables[row[1][0]] = []
-            variables[row[1][0]].append(100*row[1][1]/sum_of_weights)
+            variables[row[1][0]].append(row[1][1]/sum_of_weights)
 
 
     # collect mean values of variables
@@ -79,15 +74,11 @@ for jtcat in args:
 
     # generate lists sorted by mean variable importance
     var = []
-    val = []
     mean = []
     std = []
-    i = 0
     maxvalue = 0
     for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
-        i += 1
-        val.append(i)
-        var.append(translationFile.loc[v,"displayname"].replace("#","\\"))
+        var.append(translationFile.loc[v,"displayname"])
         mean.append(m)
         std.append( np.std(variables[v]) )
         print(v,m)
@@ -98,22 +89,34 @@ for jtcat in args:
     if opts.plot:
         if not opts.nplot == -1:
             mean = mean[-opts.nplot :]
-            val = val[-opts.nplot :]
             std = std[-opts.nplot :]
             var = var[-opts.nplot :]
 
         nvariables = len(var)
-        plt.figure(figsize = [10,nvariables/4])
-        plt.errorbar(mean, val, xerr = std, fmt = "o")
-        plt.xlim([0.,1.1*maxvalue])
-        plt.grid()
-        plt.yticks(val, var)
-        plt.title(generateJTcut.getJTlabel(jtcat), loc = "right", fontsize = 16)
-        plt.xlabel(r"mean of sum of input weights (in percent)", fontsize = 16)
-        plt.tight_layout()
+
+        canvas = ROOT.TCanvas("","",nvariables*50, 1000)
+        canvas.SetBottomMargin(canvas.GetBottomMargin()*4)
+        graph = ROOT.TH1F("","",nvariables+3,1,nvariables+4)
+        graph.SetName("variableRanking")
+        graph.SetStats(False)
+        for i in range(nvariables):
+            graph.SetBinContent(nvariables-i+3, mean[i])
+            graph.SetBinError(nvariables-i+3, std[i]+0.001)
+            graph.GetXaxis().SetBinLabel(nvariables-i+3, var[i])
+        graph.GetYaxis().SetTitle("mean of sum of input weights")
+        graph.LabelsOption("v")
+        graph.SetTitle("")
+        graph.SetMarkerStyle(20)
+        graph.SetMarkerSize(2)
+        graph.SetMarkerColor(ROOT.kAzure-3)
+        graph.SetLineColor(ROOT.kAzure-3)
+        graph.Draw("PEX0")
+        canvas.SetGridx(1)
+        canvas.RedrawAxis()
+        canvas.RedrawAxis("g")        
+
         outfile = opts.outdir+"/"+opts.weight_type+"_weight_sums_"+jtcat+".pdf"
-        plt.savefig(outfile)
-        plt.clf() 
+        canvas.SaveAs(outfile)
         print("saved plot to {}".format(outfile))
 
 if opts.generate_variableset:
