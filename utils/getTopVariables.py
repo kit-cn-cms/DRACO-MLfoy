@@ -102,7 +102,10 @@ for jtcat in args:
     maxvalue = 0
     for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
         varNames.append(v)
-        var.append(translationFile.loc[v,"displayname"])
+        try:
+            var.append(translationFile.loc[v,"displayname"])
+        except:
+            var.append(v)
         mean.append(m)
         std.append( np.std(variables[v]) )
         print(v,m)
@@ -121,13 +124,13 @@ for jtcat in args:
         canvas = ROOT.TCanvas("","",nvariables*50, 1500)
         canvas.SetBottomMargin(canvas.GetBottomMargin()*5)
         canvas.SetLeftMargin(canvas.GetLeftMargin()*2)
-        graph = ROOT.TH1F("","",nvariables+2,1,nvariables+3)
+        graph = ROOT.TH1F("","",nvariables+1,1,nvariables+2)
         graph.SetName("variableRanking")
         graph.SetStats(False)
         for i in range(nvariables):
-            graph.SetBinContent(nvariables-i+2, mean[i])
-            graph.SetBinError(nvariables-i+2, std[i]+0.001)
-            graph.GetXaxis().SetBinLabel(nvariables-i+2, var[i])
+            graph.SetBinContent(nvariables-i+1, mean[i])
+            graph.SetBinError(nvariables-i+1, std[i])
+            graph.GetXaxis().SetBinLabel(nvariables-i+1, var[i])
         graph.GetYaxis().SetTitle("mean of sum of input weights")
         graph.LabelsOption("v")
         graph.SetTitle("")
@@ -135,6 +138,7 @@ for jtcat in args:
         graph.SetMarkerSize(2)
         graph.SetMarkerColor(ROOT.kAzure-3)
         graph.SetLineColor(ROOT.kAzure-3)
+        graph.SetLineWidth(2)
         graph.Draw("PEX0")
         canvas.SetGridx(1)
         canvas.RedrawAxis()
