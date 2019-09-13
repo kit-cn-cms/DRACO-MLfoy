@@ -58,7 +58,7 @@ base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom >
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
-single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele32_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150 == 1))"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele32_WPTight_Gsf_vX == 1 or Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1))"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
@@ -91,7 +91,7 @@ ntuplesPath = "/nfs/dust/cms/user/vdlinden/ttZAnalysis/ntuples/"
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttH",
-    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_1/*nominal*.root",
     categories  = ttH_categories,
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)",
@@ -99,7 +99,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "ttbar",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_1/*nominal*.root",
     categories  = ttbar_categories,
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)"
@@ -107,10 +107,10 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "ttZ",
-    ntuples     = ntuplesPath+"/TTZToBB_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/TTZToBB_TuneCP5_13TeV-amcatnlo-pythia8_1/*nominal*.root",
     categories  = ttZ_categories,
     even_odd    = options.even_odd_splitting,
-    selections  = "(GenEvt_I_TTZ==1)"
+    selections  = "(Evt_Odd==1)"
     )
 
 # initialize variable list 

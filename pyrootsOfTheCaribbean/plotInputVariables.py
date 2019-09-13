@@ -119,40 +119,37 @@ plotter = variablePlotter(
 naming = options.naming
 # add signal samples
 plotter.addSample(
-    sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttH"+naming,
-    plotColor       = ROOT.kBlue+1,
+    sampleName      = "tt+Z",
+    sampleFile      = data_dir+"/ttZ"+naming,
+    plotColor       = ROOT.kOrange+7,
     signalSample    = True)
 
 # add background samples
 plotter.addSample(
-    sampleName      = "ttbb",
+    sampleName      = "tt+bb",
     sampleFile      = data_dir+"/ttbb"+naming,
-    plotColor       = ROOT.kRed+3)
+    plotColor       = ROOT.kAzure+3)
 
 plotter.addSample(
-    sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b"+naming,
-    plotColor       = ROOT.kRed+2)
-
-plotter.addSample(
-    sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb"+naming,
-    plotColor       = ROOT.kRed-2)
-
-plotter.addSample(
-    sampleName      = "ttcc",
+    sampleName      = "tt+cc",
     sampleFile      = data_dir+"/ttcc"+naming,
-    plotColor       = ROOT.kRed+1)
+    plotColor       = ROOT.kAzure+8)
 
 plotter.addSample(
-    sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf"+naming)
+    sampleName      = "tt+lf",
+    sampleFile      = data_dir+"/ttlf"+naming,
+    plotColor       = ROOT.kAzure-9)
 
+plotter.addSample(
+    sampleName      = "tt+H",
+    sampleFile      = data_dir+"/ttH"+naming,
+    plotColor       = ROOT.kRed+1)
 
 
 # add JT categories
-plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge6j_ge3t")
+plotter.addCategory("5j_ge3t")
+plotter.addCategory("4j_ge3t")
 
 
 # perform plotting routine
