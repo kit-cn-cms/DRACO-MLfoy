@@ -54,15 +54,15 @@ Evt_Pt_MET,20,400,50,x,p_{T}(MET)
 Evt_Pt_MinDeltaRJets,20,600,50,x,p_{T} of min #DeltaR(jet jet)
 Evt_Pt_MinDeltaRTaggedJets,20,500,50,-,p_{T} of min #DeltaR(tag tag)
 Evt_Pt_MinDeltaRUntaggedJets,0,1500,50,-,p_{T} min #DeltaR(untagged untagged)
-Evt_Pt_PrimaryLepton,50,300,30,x,p_{T}(lep)
+Evt_Pt_PrimaryLepton,50,300,50,x,p_{T}(lep)
 Evt_blr_ETH,0,1,50,x,b-tag likelihood ratio
 Evt_blr_ETH_transformed,-6,12,50,x,transformed b-tag likelihood ratio
 Evt_TaggedJet_MaxDeta_Jets,0.,4.,50,-,max #Delta#eta(jets)
 Evt_TaggedJet_MaxDeta_TaggedJets,0.,5.,50,-,max #Delta#eta(tags)
-Jet_CSV[0],0,1,50,-,Jet CSV[0]
-Jet_CSV[1],0,1,50,-,Jet CSV[1]
-Jet_CSV[2],0,1,50,-,Jet CSV[2]
-Jet_CSV[3],0,1,50,-,Jet CSV[3]
+Jet_CSV[0],0,1,50,-,b-tag value of hardest jet
+Jet_CSV[1],0,1,50,-,b-tag value of second hardest jet
+Jet_CSV[2],0,1,50,-,b-tag value of third hardest jet
+Jet_CSV[3],0,1,50,-,b-tag value of fourth hardest jet
 Jet_CSV_DNN[0],-2,1,50,-,Jet CSV DNN[0]
 Jet_CSV_DNN[1],-2,1,50,-,Jet CSV DNN[1]
 Jet_CSV_DNN[2],-2,1,50,-,Jet CSV DNN[2]
@@ -82,7 +82,7 @@ Jet_Eta[5],-2.4,2.4,50,-,#eta of sixth jet
 Jet_M[0],0.,100,50,-,mass of leading jet
 Jet_M[1],0.,60,50,-,mass of subleading jet
 Jet_M[2],0.,40,50,-,mass of third jet
-Jet_M[3],0.,50,30,-,mass of fourth jet
+Jet_M[3],0.,50,50,-,mass of fourth jet
 Jet_M[4],0.,20,50,-,mass of fifth jet
 Jet_M[5],0.,20,50,-,mass of sixth jet
 Jet_Phi[0],-3.14159265358979,3.14159265358979,50,-,#phi of leading jet
@@ -93,10 +93,10 @@ Jet_Phi[4],-3.14159265358979,3.14159265358979,50,-,#phi of fifth jet
 Jet_Phi[5],-3.14159265358979,3.14159265358979,50,-,#phi of sixth jet
 Jet_Pt[0],0,600,50,x,p_{T} of leading jet
 Jet_Pt[1],0,500,50,x,p_{T} of subleading jet
-Jet_Pt[2],50,300,30,x,p_{T} of third jet
-Jet_Pt[3],50,200,30,x,p_{T} of fourth jet
-Jet_Pt[4],50,150,30,x,p_{T} of fifth jet
-Jet_Pt[5],50,100,30,x,p_{T} of sixth jet
+Jet_Pt[2],50,300,50,x,p_{T} of third jet
+Jet_Pt[3],50,200,50,x,p_{T} of fourth jet
+Jet_Pt[4],50,150,50,x,p_{T} of fifth jet
+Jet_Pt[5],50,100,50,x,p_{T} of sixth jet
 LooseLepton_E[0],0,600,50,-,E(lep)
 LooseLepton_Eta[0],-2.4,2.4,50,-,#eta(lep)
 LooseLepton_M[0],-0.5,0.5,50,-,M(lep)
@@ -827,4 +827,29 @@ dnn_Z_vs_hf,-1.0,1.0,50,-,dnn_Z_vs_hf
 dnn_Z_vs_lf,-1.0,1.0,50,-,dnn_Z_vs_lf
 dnn_lf_vs_cc,-1.0,1.0,50,-,dnn_lf_vs_cc
 dnn_lf_vs_hf,-1.0,1.0,50,-,dnn_lf_vs_hf
+Evt_M2_maxCSVTaggedJets,0.,300.,50,-,M_{2}(tagged jets with highest b-tag value)
+Evt_blr,0.0,1.0,50,-,b-tag likelihood ratio
+Evt_blr_transformed,-2.86829805374,17.8627166748,50,-,transformed b-tag likelihood ratio
+RecoTTZ_Chi2TopHad_log,-24.5673732758,10.1887340546,50,-,ttZ Reconstruction log(#chi^{2}(t_{had}))
+RecoTTZ_Chi2TopLep_log,-24.2190952301,9.60235309601,50,-,ttZ Reconstruction log(#chi^{2}(t_{lep}))
+RecoTTZ_Chi2Total_log,-6.00851917267,11.3768110275,50,-,ttZ Reconstruction log(#chi^{2})
+RecoTTZ_Chi2WHad_log,-29.1417598724,11.0120334625,50,-,ttZ Reconstruction log(#chi^{2}(W_{had}))
+RecoTTZ_TopHad_BJet_M,1.13122916222,304.382843018,50,-,ttZ Reconstruction M(b_{had})
+RecoTTZ_TopHad_BJet_M_log,0.123304843903,5.71828651428,50,-,ttZ Reconstruction log(M(b_{had}))
+RecoTTZ_TopHad_M_log,4.00399398804,8.06792068481,50,-,ttZ Reconstruction log(M(t_{had}))
+RecoTTZ_TopHad_W_M,16.2669963837,3013.10668945,50,-,ttZ Reconstruction M(W_{had})
+RecoTTZ_TopHad_W_M_log,2.78913831711,8.01072692871,50,-,ttZ Reconstruction log(M(W_{had}))
+RecoTTZ_TopLep_BJet_M,1.68994927406,252.714675903,50,-,ttZ Reconstruction M(b_{lep})
+RecoTTZ_TopLep_BJet_M_log,0.52469855547,5.53226089478,50,-,ttZ Reconstruction log(M(b_{lep}))
+RecoTTZ_TopLep_M_log,4.53584671021,8.11102485657,50,-,ttZ Reconstruction log(M(t_{lep}))
+RecoTTZ_TopLep_W_M,83.6992645264,3258.68725586,50,-,ttZ Reconstruction M(W_{lep})
+RecoTTZ_TopLep_W_M_log,4.42723035812,8.08907985687,50,-,ttZ Reconstruction log(M(W_{lep}))
+Jet_CSV[4],0.00115541252308,0.999999046326,50,-,b-tag value of fifth hardest jet
+RecoTTZ_Chi2Z_log,-23.1747741699,8.63773536682,50,-,ttZ Reconstruction log(#chi^{2}(Z))
+RecoTTZ_Z_BJet1_M,1.73508512974,255.303955078,50,-,ttZ Reconstruction M(b_{Z})[0]
+RecoTTZ_Z_BJet1_M_log,0.55105650425,5.54245471954,50,-,ttZ Reconstruction log(M(b_{Z}))[0]
+RecoTTZ_Z_BJet2_M,0.384209156036,4.77833557129,50,-,ttZ Reconstruction M(b_{Z})[1]
+RecoTTZ_Z_BJet2_M_log,-999.0,-999.0,50,-,ttZ Reconstruction log(M(b_{Z}))[1]
+RecoTTZ_Z_M_log,2.95549201965,7.00369930267,50,-,ttZ Reconstruction log(M(Z))
+Jet_CSV[5],0.00120436050929,0.999998629093,50,-,b-tag value of sixth hardest jet
 
