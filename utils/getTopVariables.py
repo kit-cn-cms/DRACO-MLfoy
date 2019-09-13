@@ -18,6 +18,26 @@ import generateJTcut
 nameConfig = basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv"
 translationFile = pd.read_csv(nameConfig, sep = ",").set_index("variablename", drop = True)
 
+def makeLatexCompatible(text):
+    text = text.replace("#Delta","$\\Delta$")
+    text = text.replace("#eta","$\\eta$")
+    text = text.replace("#phi","$\\phi$")
+    text = text.replace("p_{T}","$p_{\\text{T}}$")
+    text = text.replace("H_{T}","$H_{\\text{T}}$")
+    text = text.replace("#chi^{2}","$\\chi^{2}$")
+    text = text.replace("M_{2}","$M_{2}$")
+    text = text.replace("t_{had}","$\\text{t}_{\\text{had}}$")
+    text = text.replace("b_{had}","$\\text{b}_{\\text{had}}$")
+    text = text.replace("W_{had}","$\\text{W}_{\\text{had}}$")
+    text = text.replace("t_{lep}","$\\text{t}_{\\text{lep}}$")
+    text = text.replace("b_{lep}","$\\text{b}_{\\text{lep}}$")
+    text = text.replace("W_{lep}","$\\text{W}_{\\text{lep}}$")
+
+    text = text.replace("$$","")
+    return text
+
+
+
 usage = "python getTopVariables.py [options] [jtCategories]"
 parser = optparse.OptionParser(usage=usage)
 parser.add_option("-w","--workdir",dest="workdir",default=basedir+"/workdir/",
@@ -35,6 +55,8 @@ parser.add_option("-v","--variableset",dest="generate_variableset",default=False
     help = "generate new variable set from variable rankings")
 parser.add_option("--nvset",dest="nvset",default=30,type=int,
     help = "number of variables written to variable set (-1 for all).")
+parser.add_option("-l","--latex",dest="latex",default=False,action="store_true",
+    help = "generate latex table of new variable sets")
 parser.add_option("-t", "--type", dest = "weight_type",default="absolute",
     help = "type of variable ranking (i.e. name of weight file TYPE_weight_sum.csv), e.g. 'absolute', 'propagated', 'first_layer'")
 
@@ -48,7 +70,7 @@ if not os.path.exists(opts.outdir):
     os.makedirs(opts.outdir)
 
 
-sorted_variables = {}
+sorted_varNames = {}
 for jtcat in args:
     print("\n\nhandling category {}\n\n".format(jtcat))
     jtpath = inputdir.replace("JTSTRING",jtcat)
@@ -74,17 +96,19 @@ for jtcat in args:
 
     # generate lists sorted by mean variable importance
     var = []
+    varNames = []
     mean = []
     std = []
     maxvalue = 0
     for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
+        varNames.append(v)
         var.append(translationFile.loc[v,"displayname"])
         mean.append(m)
         std.append( np.std(variables[v]) )
         print(v,m)
         if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
 
-    sorted_variables[jtcat] = var
+    sorted_varNames[jtcat] = varNames
 
     if opts.plot:
         if not opts.nplot == -1:
@@ -94,15 +118,16 @@ for jtcat in args:
 
         nvariables = len(var)
 
-        canvas = ROOT.TCanvas("","",nvariables*50, 1000)
-        canvas.SetBottomMargin(canvas.GetBottomMargin()*4)
-        graph = ROOT.TH1F("","",nvariables+3,1,nvariables+4)
+        canvas = ROOT.TCanvas("","",nvariables*50, 1500)
+        canvas.SetBottomMargin(canvas.GetBottomMargin()*5)
+        canvas.SetLeftMargin(canvas.GetLeftMargin()*2)
+        graph = ROOT.TH1F("","",nvariables+2,1,nvariables+3)
         graph.SetName("variableRanking")
         graph.SetStats(False)
         for i in range(nvariables):
-            graph.SetBinContent(nvariables-i+3, mean[i])
-            graph.SetBinError(nvariables-i+3, std[i]+0.001)
-            graph.GetXaxis().SetBinLabel(nvariables-i+3, var[i])
+            graph.SetBinContent(nvariables-i+2, mean[i])
+            graph.SetBinError(nvariables-i+2, std[i]+0.001)
+            graph.GetXaxis().SetBinLabel(nvariables-i+2, var[i])
         graph.GetYaxis().SetTitle("mean of sum of input weights")
         graph.LabelsOption("v")
         graph.SetTitle("")
@@ -121,10 +146,10 @@ for jtcat in args:
 
 if opts.generate_variableset:
     string = "variables = {}\n"
-    for jt in sorted_variables:
+    for jt in sorted_varNames:
         string += "\nvariables[\"{}\"] = [\n".format(jt)
 
-        variables = sorted_variables[jt]
+        variables = sorted_varNames[jt]
         if not opts.nvset==-1:
             variables = variables[-opts.nvset:]
 
@@ -139,3 +164,40 @@ if opts.generate_variableset:
     with open(outfile,"w") as f:
         f.write(string)
     print("wrote variable set to {}".format(outfile))
+
+    if opts.latex:
+        jtRegions = list(sorted([jt for jt in sorted_varNames]))
+        table = "\\begin{tabular}{l|"+"r"*len(sorted_varNames)+"}\n"
+        table+= "\\midrule\n"
+        table+= "       & "+" & ".join([generateJTcut.getJTlabel(jt).replace("\\geq","$\\geq$").replace("\\leq","$\\leq$") for jt in jtRegions])+"\\\\\n"
+        
+        # join all variables
+        tableVariables = {}
+        allVariables = []
+        for jt in jtRegions:
+            variables = sorted_varNames[jt]
+            if not opts.nvset==-1:
+                tableVariables[jt] = variables[-opts.nvset:]
+            else:
+                tableVariables[jt] = variables
+            allVariables+=tableVariables[jt]
+        allVariables = list(sorted(set(allVariables)))
+
+        for v in allVariables:
+            table += makeLatexCompatible(translationFile.loc[v,"displayname"])
+            for jt in jtRegions:
+                table += " & "
+                if v in tableVariables[jt]:
+                    table += " \\checkmark "
+                else:
+                    table += " --- "
+            table += "\\\\\n"
+        table += "\\midrule\n"
+        table += "\\end{tabular}"
+        outfile = opts.outdir+"/variableSetTable.txt"
+        with open(outfile, "w") as f:
+            f.write(table)
+        print("wrote latex table to {}".format(outfile))
+
+
+
