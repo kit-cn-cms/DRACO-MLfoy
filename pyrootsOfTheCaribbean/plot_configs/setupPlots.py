@@ -15,10 +15,10 @@ def translateName(name):
 
     name = name.replace("ttZ","t#bar{t}+Z")
     name = name.replace("ttH","t#bar{t}+H")
-    name = name.replace("ttbb","t#bar{t}+b#bar{t}")
+    name = name.replace("ttbb","t#bar{t}+b#bar{b}")
     name = name.replace("ttlf","t#bar{t}+lf")
     name = name.replace("ttcc","t#bar{t}+c#bar{c}")
-
+    return name
 
 # dictionary for colors
 def GetPlotColor( cls ):
