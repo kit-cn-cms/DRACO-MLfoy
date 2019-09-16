@@ -1,0 +1,36 @@
+variables = {}
+
+variables["ge6j_ge3t"] = [
+    "Evt_h0",
+    "N_BTagsL",
+    "Evt_M3_oneTagged",
+    "Evt_sphericity",
+    "Evt_CSV_min_tagged",
+    "Evt_CSV_dev_tagged",
+    "Evt_Pt_TaggedJetsAverage",
+    "Evt_HT_tags",
+    "Evt_M2_closestTo125TaggedJets",
+    "CSV[1]",
+    "Evt_JetPt_over_JetE",
+    "Evt_M_Total",
+    "Evt_CSV_avg_tagged",
+    "Evt_M2_JetsAverage",
+    "Evt_h1",
+    "Evt_E_TaggedJetsAverage",
+    "Evt_HT",
+    "Evt_M2_TaggedJetsAverage",
+    "Evt_HT_wo_MET",
+    "Evt_HT_jets",
+    "Evt_Deta_JetsAverage",
+    "Jet_Pt[0]",
+    "N_BTagsM",
+    "Evt_M2_closestTo91TaggedJets",
+    "Evt_M_TaggedJetsAverage",
+    "Evt_CSV_dev",
+    "Evt_Deta_TaggedJetsAverage",
+    "Evt_Pt_minDrTaggedJets",
+    "CSV[3]",
+    "CSV[2]",
+    ]
+
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))

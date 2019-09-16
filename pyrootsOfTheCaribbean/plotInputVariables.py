@@ -49,6 +49,8 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
 parser.add_option("--lumiscale", dest="lumiScale", default=41.5,
         help="FLOAT to scale Luminosity", metavar="lumiScale")
 
+parser.add_option("--corr",dest="correlationMatrix",default=False,action="store_true",
+        help="activate plotting of correlation matrix")
 
 (options, args) = parser.parse_args()
 
@@ -153,4 +155,4 @@ plotter.addCategory("4j_ge3t")
 
 
 # perform plotting routine
-plotter.plot(saveKSValues = options.KSscore)
+plotter.plot(saveKSValues = options.KSscore, plotCorrelationMatrix = options.correlationMatrix)
