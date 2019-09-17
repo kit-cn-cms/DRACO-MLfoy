@@ -45,11 +45,11 @@ N_BTagsL,2.5,6.5,4,x,number of b-tags (loose),number of b-tags (loose)
 N_BTagsM,2.5,5.5,3,x,number of b-tags (medium),number of b-tags (medium)
 RecoTTZ_Chi2TopHad,0,100,40,x,t#bar{t}+Z reconstruction #chi^{2}(t_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}(\text{t}_{\text{had}})$
 RecoTTZ_Chi2Total,0,150,40,x,t#bar{t}+Z reconstruction #chi^{2},$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}$
-RecoTTZ_Chi2Total_log,-3,9,40,-,t#bar{t}+Z reconstruction #chi^{2}_{log},$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}_{\text{log}}$
+RecoTTZ_Chi2Total_log,-3,9,40,-,t#bar{t}+Z reconstruction ln(#chi^{2}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
 RecoTTZ_Chi2WHad,0,40,40,x,t#bar{t}+Z reconstruction #chi^{2}(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}(\text{W}_{\text{had}})$
-RecoTTZ_Chi2WHad_log,-10,10,40,-,t#bar{t}+Z reconstruction #chi^{2}_{log}(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}_{\text{log}}(\text{W}_{\text{had}})$
+RecoTTZ_Chi2WHad_log,-10,10,40,-,t#bar{t}+Z reconstruction ln(#chi^{2})(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})(\text{W}_{\text{had}})$
 RecoTTZ_Chi2Z,0,100,40,x,t#bar{t}+Z reconstruction #chi^{2}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}(\text{Z})$
-RecoTTZ_Chi2Z_log,-10,7,40,-,t#bar{t}+Z reconstruction #chi^{2}_{log}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}_{\text{log}}(\text{Z})$
+RecoTTZ_Chi2Z_log,-10,7,40,-,t#bar{t}+Z reconstruction ln(#chi^{2})(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})(\text{Z})$
 RecoTTZ_TopHad_M,100,500,40,-,t#bar{t}+Z reconstruction m(t_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{t}_{\text{had}})$
 RecoTTZ_TopHad_Pt,0,500,40,-,t#bar{t}+Z reconstruction p_{T}(t_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{t}_{\text{had}})$
 RecoTTZ_TopHad_W_M,20,500,40,-,t#bar{t}+Z reconstruction m(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{W}_{\text{had}})$
@@ -57,5 +57,5 @@ RecoTTZ_TopLep_BJet_Pt,30,300,40,-,t#bar{t}+Z reconstruction p_{T}(b_{lep}),$\te
 RecoTTZ_TopLep_W_M,80,100,40,-,t#bar{t}+Z reconstruction m(W_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{W}_{\text{lep}})$
 RecoTTZ_Z_BJet2_Pt,30,150,40,-,t#bar{t}+Z reconstruction p_{T}(b_{Z}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}})$
 RecoTTZ_Z_M,20,300,40,-,t#bar{t}+Z reconstruction m(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{Z})$
-RecoTTZ_Z_M_log,3.5,6,40,-,t#bar{t}+Z reconstruction m_{log}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m_{\text{log}}(\text{Z})$
+RecoTTZ_Z_M_log,3.5,6,40,-,t#bar{t}+Z reconstruction ln(m)(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
 RecoTTZ_Z_Pt,0,500,40,-,t#bar{t}+Z reconstruction p_{T}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$
