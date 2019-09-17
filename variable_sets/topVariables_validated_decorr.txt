@@ -3,11 +3,10 @@
        & 4 jets, $\geq$ 3 b-tags & 5 jets, $\geq$ 3 b-tags & $\geq$ 6 jets, $\geq$ 3 b-tags\\
 third highest b-tag value &  \checkmark  &  \checkmark  &  --- \\
 fourth highest b-tag value &  \checkmark  &  \checkmark  &  \checkmark \\
-average b-tag value &  ---  &  \checkmark  &  \checkmark \\
+average b-tag value &  ---  &  ---  &  \checkmark \\
 average b-tag value of tagged jets &  \checkmark  &  \checkmark  &  --- \\
 average deviation of b-tag value &  \checkmark  &  \checkmark  &  \checkmark \\
-minimal b-tag value &  \checkmark  &  \checkmark  &  --- \\
-minimal b-tag value of tagged jets &  \checkmark  &  ---  &  --- \\
+minimal b-tag value &  ---  &  \checkmark  &  --- \\
 $\Delta\eta^{\text{j},\text{j}}_{\text{avg}}$ &  \checkmark  &  ---  &  \checkmark \\
 $\Delta\eta^{\text{b},\text{b}}_{\text{avg}}$ &  \checkmark  &  \checkmark  &  \checkmark \\
 $\DeltaR^{\text{j},\text{j}}_{\text{avg}}$ &  ---  &  \checkmark  &  --- \\
