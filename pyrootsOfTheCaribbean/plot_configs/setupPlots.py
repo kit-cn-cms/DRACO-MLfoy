@@ -178,7 +178,7 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
-    canvas.SetBottomMargin(0.15)
+    canvas.SetBottomMargin(0.18)
     canvas.SetRightMargin(0.15)
     canvas.SetLeftMargin(0.15)
     canvas.SetTicks(1,1)

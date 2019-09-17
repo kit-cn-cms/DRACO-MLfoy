@@ -121,8 +121,8 @@ for jtcat in args:
 
         nvariables = len(var)
 
-        canvas = ROOT.TCanvas("","",nvariables*50, 1500)
-        canvas.SetBottomMargin(canvas.GetBottomMargin()*5)
+        canvas = ROOT.TCanvas("","",nvariables*80, 1500)
+        canvas.SetBottomMargin(canvas.GetBottomMargin()*4)
         canvas.SetLeftMargin(canvas.GetLeftMargin()*2)
         graph = ROOT.TH1F("","",nvariables+1,1,nvariables+2)
         graph.SetName("variableRanking")
@@ -131,7 +131,7 @@ for jtcat in args:
             graph.SetBinContent(nvariables-i+1, mean[i])
             graph.SetBinError(nvariables-i+1, std[i])
             graph.GetXaxis().SetBinLabel(nvariables-i+1, var[i])
-        graph.GetYaxis().SetTitle("mean of sum of input weights")
+        graph.GetYaxis().SetTitle("importance measure")
         graph.LabelsOption("v")
         graph.SetTitle("")
         graph.SetMarkerStyle(20)
