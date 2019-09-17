@@ -1,0 +1,41 @@
+\begin{tabular}{l|rrr}
+\midrule
+       & 4 jets, $\geq$ 3 b-tags & 5 jets, $\geq$ 3 b-tags & $\geq$ 6 jets, $\geq$ 3 b-tags\\
+third highest b-tag value &  \checkmark  &  \checkmark  &  --- \\
+fourth highest b-tag value &  \checkmark  &  \checkmark  &  \checkmark \\
+average b-tag value &  ---  &  \checkmark  &  \checkmark \\
+average b-tag value of tagged jets &  \checkmark  &  \checkmark  &  --- \\
+average deviation of b-tag value &  \checkmark  &  \checkmark  &  \checkmark \\
+minimal b-tag value &  \checkmark  &  \checkmark  &  --- \\
+minimal b-tag value of tagged jets &  \checkmark  &  ---  &  --- \\
+$\Delta\eta^{\text{j},\text{j}}_{\text{avg}}$ &  \checkmark  &  ---  &  \checkmark \\
+$\Delta\eta^{\text{b},\text{b}}_{\text{avg}}$ &  \checkmark  &  \checkmark  &  \checkmark \\
+$\DeltaR^{\text{j},\text{j}}_{\text{avg}}$ &  ---  &  \checkmark  &  --- \\
+$\DeltaR^{\text{b},\text{b}}_{\text{avg}}$ &  ---  &  \checkmark  &  --- \\
+$\DeltaR^{\text{j},\text{j}}_{\text{min}}$ &  \checkmark  &  \checkmark  &  --- \\
+$\DeltaR^{\text{b},\text{b}}_{\text{min}}$ &  \checkmark  &  \checkmark  &  --- \\
+$m^{\text{b},\text{b}}_{\text{avg}}$ &  ---  &  \checkmark  &  \checkmark \\
+$m^{\text{b},\text{b}}$ closest to 125 GeV &  \checkmark  &  \checkmark  &  \checkmark \\
+$m^{\text{b},\text{b}}$ closest to 91 GeV &  \checkmark  &  \checkmark  &  \checkmark \\
+$m(\DeltaR^{\text{j},\text{j}}_{\text{min}})$ &  ---  &  \checkmark  &  --- \\
+$m(\DeltaR^{\text{b},\text{b}}_{\text{min}})$ &  ---  &  ---  &  \checkmark \\
+missing $H_{\text{T}}$ &  \checkmark  &  ---  &  --- \\
+$m^{\text{b}}_{\text{avg}}$ &  ---  &  \checkmark  &  \checkmark \\
+$m_{\text{tot}}$ &  ---  &  \checkmark  &  --- \\
+$p_{\text{T},\,\text{avg}}^{\text{b},\text{b}}$ &  \checkmark  &  ---  &  --- \\
+$p_{\text{T}}(\DeltaR^{\text{j},\text{j}}_{\text{min}})$ &  ---  &  \checkmark  &  --- \\
+$p_{\text{T}}(\DeltaR^{\text{b},\text{b}}_{\text{min}})$ &  ---  &  ---  &  \checkmark \\
+b-tag likelihood ratio &  ---  &  \checkmark  &  \checkmark \\
+transformed b-tag likelihood ratio &  \checkmark  &  \checkmark  &  \checkmark \\
+second fox wolfram moment &  ---  &  \checkmark  &  --- \\
+$p_{\text{T}}$ of leading jet &  ---  &  ---  &  \checkmark \\
+number of b-tags (medium) &  ---  &  ---  &  \checkmark \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})$ &  \checkmark  &  \checkmark  &  --- \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})(\text{W}_{\text{had}})$ &  \checkmark  &  \checkmark  &  --- \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})(\text{Z})$ &  ---  &  ---  &  \checkmark \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{t}_{\text{had}})$ &  \checkmark  &  ---  &  --- \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{W}_{\text{had}})$ &  \checkmark  &  ---  &  --- \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$ &  ---  &  ---  &  \checkmark \\
+$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$ &  ---  &  ---  &  \checkmark \\
+\midrule
+\end{tabular}
