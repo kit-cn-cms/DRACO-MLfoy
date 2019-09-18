@@ -349,7 +349,7 @@ class DataFrame(object):
 
     def get_test_labels(self, as_categorical = True):
         if self.binary_classification: return self.df_test["binaryTarget"].values
-        if self.regression: return self.df_test[self.classes]
+        if self.regression: return self.df_test[self.classes].values
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 

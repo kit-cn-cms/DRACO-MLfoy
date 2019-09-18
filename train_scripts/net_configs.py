@@ -247,7 +247,7 @@ config_dict["ttH_STXS"] = {
         "earlystopping_epochs":     100,
         }
 config_dict["regress_STXS"] = {
-        "layers":                   [100,100,100],
+        "layers":                   [10,10,10],
         "loss_function":            "mean_squared_error",
         "Dropout":                  0.50,
         "L2_Norm":                  1e-5,

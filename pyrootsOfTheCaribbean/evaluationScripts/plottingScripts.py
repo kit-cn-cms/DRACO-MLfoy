@@ -528,6 +528,31 @@ class plotClosureTest:
 
 
 
+class plotRegressionMatrix:
+    def __init__(self, data, prediction_vector, plotdir, event_classes, event_category, nbins = 100):
+        self.data               = data
+        self.prediction_vector  = prediction_vector
+        self.plotdir            = plotdir
+        self.event_classes      = event_classes
+        self.nbins              = nbins
+        self.event_category     = event_category
+        #print(self.data.get_test_labels().T[0])
+
+    def plot(self, privateWork = False, printCOR = True):
+        # loop over all regression variables
+        for i, regVar in enumerate(self.data.classes):
+            name = regVar+"_regressionMatrix"
+            # initialize Histogram
+            rm = setup.setupRegressionMatrix(
+                inputVec    = self.data.get_test_labels().T[0],#[:,i],
+                outputVec   = self.prediction_vector[:,i],
+                nbins       = self.nbins,
+                ytitle      = regVar,
+                axisMax     = 400)
+
+            #print(self.prediction_vector[:,i])
+            canvas = setup.drawRegressionMatrixOnCanvas(rm, name, self.event_category, printCOR, privateWork = privateWork)
+            setup.saveCanvas(canvas, self.plotdir+"/"+name+".pdf")
 
 
 class plotConfusionMatrix:
@@ -550,7 +575,7 @@ class plotConfusionMatrix:
         self.ROCScore = None
 
     def plot(self, norm_matrix = True, privateWork = False, printROC = False):
-        if printROC:
+        if printROC and not self.data.input_sample.regression:
             self.ROCScore = roc_auc_score(
                 self.data.get_test_labels(), self.prediction_vector)
 

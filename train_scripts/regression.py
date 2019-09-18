@@ -94,6 +94,7 @@ if options.doPlots():
 
     elif options.isRegression():
         print("no plots implemented yet - you chose to regret!")
+        dnn.plot_regressionMatrix(privateWork = options.isPrivateWork())
     else:
         # plot the confusion matrix
         dnn.plot_confusionMatrix(

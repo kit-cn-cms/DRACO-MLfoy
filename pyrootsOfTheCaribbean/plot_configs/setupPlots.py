@@ -152,6 +152,32 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
 
     return cm
 
+def setupRegressionMatrix(inputVec, outputVec, nbins, ytitle, axisMin=None, axisMax=None):
+    # init histogram
+    if not axisMin:    
+        axisMin = min(min(inputVec),min(outputVec))
+    if not axisMax:
+        axisMax = max(max(inputVec),max(outputVec))
+    rm = ROOT.TH2D("regression matrix", "", nbins, axisMin, axisMax, nbins, axisMin, axisMax)
+    rm.SetStats(False)
+
+    for i,o in zip(inputVec,outputVec):
+        rm.Fill(o,i)
+
+    # loop over bins, get maximum and fill empty bins
+    maximum = 0
+    for xit in range(rm.GetNbinsX()+1):
+        for yit in range(rm.GetNbinsY()+1):
+            maximum = max(maximum,rm.GetBinContent(xit,yit))
+            if (rm.GetBinContent(xit,yit)==0.0):
+                rm.SetBinContent(xit,yit,0.0001)
+
+    rm.GetXaxis().SetTitle("regressed "+ytitle)
+    rm.GetYaxis().SetTitle(ytitle)
+    rm.GetZaxis().SetRangeUser(0,maximum)
+    
+    return rm
+
 
 
 # ===============================================
@@ -195,6 +221,42 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
             latex.DrawLatex(l+0.4,1.-t+0.01, text)
         else:
             latex.DrawLatex(l+0.47,1.-t+0.01, text)
+
+    return canvas
+
+def drawRegressionMatrixOnCanvas(matrix, canvasName, catLabel, COR = False, privateWork = False):
+    # init canvas
+    canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
+    canvas.SetTopMargin(0.15)
+    canvas.SetBottomMargin(0.15)
+    canvas.SetRightMargin(0.15)
+    canvas.SetLeftMargin(0.15)
+    canvas.SetTicks(1,1)
+
+    # draw histogram
+    #ROOT.gStyle.SetPalette(69)
+    draw_option = "colz"
+    matrix.DrawCopy(draw_option)
+
+    # setup TLatex
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextColor(ROOT.kBlack)
+    latex.SetTextSize(0.03)
+
+    l = canvas.GetLeftMargin()
+    t = canvas.GetTopMargin()
+
+    # add category label
+    latex.DrawLatex(l,1.-t+0.01, catLabel)
+
+    if privateWork:
+        latex.DrawLatex(l, 1.-t+0.04, "CMS private work")
+
+    # add COR if activated
+    if COR:
+        text = "Correlation = {:.3f}".format(matrix.GetCorrelationFactor())
+        latex.DrawLatex(l+0.43, 1.-t+0.01, text)
 
     return canvas
 

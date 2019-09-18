@@ -343,7 +343,7 @@ class DNN():
                 verbose         = 1)]
 
         # train main net
-        print(self.data.get_train_labels())
+        #print(self.data.get_train_labels())
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
@@ -670,6 +670,17 @@ class DNN():
             plotdir             = self.save_path)
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
+
+    def plot_regressionMatrix(self, privateWork = False, printROC = False):
+        ''' plot regression matrix '''
+        plotRM = plottingScripts.plotRegressionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            plotdir             = self.save_path)
+
+        plotRM.plot(privateWork = privateWork)
 
     def plot_closureTest(self, log = False, privateWork = False,
                         signal_class = None, nbins = None, bin_range = None):
