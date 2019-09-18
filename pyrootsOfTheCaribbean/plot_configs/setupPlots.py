@@ -22,8 +22,8 @@ def GetPlotColor( cls ):
         "bkg":   ROOT.kOrange,
         }
 
-    if "ttZ" in cls: cls = "ttZ"
-    if "ttH" in cls: cls = "ttH"
+    if "ttZ" in cls and cls not in color_dict: cls = "ttZ"
+    if "ttH" in cls and cls not in color_dict: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
