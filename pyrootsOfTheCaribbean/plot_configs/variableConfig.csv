@@ -16,7 +16,7 @@ Evt_Dr_minDrJets,0.4,3,40,-,"#DeltaR^{j,j}_{min}","$\DeltaR^{\text{j},\text{j}}_
 Evt_Dr_minDrLepTag,0.4,3,40,-,"#DeltaR^{l,j}_{min}","$\DeltaR^{\ell,\text{j}}_{\text{min}}$"
 Evt_Dr_minDrTaggedJets,0.4,3.5,40,-,"#DeltaR^{b,b}_{min}","$\DeltaR^{\text{b},\text{b}}_{\text{min}}$"
 Evt_Dr_TaggedJetsAverage,0.5,3.5,40,-,"#DeltaR^{b,b}_{avg}","$\DeltaR^{\text{b},\text{b}}_{\text{avg}}$"
-Evt_h1,-0.2,0.35,40,-,second fox wolfram moment,second fox wolfram moment
+Evt_h1,-0.2,0.35,40,-,second Fox-Wolfram moment,second Fox-Wolfram moment
 Evt_HT,200,1200,40,-,H_{T},$H_{\text{T}}$
 Evt_HT_jets,200,1200,40,-,H_{T} of jets,$H_{\text{T}}$ of jets
 Evt_HT_tags,200,1200,40,-,H_{T} of tagged jets,$H_{\text{T}}$ of tagged jets

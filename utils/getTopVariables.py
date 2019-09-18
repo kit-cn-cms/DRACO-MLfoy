@@ -139,6 +139,7 @@ for jtcat in args:
         graph.SetMarkerColor(ROOT.kAzure-3)
         graph.SetLineColor(ROOT.kAzure-3)
         graph.SetLineWidth(2)
+        graph.GetXaxis().SetLabelSize(graph.GetXaxis().GetLabelSize()*20/nvariables)
         graph.Draw("PEX0")
         canvas.SetGridx(1)
         canvas.RedrawAxis()
