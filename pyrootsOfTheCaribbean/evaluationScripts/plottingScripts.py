@@ -542,8 +542,9 @@ class plotConfusionMatrix:
         self.event_category    = event_category
         self.plotdir           = plotdir
 
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        if not self.data.input_samples.regression:
+            self.confusion_matrix = confusion_matrix(
+                self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # default settings
         self.ROCScore = None

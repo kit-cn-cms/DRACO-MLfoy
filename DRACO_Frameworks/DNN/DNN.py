@@ -223,12 +223,14 @@ class DNN():
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        if not self.input_samples.regression:
+            self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        if not self.input_samples.regression:
+            self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+            print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
 
@@ -341,6 +343,7 @@ class DNN():
                 verbose         = 1)]
 
         # train main net
+        print(self.data.get_train_labels())
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
@@ -451,12 +454,14 @@ class DNN():
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        if not self.input_samples.regression:
+            self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        if not self.input_samples.regression:
+            self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+            print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
             print("model test loss: {}".format(self.model_eval[0]))

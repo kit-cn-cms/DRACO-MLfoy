@@ -60,6 +60,8 @@ plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", 
         help="activate to print ROC value for confusion matrix")
 plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
+sampleopts.add_option("--lumi",dest="lumi",default=None,
+        help="lumi for labelling the plots", metavar="lumi")
 parser.add_option_group(plotopts)
 
 binaryOptions = optparse.OptionGroup(parser, "Binary Options",
@@ -71,6 +73,13 @@ binaryOptions.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", de
 binaryOptions.add_option("--signal", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for binary classification (allows comma separated list) (same as --signalclass)")
 parser.add_option_group(binaryOptions)
+
+regressionOptions = optparse.OptionGroup(parser, "Regression Options", "settings for regression DNN training")
+regressionOptions.add_option("--regression", dest="regression", action = "store_true", default=False,
+        help="Activate to perform a regression instead of classificarion. Takes the targets passed to 'regression_target' as outputs.")
+regressionOptions.add_option("--regression_target", dest="regression_target", default=None,
+        help="Pass all names of target variables separated by ','", metavar="regression_target")
+parser.add_option_group(regressionOptions)
 
 
 class optionHandler:
@@ -235,3 +244,12 @@ class optionHandler:
 
     def getSignalScale(self):
         return self.__options.sigScale
+
+    def getLumi(self):
+        return self.__options.lumi
+
+    def isRegression(self):
+        return self.__options.regression
+
+    def getRegressionTarget(self):
+        return self.__options.regression_target

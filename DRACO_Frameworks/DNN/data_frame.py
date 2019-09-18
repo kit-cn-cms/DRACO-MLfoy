@@ -72,8 +72,10 @@ class Sample:
 class InputSamples:
     def __init__(self, input_path, activateSamples = None, test_percentage = 0.2):
         self.binary_classification = False
+        self.regression = False
         self.input_path = input_path
         self.samples = []
+        self.regressionTargets = []
         self.activate_samples = activateSamples
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
@@ -105,6 +107,13 @@ class InputSamples:
             else:
                 sample.isSignal = False
 
+    def addRegressionTarget(self,regression_target):
+        self.regression = True
+        if "," in regression_target:
+            self.regressionTargets = regression_target.split(",")
+        else:
+            self.regressionTargets = [regression_target]
+
 
 class DataFrame(object):
     ''' takes a path to a folder where one h5 per class is located
@@ -128,11 +137,14 @@ class DataFrame(object):
 
         self.event_category = event_category
         self.lumi = lumi
+        #if input_samples.lumi: self.lumi = input_samples.lumi
         self.evenSel = evenSel
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
 
+        self.regression = input_samples.regression
+        if self.regression: self.regressionTargets = input_samples.regressionTargets
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification: self.bkg_target = input_samples.bkg_target
 
@@ -146,36 +158,8 @@ class DataFrame(object):
         df = pd.concat(train_samples, sort=True)
         del train_samples
 
-        # multiclassification labelling
-        if not self.binary_classification:
-            # add class_label translation
-            index = 0
-            self.class_translation = {}
-            self.classes = []
-
-            for sample in input_samples.samples:
-                self.class_translation[sample.label] = index
-                self.classes.append(sample.label)
-                index += 1
-            self.index_classes = [self.class_translation[c] for c in self.classes]
-
-            # add flag for ttH to dataframe
-            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
-
-#            print(df["class_label"].values)
-
-            # add index labelling to dataframe
-            df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
-
-            # norm weights to mean(1)
-            df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
-
-            # save some meta data about network
-            self.n_input_neurons = len(train_variables)
-            self.n_output_neurons = len(self.classes)
-
         # binary classification labelling
-        else:
+        if self.binary_classification:
 
             # class translations
             self.class_translation = {}
@@ -206,6 +190,52 @@ class DataFrame(object):
 
             self.n_input_neurons = len(train_variables)
             self.n_output_neurons = 1
+
+        # regression labelling
+        elif self.regression:
+            #if "," in self.regression_target:
+            #    self.classes = self.regression_target.split(",")
+            #else:
+            #    self.classes = [self.regression_target]
+            self.classes = self.regressionTargets
+
+            # add flag for ttH to dataframe
+            df["is_ttH"] = pd.Series( [1 if ("ttH" in c) else 0 for c in df["class_label"].values], index = df.index )
+
+            # norm weights to mean(1)
+            df["train_weight"] = df["train_weight"]*df.shape[0]
+
+            # save some meta data about network
+            self.n_input_neurons = len(train_variables)
+            self.n_output_neurons = len(self.classes)
+            
+        # multiclassification labelling
+        else:
+            # add class_label translation
+            index = 0
+            self.class_translation = {}
+            self.classes = []
+
+            for sample in input_samples.samples:
+                self.class_translation[sample.label] = index
+                self.classes.append(sample.label)
+                index += 1
+            self.index_classes = [self.class_translation[c] for c in self.classes]
+
+            # add flag for ttH to dataframe
+            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+
+#            print(df["class_label"].values)
+
+            # add index labelling to dataframe
+            df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
+
+            # norm weights to mean(1)
+            df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
+
+            # save some meta data about network
+            self.n_input_neurons = len(train_variables)
+            self.n_output_neurons = len(self.classes)
 
         # shuffle dataframe
         if not self.shuffleSeed:
@@ -298,6 +328,7 @@ class DataFrame(object):
 
     def get_train_labels(self, as_categorical = True):
         if self.binary_classification: return self.df_train["binaryTarget"].values
+        if self.regression: return self.df_train[self.classes]
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
 
@@ -318,6 +349,7 @@ class DataFrame(object):
 
     def get_test_labels(self, as_categorical = True):
         if self.binary_classification: return self.df_test["binaryTarget"].values
+        if self.regression: return self.df_test[self.classes]
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values
 

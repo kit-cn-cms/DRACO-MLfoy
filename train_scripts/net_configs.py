@@ -234,3 +234,27 @@ config_dict["ttHbb_2017_DL"] = {
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
         }
+config_dict["ttH_STXS"] = {
+        "layers":                   [100,100,100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        }
+config_dict["regress_STXS"] = {
+        "layers":                   [100,100,100],
+        "loss_function":            "mean_squared_error",
+        "Dropout":                  0.50,
+        "L2_Norm":                  1e-5,
+        "batch_size":               100,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "linear",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        }
