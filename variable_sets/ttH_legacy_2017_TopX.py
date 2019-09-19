@@ -73,7 +73,6 @@ variables["ge4j_ge4t"] = [
     #additional
     "Jet_CSV[3]",
     "Evt_M_minDrLepTag",
-    "N_BTagsT",
     "Jet_Pt[0]",
     "Evt_CSV_dev",
     "Evt_M2_closestTo125TaggedJets",
@@ -81,10 +80,8 @@ variables["ge4j_ge4t"] = [
     "Evt_Pt_minDrTaggedJets",
     "Evt_transverse_sphericity_jets",
     "Evt_CSV_min_tagged",
-    "Evt_CSV_avg_tagged",
     "Evt_CSV_avg",
     "Evt_CSV_min",
-    "Evt_M_JetsAverage",
     "Evt_M2_TaggedJetsAverage",
     ]
 
