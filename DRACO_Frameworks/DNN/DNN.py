@@ -726,6 +726,7 @@ class DNN():
 
             n_epochs = len(train_history)
             epochs = np.arange(1,n_epochs+1,1)
+            print("Plotting frac")
 
             # plot histories
             plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(round(best_train, 3)))

@@ -144,6 +144,19 @@ config_dict["binary_config_overfit"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["overfit"] = {
+        "layers":                   [200,100, 100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0,
+        "L2_Norm":                  0.,
+        "batch_size":               4000,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "selu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage": 50,
+        "earlystopping_epochs":     500,
+        }
+
 config_dict["binary_config_v2"] = {
         "layers":                   [200,100],
         "loss_function":            "binary_crossentropy",

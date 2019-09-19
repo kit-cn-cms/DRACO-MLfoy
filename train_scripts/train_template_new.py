@@ -226,7 +226,8 @@ for i in range(1, n_simoular+1):   #due to naming
     dnn.save_model(signal)
 
     # plotting
-    dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    # dnn.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    print("Starting plot metrics")
     dnn.plot_metrics()
 
     #for comparison of the DNNs
