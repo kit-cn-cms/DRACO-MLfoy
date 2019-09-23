@@ -422,7 +422,6 @@ class plotClosureTest:
                 and self.pred_classes_test[k] == nodeIndex]
 
             sig_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
-
                 if self.data.get_train_labels(as_categorical = False)[k] in signalIndex \
                 and self.pred_classes_train[k] == nodeIndex]
             bkg_train_weights = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
@@ -494,12 +493,15 @@ class plotClosureTest:
 
             # setup legend
             legend = setup.getLegend()
-
+    
+            legend.SetTextSize(0.02)
+            ksSig = sig_train.KolmogorovTest(sig_test)
+            ksBkg = bkg_train.KolmogorovTest(bkg_test)
             # add entries
             legend.AddEntry(sig_train, "train {}".format("+".join(signalClass)), "F")
             legend.AddEntry(bkg_train, "train bkg", "F")
-            legend.AddEntry(sig_test,  "test {}".format("+".join(signalClass)), "L")
-            legend.AddEntry(bkg_test,  "test bkg", "L")
+            legend.AddEntry(sig_test,  "test {} (KS = {:.3f})".format("+".join(signalClass),ksSig), "L")
+            legend.AddEntry(bkg_test,  "test bkg (KS = {:.3f})".format(ksBkg), "L")
 
             # draw legend
             legend.Draw("same")

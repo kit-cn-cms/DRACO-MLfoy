@@ -25,9 +25,9 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttmb"), label = "ttmb", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
 
@@ -65,6 +65,11 @@ dnn.save_model(sys.argv, filedir)
 
 # save and print variable ranking
 dnn.get_input_weights()
+
+# save and print variable ranking according to all layer weights
+dnn.get_propagated_weights()
+
+dnn.get_variations()
 
 # plotting 
 if options.doPlots():

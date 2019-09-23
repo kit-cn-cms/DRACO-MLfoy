@@ -421,7 +421,6 @@ class DNN():
             json.dump(configs, jf, indent = 2, separators = (",", ": "))
         print("wrote net configs to "+str(json_file))
 
-    def variables_configuration(self):
         '''  save configurations of variables for plotscript '''
         plot_file = self.cp_path+"/plot_config.csv"
         variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
@@ -490,11 +489,11 @@ class DNN():
             self.weight_dict[variable] = w_sum
 
         # sort weight dict
-        rank_path = self.save_path + "/absolute_weight_sum.csv"
+        rank_path = self.save_path + "/first_layer_weight_sums.csv"
         with open(rank_path, "w") as f:
             f.write("variable,weight_sum\n")
             for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
-                print("{:50s}: {}".format(key, val))
+                #print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key,val))
         print("wrote weight ranking to "+str(rank_path))
 
@@ -502,9 +501,9 @@ class DNN():
         ''' get the weights of the all hidden layers and sort input variables by weight sum'''
 
         # get weights
-        for i,layer in enumerate(self.model.layers):
+        for i, layer in enumerate(self.model.layers):
             #odd layers correspond to dropout layers
-            if (i % 2 == 0):
+            if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
                 continue
             else:
                 weights = layer.get_weights()[0]
@@ -515,15 +514,100 @@ class DNN():
                     self.weight_dict[variable] = w_sum
 
                 # sort weight dict
-                rank_path = self.save_path + "/absolute_weight_sum_layer"+str(i)+".csv"
+                rank_path = self.save_path + "/layer_"+str(i)+"_weight_sums.csv"
                 with open(rank_path, "w") as f:
                     f.write("variable,weight_sum\n")
                     for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
-                        print("{:50s}: {}".format(key, val))
+                        #print("{:50s}: {}".format(key, val))
                         f.write("{},{}\n".format(key,val))
                 print("wrote weight ranking to "+str(rank_path))
+    
+    def get_propagated_weights(self):
+        weight_layers = []
+        for i, layer in enumerate(self.model.layers):
+            if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
+                continue
+            
+            weights = layer.get_weights()[0]
 
+            print("="*30)
+            print("layer {}".format(i))
+            print(weights)
+            print("="*30)
+            weight_layers.append(weights)
+            
+        # iteratively generate sums
+        print("propagating weights")
+        propagated_weights = []
+        for i in range(len(weight_layers)):
+            index = (len(weight_layers)-i)-1
+            print(index)
+            if i == 0:
+                propagated_weights.append(
+                    np.array([np.sum(np.abs(out_weights)) for out_weights in weight_layers[index]])
+                    )
+            else:
+                propagated_weights.append(
+                    [np.sum(np.abs(out_weights)*propagated_weights[i-1]) for out_weights in weight_layers[index]]
+#                    [propagated_weights[i-1][j]*weight_layers[index][j] for j in range(len(weight_layers[index]))]
+                    )
+            print(propagated_weights[i])
 
+        weight_dict = {}
+        for weight, variable in zip(propagated_weights[-1], self.train_variables):
+            weight_dict[variable] = weight
+
+        rank_path = self.save_path+"/propagated_weight_sums.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,weight_sum\n")
+            for key, val in sorted(weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                print("{:50s}: {}".format(key, val))
+                f.write("{},{}\n".format(key, val))
+        print("wrote propagated weight ranking to "+str(rank_path))
+        
+
+    def get_variations(self):
+        if not os.path.exists(self.save_path + "/variations/"):
+            os.makedirs(self.save_path + "/variations/")
+        import matplotlib.pyplot as plt
+
+        print("making plots for input feature variations")
+        for i, v in enumerate(self.train_variables):
+
+            test_values = np.linspace(-2,2,500)
+            testset = np.array([
+                np.array([0 if not j==i else k for j in range(len(self.train_variables))])
+                for k in test_values])
+
+            predictions = self.model.predict(testset)
+
+            yrange = [0., 2./len(self.event_classes)]
+
+            plt.clf()
+            plt.plot([-2,2],[1./len(self.event_classes),1./len(self.event_classes)], "-", color = "black")
+            plt.plot([0.,0.],yrange, "-", color = "black")
+
+            for n, node in enumerate(self.event_classes):
+                plt.plot(test_values, predictions[:,n], "-", linewidth = 2, label = node+" node")
+
+            plt.grid()
+            plt.legend()
+            title = self.category_label
+            title = title.replace("\\geq", "$\geq$")
+            title = title.replace("\\leq", "$\leq$")
+            plt.title(title, loc = "right", fontsize = 16)
+            plt.xlabel(v, fontsize = 16)
+            plt.ylabel("node output", fontsize = 16)
+            plt.xlim([-2,2])
+            plt.ylim(yrange)
+            plt.tight_layout()
+            outpath = self.save_path + "/variations/"+str(v)+".pdf"
+            plt.savefig(outpath)
+            plt.savefig(outpath.replace(".pdf",".png"))
+            print("plot saved at {}".format(outpath))
+                
+
+            
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
@@ -632,7 +716,7 @@ class DNN():
         if not bin_range:
             bin_range = [round(1./self.data.n_output_neurons,2), 1.]
         if not nbins:
-            nbins = int(25*(1.-bin_range[0]))
+            nbins = int(20*(1.-bin_range[0]))
 
         closureTest = plottingScripts.plotClosureTest(
             data                = self.data,

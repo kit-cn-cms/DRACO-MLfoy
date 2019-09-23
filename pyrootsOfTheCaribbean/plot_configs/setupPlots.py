@@ -15,7 +15,8 @@ def GetPlotColor( cls ):
         "ttb":          ROOT.kRed-2,
         "tthf":         ROOT.kRed-3,
         "ttbar":        ROOT.kOrange,
-        "ttmergedb":    ROOT.kRed-1,
+        "ttmb":         ROOT.kRed-1,
+        "ttb_bb":       ROOT.kRed-1,
         "ST":           ROOT.kRed-8,
         "tH":           ROOT.kWhite,
         "sig":   ROOT.kCyan,
@@ -145,6 +146,10 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
     cm.SetMarkerSize(2.)
+    if cm.GetNbinsX()>6:
+        cm.SetMarkerSize(1.5)
+    if cm.GetNbinsX()>8:
+        cm.SetMarkerSize(1.)
 
     return cm
 
