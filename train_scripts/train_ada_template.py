@@ -227,7 +227,7 @@ for i in range(1, n_simoular+1):   #due to naming
 
     if exists:
         # load trained model
-        # ada.load_trained_model(path)    #loading the hole model takes like forever
+        ada.load_trained_model(path)    #loading the hole model takes like forever
         ada.load_needed(path)
     else:
         # build DNN model
@@ -242,7 +242,7 @@ for i in range(1, n_simoular+1):   #due to naming
 
     print("# DEBUG: plot_binaryOutput")
     # make discriminator plot
-    # ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
+    ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
     if not exists:
         # save the trained model
@@ -274,19 +274,25 @@ for h in np.arange(0, n_simoular-1):
         # hist.SetTitle(title)
         hist.Draw()
         hist.GetXaxis().SetTitle("Differenz der Ausgabe")
+        hist.GetXaxis().SetLabelSize(0.5)
+        hist.GetXaxis().SetTickSize(0.4)
         hist.GetYaxis().SetTitle("Anzahl")
+        hist.GetYaxis().SetLabelSize(0.5)
+        hist.GetYaxis().SetTickSize(0.4)
+        hist.SetStats(false)
         hist.Draw()
 
         diff = prediction_vector[h] - prediction_vector[j]
         abs_mean = np.mean(np.absolute(diff))
         print("absolute mean ", h, "_", j, " : ", abs_mean)
 
-        c1.cd(2)
+
         l = c1.GetLeftMargin()
         t = c1.GetTopMargin()
         r = c1.GetRightMargin()
         b = c1.GetBottomMargin()
 
+        c1.cd(2)
         latex = ROOT.TLatex()
         latex.SetNDC()
         latex.SetTextColor(ROOT.kBlack)
@@ -296,27 +302,42 @@ for h in np.arange(0, n_simoular-1):
 
         c1.Print(out1)
         # label_roc(h, j, roc_vector[h], roc_vector[j])      #write down the roc output
+
+
         c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         c2.cd(1)
         hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
         for i in np.arange(0, data_len):
             hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
-        hist.GetXaxis().SetTitle("Vorhersage B")
-        hist.GetYaxis().SetTitle("Vorhersage A")
+        # hist.GetXaxis().SetTitle("Vorhersage B")
+        hist2.GetXaxis().SetTickSize(0.4)
+        # hist.GetYaxis().SetTitle("Vorhersage A")
+        hist2.GetYaxis().SetTickSize(0.4)
+        correlation = hist2.GetCorrelationFactor()
+
+        hist2.SetStats(false)
         hist2.Draw("colz")
 
-        c2.cd(2)
         l = c2.GetLeftMargin()
         t = c2.GetTopMargin()
         r = c2.GetRightMargin()
         b = c2.GetBottomMargin()
 
+        c2.cd(2)
         latex = ROOT.TLatex()
         latex.SetNDC()
         latex.SetTextColor(ROOT.kBlack)
         latex.SetTextSize(0.04)
         text = "CMS private work"
         latex.DrawLatex(l+0.57,1.-t+0.03, text)
+
+        c2.cd(3)
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+        latex.SetTextSize(0.035)
+        text = "Korrelation: " + str(correlation)
+        latex.DrawLatex(l+0.2,t-0.2, text)
         # label_correlation(hist2.GetCorrelationFactor())
         c2.Print(out2)
 

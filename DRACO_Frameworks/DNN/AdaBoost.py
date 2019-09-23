@@ -456,15 +456,16 @@ class AdaBoost():
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.xlabel(r'$\mu$', fontsize=11)
-        plt.ylabel(r'$-2 \log L$', fontsize=11)
+        plt.xlabel(r'$\mu$', fontsize=13)
+        plt.ylabel(r'$-2 \log L$', fontsize=13)
         plt.plot(mu_draw, loglike, 'k-')
         plt.xlim(left=mu_draw[0], right=mu_draw[-1])
         plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
-        plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
-        plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
-        plt.legend(loc='best')
-        plt.title("CMS private work", loc="left", fontsize=12)
+        plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}/-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
+        plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}/-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.legend(loc='best', fontsize = 'large')
+        plt.title("CMS private work", loc="left", fontsize=13)
+        plt.tick_params(labelsize=8)
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         plt.clf()
         # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
