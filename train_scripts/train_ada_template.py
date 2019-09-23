@@ -279,7 +279,7 @@ for h in np.arange(0, n_simoular-1):
         hist.GetYaxis().SetTitle("Anzahl")
         hist.GetYaxis().SetLabelSize(0.5)
         hist.GetYaxis().SetTickSize(0.4)
-        hist.SetStats(false)
+        hist.SetStats(0)
         hist.Draw()
 
         diff = prediction_vector[h] - prediction_vector[j]
@@ -315,7 +315,7 @@ for h in np.arange(0, n_simoular-1):
         hist2.GetYaxis().SetTickSize(0.4)
         correlation = hist2.GetCorrelationFactor()
 
-        hist2.SetStats(false)
+        hist2.SetStats(0)
         hist2.Draw("colz")
 
         l = c2.GetLeftMargin()
