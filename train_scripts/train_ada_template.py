@@ -267,7 +267,7 @@ for h in np.arange(0, n_simoular-1):
         out2 = path + "plot/Compare/diff2" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         # c1.Divide(2,1)
-        c1..SetLeftMargin(0.15)
+        c1.SetLeftMargin(0.15)
         c1.cd(1)
         hist = ROOT.TH1D("hist", "", 15,-0.3,0.3)
         for i in np.arange(0, data_len):

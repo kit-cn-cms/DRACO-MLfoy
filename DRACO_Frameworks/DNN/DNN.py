@@ -224,7 +224,7 @@ class DNN():
 
     def load_trained_model(self, inputDirectory):
         ''' load an already trained model '''
-        checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
+        checkpoint_path = inputDirectory+"/trained_model.h5py"
 
         # get the model
         self.model = keras.models.load_model(checkpoint_path)
@@ -245,14 +245,14 @@ class DNN():
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
-        from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(
-            self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        # from sklearn.metrics import confusion_matrix
+        # self.confusion_matrix = confusion_matrix(
+        #     self.data.get_test_labels(as_categorical = False), self.predicted_classes)
 
         # print evaluations
-        from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        # from sklearn.metrics import roc_auc_score
+        # self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        # print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
 
     def predict_event_query(self, query ):

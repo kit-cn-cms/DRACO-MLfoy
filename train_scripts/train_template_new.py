@@ -213,11 +213,24 @@ for i in range(1, n_simoular+1):   #due to naming
         from net_configs import config_dict
         config=config_dict[options.net_config]
 
-    # build DNN model
-    dnn.build_model(config)
+    # check if this NN was already trained
+    save_path = path + "save_model/" + name + "/"
+    if os.path.exists(save_path):
+        exists = True
+    else:
+        exists = False
+    print("# DEBUG: exists: ", exists)
 
-    # perform the training
-    dnn.train_model()
+    if exists:
+        # load trained model
+        dnn.load_trained_model(save_path)    #loading the hole model takes like forever
+        # ada.load_needed(path)
+    else:
+        # build DNN model
+        dnn.build_model(config)
+
+        # perform the training
+        dnn.train_model()
 
     # evalute the trained model
     dnn.eval_model()
@@ -246,13 +259,18 @@ for h in np.arange(0, n_simoular-1):
         out2 = "/home/ngolks/Projects/boosted_dnn/BinaryNN/plot/Compare/diff2" + "_" + name_raw + "_" + str(h) + "_" + str(j) + ".pdf"
         c1=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         # c1.Divide(2,1)
+        c1.SetLeftMargin(0.15)
         c1.cd(1)
         hist = ROOT.TH1D("hist", "", 15,-0.08,0.08)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
         # hist.SetTitle(title)
         hist.GetXaxis().SetTitle("Differenz der Ausgabe")
+        hist.GetXaxis().SetTitleSize(0.045)
+        hist.GetXaxis().SetLabelSize(0.045)
         hist.GetYaxis().SetTitle("Anzahl")
+        hist.GetYaxis().SetTitleSize(0.045)
+        hist.GetYaxis().SetLabelSize(0.045)
         hist.Draw()
 
         diff = prediction_vector[h] - prediction_vector[j]
@@ -280,8 +298,13 @@ for h in np.arange(0, n_simoular-1):
         hist2=ROOT.TH2D("hist", "", 40, 0, 1, 40, 0, 1)
         for i in np.arange(0, data_len):
             hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
-        hist.GetXaxis().SetTitle("Vorhersage B")
-        hist.GetYaxis().SetTitle("Vorhersage A")
+        # hist.GetXaxis().SetTitle("Vorhersage B")
+        # hist.GetYaxis().SetTitle("Vorhersage A")
+        hist2.GetXaxis().SetLabelSize(0.045)
+        hist2.GetYaxis().SetLabelSize(0.045)
+        correlation = hist2.GetCorrelationFactor()
+        print("correlation ", h, "_", j, " : ", correlation)
+        hist2.SetStats(0)
         hist2.Draw("colz")
 
         c2.cd(2)
