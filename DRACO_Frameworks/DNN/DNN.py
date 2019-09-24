@@ -244,6 +244,9 @@ class DNN():
         # save predicted classes with argmax
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
+        # hack?
+        self.trained_model = self.model
+
         # save confusion matrix
         # from sklearn.metrics import confusion_matrix
         # self.confusion_matrix = confusion_matrix(
