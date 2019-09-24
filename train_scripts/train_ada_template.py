@@ -280,6 +280,7 @@ for h in np.arange(0, n_simoular-1):
         hist.GetYaxis().SetTitle("Anzahl")
         hist.GetYaxis().SetTitleSize(0.045)
         hist.GetYaxis().SetLabelSize(0.045)
+        hist.SetLeftMargin(0.15)
         # hist.GetYaxis().SetTickSize(0.4)
         hist.SetStats(0)
         hist.Draw()

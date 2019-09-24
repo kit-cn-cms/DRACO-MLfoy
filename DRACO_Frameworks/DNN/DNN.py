@@ -579,10 +579,11 @@ class DNN():
         plt.xlim([0, 1])
         plt.ylim([0, 1])
         # plt.ylabel('True Positive Rate')
-        plt.ylabel('Anteil richtig positiv', fontsize=11)
+        plt.ylabel('Anteil richtig positiv', fontsize=15)
         # plt.xlabel('False Positive Rate')
-        plt.xlabel('Anteil falsch positiv', fontsize=11)
-        plt.title("CMS private work", loc="left", fontsize=12)
+        plt.xlabel('Anteil falsch positiv', fontsize=15)
+        plt.title("CMS private work", loc="left", fontsize=15)
+        plt.tick_params(labelsize=14.5)
         plt.savefig(save_path + self.name +"_roc.pdf")
         plt.clf()
 
@@ -684,15 +685,16 @@ class DNN():
         s1y = [1, 1]
         s2y = [4, 4]
         #plotting
-        plt.xlabel(r'$\mu$', fontsize=11)
-        plt.ylabel(r'$-2 \log L$', fontsize=11)
+        plt.xlabel(r'$\mu$', fontsize=15)
+        plt.ylabel(r'$-2 \log L$', fontsize=15)
         plt.plot(mu_draw, loglike, 'k-')
         plt.xlim(left=mu_draw[0], right=mu_draw[-1])
         plt.axvline(x=mu, color='k', ls='--', ymin=0., ymax=np.amax(loglike))
-        plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
-        plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
-        plt.legend(loc='best')
-        plt.title("CMS private work", loc="left", fontsize=13)
+        plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}/-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
+        plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}/-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
+        plt.legend(loc='best', fontsize = 'large')
+        plt.title("CMS private work", loc="left", fontsize=15)
+        plt.tick_params(labelsize=14.5)
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         plt.clf()
         # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
@@ -731,8 +733,8 @@ class DNN():
             # plot histories
             plt.plot(epochs, train_history, "r-", label = "Trainingsdaten - Max: " + str(round(best_train, 3)))
             plt.plot(epochs, val_history, "b-", label = "Testdaten - Max: " + str(round(best_test, 3)))
-            if privateWork:
-                plt.title("CMS private work", loc = "left", fontsize = 16)
+            # if privateWork:
+                # plt.title("CMS private work", loc = "left", fontsize = 16)
 
             # add title
             # title = self.categoryLabel
@@ -742,13 +744,14 @@ class DNN():
 
             # make it nicer
             # plt.grid()
-            plt.xlabel("Epochen")
-            plt.ylabel("Anteil richtig Klassifizierter")
+            plt.xlabel("Epochen", fontsize=15)
+            plt.ylabel("ARK Ereignisse", fontsize=15)
+            plt.tick_params(labelsize=14.5)
 
             # add legend
             plt.legend(loc='lower right')
             # add CMS private work
-            plt.title("CMS private work", loc="left", fontsize=12)
+            plt.title("CMS private work", loc="left", fontsize=15)
 
             # save
             # out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
