@@ -692,7 +692,7 @@ class DNN():
         plt.plot(s1x, s1y, 'b-', label = r'$1\sigma=+{1}-{0}$'.format(round(sigma1[0],3), round(sigma1[1],3)))
         plt.plot(s2x, s2y, 'r-', label = r'$2\sigma=+{1}-{0}$'.format(round(sigma2[0],3), round(sigma2[1],3)))
         plt.legend(loc='best')
-        plt.title("CMS private work", loc="left", fontsize=12)
+        plt.title("CMS private work", loc="left", fontsize=13)
         plt.savefig(save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
         plt.clf()
         # print("# DEBUG: binned_likelihood, saved fig: ", save_path + self.name+ "_mu" + str(mu) +"_loglike.pdf")
