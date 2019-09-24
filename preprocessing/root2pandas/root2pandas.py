@@ -5,7 +5,12 @@ import re
 import glob
 import os
 import shutil
+import matplotlib as mpl
+#if os.environ.get('DISPLAY','') == '':
+#    print('no display found. Using non-interactive Agg backend')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+import base64
 
 import preprocessing_utils as pputils
 
@@ -48,7 +53,7 @@ class Sample:
 
 class ImageConfig():
     ''' configuration of image/2dhist data written to h5 file for CNNs '''
-    def __init__(self, channels, xRange, yRange, imageSize, logNorm=False, x="Eta", y="Phi", ):
+    def __init__(self, channels, xRange, yRange, imageSize, rotation=None, logNorm=False, x="Eta", y="Phi", ):
         # image size with [x,y,z] size
         self.x          = x
         self.y          = y
@@ -56,8 +61,15 @@ class ImageConfig():
         self.imageSize  = imageSize # array like [12,34]
         self.xRange     = xRange
         self.yRange     = yRange
+        self.rotation   = rotation
 
         self.logNorm = logNorm
+
+        # check if rotation mode is supported
+        if self.rotation != None and self.rotation != "MaxJetPt" and self.rotation != "ttbar_toplep":
+            print("ImageConfig: the rotation-mode "+str(self.rotation)+" is not supported.")
+            exit()
+
 
         # generates a list of the form [["Jet_Eta", "Jet_Phi", "Jet_Pt"], ["Electron_Eta", "Electron_Phi", "Electron_Pt"]]
         self.images = []
@@ -80,9 +92,6 @@ class ImageConfig():
                 self.images.append([])
                 for i in range(int(indexstart),int(indexend)+1):
                     self.images[j].append([ch[0]+"_"+x+"["+str(i)+"]",ch[0]+"_"+y+"["+str(i)+"]",m.group(1)+"["+str(i)+"]"])
-
-
-
 
         # flattens a list of lists of lists
         self.variables = []
@@ -247,30 +256,33 @@ class Dataset:
 
     # ========================== CNN SPECIFIC STUFF ===============================
 
-    def yan_2dhist(self, Image_Config, image, df, draw=False):
+    def yan_2dhist(self, ImageConfig, image, df, draw=False, phi0=0):
         ''' create 2d histogram of event '''
         varname_x      = image[0]
         varname_y      = image[1]
         varname_weight = image[2]
 
-        print("processing "+varname_weight+"-layer to become a 2d histogram")
+        #print("Within 2dhist(): Bins: "+str(ImageConfig.imageSize))
+        #print("Range: "+str([ImageConfig.xRange, ImageConfig.yRange]))
+        #print(df[varname_weight])
+        #print("processing "+varname_weight+"-layer to become a 2d histogram")
 
-        H, xedges, yedges = np.histogram2d(
-            x       = df[varname_x],
-            y       = df[varname_y], 
-            weights = df[varname_weight],
-            range   = [Image_Config.xRange, Image_Config.yRange], 
-            bins    = Image_Config.imageSize)
+        H, _, _ = np.histogram2d(
+            x       = np.array(df[varname_x]),
+            y       = self.phi_rotation(np.array(df[varname_y]), phi0), 
+            bins    = ImageConfig.imageSize,
+            range   = [ImageConfig.xRange, ImageConfig.yRange],
+            weights = np.array(df[varname_weight]))
         
         #print(H.shape, H.size)
 
-        if Image_Config.logNorm:
+        if ImageConfig.logNorm:
             H = np.where(H > 1, np.log(H), 0)
 
         if draw:
             plt.figure(figsize=(8,10))
             #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
-            plt.imshow(H.T, extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
+            plt.imshow(H.T, extent=[ImageConfig.xRange[0], ImageConfig.xRange[1], ImageConfig.yRange[0], ImageConfig.yRange[1]], 
                 aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
             plt.xlabel(varname_x)
             plt.ylabel(varname_y)
@@ -291,10 +303,21 @@ class Dataset:
             #print(h.size)
             #print(h.shape)
             
-            plt.show()
+            #plt.show()
             exit()
         #print(H)
         return H
+
+    def phi_rotation(self, phi_array, phi0):
+        phi_array_rotated=[]
+        for phi in phi_array:
+            phi = phi - phi0
+            if phi < -np.pi:
+                phi =  2*np.pi+phi
+            if phi >= np.pi:
+                phi = -2*np.pi+phi
+            phi_array_rotated.append(phi)
+        return phi_array_rotated
 
         
 
@@ -415,8 +438,7 @@ class Dataset:
                     # append column to original dataframe
                     df.update( idx_df[vecvar].rename(col_name) )
 
-            # apply event selection
-            df = self.applySelections(df, sample.selections)
+
 
             # generate 2d histogram if ImageConfig was passed
             # ===============================================
@@ -424,15 +446,80 @@ class Dataset:
                 print("*"*50)
                 print("processing data from file for use with CNN")
 
-                #loop over the differet "color" channels of the image
-                for image in Image_Config.images:
-                    if isinstance(image[0], list):
-                        H=np.zeros(Image_Config.imageSize)
-                        for img in image:
-                            H+=self.yan_2dhist(Image_Config, img, df, 0)
-                    else: 
-                        H=self.yan_2dhist(Image_Config, image, df, 0)
-                exit()
+                #initialize colums for the matrices/histograms
+                for layer_name in Image_Config.z:
+                    df[layer_name+"_Hist"] = 'AAAAAAAAAAA='
+
+                #loop over the event ids
+                evtids=df["Evt_ID"]
+                #evt=evtids
+                #print(len(evtids))
+                #print(df.count)
+                #print(len(df["Evt_MET_Pt"]))
+                #print(df)
+                #exit()
+
+                for evt in evtids:
+                    df_tmp=df.loc[df["Evt_ID"]==evt]
+                    #print(evt)
+                    #for x in df_tmp.columns: print x
+                    #exit()
+
+                    #calculate phi0, which is used to shift every entry in histogramm
+                    phi0=0
+                    if Image_Config.rotation=="MaxJetPt":
+                        image = Image_Config.images[0] #assuming JetPt is at the first color channel
+                        img = image[0] #first in the list is greatest jet
+                        phi0 =np.float(np.array(df_tmp[img[1]]))
+                    if Image_Config.rotation=="ttbar_toplep":
+                        phi0 = np.float(np.array(df_tmp["Reco_ttbar_toplep_phi"]))
+
+
+                    #loop over the differet "color" channels of the image
+                    for image in Image_Config.images:
+                        #print(image)
+
+                        #print("index: "+str(pd.Index(evtids).get_loc(evt)))
+                        
+                        # for sth like "Jet_Pt[0-8]" this if-statement is true, while its not for "Jet_Pt"
+                        if isinstance(image[0], list):
+                            H=np.zeros(Image_Config.imageSize)
+                            for img in image:
+                                #print(img[1])
+                                H+=self.yan_2dhist(Image_Config, img, df_tmp, phi0=phi0)
+                        else: 
+                            H=self.yan_2dhist(Image_Config, image, df_tmp, phi0=phi0)
+                        
+
+                        someid=9
+                        plt.figure(figsize=(8,10))
+                        #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
+                        plt.imshow(np.transpose(H), extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
+                            aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
+                        plt.xlabel("Eta")
+                        plt.ylabel("Phi")
+                        plt.title(str(Image_Config.z[Image_Config.images.index(image)])+" EVT_ID "+str(evt))
+                        plt.tight_layout()
+                        plt.savefig(self.outputdir+"/"+str(Image_Config.z[Image_Config.images.index(image)])+"_"+Image_Config.rotation+"_EVT"+str(evt)+".pdf")
+                        plt.show()
+                        print("Did I plot?")
+                        if(evt==evtids[someid]):
+                            exit()
+
+
+                        col_name=Image_Config.z[Image_Config.images.index(image)]+"_Hist"
+                        H=base64.b64encode(np.ascontiguousarray(H))
+                        df.update(pd.DataFrame({col_name:[H]}, index=[pd.Index(evtids).get_loc(evt)]))
+                        #print(df)
+
+                        
+
+                df=df.drop(columns=Image_Config.variables)
+
+                #print(df["Jet_Pt[0-2]_Hist"])
+
+            # apply event selection
+            df = self.applySelections(df, sample.selections)
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
@@ -447,7 +534,7 @@ class Dataset:
                 print("max entries reached ...")
 
                 # add class labels
-                concat_df = self.addClassLabels(concat_df, sample.categories.categories)
+                concat_df = self.addClassLabels(concat_df, sample.categories.categories) #WARNING: Try using .loc[row_indexer,col_indexer] = value instead
 
                 # add indexing
                 concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
@@ -460,12 +547,21 @@ class Dataset:
                 concat_df = self.removeTriggerVariables(concat_df)
 
                 # write data to file
+                #print("Lets Save...")
+                #for x in df.columns: print x
+                #print(df)
+                #print(df["Jet_Pt[0-2]_Hist"])
                 self.createDatasets(concat_df, sample.categories.categories)
                 print("*"*50)
 
                 # reset counters
                 n_entries = 0
                 concat_df = pd.DataFrame()
+
+                #yan debugging
+                #print(df)
+                #exit()
+
 
     # ====================================================================
 

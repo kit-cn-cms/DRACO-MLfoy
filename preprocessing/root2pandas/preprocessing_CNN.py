@@ -52,7 +52,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 6 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Muon_Pt > 29. and Triggered_HLT_IsoMu27_vX == 1)"
@@ -67,8 +67,9 @@ ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH", selection = None)
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttbar", selection = None)
+#ttbar_categories.addCategory("ttbb", selection = "(GenEvt_I_TTPlusBB == 3 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("tt2b", selection = "(GenEvt_I_TTPlusBB == 2 and GenEvt_I_TTPlusCC == 0)")
 #ttbar_categories.addCategory("ttb",  selection = "(GenEvt_I_TTPlusBB == 1 and GenEvt_I_TTPlusCC == 0)")
 #ttbar_categories.addCategory("ttlf", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
 #ttbar_categories.addCategory("ttcc", selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
@@ -86,7 +87,8 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/yseyffer/data/"
+#ntuplesPath = "/nfs/dust/cms/user/yseyffer/data/"
+ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2018"
 
 # add samples to dataset
 
@@ -94,6 +96,14 @@ dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttbar_categories,
+    selections  = None,#ttbar_selection,
+    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    )
+
+dataset.addSample(
+    sampleName  = "TTH",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
+    categories  = ttH_categories,
     selections  = None,#ttbar_selection,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
@@ -110,7 +120,9 @@ additional_variables = [
     #"Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 
-    "Evt_Lumi"]
+    "Evt_Lumi",
+    "Reco_ttbar_toplep_phi"
+    ]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
@@ -118,8 +130,8 @@ dataset.addVariables(additional_variables)
 
 
 # pixel size definition
-d_eta = 0.1
-d_phi = 0.1
+d_eta = 0.4
+d_phi = 0.4
 # range definitions
 eta_range = [-2.4,2.4]
 phi_range = [-3.14159265358979, 3.14159265358979]
@@ -131,10 +143,11 @@ print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt[0-2]","Electron_Pt"],
+    channels  = ["Jet_Pt[0-12]"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
+    rotation  = "ttbar_toplep",
     # pixel intensity linear or logarithmic
     logNorm     = False)
 
