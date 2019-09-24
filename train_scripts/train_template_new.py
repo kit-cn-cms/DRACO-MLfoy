@@ -221,6 +221,8 @@ for i in range(1, n_simoular+1):   #due to naming
         exists = False
     print("# DEBUG: exists: ", exists)
 
+    exists = False #loading does not work yet
+
     if exists:
         # load trained model
         dnn.load_trained_model(save_path)    #loading the hole model takes like forever
