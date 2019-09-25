@@ -608,6 +608,7 @@ class AdaBoost():
         # save model as h5py file
         for i in range(0, self.adaboost_epochs):
             out_file = save_path + "trained_model" + str(i) + ".h5py"
+            print("# DEBUG: out_file: ", out_file)
             self.weak_model_trained[i].save(out_file)
         print("saved trained model")
 
