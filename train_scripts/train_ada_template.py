@@ -244,7 +244,7 @@ for i in range(1, n_simoular+1):   #due to naming
     # make discriminator plot
     ada.plot_binaryOutput(log = options.log, privateWork = options.privateWork, printROC = options.printROC)
 
-    if not exists:
+    # if not exists:
         # save the trained model
         # ada.save_model(signal) #seit 24.09 geht das nicht mehr -> keine Ahnung warum
 
