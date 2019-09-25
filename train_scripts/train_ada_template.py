@@ -246,7 +246,7 @@ for i in range(1, n_simoular+1):   #due to naming
 
     if not exists:
         # save the trained model
-        ada.save_model(signal)
+        # ada.save_model(signal) #seit 24.09 geht das nicht mehr -> keine Ahnung warum
 
     print("# DEBUG: appending to prediction_list")
     #for comparison of the DNNs
