@@ -170,5 +170,19 @@ print dataset
 print dataset.printVariables()
 print dataset.printBaseSelection()
 print dataset.printOptionSample(options.even_odd_splitting)
+print dataset.printHeader()
+
+with open("test.py",'w') as outfile:
+    outfile.write(dataset.printHeader())
+    outfile.write("\n")
+    outfile.write(dataset.printBaseSelection())
+    outfile.write("\n")
+    outfile.write(dataset.printOptionSample(options.even_odd_splitting))
+    outfile.write("\n")
+    outfile.write(dataset.printVariables())
+    outfile.write("\n")
+    outfile.write("dataset.runPreprocessing()")
+
+print dataset.samples["TTTo2018"].ntuples
 # run the preprocessing
-#dataset.parallelPreprocessing()
+dataset.parallelPreprocessing(options.even_odd_splitting)

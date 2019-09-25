@@ -208,12 +208,30 @@ class Dataset:
 
 
     # ====================================================================
-    # def parallelPreprocessing(self):
-    #     for sample in self.samples:
-    #         # collect ntuple files
-    #         ntuple_files = sorted(glob.glob(sample.ntuples))
-    #         for file in ntuple_files:
-    #             print file
+    def parallelPreprocessing(self, evenOdd,fileNumber = 20):
+        self.makeConfig(evenOdd)
+        for samplename in self.samples:
+            # collect ntuple files
+            sample=self.samples[samplename]
+            ntuple_files = sorted(glob.glob(sample.ntuples))
+            parallelFiles = [ntuple_files[x:x+fileNumber] for x in xrange(0, len(ntuple_files), fileNumber)]
+            print parallelFiles
+            for i,File in enumerate(parallelFiles):
+                print i
+                outputfile="parallelPreprocessing"+str(i)+".sh"
+                with open(outputfile,'w') as outfile:
+                    outfile.write("python ParallelPreprocessingConfig.py -n ")
+                    outfile.write(str(File))
+                    outfile.write(" - s ")
+                    outfile.write(str(samplename))
+                    outfile.write(" - c ")
+                    outfile.write(str(sample.categories))
+                    outfile.write(" - d ")
+                    outfile.write(str(sample.dataera))
+
+
+            
+
 
     def runPreprocessing(self):
         # add variables for triggering and event category selection
@@ -269,7 +287,8 @@ class Dataset:
         sample.printInfo()
 
         # collect ntuple files
-        ntuple_files = sorted(glob.glob(sample.ntuples))
+        if not isinstance(ntuple_files,list):
+            ntuple_files = sorted(glob.glob(sample.ntuples))
 
         # collect mem files
         if self.addMEM:
@@ -524,6 +543,54 @@ class Dataset:
         s.append(('even_odd    = {},').format(even_odd))
         s.append(")")
         return "\n".join(s)
+
+    def printHeader(self):
+        s = '''
+import os
+import sys
+import optparse
+# local imports
+filedir = os.path.dirname(os.path.realpath(__file__))
+basedir = os.path.dirname(os.path.dirname(filedir))
+sys.path.append(basedir)
+
+import root2pandas
+
+
+usage="usage=%prog [options] \\n"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-n", "--ntuples", dest="ntuples",
+        help="ntuple files", metavar="ntuples")
+
+parser.add_option("-c", "--categories", dest="categories",
+        help="categories", metavar="ntuples")
+
+parser.add_option("-s", "--samplename", dest="sampleName",
+        help="name of the sample", metavar="sampleName")
+
+parser.add_option("-d", "--dataera", dest="dataera",
+        help="dataera", metavar="dataera")
+
+(options, args) = parser.parse_args()
+
+        '''
+        return s
+
+    def makeConfig(self, evenOdd):
+        with open("ParallelPreprocessingConfig.py",'w') as outfile:
+            outfile.write(self.printHeader())
+            outfile.write("\n")
+            outfile.write(self.printBaseSelection())
+            outfile.write("\n")
+            outfile.write(self.printOptionSample(evenOdd))
+            outfile.write("\n")
+            outfile.write(self.printVariables())
+            outfile.write("\n")
+            outfile.write("dataset.runPreprocessing()")
 
     def __str__(self):
         s = []
