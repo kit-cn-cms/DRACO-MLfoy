@@ -785,7 +785,7 @@ class DNN():
 
 
     def plot_discriminators(self, log = False, printROC = False, privateWork = False,
-                        signal_class = None, nbins = 18, bin_range = [0.1,1.]):
+                        signal_class = None, nbins = 18, bin_range = [0.,1.]):
 
         ''' plot all events classified as one category '''
         plotDiscrs = plottingScripts.plotDiscriminators(
