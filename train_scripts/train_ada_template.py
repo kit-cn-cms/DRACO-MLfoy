@@ -269,7 +269,7 @@ for h in np.arange(0, n_simoular-1):
         # c1.Divide(2,1)
         c1.SetLeftMargin(0.15)
         c1.cd(1)
-        hist = ROOT.TH1D("hist", "", 15,-0.3,0.3)
+        hist = ROOT.TH1D("hist", "", 15,-0.05,0.05)
         for i in np.arange(0, data_len):
             hist.Fill(prediction_vector[h][i] - prediction_vector[j][i])
         # hist.SetTitle(title)
@@ -309,7 +309,7 @@ for h in np.arange(0, n_simoular-1):
 
         c2=ROOT.TCanvas("c1","Data", 200, 10, 700, 500)
         c2.cd(1)
-        hist2=ROOT.TH2D("hist", "", 40, -1, 1, 40, -1, 1)
+        hist2=ROOT.TH2D("hist", "", 40, -0.25, 0.25, 40, -0.25, 0.25)
         for i in np.arange(0, data_len):
             hist2.Fill(prediction_vector[h][i], prediction_vector[j][i])
         # hist.GetXaxis().SetTitle("Vorhersage B")
