@@ -24,9 +24,9 @@ class EventCategories:
                 selections.append(self.categories[cat])
         return selections
 
-    def __str__(self):
+    def printCategories(self):
         s = []
-        s.append("{} = root2pands.EventCategories({})".format(self.name,self.name))
+        s.append('{} = root2pandas.EventCategories("{}")'.format(self.name,self.name))
         for category in self.categories:
             selection = self.categories[category]
             s.append(('{}.addCategory("{}", selection = "{}")').format(self.name,category,selection))
@@ -215,20 +215,19 @@ class Dataset:
             sample=self.samples[samplename]
             ntuple_files = sorted(glob.glob(sample.ntuples))
             parallelFiles = [ntuple_files[x:x+fileNumber] for x in xrange(0, len(ntuple_files), fileNumber)]
-            print parallelFiles
+            print str(sample.categories.name)
             for i,File in enumerate(parallelFiles):
                 print i
                 outputfile="parallelPreprocessing"+str(i)+".sh"
                 with open(outputfile,'w') as outfile:
                     outfile.write("python ParallelPreprocessingConfig.py -n ")
-                    outfile.write(str(File))
-                    outfile.write(" - s ")
+                    outfile.write(','.join(File))
+                    outfile.write(" -s ")
                     outfile.write(str(samplename))
-                    outfile.write(" - c ")
-                    outfile.write(str(sample.categories))
-                    outfile.write(" - d ")
+                    outfile.write(" -c ")
+                    outfile.write(str(sample.categories.name))
+                    outfile.write(" -d ")
                     outfile.write(str(sample.dataera))
-
 
             
 
@@ -287,7 +286,9 @@ class Dataset:
         sample.printInfo()
 
         # collect ntuple files
-        if not isinstance(ntuple_files,list):
+        if isinstance(sample.ntuples,list):
+            ntuple_files = sample.ntuples 
+        else:
             ntuple_files = sorted(glob.glob(sample.ntuples))
 
         # collect mem files
@@ -538,15 +539,14 @@ class Dataset:
         s.append("dataset.addSample(")
         s.append('sampleName  = options.sampleName,')
         s.append('ntuples     = options.ntuples,')
-        s.append('categories  = options.categories,')
+        s.append('categories  = Categories[str(options.categories)],')
         s.append('dataera     = options.dataera,')
         s.append(('even_odd    = {},').format(even_odd))
         s.append(")")
         return "\n".join(s)
 
     def printHeader(self):
-        s = '''
-import os
+        s = '''import os
 import sys
 import optparse
 # local imports
@@ -556,6 +556,9 @@ sys.path.append(basedir)
 
 import root2pandas
 
+def list_callback(option, opt, value, parser):
+    setattr(parser.values, option.dest, value.split(','))
+
 
 usage="usage=%prog [options] \\n"
 usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\\n"
@@ -563,7 +566,8 @@ usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-n", "--ntuples", dest="ntuples",
+parser.add_option("-n", "--ntuples", type='string', action='callback', 
+        callback=list_callback, dest="ntuples",
         help="ntuple files", metavar="ntuples")
 
 parser.add_option("-c", "--categories", dest="categories",
@@ -581,18 +585,34 @@ parser.add_option("-d", "--dataera", dest="dataera",
         return s
 
     def makeConfig(self, evenOdd):
+        categories = []
+        for samplename in self.samples:
+            sample = self.samples[samplename]
+            if sample.categories not in categories:
+                categories.append(sample.categories)
+
         with open("ParallelPreprocessingConfig.py",'w') as outfile:
             outfile.write(self.printHeader())
-            outfile.write("\n")
+            outfile.write("\n\n")
+            outfile.write('Categories = {}')
+            for category in categories:
+                print category
+                outfile.write("\n\n")
+                outfile.write(category.printCategories())
+                outfile.write("\n\n")
+                outfile.write(('Categories["{}"] = {} ').format(category.name,category.name))           
+            outfile.write("\n\n")
+            outfile.write(self.printDataset())
+            outfile.write("\n\n")
             outfile.write(self.printBaseSelection())
-            outfile.write("\n")
+            outfile.write("\n\n")
             outfile.write(self.printOptionSample(evenOdd))
-            outfile.write("\n")
+            outfile.write("\n\n")
             outfile.write(self.printVariables())
-            outfile.write("\n")
+            outfile.write("\n\n")
             outfile.write("dataset.runPreprocessing()")
 
-    def __str__(self):
+    def printDataset(self):
         s = []
         s.append("dataset = root2pandas.Dataset(")
         s.append(('    outputdir   = "{}",').format(self.outputdir))
