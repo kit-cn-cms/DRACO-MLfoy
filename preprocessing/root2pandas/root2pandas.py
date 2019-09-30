@@ -688,7 +688,8 @@ class Dataset:
         # (16) delete all variables except for:
         df_new = pd.DataFrame()
         variables_toadd  = ["N_Jets", "N_BTagsM", "Evt_Run", "Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons",
-                            "Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]", "Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
+                            "Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]", "Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons","TightLepton_Pt[0]", "TightLepton_Eta[0]",
+                            "TightLepton_Phi[0]", "TightLepton_E[0]", "Evt_Odd"]
 
         for ind in variables_toadd:
             df_new[ind] = df[ind].values

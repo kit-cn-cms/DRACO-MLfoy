@@ -277,29 +277,29 @@ print inPath
 
 model = loadDNN(inPath, "output")
 
-top_mass = ROOT.TH1F("top_mass",";gemittelte Masse des hadronischen und leptonischen Top-Quarks; Anzahl Ereignisse", 100, 0 ,500)
-delta_rlep = ROOT.TH1F("delta_rlep", " ; #Delta R des leptonischen Top-Quarks;Ereignisse normiert ", 60,0,6)
-delta_rhad = ROOT.TH1F("delta_rhad", " ;#Delta R des hadronischen Top-Quarks;Ereignisse normiert", 60,0,6)
-delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta R; #Delta R des hadronischen B-Quarks; Anzahl Ereignisse", 100,0,6)
-delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta R; #Delta R des leptonischen Bottom-Quarks; Anzahl Ereignisse", 100,0,6)
-delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta R; #Delta R von leichtem Quark 1; Anzahl Ereignisse", 100,0,6)
-delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta R; #Delta R von leichtem Quark 2; Anzahl Ereignisse", 100,0,6)
+top_mass = ROOT.TH1F("top_mass",";1/2(m(t_{had})+m(t_{lep}); Anzahl Ereignisse", 100, 0 ,500)
+delta_rlep = ROOT.TH1F("delta_rlep", " ; #Delta R(t_{lep});Ereignisse normiert ", 60,0,6)
+delta_rhad = ROOT.TH1F("delta_rhad", " ;#Delta R(t_{had});Ereignisse normiert", 60,0,6)
+delta_r_bhad_hist = ROOT.TH1F("delta_r_bhad_hist", "#Delta R; #Delta R(b_{had}); Anzahl Ereignisse", 100,0,6)
+delta_r_blep_hist = ROOT.TH1F("delta_r_blep_hist", "#Delta R; #Delta R(b_{lep}); Anzahl Ereignisse", 100,0,6)
+delta_r_q1_hist = ROOT.TH1F("delta_r_q1_hist", "#Delta R; #Delta R(q_{1}); Anzahl Ereignisse", 100,0,6)
+delta_r_q2_hist = ROOT.TH1F("delta_r_q2_hist", "#Delta R; #Delta R(q_{2}); Anzahl Ereignisse", 100,0,6)
 
-delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi of hadronic b; number of events", 100,0,6)
-delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta of hadronic b; number of events", 100,0,6)
+delta_phi = ROOT.TH1F("delta_phi", "#Delta #Phi b had;#Delta #Phi(b_{had}); number of events", 100,0,6)
+delta_eta = ROOT.TH1F("delta_eta", "#Delta #eta b had;#Delta #eta(b_{had}); number of events", 100,0,6)
 
 rek_thad   = ROOT.TEfficiency("rek_thad","" , 150, -5, 5, 200, 0, 600)
-# rek_thad   = ROOT.TEfficiency("rek_thad", " ;Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c",  150, -5, 5, 200, 0, 600)
-PtRap_thad = ROOT.TH2F("PtRap_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 600)
-eff_count_thad = ROOT.TH2F("eff_count_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 600)
-pt_eff = ROOT.TEfficiency("pt_eff", " ; Transversalimpuls p_{T} in GeV/c; Effizienz", 60,0,600)
+# rek_thad   = ROOT.TEfficiency("rek_thad", " ;#eta(t_{had});p_{T}(t_{had}) in GeV",  150, -5, 5, 200, 0, 600)
+PtRap_thad = ROOT.TH2F("PtRap_thad", " ; #eta(t_{had}); p_{T}(t_{had}) in GeV", 150, -5, 5, 200, 0, 600)
+eff_count_thad = ROOT.TH2F("eff_count_thad", " ;#eta; p_{T}(t_{had}) in GeV", 150, -5, 5, 200, 0, 600)
+pt_eff = ROOT.TEfficiency("pt_eff", " ;p_{T}(t_{had}) in GeV; Effizienz", 60,0,600)
 # rek_tlep = ROOT.TH2F("rek_tlep", "pseudorapidity vs tranverse momentum of leptonic decaying top", 50, 0, 500, 20, -5,5)
 
-empty_rek_thad = ROOT.TH2F("empty_rek_thad", " ; Pseudorapiditaet #eta; Transversalimpuls p_{T} in GeV/c", 150, -5, 5, 200, 0, 600)
+empty_rek_thad = ROOT.TH2F("empty_rek_thad", " ;#eta;p_{T} in GeV", 150, -5, 5, 200, 0, 600)
 
-pt_eff_2 = ROOT.TH1F("pt_eff_2", " ;Transversalimpuls p_{T} in GeV/c; Effizienz", 60,0,600)
+pt_eff_2 = ROOT.TH1F("pt_eff_2", " ;Transversalimpuls p_{T} in GeV; Effizienz", 60,0,600)
 
-reko_plot = ROOT.TH2F("reko_plot", "; Pseudorapiditaet #eta; Azimutalwinkel #Phi",  30,-5, 5, 30, -3.15, 3.15)
+reko_plot = ROOT.TH2F("reko_plot", "; #eta;#phi",  30,-5, 5, 30, -3.15, 3.15)
 
 
 
@@ -537,10 +537,10 @@ for event in chain:
 
 
     #falls q1 und q2 falsch herum zugeordnet sind:
-    delta_r_q12 = ((correct_phi(TopHad_Q1_Phi[best_index] - event.GenTopHad_Q2_Phi[0]))**2 + (TopHad_Q1_Eta[best_index] - event.GenTopHad_Q2_Eta[0])**2)**0.5
-    delta_r_q21 = ((correct_phi(TopHad_Q2_Phi[best_index] - event.GenTopHad_Q1_Phi[0]))**2 + (TopHad_Q2_Eta[best_index] - event.GenTopHad_Q1_Eta[0])**2)**0.5
+    delta_r_q21 = ((correct_phi(TopHad_Q1_Phi[best_index] - event.GenTopHad_Q2_Phi[0]))**2 + (TopHad_Q1_Eta[best_index] - event.GenTopHad_Q2_Eta[0])**2)**0.5
+    delta_r_q12 = ((correct_phi(TopHad_Q2_Phi[best_index] - event.GenTopHad_Q1_Phi[0]))**2 + (TopHad_Q2_Eta[best_index] - event.GenTopHad_Q1_Eta[0])**2)**0.5
 
-    if(delta_r_q1+delta_r_q2 > delta_r_q12 + delta_r_q21):
+    if(delta_r_q1+delta_r_q2 > delta_r_q12 + delta_r_q21 and (delta_r_q1>0.4 or delta_r_q2>0.4)):
         delta_r_q1 = delta_r_q12
         delta_r_q2 = delta_r_q21
 
@@ -576,13 +576,18 @@ for event in chain:
                 circle4 = ROOT.TEllipse(event.GenTopHad_Q2_Eta[0], event.GenTopHad_Q2_Phi[0], 0.4)
 
                 c0 = ROOT.TCanvas("c0", "richtige Jets in #eta - #phi - Ebene", 800,600)
+		c0.SetTopMargin(0.15)
+		c0.SetRightMargin(0.15)
+		c0.SetBottomMargin(0.15)
+		c0.SetLeftMargin(0.15)
+
                 reko_plot.SetStats(0)
                 reko_plot.SetTitleSize(0.05,"xy")
                 reko_plot.SetTitleOffset(0.85, "xy")
                 reko_plot.Draw()
                 for ind in range(4):
                     if ind in [0,1]:
-                        globals()["circle" +str(ind+1)].SetFillColor(ROOT.kGreen-9)
+                        globals()["circle" +str(ind+1)].SetFillColor(ROOT.kBlue-9)
                     else:
                         globals()["circle" +str(ind+1)].SetFillColor(ROOT.kCyan-9)
                     globals()["circle" +str(ind+1)].SetLineWidth(1)
@@ -611,13 +616,20 @@ for event in chain:
                 circle_thad.SetLineColor(ROOT.kRed)
                 circle_thad.Draw("SAME")
 
+		latex = ROOT.TLatex()
+                latex.SetNDC(ROOT.kTRUE)
+                latex.SetTextColor(ROOT.kBlack)
+                l = c0.GetLeftMargin()
+                t = c0.GetTopMargin()
+                latex.SetTextSize(0.04)
+                latex.DrawLatex(l+0.46, 1.-t+0.01, "#bf{CMS private work}")		
 
-                legend = ROOT.TLegend(0.65,0.65,0.9,0.9)
-                legend.AddEntry(circle1, "Gen-B-Jets", "f")
-                legend.AddEntry(circle3, "Gen-lf-Jets", "f")
+                legend = ROOT.TLegend(0.65,0.6,0.85,0.85)
+                legend.AddEntry(circle1, "Gen-b", "f")
+                legend.AddEntry(circle3, "Gen-q12", "f")
                 legend.AddEntry(circle_tlep1, "Gen-Tops", "f")
                 legend.AddEntry(circle_0, "Jets", "l")
-                legend.AddEntry(circle_tlep, "reco-Tops", "l")
+                legend.AddEntry(circle_tlep, "reko-Tops", "l")
                 legend.Draw()
 
 
@@ -693,7 +705,7 @@ axis_lep.Draw()
 
 
 #buffer1 = str
-buffer1 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_lep[:2] + "," + eff_lep[2:] + "%}"
+buffer1 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_lep[:2] + "." + eff_lep[2:] + "%}"
 text1 = ROOT.TLatex()
 text1.SetTextSize(0.04)
 text1.DrawLatex(2.,0.4*delta_rlep.GetMaximum(),buffer1)
@@ -720,6 +732,7 @@ c2=ROOT.TCanvas("c1","delta r and efficiency",700,600)
 c2.SetRightMargin(0.15)
 c2.SetLeftMargin(0.15)
 c2.SetBottomMargin(0.15)
+c2.SetTopMargin(0.15)
 # delta_rhad.Draw("HIST")
 # efficiency_had.Draw("SAME")
 #efficiency_had.Draw("*","SAME")
@@ -750,13 +763,13 @@ axis_had.SetLabelFont(42)
 axis_had.SetTitleSize(0.05)
 axis_had.Draw("SAME")
 
-buffer2 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_had[:2]+","+eff_had[2:] + "%}"
+buffer2 = "#bf{Effizienz bei #Delta R < 0.4: " + eff_had[:2]+"."+eff_had[2:] + "%}"
 text2 = ROOT.TLatex()
 text2.SetTextSize(0.04)
 text2.DrawLatex(2.,0.4*delta_rhad.GetMaximum(), buffer2)
 text3 = ROOT.TLatex()
 text3.SetTextSize(0.04)
-text3.DrawLatex(2.,0.3*delta_rhad.GetMaximum(), "#bf{Gesamteffizienz:  " + eff_comb[:2] + "," + eff_comb[2:] + "%}")
+text3.DrawLatex(2.,0.3*delta_rhad.GetMaximum(), "#bf{Gesamteffizienz:  " + eff_comb[:2] + "." + eff_comb[2:] + "%}")
 
 latex = ROOT.TLatex()
 latex.SetNDC(ROOT.kTRUE)
@@ -792,6 +805,7 @@ c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.SetRightMargin(0.15)
 c3.SetLeftMargin(0.15)
 c3.SetBottomMargin(0.15)
+c3.SetTopMargin(0.15)
 
 pt_eff_2.SetFillColor(ROOT.kBlue)
 pt_eff_2.SetStats(0)
@@ -814,6 +828,7 @@ c3 = ROOT.TCanvas("c3", "quality of reconstruction", 800,600)
 c3.SetRightMargin(0.15)
 c3.SetLeftMargin(0.15)
 c3.SetBottomMargin(0.15)
+c3.SetTopMargin(0.15)
 # rek_thad.SetTitleSize(.05)
 # rek_thad.SetTitleSize(0.05,"xy")
 #rek_thad.SetTitleOffset(0.87,"x")
@@ -848,6 +863,7 @@ c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.SetRightMargin(0.15)
 c3.SetLeftMargin(0.15)
 c3.SetBottomMargin(0.15)
+c3.SetTopMargin(0.15)
 
 PtRap_thad.SetStats(0)
 PtRap_thad.SetTitleSize(.05, "xy")
@@ -869,6 +885,7 @@ c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
 c3.SetRightMargin(0.15)
 c3.SetLeftMargin(0.15)
 c3.SetBottomMargin(0.15)
+c3.SetTopMargin(0.15)
 
 eff_count_thad.SetStats(0)
 eff_count_thad.SetTitleSize(.05, "xy")
