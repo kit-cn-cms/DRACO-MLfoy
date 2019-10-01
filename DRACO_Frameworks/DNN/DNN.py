@@ -156,10 +156,10 @@ class DNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables:
-           out_file = self.cp_path + "/variable_norm.csv"
-           self.data.norm_csv.to_csv(out_file)
-           print("saved variabe norms at "+str(out_file))
+        #if self.norm_variables:
+        out_file = self.cp_path + "/variable_norm.csv"
+        self.data.norm_csv.to_csv(out_file)
+        print("saved variabe norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
