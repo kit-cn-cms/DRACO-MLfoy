@@ -94,7 +94,7 @@ ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2018"
 
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_8*nominal*.root",
     categories  = ttbar_categories,
     selections  = None,#ttbar_selection,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
@@ -118,10 +118,11 @@ additional_variables = [
     #"Weight_XS",
     #"Weight_CSV",
     #"Weight_GEN_nom",
+    "Evt_sphericity",
+    "Evt_aplanarity",
     "Evt_ID", 
     "Evt_Run", 
-    "Evt_Lumi",
-    "Reco_ttbar_toplep_phi"
+    "Evt_Lumi"
     ]
 
 # add these variables to the variable list
@@ -143,15 +144,16 @@ print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt[0-12]"],
+    channels  = ["Jet_Pt[0-16]"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
-    rotation  = "ttbar_toplep",
+    rotation  = "ttbar_toplep", #None or "MaxJetPt" or "ttbar_toplep" or "sphericity" or "aplanarity"
     # pixel intensity linear or logarithmic
     logNorm     = False)
 
-print(imageconfig.images)
+#print(str(len(imageconfig.variables))+" VARIABLES in Image_Config: " + str(imageconfig.variables))
+#print(imageconfig.images)
 
 # run the preprocessing
 dataset.runPreprocessing(imageconfig)

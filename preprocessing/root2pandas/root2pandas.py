@@ -11,6 +11,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import base64
+import ROOT as r00t
 
 import preprocessing_utils as pputils
 
@@ -66,7 +67,7 @@ class ImageConfig():
         self.logNorm = logNorm
 
         # check if rotation mode is supported
-        if self.rotation != None and self.rotation != "MaxJetPt" and self.rotation != "ttbar_toplep":
+        if self.rotation != None and self.rotation != "MaxJetPt" and self.rotation != "ttbar_toplep" and self.rotation != "aplanarity" and self.rotation != "sphericity":
             print("ImageConfig: the rotation-mode "+str(self.rotation)+" is not supported.")
             exit()
 
@@ -102,6 +103,18 @@ class ImageConfig():
                         self.variables.append(v2)
                 else:
                     self.variables.append(v)
+
+        if self.rotation == "ttbar_toplep":
+            self.variables.append("Reco_ttbar_toplep_phi")
+
+        if self.rotation == "aplanarity" or self.rotation == "sphericity":
+            LeptonVars=["TightLepton_Pt", "TightLepton_Eta", "TightLepton_Phi", "TightLepton_M"]
+            METVars=["Evt_MET_Phi", "Evt_MET"] #"Evt_MET_Pt" might also be here, but it will be included via baseselection. ommitong it here for temporariy bugfix, so it won't be droped from dataframe before baseselection
+            JetVars=[]
+            for i in range(int(indexstart),int(indexend)+1):
+                JetVars.append("Jet_M["+str(i)+"]")
+            for v in LeptonVars+METVars+JetVars:
+                self.variables.append(v)
 
 
 
@@ -319,6 +332,90 @@ class Dataset:
             phi_array_rotated.append(phi)
         return phi_array_rotated
 
+    def getSp(self, df):
+        nJets = df["N_Jets"]
+       
+        lepton = r00t.TLorentzVector()
+        met = r00t.TLorentzVector()
+
+        lepton.SetPtEtaPhiM(df["TightLepton_Pt"], df["TightLepton_Eta"], df["TightLepton_Phi"], df["TightLepton_M"])
+        met.SetPtEtaPhiM(df["Evt_MET_Pt"], 0, df["Evt_MET_Phi"], df["Evt_MET_Pt"])
+        jets=[]
+        for i in range(nJets):
+            jeti=r00t.TLorentzVector()
+            jeti.SetPtEtaPhiM(df["Jet_Pt["+str(i)+"]"], df["Jet_Eta["+str(i)+"]"], df["Jet_Phi["+str(i)+"]"], df["Jet_M["+str(i)+"]"])
+            jets.append(jeti)
+
+        mxx = lepton.Px()*lepton.Px() + met.Px()*met.Px()
+        myy = lepton.Py()*lepton.Py() + met.Py()*met.Py()
+        mzz = lepton.Pz()*lepton.Pz() + met.Pz()*met.Pz()
+        mxy = lepton.Px()*lepton.Py() + met.Px()*met.Py()
+        mxz = lepton.Px()*lepton.Pz() + met.Px()*met.Pz()
+        myz = lepton.Py()*lepton.Pz() + met.Py()*met.Pz()
+
+        for jet in jets:
+            mxx += jet.Px()*jet.Px()
+            myy += jet.Py()*jet.Py()
+            mzz += jet.Pz()*jet.Pz()
+            mxy += jet.Px()*jet.Py()
+            mxz += jet.Px()*jet.Pz()
+            myz += jet.Py()*jet.Pz()       
+        
+        summe = mxx + myy + mzz
+        mxx /= summe
+        myy /= summe
+        mzz /= summe
+        mxy /= summe
+        mxz /= summe
+        myz /= summe
+
+        tensor=r00t.TMatrix(3,3)
+        tensor[0][0] = mxx
+        tensor[1][1] = myy
+        tensor[2][2] = mzz
+        tensor[0][1] = mxy
+        tensor[1][0] = mxy
+        tensor[0][2] = mxz
+        tensor[2][0] = mxz
+        tensor[1][2] = myz
+        tensor[2][1] = myz
+        eigenval=r00t.TVector(3)
+        eigenvec=tensor.EigenVectors(eigenval)
+
+        sphericity  = 3.0*(eigenval(1)+eigenval(2))/2.0
+        aplanarity  = 3.0*eigenval(2)/2.0
+        tsphericity = 2.0*eigenval(1)/(eigenval(1)+eigenval(0))
+        
+        #tensor.Print()
+        #eigenval.Print()
+        #eigenvec.Print()
+        ev31=eigenvec[0][2]
+        ev32=eigenvec[1][2]
+        ev33=eigenvec[2][2]
+        #print(ev31,ev32,ev33)
+        
+        #print(aplanarity)
+        #print(np.float(df["Evt_aplanarity"]))
+        #exit()
+        if(eigenvec[0][0]==0):
+            ev1_phi=np.sign(eigenvec[1][0])*0.5*np.pi
+        else:
+            ev1_phi=np.arctan(eigenvec[1][0]/eigenvec[0][0])
+        
+        if(eigenvec[0][1]==0):
+            ev2_phi=np.sign(eigenvec[1][1])*0.5*np.pi
+        else:
+            ev2_phi=np.arctan(eigenvec[1][1]/eigenvec[0][1])
+        
+        if(eigenvec[0][2]==0):
+            ev3_phi=np.sign(eigenvec[1][2])*0.5*np.pi
+        else:
+            ev3_phi=np.arctan(eigenvec[1][2]/eigenvec[0][2])
+
+        #print(ev1_phi, ev2_phi, ev3_phi)
+        #exit()
+        return([ev1_phi, ev2_phi, ev3_phi])
+
         
 
     # ====================================================================
@@ -470,10 +567,12 @@ class Dataset:
                     if Image_Config.rotation=="MaxJetPt":
                         image = Image_Config.images[0] #assuming JetPt is at the first color channel
                         img = image[0] #first in the list is greatest jet
-                        phi0 =np.float(np.array(df_tmp[img[1]]))
+                        phi0 =np.float(np.array(df_tmp[img[1]])) #second entry is phi value of jet
                     if Image_Config.rotation=="ttbar_toplep":
                         phi0 = np.float(np.array(df_tmp["Reco_ttbar_toplep_phi"]))
-
+                    if Image_Config.rotation=="aplanarity" or Image_Config.rotation=="sphericity":
+                        ev1_phi,ev2_phi,ev3_phi=self.getSp(df_tmp)
+                        phi0 = ev3_phi #eigenvector 1, 2 or 3?
 
                     #loop over the differet "color" channels of the image
                     for image in Image_Config.images:
@@ -491,32 +590,33 @@ class Dataset:
                             H=self.yan_2dhist(Image_Config, image, df_tmp, phi0=phi0)
                         
 
-                        someid=9
-                        plt.figure(figsize=(8,10))
-                        #need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
-                        plt.imshow(np.transpose(H), extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
-                            aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
-                        plt.xlabel("Eta")
-                        plt.ylabel("Phi")
-                        plt.title(str(Image_Config.z[Image_Config.images.index(image)])+" EVT_ID "+str(evt))
-                        plt.tight_layout()
-                        plt.savefig(self.outputdir+"/"+str(Image_Config.z[Image_Config.images.index(image)])+"_"+Image_Config.rotation+"_EVT"+str(evt)+".pdf")
-                        plt.show()
-                        print("Did I plot?")
-                        if(evt==evtids[someid]):
-                            exit()
+                        ## plot the first 10 events in the first file
+                        #someid=9
+                        #plt.figure(figsize=(8,10))
+                        ##need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
+                        #plt.imshow(np.transpose(H), extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
+                        #    aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
+                        #plt.xlabel("Eta")
+                        #plt.ylabel("Phi")
+                        #plt.title(str(Image_Config.z[Image_Config.images.index(image)])+" EVT_ID "+str(evt))
+                        #plt.tight_layout()
+                        #plt.savefig(self.outputdir+"/"+str(Image_Config.z[Image_Config.images.index(image)])+"_"+Image_Config.rotation+"_EVT"+str(evt)+".pdf")
+                        #plt.show()
+                        #print("Did I plot?")
+                        #if(evt==evtids[someid]):
+                        #    exit()
 
 
                         col_name=Image_Config.z[Image_Config.images.index(image)]+"_Hist"
                         H=base64.b64encode(np.ascontiguousarray(H))
                         df.update(pd.DataFrame({col_name:[H]}, index=[pd.Index(evtids).get_loc(evt)]))
                         #print(df)
+                    #break #for debugging, eg to see if no extra variables get dropped which are necessary for the following "apply event selection" step
 
                         
-
+                #print(df["Jet_Pt[0-16]_Hist"])
                 df=df.drop(columns=Image_Config.variables)
-
-                #print(df["Jet_Pt[0-2]_Hist"])
+                #print(df)
 
             # apply event selection
             df = self.applySelections(df, sample.selections)
@@ -558,9 +658,9 @@ class Dataset:
                 n_entries = 0
                 concat_df = pd.DataFrame()
 
-                #yan debugging
-                #print(df)
-                #exit()
+            #yan debugging
+            #print(df)
+            #break #only run for one file
 
 
     # ====================================================================
