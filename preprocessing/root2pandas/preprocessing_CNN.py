@@ -7,6 +7,10 @@ basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
 import root2pandas
+import ROOT as r00t
+
+timer=r00t.TStopwatch()
+timer.Start()
 
 """
 USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
@@ -49,6 +53,8 @@ elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options
     outputdir=options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
+
+
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
@@ -100,13 +106,13 @@ dataset.addSample(
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
 
-dataset.addSample(
-    sampleName  = "TTH",
-    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
-    categories  = ttH_categories,
-    selections  = None,#ttbar_selection,
+#dataset.addSample(
+#    sampleName  = "TTH",
+#    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
+#    categories  = ttH_categories,
+#    selections  = None,#ttbar_selection,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-    )
+#    )
 
 # initialize variable list 
 #dataset.addVariables(variable_set.all_variables)
@@ -115,11 +121,11 @@ dataset.addSample(
 additional_variables = [
     "N_Jets",
     #"N_BTagsM",
-    #"Weight_XS",
-    #"Weight_CSV",
-    #"Weight_GEN_nom",
-    "Evt_sphericity",
-    "Evt_aplanarity",
+    "Weight_XS",
+    "Weight_CSV",
+    "Weight_GEN_nom",
+    #"Evt_sphericity",
+    #"Evt_aplanarity",
     "Evt_ID", 
     "Evt_Run", 
     "Evt_Lumi"
@@ -144,7 +150,7 @@ print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt[0-16]"],
+    channels  = ["Jet_Pt[0-16]", "Electron_Pt"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
@@ -154,6 +160,8 @@ imageconfig = root2pandas.ImageConfig(
 
 #print(str(len(imageconfig.variables))+" VARIABLES in Image_Config: " + str(imageconfig.variables))
 #print(imageconfig.images)
-
+print("time before runPreprocessing "+ str(round(timer.RealTime(),4)))
+timer.Start()
 # run the preprocessing
 dataset.runPreprocessing(imageconfig)
+print("time after runPreprocessing "+str(round(timer.RealTime(),4)))

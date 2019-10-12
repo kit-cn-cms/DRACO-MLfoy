@@ -127,6 +127,13 @@ class Dataset:
         self.varName_Run = varName_Run
         self.varName_LumiBlock = varName_LumiBlock
         self.varName_Event = varName_Event
+        
+        self.timer_general=r00t.TStopwatch()
+        self.timer_yan=r00t.TStopwatch()
+        self.timer_hist=r00t.TStopwatch()
+        self.timer_update=r00t.TStopwatch()
+
+
 
         # generating output dir
         if not os.path.exists(self.outputdir):
@@ -476,6 +483,8 @@ class Dataset:
     def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event, Image_Config=None):
         # print sample info
         sample.printInfo()
+        timer=r00t.TStopwatch()
+        timer.Start(False)
 
         # collect ntuple files
         ntuple_files = sorted(glob.glob(sample.ntuples))
@@ -489,10 +498,12 @@ class Dataset:
         n_entries = 0
         concat_df = pd.DataFrame()
         n_files = len(ntuple_files)
-
+        self.timer_general.Start(False)
         # loop over files
         for iFile, f in enumerate(ntuple_files):
             print("({}/{}) loading file {}".format(iFile+1,n_files,f))
+            if(iFile+1==9):#yan makefast testing
+                break
 
             # open root file
             with root.open(f) as rf:
@@ -535,8 +546,11 @@ class Dataset:
                     # append column to original dataframe
                     df.update( idx_df[vecvar].rename(col_name) )
 
-
-
+            # apply event selection
+            df = self.applySelections(df, sample.selections)
+            #print(df)
+            self.timer_general.Stop()
+            self.timer_yan.Start(False)
             # generate 2d histogram if ImageConfig was passed
             # ===============================================
             if Image_Config is not None:
@@ -544,8 +558,8 @@ class Dataset:
                 print("processing data from file for use with CNN")
 
                 #initialize colums for the matrices/histograms
-                for layer_name in Image_Config.z:
-                    df[layer_name+"_Hist"] = 'AAAAAAAAAAA='
+                #for layer_name in Image_Config.z:
+                #    df[layer_name+"_Hist"] = 'AAAAAAAAAAA='
 
                 #loop over the event ids
                 evtids=df["Evt_ID"]
@@ -554,12 +568,20 @@ class Dataset:
                 #print(df.count)
                 #print(len(df["Evt_MET_Pt"]))
                 #print(df)
-                #exit()
+                #for x in df.columns: print x
 
-                for evt in evtids:
+                H_List=pd.Series()
+                #print(Image_Config.images)
+
+                for ievt, evt in enumerate(evtids):
+                    #if ievt>5:
+                    #    break
+                    #print(ievt)
+
                     df_tmp=df.loc[df["Evt_ID"]==evt]
-                    #print(evt)
+                    entry=df_tmp.index[0]
                     #for x in df_tmp.columns: print x
+                    #print(df_tmp)
                     #exit()
 
                     #calculate phi0, which is used to shift every entry in histogramm
@@ -575,51 +597,50 @@ class Dataset:
                         phi0 = ev3_phi #eigenvector 1, 2 or 3?
 
                     #loop over the differet "color" channels of the image
+                    print(Image_Config.images)
                     for image in Image_Config.images:
-                        #print(image)
 
                         #print("index: "+str(pd.Index(evtids).get_loc(evt)))
-                        
+                        self.timer_hist.Start(False)
                         # for sth like "Jet_Pt[0-8]" this if-statement is true, while its not for "Jet_Pt"
                         if isinstance(image[0], list):
                             H=np.zeros(Image_Config.imageSize)
+                            #df_tmp2=pd.DataFrame(columns=["x","y","z"])
                             for img in image:
-                                #print(img[1])
+                                #df_tmp2=df_tmp2.append({'x':float(df_tmp[img[0]]) , 'y':float(df_tmp[img[1]]), 'z':float(df_tmp[img[2]])} , ignore_index=True)
                                 H+=self.yan_2dhist(Image_Config, img, df_tmp, phi0=phi0)
+                            #H=self.yan_2dhist(Image_Config, ["x","y","z"], df_tmp2, phi0=phi0)   
                         else: 
                             H=self.yan_2dhist(Image_Config, image, df_tmp, phi0=phi0)
                         
-
-                        ## plot the first 10 events in the first file
-                        #someid=9
-                        #plt.figure(figsize=(8,10))
-                        ##need to transpose H and set origin="lower" (default is "upper") in imshow() for the drawing of the 2d array to be the same/correct orientation as with plt.hist2d()
-                        #plt.imshow(np.transpose(H), extent=[Image_Config.xRange[0], Image_Config.xRange[1], Image_Config.yRange[0], Image_Config.yRange[1]], 
-                        #    aspect = 'equal', interpolation="none", origin="lower", cmap="Blues")
-                        #plt.xlabel("Eta")
-                        #plt.ylabel("Phi")
-                        #plt.title(str(Image_Config.z[Image_Config.images.index(image)])+" EVT_ID "+str(evt))
-                        #plt.tight_layout()
-                        #plt.savefig(self.outputdir+"/"+str(Image_Config.z[Image_Config.images.index(image)])+"_"+Image_Config.rotation+"_EVT"+str(evt)+".pdf")
-                        #plt.show()
-                        #print("Did I plot?")
-                        #if(evt==evtids[someid]):
-                        #    exit()
-
+                        self.timer_hist.Stop()
 
                         col_name=Image_Config.z[Image_Config.images.index(image)]+"_Hist"
                         H=base64.b64encode(np.ascontiguousarray(H))
-                        df.update(pd.DataFrame({col_name:[H]}, index=[pd.Index(evtids).get_loc(evt)]))
-                        #print(df)
-                    #break #for debugging, eg to see if no extra variables get dropped which are necessary for the following "apply event selection" step
-
-                        
+                        self.timer_update.Start(False)
+                        #df.update(pd.DataFrame({col_name:[H]}, index=[pd.Index(evtids).get_loc(evt)]))
+                        H=pd.Series(H,index=[entry])
+                        H_List=H_List.append(H)
+                        self.timer_update.Stop()
+                    #break #for debugging, eg to see if saving to file works
+                
+                #print(H_List)
+                #add matrices/histograms to df
+                #for layer_name in Image_Config.z:
+                #    df[layer_name+"_Hist"] = 'AAAAAAAAAAA='
+                #print(len(df), len(H_List))
+                self.timer_update.Start(False)
+                df["Jet_Pt_Hist"]=H_List
+                self.timer_update.Stop()
+                #print(df)
+                #exit()
+                    
                 #print(df["Jet_Pt[0-16]_Hist"])
                 df=df.drop(columns=Image_Config.variables)
                 #print(df)
 
-            # apply event selection
-            df = self.applySelections(df, sample.selections)
+            self.timer_yan.Stop()
+            self.timer_general.Start(False) 
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
@@ -627,6 +648,7 @@ class Dataset:
 
             # count entries so far
             n_entries += df.shape[0]
+            #print("n_entries: "+str(n_entries))
 
             # if number of entries exceeds max threshold, add labels and mem and save dataframe
             if (n_entries > self.maxEntries or f == ntuple_files[-1]):
@@ -660,8 +682,17 @@ class Dataset:
 
             #yan debugging
             #print(df)
-            #break #only run for one file
+            
+            self.timer_general.Stop()
+            print("time spent in general processing: "+str(np.round(self.timer_general.RealTime(),2)))
+            print("time spent in picture processing: "+str(np.round(self.timer_yan.RealTime(),2)))
+            print("        -> in 2D hist processing: "+str(np.round(self.timer_hist.RealTime(),2)))
+            print("        -> in updating processing: "+str(np.round(self.timer_update.RealTime(),2)))
 
+            #break #only run for one file
+            
+            
+        print("time processing sample "+str(round(timer.RealTime(),4)))
 
     # ====================================================================
 
