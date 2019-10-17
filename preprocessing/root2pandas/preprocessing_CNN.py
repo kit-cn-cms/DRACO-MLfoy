@@ -150,11 +150,11 @@ print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt[0-16]", "Electron_Pt"],
+    channels  = ["Jet_Pt[0-16]"],# "Electron_Pt"],
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
-    rotation  = "ttbar_toplep", #None or "MaxJetPt" or "ttbar_toplep" or "sphericity" or "aplanarity"
+    rotation  = "sphericity_ev3", #None or "MaxJetPt" or "ttbar_toplep" or "sphericity_ev1" or "sphericity_ev2" or "sphericity_ev3"
     # pixel intensity linear or logarithmic
     logNorm     = False)
 

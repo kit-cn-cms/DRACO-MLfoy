@@ -67,7 +67,7 @@ class ImageConfig():
         self.logNorm = logNorm
 
         # check if rotation mode is supported
-        if self.rotation != None and self.rotation != "MaxJetPt" and self.rotation != "ttbar_toplep" and self.rotation != "aplanarity" and self.rotation != "sphericity":
+        if self.rotation != None and self.rotation != "MaxJetPt" and self.rotation != "ttbar_toplep" and self.rotation != "sphericity_ev1" and self.rotation != "sphericity_ev2" and self.rotation != "sphericity_ev3":
             print("ImageConfig: the rotation-mode "+str(self.rotation)+" is not supported.")
             exit()
 
@@ -107,7 +107,7 @@ class ImageConfig():
         if self.rotation == "ttbar_toplep":
             self.variables.append("Reco_ttbar_toplep_phi")
 
-        if self.rotation == "aplanarity" or self.rotation == "sphericity":
+        if self.rotation != "sphericity_ev1" or self.rotation != "sphericity_ev2" or self.rotation != "sphericity_ev3":
             LeptonVars=["TightLepton_Pt", "TightLepton_Eta", "TightLepton_Phi", "TightLepton_M"]
             METVars=["Evt_MET_Phi", "Evt_MET"] #"Evt_MET_Pt" might also be here, but it will be included via baseselection. ommitong it here for temporariy bugfix, so it won't be droped from dataframe before baseselection
             JetVars=[]
@@ -502,8 +502,8 @@ class Dataset:
         # loop over files
         for iFile, f in enumerate(ntuple_files):
             print("({}/{}) loading file {}".format(iFile+1,n_files,f))
-            if(iFile+1==9):#yan makefast testing
-                break
+            #if(iFile+1==4):#yan makefast testing
+            #    break
 
             # open root file
             with root.open(f) as rf:
@@ -570,7 +570,7 @@ class Dataset:
                 #print(df)
                 #for x in df.columns: print x
 
-                H_List=pd.Series()
+                H_List_Dict={z:pd.Series() for z in Image_Config.z}
                 #print(Image_Config.images)
 
                 for ievt, evt in enumerate(evtids):
@@ -592,12 +592,16 @@ class Dataset:
                         phi0 =np.float(np.array(df_tmp[img[1]])) #second entry is phi value of jet
                     if Image_Config.rotation=="ttbar_toplep":
                         phi0 = np.float(np.array(df_tmp["Reco_ttbar_toplep_phi"]))
-                    if Image_Config.rotation=="aplanarity" or Image_Config.rotation=="sphericity":
+                    if Image_Config.rotation== "sphericity_ev1" or Image_Config.rotation== "sphericity_ev2" or Image_Config.rotation== "sphericity_ev3":
                         ev1_phi,ev2_phi,ev3_phi=self.getSp(df_tmp)
-                        phi0 = ev3_phi #eigenvector 1, 2 or 3?
+                        if Image_Config.rotation== "sphericity_ev1":
+                            phi0 = ev1_phi
+                        if Image_Config.rotation== "sphericity_ev2":
+                            phi0 = ev2_phi
+                        if Image_Config.rotation== "sphericity_ev3":
+                            phi0 = ev3_phi
 
                     #loop over the differet "color" channels of the image
-                    print(Image_Config.images)
                     for image in Image_Config.images:
 
                         #print("index: "+str(pd.Index(evtids).get_loc(evt)))
@@ -615,12 +619,13 @@ class Dataset:
                         
                         self.timer_hist.Stop()
 
-                        col_name=Image_Config.z[Image_Config.images.index(image)]+"_Hist"
+                        #col_name=Image_Config.z[Image_Config.images.index(image)]+"_Hist"
                         H=base64.b64encode(np.ascontiguousarray(H))
                         self.timer_update.Start(False)
                         #df.update(pd.DataFrame({col_name:[H]}, index=[pd.Index(evtids).get_loc(evt)]))
+                        z=Image_Config.z[Image_Config.images.index(image)]
                         H=pd.Series(H,index=[entry])
-                        H_List=H_List.append(H)
+                        H_List_Dict[z]=H_List_Dict[z].append(H)
                         self.timer_update.Stop()
                     #break #for debugging, eg to see if saving to file works
                 
@@ -630,7 +635,8 @@ class Dataset:
                 #    df[layer_name+"_Hist"] = 'AAAAAAAAAAA='
                 #print(len(df), len(H_List))
                 self.timer_update.Start(False)
-                df["Jet_Pt_Hist"]=H_List
+                for key in H_List_Dict:
+                    df[key+"_Hist"]=H_List_Dict[key]
                 self.timer_update.Stop()
                 #print(df)
                 #exit()
@@ -673,7 +679,7 @@ class Dataset:
                 #for x in df.columns: print x
                 #print(df)
                 #print(df["Jet_Pt[0-2]_Hist"])
-                self.createDatasets(concat_df, sample.categories.categories)
+                self.createDatasets(concat_df, sample.categories.categories, Image_Config)
                 print("*"*50)
 
                 # reset counters
@@ -771,16 +777,22 @@ class Dataset:
         df.drop(self.removedVariables, axis = 1, inplace = True)
         return df
 
-    def createDatasets(self, df, categories):
+    def createDatasets(self, df, categories, Image_Config=None):
         for key in categories:
             outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
 
             # create dataframe for category
             cat_df = df.query("(class_label == \""+str(key)+"\")")
-            print("creating dataset for class label {} with {} entries".format(key, cat_df.shape[0]))
+            n_events = cat_df.shape[0]
+            print("creating dataset for class label {} with {} entries".format(key, n_events))
 
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
+
+            if Image_Config is not None:
+                meta_info_dict = {"input_shape": Image_Config.imageSize, "n_events": n_events}
+                meta_info_df = pd.DataFrame.from_dict( meta_info_dict )
+                meta_info_df.to_hdf(outFile, key = "meta_info", mode = "a")
 
     def removeOldFiles(self):
         for key in self.samples:
