@@ -337,6 +337,18 @@ class Dataset:
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
 
+                replacedict = {
+                    "Reco_ttH_tophad_m":{-999:-1},
+                    "Reco_ttH_h_phi":{-999:-4},
+                    "Reco_ttH_h_eta":{-999:-3},
+                    "Reco_ttH_tophad_pt":{-999:-1},
+                    "Reco_ttH_whad_dr":{-999:-1},
+                    "Reco_ttH_whaddau_m2":{-999:-1},
+                    "Reco_JABDT_ttH_tophad_pt__P__toplep_pt__P__h_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt":{-999:-1},
+                    "Reco_ttH_toplep_m":{-999:-1}
+                }
+                concat_df = concat_df.replace(replacedict)
+
                 # write data to file
                 self.createDatasets(concat_df, sample.categories.categories)
                 print("*"*50)
