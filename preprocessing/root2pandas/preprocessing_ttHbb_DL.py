@@ -20,13 +20,13 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="variables_ttHbb_DL_inputvalidation",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="variables_ttHbb_DL",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-t", "--treeName",action='append', default=["liteTreeTTH_step7_cate8"],
         help="Name of the tree corresponding to the right category", metavar="treeName")
 
-parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
+parser.add_option("-e", "--maxentries", dest="maxEntries", default=100000,
         help="INT used for maximal number of entries for each batch (to restrict memory usage)", metavar="maxEntries")
 
 parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=False,

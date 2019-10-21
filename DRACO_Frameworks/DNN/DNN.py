@@ -30,8 +30,6 @@ import pandas as pd
 # Limit gpu usage
 import tensorflow as tf
 
-import matplotlib
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 config = tf.ConfigProto()
@@ -440,7 +438,7 @@ class DNN():
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
 
-        # Serialize the inputs for the analysis of the gradients
+        # Serialize the test inputs for the analysis of the gradients
         pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
 
 
@@ -585,7 +583,6 @@ class DNN():
     def get_variations(self):
         if not os.path.exists(self.save_path + "/variations/"):
             os.makedirs(self.save_path + "/variations/")
-        import matplotlib.pyplot as plt
 
         print("making plots for input feature variations")
         for i, v in enumerate(self.train_variables):
@@ -651,7 +648,7 @@ class DNN():
         #  Get weights as numpy arrays, load weights in tensorflow variables and build tensorflow graph with weights from keras model
         model_tensorflow = model_tensorflow_impl(inputs.placeholders, model_keras)
 
-        # Load data
+        # Load test data
         x_in = pickle.load(open(self.cp_path+"/inputvariables.pickle", "rb"))
 
         if is_binary:
@@ -741,7 +738,6 @@ class DNN():
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_metrics(self, privateWork = False):
-        import matplotlib.pyplot as plt
         plt.rc('text', usetex=True)
 
         ''' plot history of loss function and evaluation metrics '''

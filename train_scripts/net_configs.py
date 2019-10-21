@@ -1,7 +1,3 @@
-
-import keras
-import keras.models as models
-import numpy as np
 from keras import optimizers
 
 config_dict = {}
@@ -44,7 +40,6 @@ config_dict["ttZ_2018_final"] = {
         "earlystopping_percentage": 0.1,
         "earlystopping_epochs":     50,
         }
-
 
 config_dict["ttH_2017"] = {
         "layers":                   [100,100,100],
@@ -98,7 +93,6 @@ config_dict["legacy_2018"] = {
         "earlystopping_epochs":     100,
         }
 
-
 config_dict["dnn_config"] = {
         "layers":                   [20],
         "loss_function":            "categorical_crossentropy",
@@ -121,18 +115,6 @@ config_dict["binary_config"] = {
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "selu",
         "output_activation":        "Tanh",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
-config_dict["binary_config_v2"] = {
-        "layers":                   [200,100],
-        "loss_function":            "binary_crossentropy",
-        "Dropout":                  0.3,
-        "L2_Norm":                  1e-5,
-        "batch_size":               4000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "selu",
-        "output_activation":        "Sigmoid",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     50,
         }
@@ -172,74 +154,6 @@ config_dict["binary_DL_SGD_cate8"] = {
         "batch_size":               32,
         "optimizer":                optimizers.Adam(1e-3),
         "activation_function":      "tanh",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage":  0.02,
-        "earlystopping_epochs":      100,
-}
-
-config_dict["binary_DL_SGD_cate7"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.40,
-        "L2_Norm":                  1e-3,
-        "batch_size":               64,
-        "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage":  0.02,
-        "earlystopping_epochs":      100,
-}
-
-config_dict["binary_DL_SGD_cate6"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.40,
-        "L2_Norm":                  1e-3,
-        "batch_size":               64,
-        "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage":  0.02,
-        "earlystopping_epochs":      100,
-}
-
-
-config_dict["binary_DL_SGD_cate4"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.40,
-        "L2_Norm":                  1e-3,
-        "batch_size":               64,
-        "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage":  0.02,
-        "earlystopping_epochs":      100,
-}
-
-
-config_dict["binary_DL_SGD_cate3"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.40,
-        "L2_Norm":                  1e-3,
-        "batch_size":               64,
-        "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage":  0.02,
-        "earlystopping_epochs":      100,
-}
-
-config_dict["binary_DL_Adam"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.40,
-        "L1_Norm":                  0,
-        "L2_Norm":                  1e-2,
-        "batch_size":               64,
-        "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "relu",
         "output_activation":        "Tanh",
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
