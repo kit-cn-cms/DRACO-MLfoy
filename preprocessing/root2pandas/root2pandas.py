@@ -6,8 +6,15 @@ import glob
 import os
 import shutil
 import matplotlib.pyplot as plt
+import sys
 
 import preprocessing_utils as pputils
+
+filedir = os.path.dirname(os.path.realpath(__file__))
+basedir = os.path.dirname(os.path.dirname(filedir))
+sys.path.append(basedir)
+
+import nafSubmit
 
 class EventCategories:
     def __init__(self,name):
@@ -208,17 +215,21 @@ class Dataset:
 
 
     # ====================================================================
-    def parallelPreprocessing(self, evenOdd,fileNumber = 20):
+    def parallelPreprocessing(self, evenOdd,fileNumber = 20, scriptPath="Scripts"):
+        scriptdir=filedir+"/"+scriptPath
+        if not os.path.exists(scriptdir):
+         os.makedirs(scriptdir)
         self.makeConfig(evenOdd)
+        scriptlist=[]
+        i=0;
         for samplename in self.samples:
             # collect ntuple files
             sample=self.samples[samplename]
             ntuple_files = sorted(glob.glob(sample.ntuples))
             parallelFiles = [ntuple_files[x:x+fileNumber] for x in xrange(0, len(ntuple_files), fileNumber)]
             print str(sample.categories.name)
-            for i,File in enumerate(parallelFiles):
-                print i
-                outputfile="parallelPreprocessing"+str(i)+".sh"
+            for File in parallelFiles:
+                outputfile=scriptdir+"/parallelPreprocessing"+str(i)+".sh"
                 with open(outputfile,'w') as outfile:
                     outfile.write("python ParallelPreprocessingConfig.py -n ")
                     outfile.write(','.join(File))
@@ -228,7 +239,10 @@ class Dataset:
                     outfile.write(str(sample.categories.name))
                     outfile.write(" -d ")
                     outfile.write(str(sample.dataera))
-
+                i+=1
+                scriptlist.append(outputfile)
+        print scriptlist
+        nafSubmit.submitArrayToNAF(scripts=scriptlist,arrayName="parallelPreprocessing")
             
 
 
@@ -242,7 +256,7 @@ class Dataset:
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
         # remove old files
         #self.removeOldFiles()
-        self.renameOldFiles()
+        #self.renameOldFiles()
 
         if self.addMEM:
             # generate MEM path

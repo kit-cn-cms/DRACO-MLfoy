@@ -38,6 +38,9 @@ parser.add_option("--odd",dest="even_odd_splitting",default=False,action="store_
 parser.add_option("-p", "--parallelfiles", dest="parallelFiles", default=20,
         help="INT used for maximal number of files for each parallel step (to restrict memory usage)", metavar="parallelFiles")
 
+parser.add_option("--parallelScripts", dest="parallelScripts", default="ParallelScripts",
+        help="Directory for scripts for each parallel step (to restrict memory usage)", metavar="scriptDir")
+
 (options, args) = parser.parse_args()
 
 if not os.path.isabs(options.variableSelection):
@@ -164,14 +167,5 @@ additional_variables = [
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
 
-print ttH_categories
-print ttbar_categories
-print dataset
-print dataset.printVariables()
-print dataset.printBaseSelection()
-print dataset.printOptionSample(options.even_odd_splitting)
-print dataset.printHeader()
-
-print dataset.samples["TTTo2018"].ntuples
 # run the preprocessing
-dataset.parallelPreprocessing(options.even_odd_splitting)
+dataset.parallelPreprocessing(evenOdd=options.even_odd_splitting, scriptPath=options.parallelScripts)
