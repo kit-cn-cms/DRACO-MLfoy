@@ -94,6 +94,9 @@ using the option `-i DIR` to specify the path to the directory inside which ther
 using the option `-l INT` to specify the number of layers to consider in the computation.
 
 
+To compute the first-order derivatives for the DNN Taylor expansion add the funciton "dnn.get_gradients(options.isBinary())" in `train_template.py`. Whenever you add/change an architecture in `net_configs.py`, remember to  change the corresponding TensorFlow architecture in `net_configs_tensorflow.py`. The TensorFlow architecture has to have the same name as the keras one with the additional "_tensorflow" at the end.
+
+
 ## Interface to pyroot plotscripts
 The DNNs which are trained with this framework can be evaluated with the `pyroot-plotscripts` framework.
 For this purpose, generate a directory (e.g `DNNSet`) containing subdirectories (e.g. `4j_ge3t_dnn`, etc.) for each separately trained DNN.

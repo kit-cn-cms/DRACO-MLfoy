@@ -703,8 +703,6 @@ class DNN():
 
 
         # Make plot
-
-         # Plotting
         variables = self.train_variables
         plt.figure(0, figsize=(len(variables), len(event_classes)))
         axis = plt.gca()
@@ -720,7 +718,7 @@ class DNN():
                     '{:.3f}'.format(matrix[i, j]),
                     ha='center',
                     va='center')
-        q = plt.pcolormesh(matrix, cmap='YlOrRd')
+        q = plt.pcolormesh(matrix, cmap='Oranges')
         #cbar = plt.colorbar(q)
         #cbar.set_label("mean(abs(Taylor coefficients))", rotation=270, labelpad=20)
         plt.xticks(
