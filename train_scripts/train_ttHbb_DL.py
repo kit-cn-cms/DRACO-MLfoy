@@ -105,7 +105,7 @@ dnn.train_model()
 dnn.eval_model()
 
 # save information
-dnn.save_model(sys.argv, filedir)
+dnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
 # save configurations of variables for plotscript
 #dnn.variables_configuration()
@@ -116,6 +116,7 @@ dnn.get_input_weights()
 # save and print variable ranking according to all layer weights
 dnn.get_weights()
 
+dnn.get_gradients(options.isBinary())
 
 # plotting
 if options.doPlots():
@@ -130,7 +131,11 @@ if options.doPlots():
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
             bin_range   = bin_range,
+            nbins       = 20,
             name        = options.getName())
+
+
+
     else:
         # plot the confusion matrix
         dnn.plot_confusionMatrix(

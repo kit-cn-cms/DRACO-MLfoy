@@ -20,10 +20,10 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="variables_ttHbb_DL",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="variables_ttHbb_DL_inputvalidation",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
-parser.add_option("-t", "--treeName",action='append', default=[],
+parser.add_option("-t", "--treeName",action='append', default=["liteTreeTTH_step7_cate8"],
         help="Name of the tree corresponding to the right category", metavar="treeName")
 
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
@@ -58,7 +58,6 @@ else:
 base_selection = "(N_jets >= 3 and N_btags >= 2)"
 ttH_selection = None #"(Evt_Odd == 1)"
 
-print(options.treeName)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -76,13 +75,10 @@ dataset = root2pandas.Dataset(
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
-ntuplesPath = "/nfs/dust/cms/user/missirol/sandbox/ttHbb/output_190828_DeepJet/2017/exe1/selectionRoot_reco_liteTreeTTH/Nominal"
+ntuplesPath = "/nfs/dust/cms/user/missirol/sandbox/ttHbb/output_190914_DeepJet/2017/exe1/selectionRoot_reco_liteTreeTTH/Nominal"
 
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH", selection = None)
-
-background_categories = root2pandas.EventCategories()
-background_categories.addCategory("background")
 
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbar")
@@ -102,7 +98,7 @@ ttbar_cc.addCategory("ttcc")
 ttbar_lf = root2pandas.EventCategories()
 ttbar_lf.addCategory("ttlf")
 
-
+#ttHbb samples
 for i in range(15):
     dataset.addSample(
       sampleName = "ttH"+str(i),
@@ -117,19 +113,14 @@ for i in range(5):
         sampleName  = "ttbarNotau_bb"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotauBbbar_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_bb,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
     dataset.addSample(
         sampleName  = "ttbarOnlytau_bb"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonOnlytauBbbar_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_bb,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
-
 #dataset.addSample(
 #    sampleName  = "ttbarNotau_bb",
 #    ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotauBbbar_fromDilepton_ttbbPowheg.root",
@@ -149,19 +140,14 @@ for i in range(5):
         sampleName  = "ttbarNotau_b"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotauB_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_b,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
     dataset.addSample(
         sampleName  = "ttbarOnlytau_b"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonOnlytauB_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_b,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
-
 #dataset.addSample(
 #    sampleName  = "ttbarNotau_b",
 #    ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotauB_fromDilepton_ttbbPowheg.root",
@@ -179,51 +165,16 @@ for i in range(5):
 for i in range(5):
     dataset.addSample(
         sampleName  = "ttbarNotau_2b"+str(i),
-        ntuples     = ntuplesPath+"/emu/emu_ttbarDileptonNotau2b_fromDilepton_PSweights_"+str(i)+".root",
+        ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotau2b_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_2b,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
     dataset.addSample(
-        sampleName  = "ttbarNotau_2b"+str(i),
-        ntuples     = ntuplesPath+"/mumu/mumu_ttbarDileptonNotau2b_fromDilepton_PSweights_"+str(i)+".root",
+        sampleName  = "ttbarOnlytau_2b"+str(i),
+        ntuples     = ntuplesPath+"/*/*_ttbarDileptonOnlytau2b_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_2b,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
-
-
-
-dataset.addSample(
-    sampleName  = "ttbarOnlytau_2b0",
-    ntuples     = ntuplesPath+"/ee/ee_ttbarDileptonOnlytau2b_fromDilepton_PSweights_0.root",
-    categories  = ttbar_2b,
-    #   categories = background_categories,
-    #   categories  = ttbar_categories,
-    selections  = None
-    )
-dataset.addSample(
-    sampleName  = "ttbarOnlytau_2b1",
-    ntuples     = ntuplesPath+"/ee/ee_ttbarDileptonOnlytau2b_fromDilepton_PSweights_1.root",
-    categories  = ttbar_2b,
-    #   categories = background_categories,
-    #   categories  = ttbar_categories,
-    selections  = None
-    )
-dataset.addSample(
-    sampleName  = "ttbarOnlytau_2b3",
-    ntuples     = ntuplesPath+"/ee/ee_ttbarDileptonOnlytau2b_fromDilepton_PSweights_3.root",
-    categories  = ttbar_2b,
-    #   categories = background_categories,
-    #   categories  = ttbar_categories,
-    selections  = None
-    )
-
-
-
-#
 #dataset.addSample(
 #    sampleName  = "ttbarNotau_2b",
 #    ntuples     = ntuplesPath+"/*/*_ttbarDileptonNotauB_fromDilepton_ttbbPowheg.root",
@@ -243,18 +194,15 @@ for i in range(5):
         sampleName  = "ttbar_cc"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonPlustauCcbar_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_cc,
-        #   categories = background_categories,
-        #   categories  = ttbar_categories,
         selections  = None
     )
 
-dataset.addSample(
-    sampleName  = "ttbarPowheg_cc",
-    ntuples     = ntuplesPath+"/*/*_ttbarDileptonPlustauCcbar_fromDilepton_ttbbPowheg.root",
-    categories  = ttbar_cc,
-    #   categories = background_categories,
-    selections  = None
-)
+#dataset.addSample(
+#    sampleName  = "ttbarPowheg_cc",
+#    ntuples     = ntuplesPath+"/*/*_ttbarDileptonPlustauCcbar_fromDilepton_ttbbPowheg.root",
+#    categories  = ttbar_cc,
+#    selections  = None
+#)
 
 #ttbar_lf samples
 for i in range(5):
@@ -262,7 +210,6 @@ for i in range(5):
         sampleName  = "ttbar_lf"+str(i),
         ntuples     = ntuplesPath+"/*/*_ttbarDileptonPlustauOther_fromDilepton_PSweights_"+str(i)+".root",
         categories  = ttbar_lf,
-        #   categories = background_categories,
         selections  = None
     )
 
@@ -279,14 +226,11 @@ dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
-
   "N_jets",
   "N_btags",
   "runNumber",
   "lumiBlock",
   "eventNumber",
-
-#  "weight_GEN",
   "weight",
 ]
 
