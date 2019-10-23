@@ -30,6 +30,8 @@ input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalizat
 input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 input_samples.addSample(options.getDefaultName("ttb"), label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
+#input_samples.addSample(options.getDefaultName("ttbar"), label = "ttbar"  , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
+
 input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf" , normalization_weight = options.getNomWeight(), total_weight_expr='x.weight')
 
@@ -116,7 +118,6 @@ dnn.get_input_weights()
 # save and print variable ranking according to all layer weights
 dnn.get_weights()
 
-dnn.get_gradients(options.isBinary())
 
 # plotting
 if options.doPlots():
@@ -133,8 +134,6 @@ if options.doPlots():
             bin_range   = bin_range,
             nbins       = 20,
             name        = options.getName())
-
-
 
     else:
         # plot the confusion matrix
@@ -170,3 +169,6 @@ if options.doPlots():
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
+
+
+dnn.get_gradients(options.isBinary())

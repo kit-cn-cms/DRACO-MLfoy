@@ -106,53 +106,57 @@ config_dict["dnn_config"] = {
         "earlystopping_epochs":     50,
         }
 
-config_dict["binary_config"] = {
-        "layers":                   [200,100],
-        "loss_function":            "squared_hinge",
-        "Dropout":                  0.3,
-        "L2_Norm":                  0.,
-        "batch_size":               4000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
 
 config_dict["ttH_2017_DL"] = {
         "layers":                   [200,100],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.30,
+        "L1_Norm":                  0.,
         "L2_Norm":                  1e-3,
         "batch_size":               64,
-        "optimizer":                optimizers.SGD(1e-3,nesterov=True),
+        "optimizer":                optimizers.Adadelta(),
         "activation_function":      "relu",
         "output_activation":        "Sigmoid",
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
         }
 
-config_dict["binary_DL"] = {
-        "layers":                   [100,100],
+config_dict["binary_crossentropy_Adam"] = {
+        "layers":                   [200,100],
         "loss_function":            "binary_crossentropy",
-        "Dropout":                  0.40,
+        "Dropout":                  0.30,
         "L2_Norm":                  1e-3,
+        "L1_Norm":                  1e-4,
         "batch_size":               64,
         "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "relu",
+        "activation_function":      "elu",
         "output_activation":        "Sigmoid",
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
 }
 
-config_dict["binary_DL_SGD_cate8"] = {
+config_dict["binary_squared_Adadelta"] = {
         "layers":                   [200,100],
         "loss_function":            "squared_hinge",
+        "Dropout":                  0.3,
+        "L1_Norm":                  0,
+        "L2_Norm":                  0.,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "elu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+}
+
+config_dict["binary_DL_SGD_cate8"] = {
+        "layers":                   [100,100],
+        "loss_function":            "squared_hinge",
         "Dropout":                  0.40,
-        "L1_Norm":                  1e-4,
-        "L2_Norm":                  1e-4,
-        "batch_size":               32,
-        "optimizer":                optimizers.Adam(1e-3),
+        "L1_Norm":                  0,
+        "L2_Norm":                  1e-5,
+        "batch_size":               64,
+        "optimizer":                optimizers.SGD(1e-3),
         "activation_function":      "tanh",
         "output_activation":        "Tanh",
         "earlystopping_percentage":  0.02,

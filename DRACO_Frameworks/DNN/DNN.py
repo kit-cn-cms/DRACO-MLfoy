@@ -630,7 +630,7 @@ class DNN():
         # Get TensorFlow graph
         inputs = Inputs(self.train_variables)
         try:
-            import net_configs_keras
+            import net_configs_tensorflow
         except:
             print("Failed to import Keras models.")
             quit()

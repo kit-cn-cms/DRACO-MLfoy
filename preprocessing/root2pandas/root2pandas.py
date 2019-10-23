@@ -5,6 +5,7 @@ import re
 import glob
 import os
 import shutil
+import math
 import matplotlib.pyplot as plt
 
 import preprocessing_utils as pputils
@@ -269,7 +270,7 @@ class Dataset:
             print("({}/{}) loading file {}".format(iFile+1,n_files,f))
 
             for tr in self.tree:
-            # open root file
+                # open root file
                 with root.open(f) as rf:
                     # get TTree
                     try:
@@ -287,6 +288,11 @@ class Dataset:
 
                 if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
                     df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
+                    count = 0
+                    for el in df['blr_transformed']:
+                        if math.isinf(el):
+                            df = df.drop(df.index[count])
+                        count+=1
 
                 # delete subentry index
                 try: df = df.reset_index(1, drop = True)
