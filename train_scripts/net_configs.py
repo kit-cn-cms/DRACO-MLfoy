@@ -149,7 +149,7 @@ config_dict["binary_squared_Adadelta"] = {
         "earlystopping_epochs":     100,
 }
 
-config_dict["binary_DL_SGD_cate8"] = {
+config_dict["binary_squared_SGD"] = {
         "layers":                   [100,100],
         "loss_function":            "squared_hinge",
         "Dropout":                  0.40,

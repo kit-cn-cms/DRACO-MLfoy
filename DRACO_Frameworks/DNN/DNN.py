@@ -632,13 +632,13 @@ class DNN():
         try:
             import net_configs_tensorflow
         except:
-            print("Failed to import Keras models.")
+            print("Failed to import Tensorflow models.")
             quit()
 
         try:
             name_keras_model = self.netConfig
             model_tensorflow_impl = getattr(
-                net_configs_keras, self.netConfig + "_tensorflow")
+                net_configs_tensorflow, self.netConfig + "_tensorflow")
         except:
             print(
                 "Failed to load TensorFlow version of Keras model {}.".format(
