@@ -41,7 +41,6 @@ config_dict["ttZ_2018_final"] = {
         "earlystopping_epochs":     50,
         }
 
-
 config_dict["ttH_2017"] = {
         "layers":                   [100,100,100],
         "loss_function":            "categorical_crossentropy",
@@ -94,7 +93,6 @@ config_dict["legacy_2018"] = {
         "earlystopping_epochs":     100,
         }
 
-
 config_dict["dnn_config"] = {
         "layers":                   [20],
         "loss_function":            "categorical_crossentropy",
@@ -110,76 +108,57 @@ config_dict["dnn_config"] = {
 
 
 config_dict["ttH_2017_DL"] = {
-        "layers":                   [100,100,100],
+        "layers":                   [200,100],
         "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.50,
-        "L2_Norm":                  1e-5,
-        "batch_size":               5000,
-        "optimizer":                optimizers.Adam(1e-4),
-        "activation_function":      "elu",
-        "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     100,
+        "Dropout":                  0.30,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-3,
+        "batch_size":               64,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "relu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
         }
 
-config_dict["binary_DL"] = {
-
-  "layers":                   [200,100],
-  "loss_function":            "squared_hinge",
-  "Dropout":                  0.5,
-  "L2_Norm":                  1e-5,
-  "batch_size":               5000,
-  "optimizer":                optimizers.Adadelta(),
-  "activation_function":      "tanh",
-  "output_activation":        "Tanh",
-  "earlystopping_percentage": 0.05,
-  "earlystopping_epochs":     100,
-
-#  "layers":                   [100,100],
-#  "loss_function":            'binary_crossentropy',
-#  "Dropout":                  0.4,
-#  "L2_Norm":                  1e-5,
-#  "batch_size":               4096,
-#  "optimizer":                'adam',
-#  "activation_function":      'relu',
-#  "output_activation":        'Softmax',
-#  "earlystopping_percentage": 0.05,
-#  "earlystopping_epochs":     100,
+config_dict["binary_crossentropy_Adam"] = {
+        "layers":                   [200,100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.30,
+        "L2_Norm":                  1e-3,
+        "L1_Norm":                  1e-4,
+        "batch_size":               64,
+        "optimizer":                optimizers.Adam(1e-3),
+        "activation_function":      "elu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
 }
 
-config_dict["binary_config"] = {
+config_dict["binary_squared_Adadelta"] = {
         "layers":                   [200,100],
         "loss_function":            "squared_hinge",
         "Dropout":                  0.3,
+        "L1_Norm":                  0,
         "L2_Norm":                  0.,
-        "batch_size":               4000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "selu",
-        "output_activation":        "Tanh",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
-config_dict["binary_config_v2"] = {
-        "layers":                   [200,100],
-        "loss_function":            "binary_crossentropy",
-        "Dropout":                  0.3,
-        "L2_Norm":                  1e-5,
-        "batch_size":               4000,
-        "optimizer":                optimizers.Adadelta(),
-        "activation_function":      "selu",
-        "output_activation":        "Sigmoid",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
-        }
-config_dict["ttHbb_2017_DL"] = {
-        "layers":                   [100,100,100],
-        "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.50,
-        "L2_Norm":                  1e-5,
         "batch_size":               4096,
-        "optimizer":                optimizers.Adam(1e-4),
+        "optimizer":                optimizers.Adadelta(),
         "activation_function":      "elu",
-        "output_activation":        "Softmax",
+        "output_activation":        "Tanh",
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
-        }
+}
+
+config_dict["binary_squared_SGD"] = {
+        "layers":                   [100,100],
+        "loss_function":            "squared_hinge",
+        "Dropout":                  0.40,
+        "L1_Norm":                  0,
+        "L2_Norm":                  1e-5,
+        "batch_size":               64,
+        "optimizer":                optimizers.SGD(1e-3),
+        "activation_function":      "tanh",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
+}

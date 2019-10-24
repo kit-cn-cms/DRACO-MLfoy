@@ -2,6 +2,9 @@ import os
 import sys
 import numpy as np
 import ROOT
+import copy
+from array import array
+
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 
@@ -493,7 +496,7 @@ class plotClosureTest:
 
             # setup legend
             legend = setup.getLegend()
-    
+
             legend.SetTextSize(0.02)
             ksSig = sig_train.KolmogorovTest(sig_test)
             ksBkg = bkg_train.KolmogorovTest(bkg_test)
@@ -511,8 +514,6 @@ class plotClosureTest:
                 setup.printPrivateWork(canvas)
             # add category label
             setup.printCategoryLabel(canvas, self.event_category)
-
-
 
 
             # add private work label if activated
@@ -746,10 +747,20 @@ class plotBinaryOutput:
             roc = roc_auc_score(self.data.get_test_labels(), self.test_predictions)
             print("ROC: {}".format(roc))
 
+        f = ROOT.TFile(self.plotdir + "/binaryDiscriminator.root", "RECREATE")
+        f.cd()
+
         sig_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
             if self.data.get_test_labels()[k] == 1 ]
         sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if self.data.get_test_labels()[k] == 1]
+
+
+        sig_hist = ROOT.TH1F("sgn", "Signal distribution; binary DNN output", 20,-1,1)
+        for i in range(len(sig_values)):
+            sig_hist.Fill(sig_values[i],sig_weights[i])
+
+
         sig_hist = setup.setupHistogram(
             values      = sig_values,
             weights     = sig_weights,
@@ -765,6 +776,11 @@ class plotBinaryOutput:
             if not self.data.get_test_labels()[k] == 1 ]
         bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if not self.data.get_test_labels()[k] == 1]
+
+        bkg_hist = ROOT.TH1F("bkg", "Background distribution; binary DNN output", 20, -1,1)
+        for i in range(len(bkg_values)):
+            bkg_hist.Fill(bkg_values[i],bkg_weights[i])
+
         bkg_hist = setup.setupHistogram(
             values      = bkg_values,
             weights     = bkg_weights,
@@ -823,6 +839,11 @@ class plotBinaryOutput:
 
         out_path = self.plotdir + "/binaryDiscriminator.pdf"
         setup.saveCanvas(canvas, out_path)
+
+        f.cd()
+        f.Write()
+        f.Close()
+
 
 
 

@@ -5,6 +5,7 @@ import re
 import glob
 import os
 import shutil
+import math
 import matplotlib.pyplot as plt
 
 import preprocessing_utils as pputils
@@ -47,7 +48,7 @@ class Sample:
                 self.selections = "(Evt_Odd == 1)"
 
 class Dataset:
-    def __init__(self, outputdir, tree='MVATree', naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
+    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
         # settings for paths
         self.outputdir = outputdir
         self.naming = naming
@@ -268,82 +269,91 @@ class Dataset:
         for iFile, f in enumerate(ntuple_files):
             print("({}/{}) loading file {}".format(iFile+1,n_files,f))
 
-            # open root file
-            with root.open(f) as rf:
-                # get TTree
-                try:
-                    tree = rf[self.tree]
-                except:
-                    print("could not open "+str(self.tree)+" in ROOT file")
-                    continue
+            for tr in self.tree:
+                # open root file
+                with root.open(f) as rf:
+                    # get TTree
+                    try:
+                        tree = rf[tr]
+                    except:
+                        print("could not open "+str(tr)+" in ROOT file")
+                        continue
 
-            if tree.numentries == 0:
-               print(str(self.tree)+" has no entries - skipping file")
-               continue
+                if tree.numentries == 0:
+                   print(str(tr)+" has no entries - skipping file")
+                   continue
 
-            # convert to dataframe
-            df = tree.pandas.df(self.variables)
+                # convert to dataframe
+                df = tree.pandas.df(self.variables)
 
-            # delete subentry index
-            try: df = df.reset_index(1, drop = True)
-            except: None
+                if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
+                    df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
+                    count = 0
+                    for el in df['blr_transformed']:
+                        if math.isinf(el):
+                            df = df.drop(df.index[count])
+                        count+=1
 
-            # handle vector variables, loop over them
-            for vecvar in self.vector_variables:
+                # delete subentry index
+                try: df = df.reset_index(1, drop = True)
+                except: None
 
-                # load dataframe with vector variable
-                vec_df = tree.pandas.df(vecvar)
+                # handle vector variables, loop over them
+                for vecvar in self.vector_variables:
 
-                # loop over inices in vecvar list
-                for idx in self.vector_variables[vecvar]:
+                    # load dataframe with vector variable
+                    vec_df = tree.pandas.df(vecvar)
 
-                    # slice the index
-                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-                    idx_df = idx_df.reset_index(1, drop = True)
+                    # loop over inices in vecvar list
+                    for idx in self.vector_variables[vecvar]:
 
-                    # define name for column in df
-                    col_name = str(vecvar)+"["+str(idx)+"]"
+                        # slice the index
+                        idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                        idx_df = idx_df.reset_index(1, drop = True)
 
-                    # initialize column in original dataframe
-                    df[col_name] = 0.
-                    # append column to original dataframe
-                    df.update( idx_df[vecvar].rename(col_name) )
+                        # define name for column in df
+                        col_name = str(vecvar)+"["+str(idx)+"]"
 
-            # apply event selection
-            df = self.applySelections(df, sample.selections)
+                        # initialize column in original dataframe
+                        df[col_name] = 0.
+                        # append column to original dataframe
+                        df.update( idx_df[vecvar].rename(col_name) )
 
-            # add to list of dataframes
-            if concat_df.empty: concat_df = df
-            else: concat_df = concat_df.append(df)
+                # apply event selection
+                df = self.applySelections(df, sample.selections)
 
-            # count entries so far
-            n_entries += df.shape[0]
+                # add to list of dataframes
+                if concat_df.empty: concat_df = df
+                else: concat_df = concat_df.append(df)
 
-            # if number of entries exceeds max threshold, add labels and mem and save dataframe
-            if (n_entries > self.maxEntries or f == ntuple_files[-1]):
-                print("*"*50)
-                print("max entries reached ...")
+                # count entries so far
+                n_entries += df.shape[0]
 
-                # add class labels
-                concat_df = self.addClassLabels(concat_df, sample.categories.categories)
+                # if number of entries exceeds max threshold, add labels and mem and save dataframe
+                if (n_entries > self.maxEntries or f == ntuple_files[-1]):
+                    print("*"*50)
+                    print("max entries reached ...")
 
-                # add indexing
-                concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
+                    # add class labels
+                    concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
-                # add MEM variables
-                if self.addMEM:
-                   concat_df = self.addMEMVariable(concat_df, mem_df)
+                    # add indexing
+                    concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
 
-                # remove trigger variables
-                concat_df = self.removeTriggerVariables(concat_df)
+                    # add MEM variables
+                    if self.addMEM:
+                       concat_df = self.addMEMVariable(concat_df, mem_df)
 
-                # write data to file
-                self.createDatasets(concat_df, sample.categories.categories)
-                print("*"*50)
+                    # remove trigger variables
+                    concat_df = self.removeTriggerVariables(concat_df)
 
-                # reset counters
-                n_entries = 0
-                concat_df = pd.DataFrame()
+                    # write data to file
+                    self.createDatasets(concat_df, sample.categories.categories)
+                    print("*"*50)
+
+                    # reset counters
+                    n_entries = 0
+                    concat_df = pd.DataFrame()
 
     # ====================================================================
 

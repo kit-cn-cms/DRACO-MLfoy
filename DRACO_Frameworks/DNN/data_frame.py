@@ -180,7 +180,7 @@ class DataFrame(object):
             # class translations
             self.class_translation = {}
             self.class_translation["sig"] = 1
-            self.class_translation["bkg"] = 0
+            self.class_translation["bkg"] = float(self.bkg_target)
 
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
@@ -254,6 +254,8 @@ class DataFrame(object):
         print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
 
+
+
     def balanceTrainSample(self):
         # get max number of events per sample
         maxEvents = 0
@@ -271,9 +273,11 @@ class DataFrame(object):
 
             # get events
             class_label = sample.label
-            if self.binary_classification: class_label = 'sig' if class_label in self.input_samples.signal_classes else 'bkg'
 
-            events = self.df_train.query("(class_label == '{}')".format(class_label))
+            if self.binary_classification: class_label = '1' if class_label in self.input_samples.signal_classes else '0'
+
+            events = self.df_train.query("(index_label == '{}')".format(class_label))
+
             # get multiplication factor
             factor = int(maxEvents/sample.nevents)
 

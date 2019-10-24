@@ -2,6 +2,8 @@ import os
 import sys
 import numpy as np
 import json
+import pickle
+from array import array
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -15,6 +17,8 @@ from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
 # imports with keras
 import utils.generateJTcut as JTcut
 import data_frame
+import Derivatives
+from Derivatives import Inputs, Outputs, Derivatives
 
 import keras
 import keras.optimizers as optimizers
@@ -25,6 +29,8 @@ import pandas as pd
 
 # Limit gpu usage
 import tensorflow as tf
+
+import matplotlib.pyplot as plt
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -261,6 +267,7 @@ class DNN():
         if activation_function == "leakyrelu":
             activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
+        l1_regularization_beta      = self.architecture["L1_Norm"]
         output_activation           = self.architecture["output_activation"]
 
         # define input layer
@@ -351,7 +358,7 @@ class DNN():
             validation_split    = 0.25,
             sample_weight       = self.data.get_train_weights())
 
-    def save_model(self, argv, execute_dir):
+    def save_model(self, argv, execute_dir, netConfigName):
         ''' save the trained model '''
 
         # save executed command
@@ -384,6 +391,8 @@ class DNN():
             layer.trainable = False
         self.model.trainable = False
 
+        self.netConfig = netConfigName
+
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
         saver = tf.train.Saver()
@@ -408,6 +417,7 @@ class DNN():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
+        configs["netConfig"] = self.netConfig
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -427,6 +437,10 @@ class DNN():
         variables = variable_configs.loc[self.train_variables]
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
+
+        # Serialize the test inputs for the analysis of the gradients
+        pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
+
 
     def eval_model(self):
         ''' evaluate trained model '''
@@ -521,13 +535,13 @@ class DNN():
                         #print("{:50s}: {}".format(key, val))
                         f.write("{},{}\n".format(key,val))
                 print("wrote weight ranking to "+str(rank_path))
-    
+
     def get_propagated_weights(self):
         weight_layers = []
         for i, layer in enumerate(self.model.layers):
             if ("Dropout" in layer.name or "leaky" in layer.name or "inputLayer" in layer.name):
                 continue
-            
+
             weights = layer.get_weights()[0]
 
             print("="*30)
@@ -535,7 +549,7 @@ class DNN():
             print(weights)
             print("="*30)
             weight_layers.append(weights)
-            
+
         # iteratively generate sums
         print("propagating weights")
         propagated_weights = []
@@ -564,12 +578,11 @@ class DNN():
                 print("{:50s}: {}".format(key, val))
                 f.write("{},{}\n".format(key, val))
         print("wrote propagated weight ranking to "+str(rank_path))
-        
+
 
     def get_variations(self):
         if not os.path.exists(self.save_path + "/variations/"):
             os.makedirs(self.save_path + "/variations/")
-        import matplotlib.pyplot as plt
 
         print("making plots for input feature variations")
         for i, v in enumerate(self.train_variables):
@@ -605,14 +618,126 @@ class DNN():
             plt.savefig(outpath)
             plt.savefig(outpath.replace(".pdf",".png"))
             print("plot saved at {}".format(outpath))
-                
 
-            
+
+    def get_gradients(self, is_binary):
+
+        # Load keras model
+        checkpoint_path = self.cp_path+"/trained_model.h5py"
+        # get the keras model
+        model_keras = keras.models.load_model(checkpoint_path, compile=False)
+
+        # Get TensorFlow graph
+        inputs = Inputs(self.train_variables)
+        try:
+            import net_configs_tensorflow
+        except:
+            print("Failed to import Tensorflow models.")
+            quit()
+
+        try:
+            name_keras_model = self.netConfig
+            model_tensorflow_impl = getattr(
+                net_configs_tensorflow, self.netConfig + "_tensorflow")
+        except:
+            print(
+                "Failed to load TensorFlow version of Keras model {}.".format(
+                    name_keras_model))
+            quit()
+
+        #  Get weights as numpy arrays, load weights in tensorflow variables and build tensorflow graph with weights from keras model
+        model_tensorflow = model_tensorflow_impl(inputs.placeholders, model_keras)
+
+        # Load test data
+        x_in = pickle.load(open(self.cp_path+"/inputvariables.pickle", "rb"))
+
+        if is_binary:
+            outputs = Outputs(model_tensorflow, ['sig'])
+            event_classes = ['sig']
+        else:
+            outputs = Outputs(model_tensorflow, self.event_classes)
+            event_classes = self.event_classes
+
+        sess = tf.Session()
+        sess.run(tf.global_variables_initializer())
+
+        # Get operations for first-order derivatives
+        deriv_ops = {}
+        derivatives = Derivatives(inputs, outputs)
+        for class_ in event_classes:
+            deriv_ops[class_] = []
+            for variable in self.train_variables:
+                deriv_ops[class_].append(derivatives.get(class_, [variable]))
+
+        mean_abs_deriv = {}
+
+        for class_ in event_classes:
+            print("Process class %s.", class_)
+
+            weight = array("f", [-999])
+            deriv_class = np.zeros((len(self.data.get_test_data(as_matrix = True)),len(self.train_variables)))
+            weights = np.zeros(len(self.data.get_test_data()))
+
+            # Calculate first-order derivatives
+            deriv_values = sess.run(
+                deriv_ops[class_],
+                feed_dict={
+                    inputs.placeholders: x_in
+                })
+            deriv_values = np.squeeze(deriv_values)
+
+            mean_abs_deriv[class_] = np.average(np.abs(deriv_values), axis=1)
+
+
+        # Normalize rows
+        matrix = np.vstack([mean_abs_deriv[class_] for class_ in event_classes])
+        print()
+        for i_class, class_ in enumerate(event_classes):
+            print(matrix[i_class, :])
+            print(np.sum(matrix[i_class, :]))
+            matrix[i_class, :] = matrix[i_class, :] / np.sum(matrix[i_class, :])
+            print(matrix[i_class, :])
+
+
+        # Make plot
+        variables = self.train_variables
+        plt.figure(0, figsize=(len(variables), len(event_classes)))
+        axis = plt.gca()
+
+        print(matrix.shape[0])
+        print(matrix.shape[1])
+
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                axis.text(
+                    j + 0.5,
+                    i + 0.5,
+                    '{:.3f}'.format(matrix[i, j]),
+                    ha='center',
+                    va='center')
+        q = plt.pcolormesh(matrix, cmap='Oranges')
+        #cbar = plt.colorbar(q)
+        #cbar.set_label("mean(abs(Taylor coefficients))", rotation=270, labelpad=20)
+        plt.xticks(
+            np.array(range(len(variables))) + 0.5, variables, rotation='vertical')
+        plt.yticks(
+            np.array(range(len(event_classes))) + 0.5, event_classes, rotation='horizontal')
+        plt.xlim(0, len(variables))
+        plt.ylim(0, len(event_classes))
+        output_path = os.path.join(self.cp_path,
+                                   "keras_taylor_1D")
+
+        plt.savefig(output_path+".png", bbox_inches='tight')
+        print("Save plot to {}.png".format(output_path))
+        plt.savefig(output_path+".pdf", bbox_inches='tight')
+        print("Save plot to {}.pdf".format(output_path))
+
+
+
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
     def plot_metrics(self, privateWork = False):
-        import matplotlib.pyplot as plt
         plt.rc('text', usetex=True)
 
         ''' plot history of loss function and evaluation metrics '''
@@ -763,7 +888,6 @@ class DNN():
             sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
 category_label= None):

@@ -836,4 +836,44 @@ Reco_ttH_whad_dr,0,4,50,-,Reco_ttH_whad_dr
 Reco_ttH_whaddau_m2,0,50,50,-,Reco_ttH_whaddau_m2
 Reco_JABDT_ttH_tophad_pt__P__toplep_pt__P__h_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt,0,1,20,-,Reco_JABDT_ttH_tophad_pt__P__toplep_pt__P__h_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt
 Reco_JABDT_ttbar_log_toplep_pt,0,10,50,-,Reco_JABDT_ttbar_log_toplep_pt
-Reco_JABDT_ttbar_Jet_CSV_whaddau1 ,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_whaddau1 
+Reco_JABDT_ttbar_Jet_CSV_whaddau1 ,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_whaddau1
+blr, 0,1, 50,-,blr
+blr_transformed, -7,14,50,-,blr_transformed
+MEM, 0,1, 50,-,MEM
+bjet3_btag,0,1,50,-,bjet3_btag
+N_btags_Tight,2,6,5,-,N_btags_Tight
+N_btags_Loose,2,6,5,-,N_btags_Loose
+N_btags_Medium,2,6,5,-,N_btags_Medium
+avgDeltaR_tag_tag, 0,6,120, -, avgDeltaR_tag_tag
+bjet2_btag,0,1,50,-,bjet2_btag
+maxDeltaEta_tag_tag, 0,5,100, -, maxDeltaEta_tag_tag
+btagDiscriminatorAverage_tagged, 0,1, 50,-,btagDiscriminatorAverage_tagged
+H0_tag, 0,3,100, -, H0_tag
+avgDeltaR_jet_tag, 0,6,120, -, avgDeltaR_jet_tag
+maxDeltaEta_jet_jet, 0,5,100, -, maxDeltaEta_jet_jet
+HT_tags,0,600,50,-,H_{T}(tags)
+avgDeltaR_jet_jet, 0,6,120, -, avgDeltaR_jet_jet
+H2_tag, 0,3,100, -, H2_tag
+H3_tag, 0,3,100, -, H3_tag
+D_tag, 0,1, 50,-,D_tag
+aplanarity_tag, 0,1, 50,-,aplanarity_tag
+minDeltaR_tag_tag, 0,5,100, -, minDeltaR_tag_tag
+R2_tag, 0,1, 50,-,R2_tag
+pT_tag_tag_min_deltaR,0,600,50,-,pT_tag_tag_min_deltaR
+centrality_tags, 0,1, 50,-,centrality_tags
+bjet3_pt,0,600,50,-,bjet3_pt
+jet3_pt,0,600,50,-,jet3_pt
+R3_tag, 0,1, 50,-,R3_tag
+centrality_jets_leps, 0,1, 50,-,centrality_jets_leps
+jet3_btag, 0,1, 50,-,jet3_btag
+H2_jet, 0,1, 50,-,H2_jet
+D_jet, 0,1, 50,-,D_jet
+mass_tag_tag_min_deltaR,0,600,50,-,mass_tag_tag_min_deltaR
+mass_jet_tag_min_deltaR,0,600,50,-,mass_jet_tag_min_deltaR
+mass_jet_jet_min_deltaR,0,600,50,-,mass_jet_jet_min_deltaR
+mass_tag_tag_max_mass,0,600,50,-,mass_tag_tag_max_mass
+mass_jet_tag_tag_max_pT,0,600,50,-,mass_jet_tag_tag_max_pT
+HT_jets,0,600,50,-,HT_jets
+twist_tag_tag_max_mass, -1.6,1.6, 100,-,twist_tag_tag_max_mass
+twist_jet_tag_max_mass, -1.6,1.6, 100,-,twist_jet_tag_max_mass
+twist_jet_jet_max_mass, -1.6,1.6, 100,-,twist_jet_jet_max_mass

@@ -215,6 +215,9 @@ class optionHandler:
     def getNetConfig(self):
         return self.__config
 
+    def getNetConfigName(self):
+        return self.__options.net_config
+
     def doPlots(self):
         return self.__options.plot
 
