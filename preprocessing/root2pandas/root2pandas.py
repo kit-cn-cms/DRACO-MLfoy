@@ -6,11 +6,19 @@ import glob
 import os
 import shutil
 import matplotlib.pyplot as plt
+import sys
 
 import preprocessing_utils as pputils
 
+filedir = os.path.dirname(os.path.realpath(__file__))
+basedir = os.path.dirname(os.path.dirname(filedir))
+sys.path.append(basedir)
+
+import nafSubmit
+
 class EventCategories:
-    def __init__(self):
+    def __init__(self,name):
+        self.name=name
         self.categories = {}
 
     def addCategory(self, name, selection = None):
@@ -22,6 +30,15 @@ class EventCategories:
             if self.categories[cat]:
                 selections.append(self.categories[cat])
         return selections
+
+    def printCategories(self):
+        s = []
+        s.append('{} = root2pandas.EventCategories("{}")'.format(self.name,self.name))
+        for category in self.categories:
+            selection = self.categories[category]
+            s.append(('{}.addCategory("{}", selection = "{}")').format(self.name,category,selection))
+        return "\n".join(s)
+
 
 class Sample:
     def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, dataera=None):
@@ -198,9 +215,36 @@ class Dataset:
 
 
     # ====================================================================
-    def parallelPreprocessing(self):
-        for key in self.samples:
-            print key
+    def parallelPreprocessing(self, evenOdd,fileNumber = 20, scriptPath="Scripts"):
+        scriptdir=filedir+"/"+scriptPath
+        if not os.path.exists(scriptdir):
+         os.makedirs(scriptdir)
+        self.makeConfig(evenOdd)
+        scriptlist=[]
+        i=0;
+        for samplename in self.samples:
+            # collect ntuple files
+            sample=self.samples[samplename]
+            ntuple_files = sorted(glob.glob(sample.ntuples))
+            parallelFiles = [ntuple_files[x:x+fileNumber] for x in xrange(0, len(ntuple_files), fileNumber)]
+            print str(sample.categories.name)
+            for File in parallelFiles:
+                outputfile=scriptdir+"/parallelPreprocessing"+str(i)+".sh"
+                with open(outputfile,'w') as outfile:
+                    outfile.write("python ParallelPreprocessingConfig.py -n ")
+                    outfile.write(','.join(File))
+                    outfile.write(" -s ")
+                    outfile.write(str(samplename))
+                    outfile.write(" -c ")
+                    outfile.write(str(sample.categories.name))
+                    outfile.write(" -d ")
+                    outfile.write(str(sample.dataera))
+                i+=1
+                scriptlist.append(outputfile)
+        print scriptlist
+        nafSubmit.submitArrayToNAF(scripts=scriptlist,arrayName="parallelPreprocessing")
+            
+
 
     def runPreprocessing(self):
         # add variables for triggering and event category selection
@@ -212,7 +256,7 @@ class Dataset:
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
         # remove old files
         #self.removeOldFiles()
-        self.renameOldFiles()
+        #self.renameOldFiles()
 
         if self.addMEM:
             # generate MEM path
@@ -256,7 +300,10 @@ class Dataset:
         sample.printInfo()
 
         # collect ntuple files
-        ntuple_files = sorted(glob.glob(sample.ntuples))
+        if isinstance(sample.ntuples,list):
+            ntuple_files = sample.ntuples 
+        else:
+            ntuple_files = sorted(glob.glob(sample.ntuples))
 
         # collect mem files
         if self.addMEM:
@@ -485,3 +532,105 @@ class Dataset:
             if filename.endswith(".old") and filename.split(".")[0] in rerename:
                 print("re-renaming file {}".format(filename))
                 os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
+
+    def printVariables(self):
+        s = []
+        s.append("variables = [")
+        for variable in self.variables:
+            s.append(('    "{}",').format(variable))
+        s.append("]")
+        s.append("dataset.addVariables(variables)")
+        return "\n".join(s)
+
+    def printBaseSelection(self):
+        s = []
+        s.append(('base_selection = "{}"').format(self.baseSelection))
+        s.append("dataset.addBaseSelection(base_selection)")
+        return "\n".join(s)
+
+    def printOptionSample(self,even_odd=False):
+        s = []
+        s.append("dataset.addSample(")
+        s.append('sampleName  = options.sampleName,')
+        s.append('ntuples     = options.ntuples,')
+        s.append('categories  = Categories[str(options.categories)],')
+        s.append('dataera     = options.dataera,')
+        s.append(('even_odd    = {},').format(even_odd))
+        s.append(")")
+        return "\n".join(s)
+
+    def printHeader(self):
+        s = '''import os
+import sys
+import optparse
+# local imports
+filedir = os.path.dirname(os.path.realpath(__file__))
+basedir = os.path.dirname(os.path.dirname(filedir))
+sys.path.append(basedir)
+
+import root2pandas
+
+def list_callback(option, opt, value, parser):
+    setattr(parser.values, option.dest, value.split(','))
+
+
+usage="usage=%prog [options] \\n"
+usage+="USE: python preprocessing.py --outputdirectory=DIR --variableselection=FILE --maxentries=INT --MEM=BOOL --name=STR\\n"
+usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
+
+parser = optparse.OptionParser(usage=usage)
+
+parser.add_option("-n", "--ntuples", type='string', action='callback', 
+        callback=list_callback, dest="ntuples",
+        help="ntuple files", metavar="ntuples")
+
+parser.add_option("-c", "--categories", dest="categories",
+        help="categories", metavar="ntuples")
+
+parser.add_option("-s", "--samplename", dest="sampleName",
+        help="name of the sample", metavar="sampleName")
+
+parser.add_option("-d", "--dataera", dest="dataera",
+        help="dataera", metavar="dataera")
+
+(options, args) = parser.parse_args()
+
+        '''
+        return s
+
+    def makeConfig(self, evenOdd):
+        categories = []
+        for samplename in self.samples:
+            sample = self.samples[samplename]
+            if sample.categories not in categories:
+                categories.append(sample.categories)
+
+        with open("ParallelPreprocessingConfig.py",'w') as outfile:
+            outfile.write(self.printHeader())
+            outfile.write("\n\n")
+            outfile.write('Categories = {}')
+            for category in categories:
+                print category
+                outfile.write("\n\n")
+                outfile.write(category.printCategories())
+                outfile.write("\n\n")
+                outfile.write(('Categories["{}"] = {} ').format(category.name,category.name))           
+            outfile.write("\n\n")
+            outfile.write(self.printDataset())
+            outfile.write("\n\n")
+            outfile.write(self.printBaseSelection())
+            outfile.write("\n\n")
+            outfile.write(self.printOptionSample(evenOdd))
+            outfile.write("\n\n")
+            outfile.write(self.printVariables())
+            outfile.write("\n\n")
+            outfile.write("dataset.runPreprocessing()")
+
+    def printDataset(self):
+        s = []
+        s.append("dataset = root2pandas.Dataset(")
+        s.append(('    outputdir   = "{}",').format(self.outputdir))
+        s.append(('    naming      = "{}",').format(self.naming))
+        s.append(("    addMEM      = {},").format(self.addMEM))
+        s.append(("    maxEntries  = {})").format(self.maxEntries))
+        return "\n".join(s)
