@@ -31,7 +31,9 @@ class Sample:
         if not evenSel == "":
             query+=" and "+evenSel
         if not dataEra == "" and not dataEra == None:
-            query+=" and (data_era=="+str(dataEra)+")"
+            query+= " and ("
+            query+=" or ".join(["data_era=="+era for era in dataEra])
+            query+= ")"
         print query
         df.query(query, inplace = True)
         print("number of events after selections:  "+str(df.shape[0]))

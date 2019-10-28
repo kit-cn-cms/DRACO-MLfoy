@@ -78,7 +78,7 @@ variables["4j_ge3t"] = [
     "Evt_transverse_sphericity_tags",
     "N_BTagsL",
     "N_BTagsM",
-    "N_BTagsT",
+    #"N_BTagsT",
     "LooseLepton_E[0]",
     "LooseLepton_Eta[0]",
     "LooseLepton_Phi[0]",

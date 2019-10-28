@@ -113,7 +113,5 @@ if options.doPlots():
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
 
-        #plot variations of input features
-        dnn.get_variations()
 
 

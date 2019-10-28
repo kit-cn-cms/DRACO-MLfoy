@@ -141,7 +141,10 @@ class optionHandler:
     def __setDataEra(self):
         #handle data era
         if not self.__options.data_era is None:
-            self.__outputdir+=str(self.__options.data_era)
+            dataera=self.__options.data_era
+            self.__outputdir+=str(dataera.replace(",","_"))
+            self.__options.data_era=self.__options.data_era.split(",")
+            print self.__options.data_era
 
     def __loadVariables(self):
         # the input variables are loaded from the variable_set file
