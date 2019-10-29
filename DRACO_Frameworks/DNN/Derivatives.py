@@ -25,6 +25,12 @@ class Inputs(object):
         self._placeholders_dict = {}
         with tf.variable_scope(variable_scope):
             for name in names:
+                if "[" in name:
+                    name = name.replace("[","_")
+                if "]" in name:
+                    name = name.replace("]","")
+                print name
+               
                 placeholder = tf.placeholder(
                     dtype=self._datatype, shape=(None, ), name=name)
                 self._placeholders_list.append(placeholder)
@@ -128,6 +134,10 @@ class Derivatives(object):
 
         derivative = self._outputs.outputs_dict[output]
         for name in inputs:
+            if "[" in name:
+                name = name.replace("[","_")
+            if "]" in name:
+                name = name.replace("]","")
             derivative = tf.gradients(derivative,
                                       self._inputs.placeholders_dict[name])
 
