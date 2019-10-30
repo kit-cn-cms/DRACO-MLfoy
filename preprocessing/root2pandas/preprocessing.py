@@ -69,7 +69,8 @@ base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 ttbar_selection = "(Evt_Odd == 1)"
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbar")
+ttbar_categories.addCategory("ttH")
+#ttbar_categories.addCategory("ttbar")
 ttbar_categories.addCategory("bkg")
 
 # initialize dataset class
@@ -93,8 +94,9 @@ ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/forJost/ntuple/"
 
 
 dataset.addSample(
-    sampleName  = "TTToSL",
-    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_nominal*.root",
+    sampleName  = "TTHToSL",
+    #ntuples     = "/ceph/mheim/ntuples/ttbar.root",
+    ntuples     = "/ceph/mheim/ntuples/ttH.root",
     categories  = ttbar_categories,
     selections  = ttbar_selection
 )

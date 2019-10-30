@@ -139,8 +139,11 @@ class variablePlotter:
             else:
                 variables = list(self.variable_set.all_variables) + self.add_vars
 
+	    print self.variable_set.variables
+
             # filter events according to JT category
             for key in self.samples:
+			#print variables
                 self.samples[key].cutData(cat, variables, self.options["lumiScale"])
 
             # loop over all variables and perform plot each time

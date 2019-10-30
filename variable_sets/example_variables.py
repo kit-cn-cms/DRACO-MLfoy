@@ -1,4 +1,3 @@
-print("here")
 variables = {}
 variables["4j_ge3t"] = [
     "Jet_CSV[3]",
@@ -77,7 +76,7 @@ variables["ge6j_ge3t"] = [
     "Evt_CSV_Min_Tagged",
     "BDT_common5_input_HT_tag",
     "Evt_M_JetsAverage",
-  #  "memDBp",
+#    "memDBp",
     "Evt_blr_ETH_transformed",
     ]
 
