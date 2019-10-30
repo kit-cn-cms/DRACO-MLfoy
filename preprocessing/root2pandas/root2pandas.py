@@ -1129,7 +1129,8 @@ class Dataset:
 
 		# (1) total number of events in current df
 		total_nr  = df["N_Jets"].size
-	
+		print total_nr, "Events in file."
+
 		# array containing the number of jets per event
 		njets_vec = df["N_Jets"].values
 
@@ -1142,6 +1143,8 @@ class Dataset:
 		GenHiggs_B1_Eta = df["GenHiggs_B1_Eta"].values
 		GenHiggs_B2_Phi = df["GenHiggs_B2_Phi"].values
 		GenHiggs_B2_Eta = df["GenHiggs_B2_Eta"].values
+
+
 
 
 		# (4) arrays for better clarity in (5),...; jets and reconstructed particles
@@ -1173,7 +1176,21 @@ class Dataset:
 		counter2 = 0
 		counter1 = 0
 
+		Ptbkg = np.zeros(total_nr)
+		Pthiggs = np.zeros(total_nr)
+		GenPt = np.zeros(total_nr)
 
+		Etabkg = np.full(total_nr,10.)
+		Etahiggs = np.full(total_nr,10.)
+		GenEta = np.full(total_nr,10.)
+
+		Pt1bkg = np.zeros(total_nr)
+		Pt1higgs = np.zeros(total_nr)
+		GenPt1 = np.zeros(total_nr)
+
+		Eta1bkg = np.full(total_nr,10.)
+		Eta1higgs = np.full(total_nr,10.)
+		GenEta1 = np.full(total_nr,10.)
 
 		# (6) loop over all events
 		for i in range(total_nr):
@@ -1242,7 +1259,7 @@ class Dataset:
 
 			n = 0
 			# (14) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be b-tagged
-	 		if minr_b1 < 0.4 and minr_b2 < 0.4:	
+	 		if minr_b1 < 0.2 and minr_b2 < 0.2:	
 				for index in jets:
 					for index2 in pepec:
 						globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(int(best_comb[n])) + "]"].values[i]
@@ -1257,6 +1274,16 @@ class Dataset:
 					globals()["reco_" + index + "_Phi"][i]  =	 locals()["reco_" + index + "_4vec"].Phi()
 					globals()["reco_" + index + "_M"][i]	=	 locals()["reco_" + index + "_4vec"].M()
 					globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
+
+
+				Pthiggs[i] = globals()["reco_Higgs_Pt"][i]
+				GenPt[i] = df["GenHiggs_Pt"].values[i]
+				Etahiggs[i] = globals()["reco_Higgs_Eta"][i]
+				GenEta[i] = df["GenHiggs_Eta"].values[i]
+				Eta1higgs[i] = df["Jet_Eta["+str(J)+"]"].values[i]
+				GenEta1[i] = df["GenHiggs_B1_Eta"].values[i]
+				Pt1higgs[i] = df["Jet_Pt["+str(J)+"]"].values[i]
+				GenPt1[i] = df["GenHiggs_B1_Pt"].values[i]
 
 
 				# counting how often b1-jet==b2-jet and b1 != b2 jet
@@ -1321,6 +1348,10 @@ class Dataset:
 					is_Higgs = np.append(is_Higgs,0)
 					bkg_scale = np.append(bkg_scale, 1)
 
+					Ptbkg[i] = globals()["reco_Higgs_Pt"][total_nr+jkcounter+jnkcounter-1]
+					Etabkg[i] = globals()["reco_Higgs_Eta"][total_nr+jkcounter+jnkcounter-1]
+					Pt1bkg[i] = df["Jet_Pt["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
+					Eta1bkg[i] = df["Jet_Eta["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
 					#false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					#false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					Rb1 = np.append(Rb1,0)
@@ -1330,19 +1361,16 @@ class Dataset:
 
 
 			# (15) Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
-			#for u in range(int(r_max*100)):
-			#	if(minr_bhad<u/100. and minr_blep<u/100. and minr_q1<u/100. and minr_q2<u/100.):
-			#		numb[u]+=1
-#
-#				if(i==total_nr-1 and u%10 == 0):
-#					print "Anteil verwendeter Daten bei delta R cut ", u/100.," : ", numb[u]/total_nr
+#			for u in range(int(r_max*100)):
+#				if(minr_b1<u/100. and minr_b1<u/100.):
+#					numb[u]+=1
+#				
+#			if(i==total_nr-1 and u%10 == 0):
+#				print "Anteil verwendeter Daten bei delta R cut ", u/100.," : ", numb[u]/total_nr*100, "%"
 
-
-
-
-		print("Higgs Events mit 1 Jet (nach 0.3 Krit):")
+		print("Higgs Events mit 1 Jet (nach 0.4 Krit):")
 		print jkcounter, "von", total_nr, "also", round(jkcounter/float(total_nr)*100,1),"%"
-		print("Higgs Events mit 2 Jets (nach 0.3 Krit):")
+		print("Higgs Events mit 2 Jets (nach 0.4 Krit):")
 		print jnkcounter, "von", total_nr, "also", round(jnkcounter/float(total_nr)*100,1),"%"
 		print"b1 und b2 unter 0.3:", counter, "mal, also",round(counter/float(total_nr)*100,1),"%"
 		print"b1 und b2 unter 0.2:", counter1, "mal, also",round(counter1/float(total_nr)*100,1),"%"
@@ -1350,7 +1378,7 @@ class Dataset:
 
 
 		#---Histogramme Higgs delta R
-		#plt.hist(Rb1,bins=200,range=(0,3))	#minR bis hoechstens 0.3
+		#plt.hist(Rb1,bins=200,range=(0,3))	
 		#plt.show()
 		plt.hist(Rb2,bins=200,range=(0,3))
 		plt.ylabel("Anzahl Events")
@@ -1362,6 +1390,64 @@ class Dataset:
 		plt.xlabel("Delta R von b1+b2")
 		#plt.show()
 		plt.savefig("DeltaRgesamtHbjets.pdf")
+
+
+		Bins=100
+		b,e = np.histogram(Ptbkg,bins=Bins,range=(20,1000))
+		X=np.arange(20,1000,(1000-20)/float(Bins))
+		plt.plot(X,b,  'b-')
+		b,e = np.histogram(Pthiggs,bins=Bins,range=(20,1000))
+		plt.plot(X,b, 'g-')
+		b,e = np.histogram(GenPt,bins=Bins,range=(20,1000))
+		plt.plot(X,b, 'r-')
+		plt.ylabel("Anzahl Events")
+		plt.xlabel("Higgs Pt")
+		plt.ylim((0,total_nr/10))
+		plt.xlim((20,300))
+		#plt.show()
+		plt.savefig("Pt.pdf")
+
+		b,e = np.histogram(Pt1bkg,bins=Bins,range=(20,1000))
+		X=np.arange(20,1000,(1000-20)/float(Bins))
+		plt.plot(X,b,  'b-')
+		b,e = np.histogram(Pt1higgs,bins=Bins,range=(20,1000))
+		plt.plot(X,b, 'g-')
+		b,e = np.histogram(GenPt1,bins=Bins,range=(20,1000))
+		plt.plot(X,b, 'r-')
+		plt.ylabel("Anzahl Events")
+		plt.xlabel("erster Higgs b-jet Pt")
+		plt.ylim((0,total_nr/5))
+		plt.xlim((20,300))
+		#plt.show()
+		plt.savefig("Pt1.pdf")
+
+
+		Bins=30
+		b1,e = np.histogram(Etabkg,bins=Bins,range=(-2.4,2.4))
+		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
+		plt.plot(X,b1,'b-')
+		b1,e = np.histogram(Etahiggs,bins=Bins,range=(-2.4,2.4))
+		plt.plot(X,b1,'g-')
+		b1,e = np.histogram(GenEta,bins=Bins,range=(-2.4,2.4))
+		plt.plot(X,b1,'r-')
+		plt.ylabel("Anzahl Events")
+		plt.xlabel("Higgs Eta")
+		#plt.ylim((0,100))
+		#plt.show()
+		plt.savefig("Eta.pdf")
+
+		b1,e = np.histogram(Eta1bkg,bins=Bins,range=(-2.4,2.4))
+		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
+		plt.plot(X,b1,'b-')
+		b1,e = np.histogram(Eta1higgs,bins=Bins,range=(-2.4,2.4))
+		plt.plot(X,b1,'g-')
+		b1,e = np.histogram(GenEta1,bins=Bins,range=(-2.4,2.4))
+		plt.plot(X,b1,'r-')
+		plt.ylabel("Anzahl Events")
+		plt.xlabel("erster Higgs b-jet Eta")
+		#plt.ylim((0,100))
+		#plt.show()
+		plt.savefig("Eta1.pdf")
 
 
 		# (16) delete all variables except for:
@@ -1392,14 +1478,14 @@ class Dataset:
 		#df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
 		entr+=5
 	
-			# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
+		# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
 		df.drop(df.columns[:-(entr)],inplace = True, axis = 1)
-	
+
 		for ind in variables_toadd:
 			df[ind] = df_new[ind].values
 
 
-			# (20) delete combinations of events without certain ttH event
+		# (20) delete combinations of events without certain ttH event
 		i,j=0,0
 		while(i<total_nr):
 			if df["Evt_is_Higgs"].values[i]==0:
