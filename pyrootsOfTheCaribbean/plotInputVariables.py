@@ -124,16 +124,16 @@ naming = options.naming
 #    sampleFile      = data_dir + "/ttbar" + naming,
 #    plotColor       = ROOT.kBlue+1)
 
-#plotter.addSample(
-#    sampleName      = "bkg",
-#    sampleFile      = data_dir + "/bkg" + naming,
-#    plotColor       = ROOT.kRed+3)
+plotter.addSample(
+    sampleName      = "bkg",
+    sampleFile      = data_dir + "/bkg" + naming,
+    plotColor       = ROOT.kRed-3)
 
 plotter.addSample(
     sampleName      = "ttH",
     sampleFile      = data_dir+"/ttH"+naming,
-    plotColor       = ROOT.kBlue+2
-    )#signalSample    = True)
+    plotColor       = ROOT.kAzure+7,
+    signalSample    = True)
 
 # add background samples
 #plotter.addSample(

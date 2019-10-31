@@ -1053,12 +1053,12 @@ class Dataset:
 		#---Histogramme Higgs delta R
 		#plt.hist(Rb1,bins=200,range=(0,3))	#minR bis hoechstens 0.3
 		#plt.show()
-		plt.hist(Rb2,bins=200,range=(0,3))
-		plt.show()
-		plt.savefig("DeltaR2bjets.pdf")
-		plt.hist(Rb12,bins=200,range=(0,3))
-		plt.show()
-		plt.savefig("DeltaRgesamtHbjets.pdf")
+#		plt.hist(Rb2,bins=200,range=(0,3))
+#		plt.show()
+#		plt.savefig("DeltaR2bjets.pdf")
+#		plt.hist(Rb12,bins=200,range=(0,3))
+#		plt.show()
+#		plt.savefig("DeltaRgesamtHbjets.pdf")
 
 		x = np.arange(0,r_max,0.01)
 		plt.plot(x, numb/total_nr)
@@ -1135,16 +1135,15 @@ class Dataset:
 		njets_vec = df["N_Jets"].values
 
 		# (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
-		r_max = 0.8
+		r_max = 1.1
 		numb = np.zeros(int(r_max*100))
+		numbbkg = np.zeros(int(r_max*100))
 
 		# (3) get gen-info of bjets needed for calculation of delta r at
 		GenHiggs_B1_Phi = df["GenHiggs_B1_Phi"].values
 		GenHiggs_B1_Eta = df["GenHiggs_B1_Eta"].values
 		GenHiggs_B2_Phi = df["GenHiggs_B2_Phi"].values
 		GenHiggs_B2_Eta = df["GenHiggs_B2_Eta"].values
-
-
 
 
 		# (4) arrays for better clarity in (5),...; jets and reconstructed particles
@@ -1154,7 +1153,7 @@ class Dataset:
 		recos = ["Higgs"]
 		pepm  = ["Pt", "Eta", "Phi", "M", "logM"]
 
-		# (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles get filled in (13); information about whether an event is accepted as ttbar (is_ttbar); scaling-factor if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
+		# (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles get filled in (13); information about whether an event is accepted as ttbar (is_ttbar); scaling-factor 			if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
 		for index in jets:
 			for index2 in pepec:
 				globals()[index + "_" + index2] = np.zeros(total_nr)
@@ -1166,41 +1165,44 @@ class Dataset:
 
 		is_Higgs = np.zeros(total_nr)
 		bkg_scale = np.zeros(total_nr)+1
-		Rb1 = np.zeros(total_nr)
-		Rb2 = np.zeros(total_nr)
-		Rb12 = np.zeros(total_nr)
+#		Rb1 = np.zeros(total_nr)
+#		Rb2 = np.zeros(total_nr)
+#		Rb12 = np.zeros(total_nr)
+		DeltaR = np.zeros(total_nr)
 
 		jkcounter = 0
 		jnkcounter = 0
-		counter = 0
-		counter2 = 0
-		counter1 = 0
 
-		Ptbkg = np.zeros(total_nr)
-		Pthiggs = np.zeros(total_nr)
-		GenPt = np.zeros(total_nr)
 
-		Etabkg = np.full(total_nr,10.)
-		Etahiggs = np.full(total_nr,10.)
-		GenEta = np.full(total_nr,10.)
-
-		Pt1bkg = np.zeros(total_nr)
-		Pt1higgs = np.zeros(total_nr)
-		GenPt1 = np.zeros(total_nr)
-
-		Eta1bkg = np.full(total_nr,10.)
-		Eta1higgs = np.full(total_nr,10.)
-		GenEta1 = np.full(total_nr,10.)
+#		Ptbkg = np.zeros(total_nr)
+#		Pthiggs = np.zeros(total_nr)
+#		GenPt = np.zeros(total_nr)
+#
+#		Etabkg = np.full(total_nr,10.)
+#		Etahiggs = np.full(total_nr,10.)
+#		GenEta = np.full(total_nr,10.)
+#
+#		Pt1bkg = np.zeros(total_nr)
+#		Pt1higgs = np.zeros(total_nr)
+#		GenPt1 = np.zeros(total_nr)
+#
+#		Eta1bkg = np.full(total_nr,10.)
+#		Eta1higgs = np.full(total_nr,10.)
+#		GenEta1 = np.full(total_nr,10.)
 
 		# (6) loop over all events
-		for i in range(total_nr):
-			
+		for i in range(total_nr):	
 
-			# (7) get number of jets in current event; create array for bkg scaling, shape(2,2) is to make np.append with new rows possible later (12). get deleted again in (12); minr and array for indices of best combination
+			if df["Evt_ID"].values[i]%10 != 0:
+				continue
+
+			# (7) get number of jets in current event; create array for bkg scaling, shape(2,2) is to make np.append with new rows possible later (12). get deleted again in (12); minr and 			array for indices of best combination
 
 			njets = min(int(njets_vec[i]),12)
-			minrH = 10000.
+#			minrH = 10000.
 
+			if njets < 4:
+				continue
 
 			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
 			for index in pepec:
@@ -1231,12 +1233,13 @@ class Dataset:
 					minr_b2   = deltar_b2
 					K = k
 					best_comb[1]= k
+			DeltaR[i] = ((Eta[J]-Eta[K])**2  + (correct_phi(Phi[J] - Phi[K]))**2)**0.5
 
-			minrH = minr_b1 + minr_b2
+#			minrH = minr_b1 + minr_b2
 
-			Rb1[i] = minr_b1
-			Rb2[i] = minr_b2
-			Rb12[i] = minrH
+#			Rb1[i] = minr_b1
+#			Rb2[i] = minr_b2
+#			Rb12[i] = minrH
 
 			# if there are no 2 matching bjets (each delta R < 0.3) at all, ignore event
 			#if gibtesueberhauptbeidebjets!=1:
@@ -1245,21 +1248,15 @@ class Dataset:
 			#	counter3=counter3+1
 			#gibtesueberhauptbeidebjets = 0
 
-			if minr_b1 < 0.3 and minr_b2 < 0.3:
-				counter=counter+1
-				if minr_b1 < 0.2 and minr_b2 < 0.2:
-					counter1=counter1+1
-					if minr_b1 < 0.1 and minr_b2 < 0.1:
-						counter2=counter2+1
 
 			# (13) short print against long boring time
 			if(i%1000 == 0):
-				print "Event:",i,"minrH:",minrH," minr_b1:", minr_b1," minr_b2:", minr_b2
+				print "Event:",i," minr_b1:", minr_b1," minr_b2:", minr_b2
 
 
 			n = 0
-			# (14) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be b-tagged
-	 		if minr_b1 < 0.2 and minr_b2 < 0.2:	
+			# (14) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be 					b-tagged
+	 		if minr_b1 < 0.4 and minr_b2 < 0.4:	
 				for index in jets:
 					for index2 in pepec:
 						globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(int(best_comb[n])) + "]"].values[i]
@@ -1276,14 +1273,14 @@ class Dataset:
 					globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
 
 
-				Pthiggs[i] = globals()["reco_Higgs_Pt"][i]
-				GenPt[i] = df["GenHiggs_Pt"].values[i]
-				Etahiggs[i] = globals()["reco_Higgs_Eta"][i]
-				GenEta[i] = df["GenHiggs_Eta"].values[i]
-				Eta1higgs[i] = df["Jet_Eta["+str(J)+"]"].values[i]
-				GenEta1[i] = df["GenHiggs_B1_Eta"].values[i]
-				Pt1higgs[i] = df["Jet_Pt["+str(J)+"]"].values[i]
-				GenPt1[i] = df["GenHiggs_B1_Pt"].values[i]
+#				Pthiggs[i] = globals()["reco_Higgs_Pt"][i]
+#				GenPt[i] = df["GenHiggs_Pt"].values[i]
+#				Etahiggs[i] = globals()["reco_Higgs_Eta"][i]
+#				GenEta[i] = df["GenHiggs_Eta"].values[i]
+#				Eta1higgs[i] = df["Jet_Eta["+str(J)+"]"].values[i]
+#				GenEta1[i] = df["GenHiggs_B1_Eta"].values[i]
+#				Pt1higgs[i] = df["Jet_Pt["+str(J)+"]"].values[i]
+#				GenPt1[i] = df["GenHiggs_B1_Pt"].values[i]
 
 
 				# counting how often b1-jet==b2-jet and b1 != b2 jet
@@ -1291,32 +1288,32 @@ class Dataset:
 					jkcounter=jkcounter+1
 				else:
 					jnkcounter=jnkcounter+1
-			#---------------------------
+#---------------------------
 
 
-				if self.Scale:
-					for nr in range(len(bkg)):
-						df=df.append(df.iloc[[i]])
-						false_comb = [int(bkg[nr][0]),int(bkg[nr][1])]
-
-						n=0
-						for index in jets:
-							for index2 in pepec:
-								globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-							n+=1
-	
-						reco_Higgs_4vec = reconstruct_Higgs(df, i,false_comb[0],false_comb[1])
-
-						for index in recos:
-							globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
-							globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
-							globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
-							globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
-							globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
-
-
-						is_Higgs  = np.append(is_Higgs,0)
-						bkg_scale = np.append(bkg_scale, 1./len(bkg))
+#				if self.Scale:
+#					for nr in range(len(bkg)):
+#						df=df.append(df.iloc[[i]])
+#						false_comb = [int(bkg[nr][0]),int(bkg[nr][1])]
+#
+#						n=0
+#						for index in jets:
+#							for index2 in pepec:
+#								globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+#							n+=1
+#	
+#						reco_Higgs_4vec = reconstruct_Higgs(df, i,false_comb[0],false_comb[1])
+#
+#						for index in recos:
+#							globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
+#							globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
+#							globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
+#							globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
+#							globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+#
+#
+#						is_Higgs  = np.append(is_Higgs,0)
+#						bkg_scale = np.append(bkg_scale, 1./len(bkg))
 
 
 
@@ -1324,10 +1321,16 @@ class Dataset:
 					false_comb = np.zeros(2)
 					j1,k1 = J,K
 					df=df.append(df.iloc[[i]])
+	
+
 					#kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
-					while(j1==best_comb[0] or k1 == best_comb[1]):
+
+					while(j1 == best_comb[0] or j1 == best_comb[1]):
 						j1 = randrange(njets)
+
+					while(k1 == best_comb[0] or k1 == best_comb[1] or k1 == j1):
 						k1 = randrange(njets)
+
 
 					false_comb = [j1,k1]
 					n=0
@@ -1348,115 +1351,124 @@ class Dataset:
 					is_Higgs = np.append(is_Higgs,0)
 					bkg_scale = np.append(bkg_scale, 1)
 
-					Ptbkg[i] = globals()["reco_Higgs_Pt"][total_nr+jkcounter+jnkcounter-1]
-					Etabkg[i] = globals()["reco_Higgs_Eta"][total_nr+jkcounter+jnkcounter-1]
-					Pt1bkg[i] = df["Jet_Pt["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
-					Eta1bkg[i] = df["Jet_Eta["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
-					#false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
-					#false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
-					Rb1 = np.append(Rb1,0)
-					Rb2 = np.append(Rb2,0)
-					Rb12 = np.append(Rb12,0)
+#					Ptbkg[i] = globals()["reco_Higgs_Pt"][total_nr+jkcounter+jnkcounter-1]
+#					Etabkg[i] = globals()["reco_Higgs_Eta"][total_nr+jkcounter+jnkcounter-1]
+#					Pt1bkg[i] = df["Jet_Pt["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
+#					Eta1bkg[i] = df["Jet_Eta["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
+					false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
+					false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
+					DeltaR = np.append(DeltaR,((Eta[j1]-Eta[k1])**2  + (correct_phi(Phi[j1] - Phi[k1]))**2)**0.5)
+#					Rb1 = np.append(Rb1,0)
+#					Rb2 = np.append(Rb2,0)
+#					Rb12 = np.append(Rb12,0)
 
 
 
 			# (15) Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
-#			for u in range(int(r_max*100)):
-#				if(minr_b1<u/100. and minr_b1<u/100.):
-#					numb[u]+=1
-#				
-#			if(i==total_nr-1 and u%10 == 0):
-#				print "Anteil verwendeter Daten bei delta R cut ", u/100.," : ", numb[u]/total_nr*100, "%"
+			for u in range(int(r_max*100)):
+				if(minr_b1<u/100. and minr_b2<u/100.):
+					numb[u]+=1
+#				if(false_dr1<u/100. and false_dr2<u/100.):
+#					numbbkg[u]+=1
+				
+				if(i==total_nr-1 and u%10 == 0):
+					print "Anteil verwendeter Daten bei Delta R cut ", u/100.," : ", numb[u]/total_nr*100, "%"
 
 		print("Higgs Events mit 1 Jet (nach 0.4 Krit):")
-		print jkcounter, "von", total_nr, "also", round(jkcounter/float(total_nr)*100,1),"%"
+		print jkcounter, "von", total_nr, "also", round(jkcounter/float(total_nr)*100,3),"%"
 		print("Higgs Events mit 2 Jets (nach 0.4 Krit):")
-		print jnkcounter, "von", total_nr, "also", round(jnkcounter/float(total_nr)*100,1),"%"
-		print"b1 und b2 unter 0.3:", counter, "mal, also",round(counter/float(total_nr)*100,1),"%"
-		print"b1 und b2 unter 0.2:", counter1, "mal, also",round(counter1/float(total_nr)*100,1),"%"
-		print"b1 und b2 unter 0.1:", counter2, "mal, also",round(counter2/float(total_nr)*100,1),"%"
+		print jnkcounter, "von", total_nr, "also", round(jnkcounter/float(total_nr)*100,2),"%"
 
+
+		x = np.arange(0,r_max,0.01)
+		plt.plot(x, numb/total_nr)
+		#plt.plot(x, numbbkg/total_nr)
+		plt.title("Anteil der in der Aufbereitung beruecksichtigten Daten")
+		plt.xlabel("akzeptiertes maximales $\Delta$R")
+		plt.ylabel("Verhaeltnis akzeptierter Ereignisse zur Gesamtzahl an Ereignissen")
+		plt.grid()
+		plt.savefig("ratio_neu_btag1.pdf")
 
 		#---Histogramme Higgs delta R
 		#plt.hist(Rb1,bins=200,range=(0,3))	
 		#plt.show()
-		plt.hist(Rb2,bins=200,range=(0,3))
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("Delta R von b2")
+		#plt.hist(Rb2,bins=200,range=(0,3))
+		#plt.ylabel("Anzahl Events")
+		#plt.xlabel("Delta R von b2")
 		#plt.show()
-		plt.savefig("DeltaR2bjets.pdf")
-		plt.hist(Rb12,bins=200,range=(0,3))
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("Delta R von b1+b2")
+		#plt.savefig("DeltaR2bjets.pdf")
+		#plt.hist(Rb12,bins=200,range=(0,3))
+		#plt.ylabel("Anzahl Events")
+		#plt.xlabel("Delta R von b1+b2")
 		#plt.show()
-		plt.savefig("DeltaRgesamtHbjets.pdf")
+		#plt.savefig("DeltaRgesamtHbjets.pdf")
 
 
-		Bins=100
-		b,e = np.histogram(Ptbkg,bins=Bins,range=(20,1000))
-		X=np.arange(20,1000,(1000-20)/float(Bins))
-		plt.plot(X,b,  'b-')
-		b,e = np.histogram(Pthiggs,bins=Bins,range=(20,1000))
-		plt.plot(X,b, 'g-')
-		b,e = np.histogram(GenPt,bins=Bins,range=(20,1000))
-		plt.plot(X,b, 'r-')
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("Higgs Pt")
-		plt.ylim((0,total_nr/10))
-		plt.xlim((20,300))
+		#Bins=100
+		#b,e = np.histogram(Ptbkg,bins=Bins,range=(20,1000))
+		#X=np.arange(20,1000,(1000-20)/float(Bins))
+		#plt.plot(X,b,  'b-')
+		#b,e = np.histogram(Pthiggs,bins=Bins,range=(20,1000))
+		#plt.plot(X,b, 'g-')
+		#b,e = np.histogram(GenPt,bins=Bins,range=(20,1000))
+		#plt.plot(X,b, 'r-')
+		#plt.ylabel("Anzahl Events")
+		#plt.xlabel("Higgs Pt")
+		#plt.ylim((0,total_nr/10))
+		#plt.xlim((20,300))
 		#plt.show()
-		plt.savefig("Pt.pdf")
+		#plt.savefig("Pt.pdf")
 
-		b,e = np.histogram(Pt1bkg,bins=Bins,range=(20,1000))
-		X=np.arange(20,1000,(1000-20)/float(Bins))
-		plt.plot(X,b,  'b-')
-		b,e = np.histogram(Pt1higgs,bins=Bins,range=(20,1000))
-		plt.plot(X,b, 'g-')
-		b,e = np.histogram(GenPt1,bins=Bins,range=(20,1000))
-		plt.plot(X,b, 'r-')
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("erster Higgs b-jet Pt")
-		plt.ylim((0,total_nr/5))
-		plt.xlim((20,300))
-		#plt.show()
-		plt.savefig("Pt1.pdf")
+#		b,e = np.histogram(Pt1bkg,bins=Bins,range=(20,1000))
+#		X=np.arange(20,1000,(1000-20)/float(Bins))
+#		plt.plot(X,b,  'b-')
+#		b,e = np.histogram(Pt1higgs,bins=Bins,range=(20,1000))
+#		plt.plot(X,b, 'g-')
+#		b,e = np.histogram(GenPt1,bins=Bins,range=(20,1000))
+#		plt.plot(X,b, 'r-')
+#		plt.ylabel("Anzahl Events")
+#		plt.xlabel("erster Higgs b-jet Pt")
+#		plt.ylim((0,total_nr/5))
+#		plt.xlim((20,300))
+#		#plt.show()
+#		plt.savefig("Pt1.pdf")
 
 
-		Bins=30
-		b1,e = np.histogram(Etabkg,bins=Bins,range=(-2.4,2.4))
-		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
-		plt.plot(X,b1,'b-')
-		b1,e = np.histogram(Etahiggs,bins=Bins,range=(-2.4,2.4))
-		plt.plot(X,b1,'g-')
-		b1,e = np.histogram(GenEta,bins=Bins,range=(-2.4,2.4))
-		plt.plot(X,b1,'r-')
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("Higgs Eta")
-		#plt.ylim((0,100))
-		#plt.show()
-		plt.savefig("Eta.pdf")
+#		Bins=30
+#		b1,e = np.histogram(Etabkg,bins=Bins,range=(-2.4,2.4))
+#		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
+#		plt.plot(X,b1,'b-')
+#		b1,e = np.histogram(Etahiggs,bins=Bins,range=(-2.4,2.4))
+#		plt.plot(X,b1,'g-')
+#		b1,e = np.histogram(GenEta,bins=Bins,range=(-2.4,2.4))
+#		plt.plot(X,b1,'r-')
+#		plt.ylabel("Anzahl Events")
+#		plt.xlabel("Higgs Eta")
+#		#plt.ylim((0,100))
+#		#plt.show()
+#		plt.savefig("Eta.pdf")
 
-		b1,e = np.histogram(Eta1bkg,bins=Bins,range=(-2.4,2.4))
-		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
-		plt.plot(X,b1,'b-')
-		b1,e = np.histogram(Eta1higgs,bins=Bins,range=(-2.4,2.4))
-		plt.plot(X,b1,'g-')
-		b1,e = np.histogram(GenEta1,bins=Bins,range=(-2.4,2.4))
-		plt.plot(X,b1,'r-')
-		plt.ylabel("Anzahl Events")
-		plt.xlabel("erster Higgs b-jet Eta")
-		#plt.ylim((0,100))
-		#plt.show()
-		plt.savefig("Eta1.pdf")
+#		b1,e = np.histogram(Eta1bkg,bins=Bins,range=(-2.4,2.4))
+#		X=np.arange(-2.4,2.4,(2.4+2.4)/float(Bins))
+#		plt.plot(X,b1,'b-')
+#		b1,e = np.histogram(Eta1higgs,bins=Bins,range=(-2.4,2.4))
+#		plt.plot(X,b1,'g-')
+#		b1,e = np.histogram(GenEta1,bins=Bins,range=(-2.4,2.4))
+#		plt.plot(X,b1,'r-')
+#		plt.ylabel("Anzahl Events")
+#		plt.xlabel("erster Higgs b-jet Eta")
+#		#plt.ylim((0,100))
+#		#plt.show()
+#		plt.savefig("Eta1.pdf")
 
 
 		# (16) delete all variables except for:
 		df_new = pd.DataFrame()
-		variables_toadd  = ["GenHiggs_B1_Pt","GenHiggs_B1_E","GenHiggs_B1_Phi","GenHiggs_B1_Eta","GenHiggs_B2_Pt","GenHiggs_B2_E","GenHiggs_B2_Phi","GenHiggs_B2_Eta","N_Jets", "N_BTagsM", "Evt_Run", "Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons","Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]", "Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
+		variables_toadd  = ["GenHiggs_B1_Pt","GenHiggs_B1_E","GenHiggs_B1_Phi","GenHiggs_B1_Eta","GenHiggs_B2_Pt","GenHiggs_B2_E","GenHiggs_B2_Phi","GenHiggs_B2_Eta","N_Jets", "N_BTagsM", "Evt_Run","Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons","Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]","Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
 
 		for ind in variables_toadd:
 			df_new[ind] = df[ind].values
-
+		#print "df shape",df.shape,"df columns", df.columns,len(globals()["Higgs_B1_Pt"])
 		# (18) add correct and false combinations with their tags to df
 		entr=0
 		for index in jets:
@@ -1469,14 +1481,15 @@ class Dataset:
 				df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
 				entr+=1
 
-		df["DeltaR_B1"] = Rb1
-		df["DeltaR_B2"] = Rb2
-		df["DeltaR_B1_B2"] = Rb12
+#		df["DeltaR_B1"] = Rb1
+#		df["DeltaR_B2"] = Rb2
+#		df["DeltaR_B1_B2"] = Rb12
+		df["DeltaR"] = DeltaR
 		df["bkg_scale"] = bkg_scale
 		df["Evt_is_Higgs"]  = is_Higgs
 		#df["ttbar_phi"] = ttbar_phi
 		#df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
-		entr+=5
+		entr+=3
 	
 		# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
 		df.drop(df.columns[:-(entr)],inplace = True, axis = 1)

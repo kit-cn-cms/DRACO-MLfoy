@@ -600,3 +600,4 @@ GenHiggs_B2_Eta,-2.4,2.4,30,-,#eta of second generated Higgs B-Jet
 DeltaR_B1,0,3,50,-,#DeltaR of first Higgs B-Jet
 DeltaR_B2,0,3,50,-,#DeltaR of second Higgs B-Jet
 DeltaR_B1_B2,0,4,50,-,summed #DeltaR of Higgs B-Jets
+DeltaR,0,4,20,-,#DeltaR of Higgs B-Jets

@@ -21,9 +21,8 @@ variables["ge4j_ge3t"] = [
 	"GenHiggs_B1_Eta",
 	"GenHiggs_B2_Phi",
 	"GenHiggs_B2_Eta",
-	"DeltaR_B1",
-	"DeltaR_B2",
-	"DeltaR_B1_B2"	
+	#"DeltaR_B1",
+	"DeltaR"
 	]
 
 variables["ge4j_ge2t"] = [
@@ -36,7 +35,8 @@ variables["ge4j_ge2t"] = [
 	"Higgs_B2_Eta",
 	"Higgs_B2_Phi",
 	"Higgs_B2_E",
-	"Higgs_B2_CSV"
+	"Higgs_B2_CSV",
+	"DeltaR"
 	]
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
