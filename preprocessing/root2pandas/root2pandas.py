@@ -311,10 +311,7 @@ class Dataset:
             sample.categories.categories["ttbar"] = "(Evt_is_ttbar==1)"
             sample.categories.categories["bkg"] = "(Evt_is_ttbar==0)"
 
-            # print(ttbar_df)
-            # plt.figure()
-            # df["deltar"].hist(bins=20)
-            # plt.show()
+
             # add to list of dataframes
             if concat_df.empty: concat_df = df
             else: concat_df = concat_df.append(df)
@@ -343,7 +340,6 @@ class Dataset:
 
                 # write data to file
                 self.createDatasets(concat_df, sample.categories.categories)
-                # self.createDatasets_for_ttbar(concat_df)
 
                 print("*"*50)
                 n_entries = 0
@@ -473,7 +469,7 @@ class Dataset:
                     os.remove(outFile)
 
 #########################################################################################
-# function to get dataframe with all variables relevant for ttbar-reconstruction
+# function to get dataframe with all relevant variables for ttbar-reconstruction
     def findbest(self, df):
 
         # (1) total number of events in current df
@@ -481,11 +477,11 @@ class Dataset:
         # array containing the number of jets per event
         njets_vec = df["N_Jets"].values
 
-        # (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
+        # (2) for ttbar-event plot: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
         r_max = 0.8
         numb = np.zeros(int(r_max*100))
 
-        # (3) get gen-info of quarks needed for calculation of delta r at
+        # (3) get gen-info of quarks for calculation of delta r
         GenTopHad_B_Phi = df["GenTopHad_B_Phi"].values
         GenTopHad_B_Eta = df["GenTopHad_B_Eta"].values
         GenTopLep_B_Phi = df["GenTopLep_B_Phi"].values
@@ -503,7 +499,7 @@ class Dataset:
         recos = ["TopHad", "TopLep", "WHad", "WLep"]
         pepm  = ["Pt", "Eta", "Phi", "M", "logM"]
 
-        # (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles get filled in (13); information about whether an event is accepted as ttbar (is_ttbar); scaling-factor if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
+        # (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles; filled in (13); information: is event accepted as ttbar (is_ttbar)?; scaling-factor if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
         for index in jets:
             for index2 in pepec:
                 globals()[index + "_" + index2] = np.zeros(total_nr)
@@ -517,7 +513,6 @@ class Dataset:
 
         ttbar_phi = np.zeros(total_nr)
         ttbar_Pt_div_Ht_p_Met = np.zeros(total_nr)
-        # cntr     = 0
 
         # (6) loop over all events
         for i in range(total_nr):
@@ -541,11 +536,13 @@ class Dataset:
             minr_blep = 10
             minr_q1   = 10
             minr_q2   = 10
+
             # (9) Loop over all combinations of 4 jets: j for TopHad_B ; k for TopLep_B ; l for TopHad_Q1 ; m for TopHad_Q2
             for j in range(njets):
                 for k in range(njets):
                     for l in range(njets):
                         for m in range(njets):
+
                             # (10) exclude combinations with two identical indices or without B-tags for b-quarks (medium working point)
                             if(j==k or j==l or j==m or k==l or k==m or l==m):
                                 continue
@@ -577,9 +574,8 @@ class Dataset:
             # (12) delete first two rows
             bkg = np.delete(bkg, (0,1), axis=0)
 
-            # (13) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be b-tagged
+            # (13) only combinations with smallest total_deltar and each delta r <0.1 are ttbar-events (~25% of all events pass this); reconstruct further particles
             n=0
-            # if(minr_bhad<0.3 and minr_blep<0.3 and minr_q1<0.3 and minr_q2<0.3 and (CSV[best_comb[2]]<0.277 or CSV[best_comb[3]]<0.277)):
             if(minr_bhad<0.1 and minr_blep<0.1 and minr_q1<0.1 and minr_q2<0.1):
                 for index in jets:
                     for index2 in pepec:
@@ -599,7 +595,7 @@ class Dataset:
                 ttbar_phi[i] = correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi())
                 ttbar_Pt_div_Ht_p_Met[i] = (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt())
 
-            # (14) short print against long boring time
+            # (14) some prints
             if(i%5000 == 0):
                 print minr, minr_bhad, minr_blep, minr_q1, minr_q2
 
@@ -638,7 +634,7 @@ class Dataset:
                     false_comb = np.zeros(4)
                     j1,k1,l1,m1 = 0,0,0,0
                     df=df.append(df.iloc[[i]])
-                    #kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
+                    # search for combinations other than best_comb and  selbst den anforderungen genuegen
                     while(CSV[j1]<0.277 or CSV[k1]<0.277 or j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
                         j1 = randrange(njets)
                         k1 = randrange(njets)
@@ -694,7 +690,7 @@ class Dataset:
         for ind in variables_toadd:
             df_new[ind] = df[ind].values
 
-        # (17) another short print for control
+        # (17) another print for control
         print df.shape, len(globals()["TopHad_B_" + index2]), len(is_ttbar)
 
         # (18) add correct and false combinations with their tags to df
@@ -722,7 +718,7 @@ class Dataset:
             df[ind] = df_new[ind].values
 
 
-        # (20) delete combinations of events without certain ttbar event
+        # (20) delete combinations of events without proved ttbar event
         i,j=0,0
         while(i<total_nr):
             if df["Evt_is_ttbar"].values[i]==0:

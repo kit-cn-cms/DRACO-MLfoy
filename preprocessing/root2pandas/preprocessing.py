@@ -55,7 +55,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-# N<13 could be removed, because in the given dataset there is no event with N>12
+# N<14 could be removed, because in the given dataset there is no event with N>12
 base = "(N_Jets<14 and N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
 
 
