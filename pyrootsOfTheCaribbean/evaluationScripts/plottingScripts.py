@@ -8,6 +8,8 @@ from array import array
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import confusion_matrix
 
+from root_numpy import hist2array
+
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
 pyrootdir = os.path.dirname(filedir)
@@ -48,6 +50,8 @@ class plotDiscriminators:
         self.printROCScore = printROC
         self.privateWork = privateWork
 
+        allBKGhists = []
+        allSIGhists = []
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
             print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
@@ -112,8 +116,9 @@ class plotDiscriminators:
                         filled    = True)
 
                     bkgHists.append( histogram )
-                    bkgLabels.append( truth_cls )
 
+                    bkgLabels.append( truth_cls )
+            allBKGhists.append( bkgHists )
             sigHists = []
             scaleFactors = []
             for iSig in range(len(sig_labels)):
@@ -136,7 +141,7 @@ class plotDiscriminators:
                     scaleFactor = weightIntegral/(sum(sig_weights[iSig])+1e-9)
                 else:
                     scaleFactor = float(self.sigScale)
-
+                allSIGhists.append(sigHist.Clone())
                 sigHist.Scale(scaleFactor)
                 sigHists.append(sigHist)
                 scaleFactors.append(scaleFactor)
@@ -193,6 +198,21 @@ class plotDiscriminators:
         cmd = "pdfunite "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
         print(cmd)
         os.system(cmd)
+
+        # create combined histos for max Likelihood fit
+        h_bkg = np.array([])
+        h_sig = np.array([])
+        for l_h in allBKGhists:
+            h_tmp=l_h[0].Clone()
+            h_tmp.Reset()
+            for h in l_h:
+                h_tmp.Add(h)
+            h_bkg = np.concatenate((h_bkg,hist2array(h_tmp)), axis=None)
+
+        for h in allSIGhists:
+            h_sig = np.concatenate((h_sig,hist2array(h)), axis=None)
+        return h_bkg, h_sig
+
 
 
 
@@ -795,6 +815,8 @@ class plotBinaryOutput:
             scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
         else:
             scaleFactor = float(self.sigScale)
+
+        sig_hist_unscaled = sig_hist.Clone()
         sig_hist.Scale(scaleFactor)
 
         # rescale histograms if privateWork enabled
@@ -840,9 +862,14 @@ class plotBinaryOutput:
         out_path = self.plotdir + "/binaryDiscriminator.pdf"
         setup.saveCanvas(canvas, out_path)
 
+        # returns = np.round_(hist2array(bkg_hist)).astype(int), np.round(hist2array(sig_hist_unscaled)).astype(int)
+        # returns = np.round_(hist2array(bkg_hist)), np.round(hist2array(sig_hist_unscaled))
+        returns = hist2array(bkg_hist), hist2array(sig_hist_unscaled)
+
         f.cd()
         f.Write()
         f.Close()
+        return returns
 
 
 
