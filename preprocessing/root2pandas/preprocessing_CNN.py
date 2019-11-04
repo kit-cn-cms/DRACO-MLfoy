@@ -36,6 +36,9 @@ parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=Fals
 parser.add_option("-n", "--name", dest="Name", default="cnn", #changed default from dnn to cnn
         help="STR of the output file name", metavar="Name")
 
+parser.add_option("-r", "--rotation_cnn", dest="rotation_cnn", default=None,
+        help="STR of the desired cnn rotation", metavar="Name")
+
 
 (options, args) = parser.parse_args()
 
@@ -102,17 +105,17 @@ dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_8*nominal*.root",
     categories  = ttbar_categories,
-    selections  = None,#ttbar_selection,
+    selections  = None, #"(Evt_Odd == 1)" <=for even odd splitting in final form
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
     )
 
-#dataset.addSample(
-#    sampleName  = "TTH",
-#    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
-#    categories  = ttH_categories,
-#    selections  = None,#ttbar_selection,
+dataset.addSample(
+    sampleName  = "TTH",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
+    categories  = ttH_categories,
+    selections  = None,#"(Evt_Odd == 1)" <=for even odd splitting in final form #ttbar_selection,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
-#    )
+    )
 
 # initialize variable list 
 #dataset.addVariables(variable_set.all_variables)
@@ -120,7 +123,7 @@ dataset.addSample(
 # define an additional variable list
 additional_variables = [
     "N_Jets",
-    #"N_BTagsM",
+    "N_BTagsM",
     "Weight_XS",
     "Weight_CSV",
     "Weight_GEN_nom",
@@ -154,7 +157,7 @@ imageconfig = root2pandas.ImageConfig(
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
-    rotation  = "sphericity_ev3", #None or "MaxJetPt" or "ttbar_toplep" or "sphericity_ev1" or "sphericity_ev2" or "sphericity_ev3"
+    rotation  = options.rotation_cnn, #options.rotation_cnn or None or "MaxJetPt" or "ttbar_toplep" or "sphericity_ev1" or "sphericity_ev2" or "sphericity_ev3"
     # pixel intensity linear or logarithmic
     logNorm     = False)
 
