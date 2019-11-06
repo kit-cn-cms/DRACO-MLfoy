@@ -301,12 +301,13 @@ class Dataset:
 
 
 			#in Bearbeitung
+			df = self.applySelections(df, sample.selections)
 			#ttbar_df = self.findbest(df)
 			#ttbar_df = self.findbestwithHiggs(df)
 			ttbar_df = self.findbestHiggs(df)
 			df = ttbar_df
-			# apply event selection
-			df = self.applySelections(df, sample.selections)
+			#apply event selection
+			#df = self.applySelections(df, sample.selections)
 
 
 
@@ -480,7 +481,7 @@ class Dataset:
 	def findbest(self, df):
 
 		# (1) total number of events in current df
-		total_nr  = df["N_Jets"].size
+		total_nr  = df["Evt_ID"].size
 		#print("-"*10+"total_nr"+"-"*10)
 		#print(total_nr)
 	
@@ -828,6 +829,9 @@ class Dataset:
 
 			# (7) get number of jets in current event; create array for bkg scaling, shape(2,4) is to make np.append with new rows possible later (12). get deleted again in (12); minr and array for indices of best combination
 
+			if Evt_ID == nan:
+				continue
+
 			njets = min(int(njets_vec[i]),12)
 			#print(njets)
 			bkg = np.zeros((2,4))
@@ -835,6 +839,7 @@ class Dataset:
 			minrH = 10000.
 			best_comb = np.zeros(4)
 
+			
 
 			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
 			for index in pepec:
@@ -1092,9 +1097,9 @@ class Dataset:
 				df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
 				entr+=1
 	
-		print is_ttbar
-		print ttbar_phi
-		print df
+		
+	
+
 	
 		df["bkg_scale"] = bkg_scale
 		df["Evt_is_ttbar"]  = is_ttbar
@@ -1133,6 +1138,7 @@ class Dataset:
 
 		# array containing the number of jets per event
 		njets_vec = df["N_Jets"].values
+		print(njets_vec)
 
 		# (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
 		r_max = 1.1
@@ -1169,10 +1175,12 @@ class Dataset:
 #		Rb2 = np.zeros(total_nr)
 #		Rb12 = np.zeros(total_nr)
 		DeltaR = np.zeros(total_nr)
+		DeltaEta = np.zeros(total_nr)
+		DeltaPhi = np.zeros(total_nr)
 
 		jkcounter = 0
 		jnkcounter = 0
-
+		nancounter = 0
 
 #		Ptbkg = np.zeros(total_nr)
 #		Pthiggs = np.zeros(total_nr)
@@ -1191,18 +1199,26 @@ class Dataset:
 #		GenEta1 = np.full(total_nr,10.)
 
 		# (6) loop over all events
+#
 		for i in range(total_nr):	
 
-			if df["Evt_ID"].values[i]%10 != 0:
-				continue
+
+#			if df["Evt_ID"].values[i]%1 != 0:
+#				nancounter +=1
+#				print df.keys(),df.values[i]
+#				for k,v in zip(list(df.keys()),list(df.values[i])):
+#					print k,v
+#				raw_input()
+#				continue
+				
 
 			# (7) get number of jets in current event; create array for bkg scaling, shape(2,2) is to make np.append with new rows possible later (12). get deleted again in (12); minr and 			array for indices of best combination
 
 			njets = min(int(njets_vec[i]),12)
 #			minrH = 10000.
 
-			if njets < 4:
-				continue
+#			if njets < 4:
+#				continue
 
 			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
 			for index in pepec:
@@ -1217,6 +1233,7 @@ class Dataset:
 			minr_b1 = 10
 			minr_b2 = 10
 			best_comb = np.zeros(2)
+
 
 
 			# Loop over all combinations of 2 b-jets: j for b1, k for b2
@@ -1234,7 +1251,8 @@ class Dataset:
 					K = k
 					best_comb[1]= k
 			DeltaR[i] = ((Eta[J]-Eta[K])**2  + (correct_phi(Phi[J] - Phi[K]))**2)**0.5
-
+			DeltaEta[i] = abs(Eta[J]-Eta[K])
+			DeltaPhi[i] = abs(Phi[J]-Phi[K])
 #			minrH = minr_b1 + minr_b2
 
 #			Rb1[i] = minr_b1
@@ -1291,35 +1309,45 @@ class Dataset:
 #---------------------------
 
 
-#				if self.Scale:
-#					for nr in range(len(bkg)):
-#						df=df.append(df.iloc[[i]])
-#						false_comb = [int(bkg[nr][0]),int(bkg[nr][1])]
-#
-#						n=0
-#						for index in jets:
-#							for index2 in pepec:
-#								globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-#							n+=1
-#	
-#						reco_Higgs_4vec = reconstruct_Higgs(df, i,false_comb[0],false_comb[1])
-#
-#						for index in recos:
-#							globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
-#							globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
-#							globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
-#							globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
-#							globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
-#
-#
-#						is_Higgs  = np.append(is_Higgs,0)
-#						bkg_scale = np.append(bkg_scale, 1./len(bkg))
+				if self.Scale:
+					for J1 in range(njets):
+						if J1 != best_comb[0] and J1 != best_comb[1]:
+							j1 = J1
+	
+							for K1 in range(njets):
+								if K1 != best_comb[0] and K1 != best_comb[1] and K1 != J1:						
+									k1 = K1
+									false_comb = [j1,k1]
 
+									df=df.append(df.iloc[[i]])
 
+									n=0
+									for index in jets:
+										for index2 in pepec:
+											globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+										n+=1
+	
+									reco_Higgs_4vec = reconstruct_Higgs(df, i,false_comb[0],false_comb[1])
+
+									for index in recos:
+										globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
+										globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
+										globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
+										globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
+										globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+
+		
+									is_Higgs  = np.append(is_Higgs,0)
+									bkg_scale = np.append(bkg_scale, 1)
+									DeltaR = np.append(DeltaR,((Eta[j1]-Eta[k1])**2  + (correct_phi(Phi[j1] - Phi[k1]))**2)**0.5)
+									DeltaEta = np.append(DeltaEta,abs(Eta[J1]-Eta[K1]))
+									DeltaPhi = np.append(DeltaPhi,abs(Phi[J1]-Phi[K1]))
+	
 
 				if self.Scale==0:
 					false_comb = np.zeros(2)
-					j1,k1 = J,K
+					j1 = randrange(njets)
+					k1 = randrange(njets)
 					df=df.append(df.iloc[[i]])
 	
 
@@ -1358,6 +1386,8 @@ class Dataset:
 					false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					DeltaR = np.append(DeltaR,((Eta[j1]-Eta[k1])**2  + (correct_phi(Phi[j1] - Phi[k1]))**2)**0.5)
+					DeltaEta = np.append(DeltaEta,abs(Eta[j1]-Eta[k1]))
+					DeltaPhi = np.append(DeltaPhi,abs(Phi[j1-Phi[k1]))
 #					Rb1 = np.append(Rb1,0)
 #					Rb2 = np.append(Rb2,0)
 #					Rb12 = np.append(Rb12,0)
@@ -1379,6 +1409,7 @@ class Dataset:
 		print("Higgs Events mit 2 Jets (nach 0.4 Krit):")
 		print jnkcounter, "von", total_nr, "also", round(jnkcounter/float(total_nr)*100,2),"%"
 
+		print nancounter,"Events NaN."
 
 		x = np.arange(0,r_max,0.01)
 		plt.plot(x, numb/total_nr)
@@ -1489,7 +1520,9 @@ class Dataset:
 		df["Evt_is_Higgs"]  = is_Higgs
 		#df["ttbar_phi"] = ttbar_phi
 		#df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
-		entr+=3
+		df["Delta_Eta"] = DeltaEta
+		df["Delta_Phi"] = DeltaPhi
+		entr+=5
 	
 		# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
 		df.drop(df.columns[:-(entr)],inplace = True, axis = 1)
@@ -1501,7 +1534,11 @@ class Dataset:
 		# (20) delete combinations of events without certain ttH event
 		i,j=0,0
 		while(i<total_nr):
-			if df["Evt_is_Higgs"].values[i]==0:
+			if df["Evt_ID"].values[i]%1!=0:
+				df.drop(df.index[i],axis=0)
+				total_nr -= 1
+				j+=1
+			elif df["Evt_is_Higgs"].values[i]==0:
 				df=df.drop(df.index[i],axis=0)
 				total_nr -= 1
 				j+=1

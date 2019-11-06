@@ -89,14 +89,15 @@ dataset.addBaseSelection(base_selection)
 #ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
 # ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ/"
 # ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/forJost/ntuple/"
+ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2017/"
 
 
 
 dataset.addSample(
-    sampleName  = "TTHToSL",
+    sampleName  = "TTHbb",
     #ntuples     = "/ceph/mheim/ntuples/ttbar.root",
-    ntuples     = "/ceph/mheim/ntuples/ttH.root",
+    #ntuples     = "/ceph/mheim/ntuples/ttH.root",
+    ntuples     = ntuplesPath+"ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttbar_categories,
     selections  = ttbar_selection
 )
