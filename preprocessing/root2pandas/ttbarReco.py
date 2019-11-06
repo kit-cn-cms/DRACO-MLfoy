@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import ROOT
 import copy
-import progressbar
 
 # temporary hard coded bullshit
 csvWP = 0.277
@@ -42,8 +41,6 @@ def findbest(df, additionalVariables):
 
     # event loop
     valid_events = 0
-    #pbar = progressbar.ProgressBar(widgets=[progressbar.ETA(), progressbar.Percentage(), progressbar.Bar(left="[",right="]")," "*20])
-    #for iEvt in pbar(df.index):
     for iEvt in df.index:
         # get number of jets (max 10)
         event = df.loc[iEvt]
