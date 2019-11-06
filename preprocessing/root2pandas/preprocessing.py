@@ -6,7 +6,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
-import root2pandas
+import root2pandas as root2pandas
 
 """
 USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
@@ -32,8 +32,8 @@ parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=Fals
 parser.add_option("-n", "--name", dest="Name", default="dnn",
         help="STR of the output file name", metavar="Name")
 
-parser.add_option("-s", "--scale", dest="Scale", action= "store_true", default=False,
-        help="BOOl to use every wrong bkg event (1) or just one (0)", metavar="Scale")
+parser.add_option("--ttbarReco", dest="ttbarReco", action= "store_true", default=False,
+        help="activate preprocessing for ttbar reconstruction", metavar="ttbarReco")
 
 
 (options, args) = parser.parse_args()
@@ -55,8 +55,8 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-# N<14 could be removed, because in the given dataset there is no event with N>12
-base = "(N_Jets<14 and N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
+# N<13 could be removed, because in the given dataset there is no event with N>12
+base = "(N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
 
 
 # single lepton selections
@@ -78,23 +78,15 @@ dataset = root2pandas.Dataset(
     naming      = options.Name,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
-    Scale       = options.Scale)
+    ttbarReco   = options.ttbarReco)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
-
-
-
-#ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
-# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ/"
-# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/forJost/ntuple/"
-
-
+ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples_ttbar/"
 
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_nominal*.root",
+    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
     categories  = ttbar_categories,
     selections  = ttbar_selection
 )
@@ -112,11 +104,6 @@ additional_variables = [
     "Evt_Run",
     "Evt_Lumi"
     ]
-import time
-start_time = time.time()
-# your script
-elapsed_time = time.time() - start_time
-time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
 
