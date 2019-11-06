@@ -9,9 +9,8 @@ from multiprocessing import Pool
 import ttbarReco
 
 # multi processing magic
-def processFile(info):
-    print("loading file ({}/{}) {}".format(info["i"], info["nfiles"], info["file"]))
-    info["self"].process_file(info["sample"], info["file"])
+def processChunk(info):
+    info["self"].processChunk(info["sample"], info["chunk"], info["chunkNumber"])
 
 class EventCategories:
     def __init__(self):
@@ -54,7 +53,7 @@ class Sample:
 
 
 class Dataset:
-    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, ttbarReco=False):
+    def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, ttbarReco=False, ncores = 1):
         # settings for paths
         self.outputdir  = outputdir
         self.naming     = naming
@@ -73,6 +72,7 @@ class Dataset:
         self.samples        = {}
         self.variables      = []
 
+        self.ncores         = int(ncores)
     def addBaseSelection(self, selection):
         self.baseSelection = selection
 
@@ -256,83 +256,103 @@ class Dataset:
         n_files = len(ntuple_files)
         print("number of files: {}".format(n_files))
 
+        while not len(ntuple_files)%self.ncores == 0:
+            ntuple_files.append("")
+        ntuple_files = np.array(ntuple_files).reshape(self.ncores, -1)
+    
+        pool = Pool(self.ncores)
+        chunks = [{"chunk": c, "sample": sample, "chunkNumber": i+1, "self": self} for i,c in enumerate(ntuple_files)]
+        pool.map(processChunk, chunks)
 
-        pool = Pool(4)
-        iteration = [{"file": f, "sample": sample, "i": i, "nfiles": n_files, "self": self} for i,f in enumerate(ntuple_files)]
-        pool.map(processFile, iteration)
+        # concatenate single thread files
+        self.mergeFiles(sample.categories.categories)
 
-    def process_file(self, sample, f):
-        # open root file
-        with root.open(f) as rf:
-            # get MVATree
-            try:
-                tree = rf["MVATree"]
-            except:
-                print("could not open MVATree in ROOT file")
+    def processChunk(self, sample, files, chunkNumber):
+        files = [f for f in files if not f == ""]
+
+        n_entries = 0
+        concat_df = pd.DataFrame()
+        n_files = len(files)
+        for iF, f in enumerate(files):
+            print("chunk #{}: starting file ({}/{}): {}".format(chunkNumber, iF+1, n_files, f))
+
+            # open root file
+            with root.open(f) as rf:
+                # get MVATree
+                try:
+                    tree = rf["MVATree"]
+                except:
+                    print("could not open MVATree in ROOT file")
+                    return
+
+            if tree.numentries == 0:
+                print("MVATree has no entries - skipping file")
                 return
 
-        if tree.numentries == 0:
-            print("MVATree has no entries - skipping file")
-            return
+            # convert to dataframe
+            df = tree.pandas.df(self.variables)
 
-        # convert to dataframe
-        df = tree.pandas.df(self.variables)
+            # delete subentry index
+            df = df.reset_index(1, drop = True)
 
-        # delete subentry index
-        df = df.reset_index(1, drop = True)
+            # handle vector variables, loop over them
+            for vecvar in self.vector_variables:
 
-        # handle vector variables, loop over them
-        for vecvar in self.vector_variables:
+                # load dataframe with vector variable
+                vec_df = tree.pandas.df(vecvar)
 
-            # load dataframe with vector variable
-            vec_df = tree.pandas.df(vecvar)
+                # loop over inices in vecvar list
+                for idx in self.vector_variables[vecvar]:
 
-            # loop over inices in vecvar list
-            for idx in self.vector_variables[vecvar]:
+                    # slice the indexdf
+                    idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
+                    idx_df = idx_df.reset_index(1, drop = True)
 
-                # slice the indexdf
-                idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
-                idx_df = idx_df.reset_index(1, drop = True)
+                    # define name for column in df
+                    col_name = str(vecvar)+"["+str(idx)+"]"
 
-                # define name for column in df
-                col_name = str(vecvar)+"["+str(idx)+"]"
+                    # initialize column in original dataframe
+                    df[col_name] = 0.
 
-                # initialize column in original dataframe
-                df[col_name] = 0.
-
-                # append column to original dataframe
-                df.update( idx_df[vecvar].rename(col_name) )
+                    # append column to original dataframe
+                    df.update( idx_df[vecvar].rename(col_name) )
 
 
 
-        # apply event selection
-        df = self.applySelections(df, sample.selections)
+            # apply event selection
+            df = self.applySelections(df, sample.selections)
 
-        # perform ttbar reconstruction
-        if self.ttbarReco:
-            df = ttbarReco.findbest(df, self.variables)
+            # perform ttbar reconstruction
+            if self.ttbarReco:
+                df = ttbarReco.findbest(df, self.variables)
 
-            sample.categories.categories["ttbar"] = "(is_ttbar==1)"
-            sample.categories.categories["bkg"]   = "(is_ttbar==0)"
+                sample.categories.categories["ttbar"] = "(is_ttbar==1)"
+                sample.categories.categories["bkg"]   = "(is_ttbar==0)"
 
-        
-        df = self.addClassLabels(df, sample.categories.categories)
+            if concat_df.empty: concat_df = df
+            else: concat_df = concat_df.append(df)            
+            n_entries += df.shape[0]
 
-        # add indexing
-        df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
+            if (n_entries > self.maxEntries or f == files[-1]):
+                print("*"*50)
+                print("chunk #{}: max entries reached ...".format(chunkNumber))
+                concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
-        # add MEM variables
-        if self.addMEM:
-            df = self.addMEMVariable(df, mem_df)
+                # add indexing
+                concat_df.set_index(["Evt_Run", "Evt_Lumi", "Evt_ID"], inplace = True, drop = True)
 
-        # remove trigger variables
-        df = self.removeTriggerVariables(df)
+                # add MEM variables
+                if self.addMEM:
+                    concat_df = self.addMEMVariable(concat_df, mem_df)
 
-        # write data to file
-        self.createDatasets(df, sample.categories.categories)
+                # remove trigger variables
+                concat_df = self.removeTriggerVariables(concat_df)
 
-        print("*"*50)
-
+                # write data to file
+                self.createDatasets(concat_df, sample.categories.categories, chunkNumber)
+                print("*"*50)
+                n_entries = 0
+                concat_df = pd.DataFrame()
 
     # ====================================================================
 
@@ -411,17 +431,33 @@ class Dataset:
         df.drop(self.removedVariables, axis = 1, inplace = True)
         return df
 
-    def createDatasets(self, df, categories):
+    def createDatasets(self, df, categories, chunkNumber = None):
         for key in categories:
-            outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            if chunkNumber is None:
+                outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            else:
+                outFile = self.outputdir+"/"+key+"_"+self.naming+"_"+str(chunkNumber)+".h5"
 
             # create dataframe for category
             cat_df = df.query("(class_label == \""+str(key)+"\")")
             print("creating dataset for class label {} with {} entries".format(key, cat_df.shape[0]))
 
-            
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
+            
+    def mergeFiles(self, categories):
+        print("="*50)
+        print("merging multicore threading files ...")
+        for key in categories:
+            print("category: {}".format(key))
+            threadFiles = [ self.outputdir+"/"+key+"_"+self.naming+"_"+str(chunkNumber+1)+".h5" for chunkNumber in range(self.ncores) ]
+            outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            with pd.HDFStore(outFile, "a") as store:
+                for f in threadFiles:
+                    store.append("data", pd.read_hdf(f), index = False)
+                    os.remove(f)
+                print("number of events: {}".format(store.get_storer("data").nrows))
+        print("="*50)
 
     def removeOldFiles(self):
         for key in self.samples:

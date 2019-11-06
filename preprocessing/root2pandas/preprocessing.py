@@ -35,6 +35,9 @@ parser.add_option("-n", "--name", dest="Name", default="dnn",
 parser.add_option("--ttbarReco", dest="ttbarReco", action= "store_true", default=False,
         help="activate preprocessing for ttbar reconstruction", metavar="ttbarReco")
 
+parser.add_option("--cores", dest="ncores", default = 1,
+        help="number of cores for parallel multiprocessing")
+
 
 (options, args) = parser.parse_args()
 
@@ -71,6 +74,7 @@ ttbar_selection = "(Evt_Odd == 1)"
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbar")
 ttbar_categories.addCategory("bkg")
+#ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -78,7 +82,8 @@ dataset = root2pandas.Dataset(
     naming      = options.Name,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
-    ttbarReco   = options.ttbarReco)
+    ttbarReco   = options.ttbarReco,
+    ncores      = options.ncores)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
