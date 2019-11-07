@@ -782,7 +782,7 @@ category_label= None, inputData=None, data_era=None):
       category_name  = config["JetTagCategory"],
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
-      data_era        = data_era,
+      dataEra       = data_era,
     )
 
 
@@ -795,7 +795,7 @@ category_label= None, inputData=None, data_era=None):
 
 
 def loadMultipleDNNs(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
-category_label= None, inputData=None):
+category_label= None, inputData=None,dataEra=None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -827,6 +827,7 @@ category_label= None, inputData=None):
       category_name  = config["JetTagCategory"],
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
+      dataEra         = dataEra
     )
 
 
