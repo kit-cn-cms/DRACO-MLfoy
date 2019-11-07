@@ -19,59 +19,37 @@ import DRACO_Frameworks.DNN.data_frame as df
 
 options.initArguments()
 
-# specify which variable set to use
-import variable_sets.newJEC_validated as variable_set
-
-
-cats = ["4j_ge3t","5j_ge3t","ge6j_ge3t"]
-
-
-# when executing the script give the jet-tag category as a first argument
-# (ge)[nJets]j_(ge)[nTags]t
-JTcategory      = cats[2]
-
-# the input variables are loaded from the variable_set file
-variables       = variable_set.variables[JTcategory]
-
-# absolute path to folder with input dataframes
-inPath   = "/storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/"
-
-# naming for input files
-naming = "_dnn_newJEC.h5"
-
 # load samples
-input_samples = df.InputSamples(inPath)
+input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample("ttHbb"+naming,     label = "ttH", normalization_weight = 2.)
-input_samples.addSample("ttbb"+naming,      label = "ttbb")
-input_samples.addSample("tt2b"+naming,      label = "tt2b")
-input_samples.addSample("ttb"+naming,       label = "ttb")
-input_samples.addSample("ttcc"+naming,      label = "ttcc")
-input_samples.addSample("ttlf"+naming,      label = "ttlf")
+input_samples.addSample(options.getDefaultName("ttHbb"),     label = "ttH", normalization_weight = 2.)
+input_samples.addSample(options.getDefaultName("ttbb"),      label = "ttbb")
+input_samples.addSample(options.getDefaultName("tt2b"),      label = "tt2b")
+input_samples.addSample(options.getDefaultName("ttb"),       label = "ttb")
+input_samples.addSample(options.getDefaultName("ttcc"),      label = "ttcc")
+input_samples.addSample(options.getDefaultName("ttlf"),      label = "ttlf")
 input_samples.addSample("ttbb_dnn_OL.h5",   label = "ttbb_OL")
 input_samples.addSample("ttb_dnn_OL.h5",    label = "ttb_OL")
 input_samples.addSample("tt2b_dnn_OL.h5",   label = "tt2b_OL")
 #input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
 
-
-
-# path to output directory (adjust NAMING)
-savepath = basedir+"/workdir/masterthesis/lambda_"+str(10)+"_OL_redone_2/test" +str(JTcategory)+"/"
-
 # initializing DNN training class
 dnn = DNN.GAN(
-    save_path       = savepath,
+    save_path       = options.getOutputDir(),
     input_samples   = input_samples,
-    category_name   = JTcategory,
-    train_variables = variables,
+    category_name   = options.getCategory(),
+    train_variables = options.getTrainVariables(),
     # number of epochs
-    train_epochs    = 500,
+    train_epochs    = options.getTrainEpochs(), # hard coded in backend
     # metrics for evaluation (c.f. KERAS metrics)
     eval_metrics    = ["acc"],
     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = 0.2,
-    balanceSamples  = False)
+    test_percentage = options.getTestPercentage(),
+    # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.doBalanceSamples(),
+    evenSel         = options.doEvenSelection(),
+    norm_variables  = options.doNormVariables())
 
 
 dnn.build_model(config=options.getNetConfig() ,penalty=10)
@@ -90,3 +68,5 @@ dnn.train_model()
 # # plot the output discriminators
 # dnn.plot_discriminators()
 # dnn.plot_outputNodes()
+
+# example: python train_adversary_DNN_validatedVariables.py -i /storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/ --naming _dnn_newJEC.h5 -o adversary_test -n adversary_test -c ge6j_ge3t -v newJEC_validated

@@ -890,34 +890,6 @@ class DNN():
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
 class GAN(DNN):
-    def __init__(self,
-            save_path,
-            input_samples,
-            category_name,
-            train_variables,
-            category_cutString = None,
-            category_label     = None,
-            norm_variables     = True,
-            train_epochs       = 500,
-            test_percentage    = 0.2,
-            eval_metrics       = None,
-            shuffle_seed       = None,
-            balanceSamples     = False,
-            evenSel            = None):
-        DNN.__init__(self,
-            save_path,
-            input_samples,
-            category_name,
-            train_variables,
-            category_cutString = None,
-            category_label     = None,
-            norm_variables     = True,
-            train_epochs       = 500,
-            test_percentage    = 0.2,
-            eval_metrics       = None,
-            shuffle_seed       = None,
-            balanceSamples     = False,
-            evenSel            = None)
 
     def build_model(self, config = None, penalty = 0):
         ''' build default straight forward GAN from architecture dictionary '''
