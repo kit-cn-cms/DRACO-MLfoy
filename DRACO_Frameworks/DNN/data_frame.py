@@ -47,6 +47,9 @@ class Sample:
 
         df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.normalization_weight / self.test_percentage)
 
+        if "OL" in self.label:
+            df["class_label"] = pd.Series([ c + "_OL" for c in df["class_label"].values], index = df.index)
+
         self.data = df
         print("-"*50)
 
@@ -81,6 +84,8 @@ class InputSamples:
         if self.test_percentage <= 0. or self.test_percentage >= 1.:
             sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
 
+        self.additional_samples = 0
+
     def addSample(self, sample_path, label, normalization_weight=1., train_weight=1., total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
         if self.activate_samples and not label in self.activate_samples:
             print("skipping sample {}".format(label))
@@ -88,6 +93,9 @@ class InputSamples:
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
         self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr))
+
+        if label.endswith("_OL"):
+            self.additional_samples +=1
 
     def getClassConfig(self):
         configs = []
@@ -138,12 +146,16 @@ class DataFrame(object):
 
         # loop over all input samples and load dataframe
         train_samples = []
+        j=len(input_samples.samples)-input_samples.additional_samples
+        i=0
         for sample in input_samples.samples:
+            if i >= j: continue
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel)
             train_samples.append(sample.data)
+            i+=1
 
         # concatenating all dataframes
-        df = pd.concat(train_samples, sort=True)
+        df = pd.concat(train_samples)#, sort=True)
         del train_samples
 
         # multiclassification labelling
@@ -161,18 +173,20 @@ class DataFrame(object):
 
             # add flag for ttH to dataframe
             df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttBB"] = pd.Series( [1 if ("ttb" in c or "tt2b" in c) else 0 for c in df["class_label"].values], index = df.index )
 
-#            print(df["class_label"].values)
+            # print(df["class_label"].values)
+            df["generator_flag"] = pd.Series( [1 if ("OL" in c) else 0 for c in df["class_label"].values], index = df.index )
 
             # add index labelling to dataframe
             df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
-
+            
             # norm weights to mean(1)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
 
             # save some meta data about network
             self.n_input_neurons = len(train_variables)
-            self.n_output_neurons = len(self.classes)
+            self.n_output_neurons = len(self.classes)-input_samples.additional_samples
 
         # binary classification labelling
         else:
@@ -254,6 +268,18 @@ class DataFrame(object):
         print("events used for testing:  "+str(self.df_test.shape[0]))
         del df
 
+    #     # init non trainable samples
+    #     self.non_train_samples = None
+
+    # def get_non_train_samples(self):
+    #     # get samples with flag 'isTrainSample == False' and load those
+    #     samples = []
+    #     for sample in self.input_samples.samples:
+    #         if sample.isTrainSample: continue
+    #         sample.data[self.train_variables] = (sample.data[self.train_variables] - self.norm_csv["mu"])/(self.norm_csv["std"])
+    #         samples.append(sample)
+    #     self.non_train_samples = samples
+
 
 
     def balanceTrainSample(self):
@@ -334,3 +360,12 @@ class DataFrame(object):
     # full sample ----------------------------------
     def get_full_df(self):
         return self.unsplit_df[self.train_variables]
+
+    def get_adversary_labels(self):
+        return self.df_train["generator_flag"].values
+
+    def get_adversary_weights_classifier(self):
+        return pd.Series([0 if self.df_train["generator_flag"].values[i]==1 else c for i, c in enumerate(self.df_train["train_weight"].values)],index = self.df_train.index).values
+
+    def get_adversary_weights_adversary(self):
+        return pd.Series([c if self.df_train["is_ttBB"].values[i]==1 else 0 for i, c in enumerate(self.df_train["train_weight"].values)],index = self.df_train.index).values
