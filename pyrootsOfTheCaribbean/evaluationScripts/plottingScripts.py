@@ -191,8 +191,115 @@ class plotDiscriminators:
         print(cmd)
         os.system(cmd)
 
+class getDiscriminators:
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir):
+        self.data              = data
+        self.prediction_vector = prediction_vector
+        self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
+
+        self.event_classes     = event_classes
+        self.nbins             = nbins
+        self.bin_range         = bin_range
+        self.signal_class      = signal_class
+        self.event_category    = event_category
+        self.plotdir           = plotdir
+        self.signalIndex       = []
+        self.signalFlag        = []
+
+        if self.signal_class:
+            print self.signal_class
+            print self.data.class_translation
+            self.signalIndex.append(self.data.class_translation[signal_class])
+            self.signalFlag.append(self.data.get_class_flag(signal_class))
 
 
+    def getHistograms(self):
+        Histograms = {}
+
+        # generate one plot per output node
+        for i, node_cls in enumerate(self.event_classes):
+            print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
+
+            # get index of node
+            nodeIndex = self.data.class_translation[node_cls]
+            if self.signal_class:
+                signalIndex = self.signalIndex
+                signalFlag  = self.signalFlag
+            else:
+                signalIndex = [nodeIndex]
+                signalFlag  = [self.data.get_class_flag(node_cls)]
+
+            # get output values of this node
+            out_values = self.prediction_vector[:,i]
+
+
+            # fill lists according to class
+            bkgHists  = []
+            bkgLabels = []
+            weightIntegral = 0
+
+            sig_values = []
+            sig_labels = []
+            sig_weights = []
+
+            # loop over all classes to fill hists according to truth level class
+            for j, truth_cls in enumerate(self.event_classes):
+                classIndex = self.data.class_translation[truth_cls]
+
+                # filter values per event class
+                filtered_values = [ out_values[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    and self.predicted_classes[k] == nodeIndex]
+
+                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    and self.predicted_classes[k] == nodeIndex]
+
+                print("{} events in discriminator: {}\t(Integral: {})".format(truth_cls, len(filtered_values), sum(filtered_weights)))
+
+                if j in signalIndex:
+                    # signal histogram
+                    sig_values.append(filtered_values)
+                    sig_labels.append(str(truth_cls))
+                    sig_weights.append(filtered_weights)
+                else:
+                    # background histograms
+                    weightIntegral += sum(filtered_weights)
+
+                    histogram = setup.setupHistogram(
+                        values    = filtered_values,
+                        weights   = filtered_weights,
+                        nbins     = self.nbins,
+                        bin_range = self.bin_range,
+                        color     = setup.GetPlotColor(truth_cls),
+                        xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
+                        ytitle    = setup.GetyTitle(),
+                        filled    = True)
+
+                    bkgHists.append( histogram )
+                    bkgLabels.append( truth_cls )
+
+            sigHists = []
+            scaleFactors = []
+            for iSig in range(len(sig_labels)):
+                # setup signal histogram
+                sigHist = setup.setupHistogram(
+                    values    = sig_values[iSig],
+                    weights   = sig_weights[iSig],
+                    nbins     = self.nbins,
+                    bin_range = self.bin_range,
+                    color     = setup.GetPlotColor(sig_labels[iSig]),
+                    xtitle    = str(sig_labels[iSig])+" at "+str(node_cls)+" node",
+                    ytitle    = setup.GetyTitle(),
+                    filled    = False)
+
+                # set signal histogram linewidth
+                sigHist.SetLineWidth(3)
+        
+            Histograms[node_cls]={}
+            Histograms[node_cls]["sigHists"]=sigHist
+            Histograms[node_cls]["bkgHists"]=bkgHists
+        return Histograms
 
 class plotOutputNodes:
     def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):

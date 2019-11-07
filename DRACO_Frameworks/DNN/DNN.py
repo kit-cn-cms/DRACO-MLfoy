@@ -728,9 +728,29 @@ class DNN():
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
+    def get_discriminators(self, signal_class = None, nbins = None, bin_range = None):
+
+        ''' plot all events classified as one category '''
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(25*(1.-bin_range[0]))
+
+        plotDiscrs = plottingScripts.getDiscriminators(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path)
+
+        self.Histograms = plotDiscrs.getHistograms()
+
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
-category_label= None):
+category_label= None, inputData=None, data_era=None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -743,7 +763,55 @@ category_label= None):
 
 
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"])
+    if inputData==None:
+        input_samples = data_frame.InputSamples(config["inputData"])
+    else:
+        input_samples = data_frame.InputSamples(str(inputData))
+
+    if binary:
+        input_samples.addBinaryLabel(signal, binary_target)
+
+    for sample in config["eventClasses"]:
+        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
+
+    print("shuffle seed: {}".format(config["shuffleSeed"]))
+    # init DNN class
+    dnn = DNN(
+      save_path       = outputDirectory,
+      input_samples   = input_samples,
+      category_name  = config["JetTagCategory"],
+      train_variables = config["trainVariables"],
+      shuffle_seed    = config["shuffleSeed"],
+      data_era        = data_era,
+    )
+
+
+
+    # load the trained model
+    dnn.load_trained_model(inputDirectory)
+#    dnn.predict_event_query()
+
+    return dnn
+
+
+def loadMultipleDNNs(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
+category_label= None, inputData=None):
+
+    # get net config json
+    configFile = inputDirectory+"/checkpoints/net_config.json"
+    if not os.path.exists(configFile):
+        sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
+
+    with open(configFile) as f:
+        config = f.read()
+    config = json.loads(config)
+
+
+    # load samples
+    if inputData==None:
+        input_samples = data_frame.InputSamples(config["inputData"])
+    else:
+        input_samples = data_frame.InputSamples(str(inputData))
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
