@@ -303,7 +303,7 @@ class Dataset:
 			#in Bearbeitung
 			df = self.applySelections(df, sample.selections)
 			#ttbar_df = self.findbest(df)
-			#ttbar_df = self.findbestwithHiggs(df)
+			#ttbar_df = self.findbestTopBs(df)
 			ttbar_df = self.findbestHiggs(df)
 			df = ttbar_df
 			#apply event selection
@@ -756,376 +756,6 @@ class Dataset:
 		return df
 
 ###########################################################################
-# function to get dataframe with all variables relevant for ttbar-reconstruction
-	def findbestwithHiggs(self, df):
-
-		# (1) total number of events in current df
-		total_nr  = df["N_Jets"].size
-	
-		# array containing the number of jets per event
-		njets_vec = df["N_Jets"].values
-		#print("-"*10+"njets_vec"+"-"*10)
-		#print(njets_vec,len(njets_vec))
-		#print("_"*20)
-
-		# (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
-		r_max = 0.8
-		numb = np.zeros(int(r_max*100))
-
-		# (3) get gen-info of quarks needed for calculation of delta r at
-		GenTopHad_B_Phi = df["GenTopHad_B_Phi"].values
-		GenTopHad_B_Eta = df["GenTopHad_B_Eta"].values
-		GenTopLep_B_Phi = df["GenTopLep_B_Phi"].values
-		GenTopLep_B_Eta = df["GenTopLep_B_Eta"].values
-
-		GenTophad_Q1_Phi= df["GenTopHad_Q1_Phi"].values
-		GenTophad_Q1_Eta= df["GenTopHad_Q1_Eta"].values
-		Gentophad_Q2_Phi= df["GenTopHad_Q2_Phi"].values
-		GenTophad_Q2_Eta= df["GenTopHad_Q2_Eta"].values
-
-		GenHiggs_B1_Phi = df["GenHiggs_B1_Phi"].values
-		GenHiggs_B1_Eta = df["GenHiggs_B1_Eta"].values
-		GenHiggs_B2_Phi = df["GenHiggs_B2_Phi"].values
-		GenHiggs_B2_Eta = df["GenHiggs_B2_Eta"].values
-
-
-		# (4) arrays for better clarity in (5),...; jets and reconstructed particles
-		jets  = ["TopHad_B", "TopLep_B", "TopHad_Q1", "TopHad_Q2"]#,"Higgs_B1","Higgs_B2"]
-		pepec = ["Pt", "Eta", "Phi", "E", "CSV"]
-
-		recos = ["TopHad", "TopLep", "WHad", "WLep"]#,"Higgs"]
-		pepm  = ["Pt", "Eta", "Phi", "M", "logM"]
-
-		# (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles get filled in (13); information about whether an event is accepted as ttbar (is_ttbar); scaling-factor if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
-		for index in jets:
-			for index2 in pepec:
-				globals()[index + "_" + index2] = np.zeros(total_nr)
-
-		for index in recos:
-			for index2 in pepm:
-				globals()["reco_" + index + "_" + index2] = np.zeros(total_nr)
-
-		is_ttbar = np.zeros(total_nr)
-		bkg_scale = np.zeros(total_nr)+1
-
-		ttbar_phi = np.zeros(total_nr)
-		ttbar_Pt_div_Ht_p_Met = np.zeros(total_nr)
-		# cntr	 = 0
-	#for i in range(total_nr):
-	#	print(njets_vec[i])
-
-		jkcounter = 0
-		jnkcounter = 0
-		counter = 0
-		counter3 = 0
-		counter2 = 0
-		counter1 = 0
-		Rb1 = np.zeros(total_nr)
-		Rb2 = np.zeros(total_nr)
-		Rb12 = np.zeros(total_nr)
-
-		# (6) loop over all events
-		for i in range(total_nr):
-
-			# (7) get number of jets in current event; create array for bkg scaling, shape(2,4) is to make np.append with new rows possible later (12). get deleted again in (12); minr and array for indices of best combination
-
-			if Evt_ID == nan:
-				continue
-
-			njets = min(int(njets_vec[i]),12)
-			#print(njets)
-			bkg = np.zeros((2,4))
-			minr = 100000.
-			minrH = 10000.
-			best_comb = np.zeros(4)
-
-			
-
-			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
-			for index in pepec:
-				globals()[index] = np.array([])
-
-			for j in range(njets):
-				for index2 in pepec:
-					globals()[index2] = np.append(globals()[index2], df["Jet_" + str(index2) + "[" + str(j) + "]"].values[i])
-
-			minr_bhad = 10
-			minr_blep = 10
-			minr_q1   = 10
-			minr_q2   = 10
-#get Higgs Bjets---------------------
-
-			minr_b1 = 10
-			minr_b2 = 10
-			minr_bhiggs = 10
-			gibtesueberhauptbeidebjets = 0
-
-
-			# Loop over all combinations of 2 b-jets: j for b1, k for b2
-			for j in range(njets):
-				for k in range(njets):
-
-						# look for combination with smallest delta r between jets and genjets, if scale: add all relevant combinations except for right combination to bkg
-					deltar_b1 = ((Eta[j]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j] - GenHiggs_B1_Phi[i]))**2)**0.5
-					deltar_b2 = ((Eta[k]-GenHiggs_B2_Eta[i])**2  + (correct_phi(Phi[k] - GenHiggs_B2_Phi[i]))**2)**0.5
-	 		#if deltar_b1 < 0.3 and deltar_b2 < 0.3:	
-					total_deltarH = deltar_b1 + deltar_b2
-					if(total_deltarH < minrH):
-						minrH = total_deltarH
-						minr_b1   = deltar_b1
-						minr_b2   = deltar_b2
-						J = j
-						K = k
-						gibtesueberhauptbeidebjets = 1
-
-			# if there are no 2 matching bjets (each delta R < 0.3) at all, ignore event
-			if gibtesueberhauptbeidebjets!=1:
-				continue
-			else:
-				counter3=counter3+1
-			gibtesueberhauptbeidebjets = 0
-
-			if deltar_b1 < 0.7 and deltar_b2 < 0.7:
-				counter1=counter1+1
-			if deltar_b1 < 0.5 and deltar_b2 < 0.5:
-				counter2=counter2+1
-			if deltar_b1 < 0.3 and deltar_b2 < 0.3:
-				counter=counter+1
-	
-
-
-#---------------------------
-
-			# (9) Loop over all combinations of 5 jets: j for TopHad_B ; k for TopLep_B ; l for TopHad_Q1 ; m for TopHad_Q2
-			for j in range(njets):
-				for k in range(njets):
-					for l in range(njets):
-						for m in range(njets):
-				#for n in range(njets):
-							# (10) exclude combinations with two identical indices or without B-tags for b-quarks (medium working point)
-							if(j==k or j==l or j==m or k==l or k==m or l==m):# or n==j or n==k or n==l or n==m):
-								continue
-							if(CSV[j]<0.277 or CSV[k]<0.277):
-								continue
-
-							# (11) look for combination with smallest delta r between jets and genjets, if scale: add all relevant combinations except for right combination to bkg
-				# ! ANNAHME: higgsb1 jet = higgsb2jet----------------------------------------------
-
-							deltar_bhad = ((Eta[j]-GenTopHad_B_Eta[i])**2  + (correct_phi(Phi[j] - GenTopHad_B_Phi[i]))**2)**0.5
-							deltar_blep = ((Eta[k]-GenTopLep_B_Eta[i])**2  + (correct_phi(Phi[k] - GenTopLep_B_Phi[i]))**2)**0.5
-							deltar_q1   = ((Eta[l]-GenTophad_Q1_Eta[i])**2 + (correct_phi(Phi[l] - GenTophad_Q1_Phi[i]))**2)**0.5
-							deltar_q2   = ((Eta[m]-GenTophad_Q2_Eta[i])**2 + (correct_phi(Phi[m] - Gentophad_Q2_Phi[i]))**2)**0.5
-						#deltar_b12higgs = ((Eta[n]-GenHiggs_B1_Eta[i])**2 + (correct_phi(Phi[n] - GenHiggs_B1_Phi[i]))**2 + (Eta[n]-GenHiggs_B2_Eta[i])**2 + (correct_phi(Phi[n] - GenHiggs_B2_Phi[i]))**2 )**0.5
-
-							total_deltar = deltar_bhad + deltar_blep + deltar_q1 + deltar_q2 #+ deltar_b12higgs
-
-							if(total_deltar<minr):
-								if self.Scale:
-									bkg = np.append(bkg, [[best_comb[0],best_comb[1],best_comb[2],best_comb[3]]], axis=0)
-								minr = total_deltar
-								best_comb = [j,k,l,m]#,n]
-								minr_bhad   = deltar_bhad
-								minr_blep   = deltar_blep
-								minr_q1	 = deltar_q1
-								minr_q2	 = deltar_q2
-				#minr_bhiggs = deltar_b12higgs
-
-							if (total_deltar >= minr and self.Scale):
-								bkg = np.append(bkg, [[j,k,l,m,n]], axis = 0)
-
-			# (12) delete first two rows
-			bkg = np.delete(bkg, (0,1), axis=0)
-
-				# (13) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be b-tagged
-			n=0
-				# if(minr_bhad<0.3 and minr_blep<0.3 and minr_q1<0.3 and minr_q2<0.3 and (CSV[best_comb[2]]<0.277 or CSV[best_comb[3]]<0.277)):
-			if(minr_bhad<0.1 and minr_blep<0.1 and minr_q1<0.1 and minr_q2<0.1):# and minr_bhiggs<0.3):
-				for index in jets:
-					for index2 in pepec:
-						globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(best_comb[n]) + "]"].values[i]
-					n+=1
-				is_ttbar[i]=1
-
-				reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_Neutrino_4vec = reconstruct_ttbar(df, i,best_comb[0],best_comb[1],best_comb[2],best_comb[3])
-
-				for index in recos:
-					globals()["reco_" + index + "_Pt"][i]   =	 locals()["reco_" + index + "_4vec"].Pt()
-					globals()["reco_" + index + "_Eta"][i]  =	 locals()["reco_" + index + "_4vec"].Eta()
-					globals()["reco_" + index + "_Phi"][i]  =	 locals()["reco_" + index + "_4vec"].Phi()
-					globals()["reco_" + index + "_M"][i]	=	 locals()["reco_" + index + "_4vec"].M()
-					globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
-
-				ttbar_phi[i] = correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi())
-				ttbar_Pt_div_Ht_p_Met[i] = (reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt())
-
-			# (14) short print against long boring time
-			if(i%5000 == 0):
-				print " minR:",minr," minRbHad:", minr_bhad," minRbLep:", minr_blep," minRQ1:", minr_q1," minRQ2:", minr_q2#," minRbHiggs:", minr_bhiggs,"minRb1:",minr_b1,"minRb2:",minr_b2
-
-
-			# (14) for ttbar events: append wrong combination(s) of jets to arrays and df
-			if is_ttbar[i]==1:
-				if self.Scale:
-					for nr in range(len(bkg)):
-						df=df.append(df.iloc[[i]])
-						false_comb = [int(bkg[nr][0]),int(bkg[nr][1]),int(bkg[nr][2]),int(bkg[nr][3])]
-
-						n=0
-						for index in jets:
-							for index2 in pepec:
-								globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-							n+=1
-	
-						reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
-
-						for index in recos:
-							globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
-							globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
-							globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
-							globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
-							globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
-
-						ttbar_phi = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi()))
-						ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
-
-						is_ttbar  = np.append(is_ttbar,0)
-						bkg_scale = np.append(bkg_scale, 1./len(bkg))
-
-
-
-				if self.Scale==0:
-					false_comb = np.zeros(4)
-					j1,k1,l1,m1 = 0,0,0,0
-					df=df.append(df.iloc[[i]])
-					#kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
-					while(CSV[j1]<0.277 or CSV[k1]<0.277 or j1 == k1 or j1==l1 or j1==m1 or k1==l1 or k1==m1 or  l1==m1 or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[2] and m1 ==best_comb[3]) or (j1==best_comb[0] and k1 == best_comb[1] and l1==best_comb[3] and m1 ==best_comb[2])):
-						j1 = randrange(njets)
-						k1 = randrange(njets)
-						l1 = randrange(njets)
-						m1 = randrange(njets)
-					false_comb = [j1,k1,l1,m1]
-
-					n=0
-					for index in jets:
-						for index2 in pepec:
-							globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
-						n+=1
-
-					reco_TopHad_4vec, reco_TopLep_4vec, reco_WHad_4vec, reco_WLep_4vec, reco_lepton_4vec, reco_neutrino_4vec = reconstruct_ttbar(df, i,false_comb[0],false_comb[1],false_comb[2],false_comb[3])
-
-					for index in recos:
-						globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
-						globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
-						globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
-						globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
-						globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
-	
-					ttbar_phi = np.append(ttbar_phi, correct_phi(reco_TopHad_4vec.Phi() - reco_TopLep_4vec.Phi()))
-					ttbar_Pt_div_Ht_p_Met = np.append(ttbar_Pt_div_Ht_p_Met,(reco_TopHad_4vec.Pt() + reco_TopLep_4vec.Pt())/(df["Evt_HT"].values[i] + df["Evt_MET_Pt"].values[i] + reco_lepton_4vec.Pt()))
-
-					is_ttbar = np.append(is_ttbar,0)
-					bkg_scale = np.append(bkg_scale, 1)
-
-
-
-			# (15) Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
-			for u in range(int(r_max*100)):
-				if(minr_bhad<u/100. and minr_blep<u/100. and minr_q1<u/100. and minr_q2<u/100.):
-					numb[u]+=1
-
-				if(i==total_nr-1 and u%10 == 0):
-					print "Anteil verwendeter Daten bei delta R cut ", u/100.," : ", numb[u]/total_nr
-			Rb1[i]=minr_b1
-			Rb2[i]=minr_b2
-			Rb12[i]=minrH
-
-		# counting how often b1-jet==b2-jet and b1 != b2 jet
-		if(J==K):
-			jkcounter = jkcounter+1
-		else:
-			jnkcounter = jnkcounter+1
-	
-		print("Higgs Events mit 1 Jet:")
-		print jkcounter, "von", total_nr, "also", round(jkcounter/float(total_nr)*100,1),"%"
-		print("Higgs Events mit 2 Jets:")
-		print jnkcounter, "von", total_nr, "also", round(jnkcounter/float(total_nr)*100,1),"%"
-		#print counter1,"mal delta R von b1 und b2 unter 0,7"
-		#print counter2,"mal delta R von b1 und b2 unter 0,5"
-		#print counter,"mal delta R von b1 und b2 unter 0,3"
-		print"b1 und b2 unter 0.3:", counter3, "mal, also",round(counter3/float(total_nr)*100,1),"%"
-
-
-		#---Histogramme Higgs delta R
-		#plt.hist(Rb1,bins=200,range=(0,3))	#minR bis hoechstens 0.3
-		#plt.show()
-#		plt.hist(Rb2,bins=200,range=(0,3))
-#		plt.show()
-#		plt.savefig("DeltaR2bjets.pdf")
-#		plt.hist(Rb12,bins=200,range=(0,3))
-#		plt.show()
-#		plt.savefig("DeltaRgesamtHbjets.pdf")
-
-		x = np.arange(0,r_max,0.01)
-		plt.plot(x, numb/total_nr)
-		plt.title("Anteil der in der Aufbereitung beruecksichtigten Daten")
-		plt.xlabel("akzeptiertes maximales $\Delta$R")
-		plt.ylabel("Verhaeltnis akzeptierter Ereignisse zur Gesamtzahl an Ereignissen")
-		plt.grid()
-		plt.savefig("ratio_neu_btag.pdf")
-
-		# (16) delete all variables except for:
-		df_new = pd.DataFrame()
-		variables_toadd  = ["N_Jets", "N_BTagsM", "Evt_Run", "Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons",
-"Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]", "Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
-
-		for ind in variables_toadd:
-			df_new[ind] = df[ind].values
-	
-		# (17) another short print for control
-		#print df.shape, len(globals()["TopHad_B_" + index2]), len(is_ttbar)
-
-		# (18) add correct and false combinations with their tags to df
-		entr=0
-		for index in jets:
-			for index2 in pepec:
-				df[index + "_" + index2] = globals()[index + "_" + index2]
-				entr+=1
-	
-	
-		for index in recos:
-			for index2 in pepm:
-				df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
-				entr+=1
-	
-		
-	
-
-	
-		df["bkg_scale"] = bkg_scale
-		df["Evt_is_ttbar"]  = is_ttbar
-		df["ttbar_phi"] = ttbar_phi
-		df["ttbar_pt_div_ht_p_met"] = ttbar_Pt_div_Ht_p_Met
-	
-			# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
-		df.drop(df.columns[:-(entr+4)],inplace = True, axis = 1)
-	
-		for ind in variables_toadd:
-			df[ind] = df_new[ind].values
-	
-	
-			# (20) delete combinations of events without certain ttbar event
-		i,j=0,0
-		while(i<total_nr):
-			if df["Evt_is_ttbar"].values[i]==0:
-				df=df.drop(df.index[i],axis=0)
-				total_nr -= 1
-				j+=1
-			else:
-				i+=1
-				j+=1
-		print df.shape, df.columns
-
-		return df
 
 ###########################################################################
 
@@ -1133,12 +763,11 @@ class Dataset:
 		
 
 		# (1) total number of events in current df
-		total_nr  = df["N_Jets"].size
+		total_nr  = df.shape[0]
 		print total_nr, "Events in file."
 
 		# array containing the number of jets per event
 		njets_vec = df["N_Jets"].values
-		print(njets_vec)
 
 		# (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
 		r_max = 1.1
@@ -1171,54 +800,32 @@ class Dataset:
 
 		is_Higgs = np.zeros(total_nr)
 		bkg_scale = np.zeros(total_nr)+1
-#		Rb1 = np.zeros(total_nr)
-#		Rb2 = np.zeros(total_nr)
-#		Rb12 = np.zeros(total_nr)
 		DeltaR = np.zeros(total_nr)
 		DeltaEta = np.zeros(total_nr)
 		DeltaPhi = np.zeros(total_nr)
+		boost1_Pt = np.zeros(total_nr)
+		boost_delta_Pt = np.zeros(total_nr)
+		boost1_Eta = np.zeros(total_nr)
+		boost_delta_Eta = np.zeros(total_nr)
+		boost1_Phi = np.zeros(total_nr)
+		boost_delta_Phi = np.zeros(total_nr)
+		boost1_E = np.zeros(total_nr)
+		boost_delta_E = np.zeros(total_nr)
 
 		jkcounter = 0
 		jnkcounter = 0
 		nancounter = 0
 
-#		Ptbkg = np.zeros(total_nr)
-#		Pthiggs = np.zeros(total_nr)
-#		GenPt = np.zeros(total_nr)
-#
-#		Etabkg = np.full(total_nr,10.)
-#		Etahiggs = np.full(total_nr,10.)
-#		GenEta = np.full(total_nr,10.)
-#
-#		Pt1bkg = np.zeros(total_nr)
-#		Pt1higgs = np.zeros(total_nr)
-#		GenPt1 = np.zeros(total_nr)
-#
-#		Eta1bkg = np.full(total_nr,10.)
-#		Eta1higgs = np.full(total_nr,10.)
-#		GenEta1 = np.full(total_nr,10.)
 
 		# (6) loop over all events
 #
 		for i in range(total_nr):	
 
 
-#			if df["Evt_ID"].values[i]%1 != 0:
-#				nancounter +=1
-#				print df.keys(),df.values[i]
-#				for k,v in zip(list(df.keys()),list(df.values[i])):
-#					print k,v
-#				raw_input()
-#				continue
-				
-
 			# (7) get number of jets in current event; create array for bkg scaling, shape(2,2) is to make np.append with new rows possible later (12). get deleted again in (12); minr and 			array for indices of best combination
 
 			njets = min(int(njets_vec[i]),12)
-#			minrH = 10000.
 
-#			if njets < 4:
-#				continue
 
 			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
 			for index in pepec:
@@ -1250,21 +857,12 @@ class Dataset:
 					minr_b2   = deltar_b2
 					K = k
 					best_comb[1]= k
+			if K == J:
+				continue
 			DeltaR[i] = ((Eta[J]-Eta[K])**2  + (correct_phi(Phi[J] - Phi[K]))**2)**0.5
 			DeltaEta[i] = abs(Eta[J]-Eta[K])
 			DeltaPhi[i] = abs(Phi[J]-Phi[K])
-#			minrH = minr_b1 + minr_b2
 
-#			Rb1[i] = minr_b1
-#			Rb2[i] = minr_b2
-#			Rb12[i] = minrH
-
-			# if there are no 2 matching bjets (each delta R < 0.3) at all, ignore event
-			#if gibtesueberhauptbeidebjets!=1:
-			#	continue
-			#else:
-			#	counter3=counter3+1
-			#gibtesueberhauptbeidebjets = 0
 
 
 			# (13) short print against long boring time
@@ -1275,6 +873,8 @@ class Dataset:
 			n = 0
 			# (14) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be 					b-tagged
 	 		if minr_b1 < 0.4 and minr_b2 < 0.4:	
+		
+
 				for index in jets:
 					for index2 in pepec:
 						globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(int(best_comb[n])) + "]"].values[i]
@@ -1288,19 +888,157 @@ class Dataset:
 					globals()["reco_" + index + "_Eta"][i]  =	 locals()["reco_" + index + "_4vec"].Eta()
 					globals()["reco_" + index + "_Phi"][i]  =	 locals()["reco_" + index + "_4vec"].Phi()
 					globals()["reco_" + index + "_M"][i]	=	 locals()["reco_" + index + "_4vec"].M()
-					globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
+					globals()["reco_" + index + "_logM"][i] =    log(locals()["reco_" + index + "_4vec"].M())
+				
 
 
-#				Pthiggs[i] = globals()["reco_Higgs_Pt"][i]
-#				GenPt[i] = df["GenHiggs_Pt"].values[i]
-#				Etahiggs[i] = globals()["reco_Higgs_Eta"][i]
-#				GenEta[i] = df["GenHiggs_Eta"].values[i]
-#				Eta1higgs[i] = df["Jet_Eta["+str(J)+"]"].values[i]
-#				GenEta1[i] = df["GenHiggs_B1_Eta"].values[i]
-#				Pt1higgs[i] = df["Jet_Pt["+str(J)+"]"].values[i]
-#				GenPt1[i] = df["GenHiggs_B1_Pt"].values[i]
+
+				globals()["Higgs_B1_4vec"] = ROOT.TLorentzVector()
+				globals()["Higgs_B1_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(best_comb[0]))+"]"].values[i],df["Jet_Eta[" + str(int(best_comb[0]))+"]"].values[i],
+				df["Jet_Phi[" + str(int(best_comb[0]))+"]"].values[i],df["Jet_E[" + str(int(best_comb[0]))+"]"].values[i])
+				
+				globals()["Higgs_B2_4vec"] = ROOT.TLorentzVector()
+				globals()["Higgs_B2_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(best_comb[1]))+"]"].values[i],df["Jet_Eta[" + str(int(best_comb[1]))+"]"].values[i],
+				df["Jet_Phi[" + str(int(best_comb[1]))+"]"].values[i],df["Jet_E[" + str(int(best_comb[1]))+"]"].values[i])
 
 
+
+				globals()["Higgs_B1_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+				globals()["Higgs_B2_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+
+
+				boost1_Pt[i] = globals()["Higgs_B1_4vec"].Pt()
+				boost_delta_Pt[i] = abs(globals()["Higgs_B1_4vec"].Pt()-globals()["Higgs_B2_4vec"].Pt())
+				boost1_Eta[i] = globals()["Higgs_B1_4vec"].Eta()
+				boost_delta_Eta[i] = abs(globals()["Higgs_B1_4vec"].Eta()-globals()["Higgs_B2_4vec"].Eta())
+				boost1_Phi[i] = globals()["Higgs_B1_4vec"].Phi()
+				boost_delta_Phi[i] = correct_phi(globals()["Higgs_B1_4vec"].Phi()-globals()["Higgs_B2_4vec"].Phi())
+				boost1_E[i] = globals()["Higgs_B1_4vec"].E()
+				boost_delta_E[i] = abs(globals()["Higgs_B1_4vec"].E()-globals()["Higgs_B2_4vec"].E())
+
+################################
+				#bkg mit b tagging 
+	
+
+
+				false_comb = np.zeros(6)
+				j1 = randrange(njets)
+				k1 = randrange(njets)
+				j2 = randrange(njets)
+				k2 = randrange(njets)
+				j3 = randrange(njets)
+				k3 = randrange(njets)
+				gotbtag_l = 0
+				gotbtag_m = 0
+				gotbtag_t = 0
+				CSVl = 0.277#?
+				CSVm = 0.277#?
+				CSVt = 0.277#?
+	
+				#kombis suchen, die sich von bester kombi unterscheiden (beachte jets aus dem w duerfen auch nicht vertauschen) und selbst den anforderungen genuegen
+				if is_Higgs[i]==1:
+
+					for ind in range(njets):
+						if CSV[ind]>CSVl and ind != bestcomb[0] and ind != bestcomb[1]:
+							gotbtag_l+=1
+							if CSV[ind]>CSVm and ind != bestcomb[0] and ind != bestcomb[1]:
+								gotbtag_m+=1
+								if CSV[ind]>CSVt and ind != bestcomb[0] and ind != bestcomb[1]:
+									gotbtag_t+=1
+					if gotbtag_l >= 2:
+						df=df.append(df.iloc[[i]])	
+						while (j1 == best_comb[0] or j1 == best_comb[1] or CSV[j1]<CSVl):
+							j1 = randrange(njets)	
+						while (k1 == best_comb[0] or k1 == best_comb[1] or k1 == j1 or CSV[k1]<CSVl):
+							k1 = randrange(njets)
+
+						if gotbtag_m >= 2:	
+							df=df.append(df.iloc[[i]])
+							while (j2 == best_comb[0] or j2 == best_comb[1] or CSV[j2]<CSVm):
+								j2 = randrange(njets)	
+							while (k2 == best_comb[0] or k2 == best_comb[1] or k2 == j2 or CSV[k2]<CSVm):
+								k2 = randrange(njets)
+
+							if gotbtag_t >= 2:	
+								df=df.append(df.iloc[[i]])
+								while (j3 == best_comb[0] or j3 == best_comb[1] or CSV[j3]<CSVt):
+									j3 = randrange(njets)	
+								while (k3 == best_comb[0] or k3 == best_comb[1] or k3 == j3 or CSV[k3]<CSVt):
+									k3 = randrange(njets)
+				
+				else:
+					for ind in range(njets):
+						if CSV[ind]>CSVl:
+							gotbtag_l+=1
+							if CSV[ind]>CSVm:
+								gotbtag_m+=1
+								if CSV[ind]>CSVt:
+									gotbtag_t+=1
+					if gotbtag_l >= 2:
+						while (CSV[j1]<CSVl):
+							j1 = randrange(njets)
+						while (CSV[k1]<CSVl):
+							k1 = randrange(njets)
+						if gotbtag_m >= 2:
+							while (CSV[j2]<CSVm):
+								j2 = randrange(njets)
+							while (CSV[k2]<CSVm):
+								k2 = randrange(njets)
+							if gotbtag_t >= 2:
+								while (CSV[j3]<CSVt):
+									j3 = randrange(njets)
+								while (CSV[k3]<CSVl):
+									k3 = randrange(njets)
+
+				false_comb = [j1,k1,j2,k2,j3,k3]
+				n=0
+				for index in jets:
+					for index2 in pepec:
+						globals()[index + "_" + index2] = np.append(globals()[index + "_" + index2],(df["Jet_" +str(index2) + "[" + str(false_comb[n]) + "]"].values[i]))
+					n+=1
+
+				reco_Higgs_4vec = reconstruct_Higgs(df, i,false_comb[0],false_comb[1])
+
+				for index in recos:
+					globals()["reco_" + index + "_Pt"]   = np.append(globals()["reco_" + index + "_Pt"],	   locals()["reco_" + index + "_4vec"].Pt())
+					globals()["reco_" + index + "_Eta"]  = np.append(globals()["reco_" + index + "_Eta"],	  locals()["reco_" + index + "_4vec"].Eta())
+					globals()["reco_" + index + "_Phi"]  = np.append(globals()["reco_" + index + "_Phi"],	  locals()["reco_" + index + "_4vec"].Phi())
+					globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
+					globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
+
+
+				globals()["Higgs_B1_4vec"] = np.append(globals()["Higgs_B1_4vec"],	globals()["Higgs_B1_4vec"].Boost(-reco_Higgs_4vec.X(),-reco_Higgs_4vec.Y(), -reco_Higgs_4vec.Z()))
+				globals()["Higgs_B2_4vec"] = np.append(globals()["Higgs_B2_4vec"],	globals()["Higgs_B2_4vec"].Boost(-reco_Higgs_4vec.X(),-reco_Higgs_4vec.Y(), -reco_Higgs_4vec.Z()))
+
+				is_Higgs = np.append(is_Higgs,0)
+				bkg_scale = np.append(bkg_scale, 1)
+
+				false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
+				false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
+				DeltaR = np.append(DeltaR,((Eta[j1]-Eta[k1])**2  + (correct_phi(Phi[j1] - Phi[k1]))**2)**0.5)
+				DeltaEta = np.append(DeltaEta,abs(Eta[j1]-Eta[k1]))
+				DeltaPhi = np.append(DeltaPhi,abs(Phi[j1]-Phi[k1]))
+
+				globals()["Higgs_B1_4vec"] = ROOT.TLorentzVector()
+				globals()["Higgs_B1_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(false_comb[0]))+"]"].values[i],df["Jet_Eta[" + str(int(false_comb[0]))+"]"].values[i],df["Jet_Phi[" + str(int(false_comb[0]))+"]"].values[i],df["Jet_E[" + str(int(false_comb[0]))+"]"].values[i])
+				globals()["Higgs_B2_4vec"] = ROOT.TLorentzVector()
+				globals()["Higgs_B2_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(false_comb[1]))+"]"].values[i],df["Jet_Eta[" + str(int(false_comb[1]))+"]"].values[i],df["Jet_Phi[" + str(int(false_comb[1]))+"]"].values[i],df["Jet_E[" + str(int(false_comb[1]))+"]"].values[i])
+
+				globals()["Higgs_B1_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+				globals()["Higgs_B2_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+
+
+				boost1_Pt = np.append(boost1_Pt,globals()["Higgs_B1_4vec"].Pt())
+				boost_delta_Pt = np.append(boost_delta_Pt,abs(globals()["Higgs_B1_4vec"].Pt()-globals()["Higgs_B2_4vec"].Pt()))
+				boost1_Eta = np.append(boost1_Eta,globals()["Higgs_B1_4vec"].Eta())
+				boost_delta_Eta = np.append(boost_delta_Eta,abs(globals()["Higgs_B1_4vec"].Eta()-globals()["Higgs_B2_4vec"].Eta()))
+				boost1_Phi = np.append(boost1_Phi,globals()["Higgs_B1_4vec"].Phi())
+				boost_delta_Phi = np.append(boost_delta_Phi,correct_phi(globals()["Higgs_B1_4vec"].Phi()-globals()["Higgs_B2_4vec"].Phi()))
+				boost1_E = np.append(boost1_E,globals()["Higgs_B1_4vec"].E())
+				boost_delta_E = np.append(boost_delta_E,abs(globals()["Higgs_B1_4vec"].E()-globals()["Higgs_B2_4vec"].E()))
+
+
+################################
 				# counting how often b1-jet==b2-jet and b1 != b2 jet
 				if(J==K):
 					jkcounter=jkcounter+1
@@ -1376,21 +1114,41 @@ class Dataset:
 						globals()["reco_" + index + "_M"]	= np.append(globals()["reco_" + index + "_M"],		locals()["reco_" + index + "_4vec"].M())
 						globals()["reco_" + index + "_logM"] = np.append(globals()["reco_" + index + "_logM"], log(locals()["reco_" + index + "_4vec"].M()))
 
+
+					globals()["Higgs_B1_4vec"] = np.append(globals()["Higgs_B1_4vec"],	globals()["Higgs_B1_4vec"].Boost(-reco_Higgs_4vec.X(),-reco_Higgs_4vec.Y(), -reco_Higgs_4vec.Z()))
+					globals()["Higgs_B2_4vec"] = np.append(globals()["Higgs_B2_4vec"],	globals()["Higgs_B2_4vec"].Boost(-reco_Higgs_4vec.X(),-reco_Higgs_4vec.Y(), -reco_Higgs_4vec.Z()))
+
 					is_Higgs = np.append(is_Higgs,0)
 					bkg_scale = np.append(bkg_scale, 1)
 
-#					Ptbkg[i] = globals()["reco_Higgs_Pt"][total_nr+jkcounter+jnkcounter-1]
-#					Etabkg[i] = globals()["reco_Higgs_Eta"][total_nr+jkcounter+jnkcounter-1]
-#					Pt1bkg[i] = df["Jet_Pt["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
-#					Eta1bkg[i] = df["Jet_Eta["+str(j1)+"]"].values[jkcounter+jnkcounter-1]
+
 					false_dr1 = ((Eta[j1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[j1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					false_dr2 = ((Eta[k1]-GenHiggs_B1_Eta[i])**2  + (correct_phi(Phi[k1] - GenHiggs_B1_Phi[i]))**2)**0.5
 					DeltaR = np.append(DeltaR,((Eta[j1]-Eta[k1])**2  + (correct_phi(Phi[j1] - Phi[k1]))**2)**0.5)
 					DeltaEta = np.append(DeltaEta,abs(Eta[j1]-Eta[k1]))
-					DeltaPhi = np.append(DeltaPhi,abs(Phi[j1-Phi[k1]))
-#					Rb1 = np.append(Rb1,0)
-#					Rb2 = np.append(Rb2,0)
-#					Rb12 = np.append(Rb12,0)
+					DeltaPhi = np.append(DeltaPhi,abs(Phi[j1]-Phi[k1]))
+
+
+					ind = 0
+					for index in ["Higgs_B1", "Higgs_B2"]:
+						globals()[index + "_4vec"] = ROOT.TLorentzVector()
+						globals()[index + "_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(false_comb[ind]))+"]"].values[i],df["Jet_Eta[" + str(int(false_comb[ind]))+"]"].values[i],
+						df["Jet_Phi[" + str(int(false_comb[ind]))+"]"].values[i],df["Jet_E[" + str(int(false_comb[ind]))+"]"].values[i])
+						ind+=1
+
+					globals()["Higgs_B1_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+					globals()["Higgs_B2_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+
+					boost1_Pt = np.append(boost1_Pt,globals()["Higgs_B1_4vec"].Pt())
+					boost_delta_Pt = np.append(boost_delta_Pt,abs(globals()["Higgs_B1_4vec"].Pt()-globals()["Higgs_B2_4vec"].Pt()))
+					boost1_Eta = np.append(boost1_Eta,globals()["Higgs_B1_4vec"].Eta())
+					boost_delta_Eta = np.append(boost_delta_Eta,abs(globals()["Higgs_B1_4vec"].Eta()-globals()["Higgs_B2_4vec"].Eta()))
+					boost1_Phi = np.append(boost1_Phi,globals()["Higgs_B1_4vec"].Phi())
+					boost_delta_Phi = np.append(boost_delta_Phi,correct_phi(globals()["Higgs_B1_4vec"].Phi()-globals()["Higgs_B2_4vec"].Phi()))
+					boost1_E = np.append(boost1_E,globals()["Higgs_B1_4vec"].E())
+					boost_delta_E = np.append(boost_delta_E,abs(globals()["Higgs_B1_4vec"].E()-globals()["Higgs_B2_4vec"].E()))
+
+
 
 
 
@@ -1499,7 +1257,7 @@ class Dataset:
 
 		for ind in variables_toadd:
 			df_new[ind] = df[ind].values
-		#print "df shape",df.shape,"df columns", df.columns,len(globals()["Higgs_B1_Pt"])
+		
 		# (18) add correct and false combinations with their tags to df
 		entr=0
 		for index in jets:
@@ -1512,9 +1270,7 @@ class Dataset:
 				df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
 				entr+=1
 
-#		df["DeltaR_B1"] = Rb1
-#		df["DeltaR_B2"] = Rb2
-#		df["DeltaR_B1_B2"] = Rb12
+
 		df["DeltaR"] = DeltaR
 		df["bkg_scale"] = bkg_scale
 		df["Evt_is_Higgs"]  = is_Higgs
@@ -1523,6 +1279,17 @@ class Dataset:
 		df["Delta_Eta"] = DeltaEta
 		df["Delta_Phi"] = DeltaPhi
 		entr+=5
+
+		df["Boosted_B1_Pt"] = boost1_Pt
+		df["Boosted_Delta_Pt"] = boost_delta_Pt
+		df["Boosted_B1_Eta"] = boost1_Eta
+		df["Boosted_Delta_Eta"] = boost_delta_Eta
+		df["Boosted_B1_Phi"] = boost1_Phi
+		df["Boosted_Delta_Phi"] = boost_delta_Phi
+		df["Boosted_B1_E"] = boost1_E
+		df["Boosted_Delta_E"] = boost_delta_E
+		entr+=8
+
 	
 		# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
 		df.drop(df.columns[:-(entr)],inplace = True, axis = 1)
@@ -1534,11 +1301,7 @@ class Dataset:
 		# (20) delete combinations of events without certain ttH event
 		i,j=0,0
 		while(i<total_nr):
-			if df["Evt_ID"].values[i]%1!=0:
-				df.drop(df.index[i],axis=0)
-				total_nr -= 1
-				j+=1
-			elif df["Evt_is_Higgs"].values[i]==0:
+			if df["Evt_is_Higgs"].values[i]==0:
 				df=df.drop(df.index[i],axis=0)
 				total_nr -= 1
 				j+=1
@@ -1549,6 +1312,225 @@ class Dataset:
 
 		return df
 ###########################################################################
+###########################################################################
+#            Background!
+	def findbestTopBs(self,df):
+		
+		print("getting Top Bjets.....")
+		# (1) total number of events in current df
+		total_nr  = df.shape[0]
+		print total_nr,"Events in file"
+
+		# array containing the number of jets per event
+		njets_vec = df["N_Jets"].values
+
+		# (2) just for plot that shows amount of events accepted as ttbar: x-axis: acceptance-niveau of delta r between jets and gen blep/bhad/q1/q2 (); r_max: max of x-axis
+		r_max = 1.1
+		numb = np.zeros(int(r_max*100))
+		numbbkg = np.zeros(int(r_max*100))
+
+		# (3) get gen-info of bjets needed for calculation of delta r at
+		TopHad_B_Phi = df["GenTopHad_B_Phi"].values
+		TopHad_B_Eta = df["GenTopHad_B_Eta"].values
+		TopLep_B_Phi = df["GenTopLep_B_Phi"].values
+		TopLep_B_Eta = df["GenTopLep_B_Eta"].values
+
+
+		# (4) arrays for better clarity in (5),...; jets and reconstructed particles
+		jets  = ["Higgs_B1","Higgs_B2"]
+		pepec = ["Pt", "Eta", "Phi", "E", "CSV"]
+
+		recos = ["Higgs"]
+		pepm  = ["Pt", "Eta", "Phi", "M", "logM"]
+
+		# (5) create arrays: TopHad_B_Pt etc. for all jets and reconstructed particles get filled in (13); information about whether an event is accepted as ttbar (is_ttbar); scaling-factor 			if all wrong combinations shall be considered as background if only one event: remains 1(bkg_scale)
+		for index in jets:
+			for index2 in pepec:
+				globals()[index + "_" + index2] = np.zeros(total_nr)
+
+		for index in recos:
+			for index2 in pepm:
+				globals()["reco_" + index + "_" + index2] = np.zeros(total_nr)
+
+
+		is_Higgs = np.zeros(total_nr)
+		is_Top = np.zeros(total_nr)
+
+		DeltaR = np.zeros(total_nr)
+		DeltaEta = np.zeros(total_nr)
+		DeltaPhi = np.zeros(total_nr)
+		boost1_Pt = np.zeros(total_nr)
+		boost_delta_Pt = np.zeros(total_nr)
+		boost1_Eta = np.zeros(total_nr)
+		boost_delta_Eta = np.zeros(total_nr)
+		boost1_Phi = np.zeros(total_nr)
+		boost_delta_Phi = np.zeros(total_nr)
+		boost1_E = np.zeros(total_nr)
+		boost_delta_E = np.zeros(total_nr)
+
+
+
+		for i in range(total_nr):	
+
+
+			# (7) get number of jets in current event; create array for bkg scaling, shape(2,2) is to make np.append with new rows possible later (12). get deleted again in (12); minr and 			array for indices of best combination
+
+			njets = min(int(njets_vec[i]),12)
+
+			# (8) create arrays for entries of pepec and loop over all jets: df to arrays with len(njets), i.e. Jet_Pt (contains Pt info of all jets of this event)
+			for index in pepec:
+				globals()[index] = np.array([])
+
+			for j in range(njets):
+				for index2 in pepec:
+					globals()[index2] = np.append(globals()[index2], df["Jet_" + str(index2) + "[" + str(j) + "]"].values[i])
+
+#get Top Bjets---------------------
+
+			minr_b1 = 10
+			minr_b2 = 10
+			best_comb = np.zeros(2)
+
+
+			# Loop over all combinations of 2 b-jets: j for b1, k for b2
+			for j in range(njets):
+				# look for combination with smallest delta r between jets and genjets, if scale: add all relevant combinations except for right combination to bkg
+				deltar_b1 = ((Eta[j]-TopHad_B_Eta[i])**2  + (correct_phi(Phi[j] - TopHad_B_Phi[i]))**2)**0.5
+				if(deltar_b1 < minr_b1):
+					minr_b1   = deltar_b1
+					J = j
+					best_comb[0]= j
+			for k in range(njets):
+				deltar_b2 = ((Eta[k]-TopLep_B_Eta[i])**2  + (correct_phi(Phi[k] - TopLep_B_Phi[i]))**2)**0.5
+				if(deltar_b2 < minr_b2):
+					minr_b2   = deltar_b2
+					K = k
+					best_comb[1]= k
+			#if K == J:
+			#	continue
+			DeltaR[i] = ((Eta[J]-Eta[K])**2  + (correct_phi(Phi[J] - Phi[K]))**2)**0.5
+			DeltaEta[i] = abs(Eta[J]-Eta[K])
+			DeltaPhi[i] = correct_phi(Phi[J]-Phi[K])
+
+
+			# (13) short print against long boring time
+			if(i%1000 == 0):
+				print "Event:",i," minr_b1:", minr_b1," minr_b2:", minr_b2
+
+			n = 0
+			# (14) only combinations with smallest total_deltar and each delta r <0.3 are ttbar-events (~50% of all events pass this); reconstruct further particles, quark jets not to be 					b-tagged
+	 		if minr_b1 < 0.4 and minr_b2 < 0.4:	
+		
+
+				for index in jets:
+					for index2 in pepec:
+						globals()[index + "_" + index2][i] = df["Jet_" + str(index2) + "[" + str(int(best_comb[n])) + "]"].values[i]
+					n+=1
+				is_Top[i]=1
+
+				reco_Higgs_4vec = reconstruct_Higgs(df, i,best_comb[0],best_comb[1])
+
+	
+				for index in recos:
+					globals()["reco_" + index + "_Pt"][i]   =	 locals()["reco_" + index + "_4vec"].Pt()
+					globals()["reco_" + index + "_Eta"][i]  =	 locals()["reco_" + index + "_4vec"].Eta()
+					globals()["reco_" + index + "_Phi"][i]  =	 locals()["reco_" + index + "_4vec"].Phi()
+					globals()["reco_" + index + "_M"][i]	=	 locals()["reco_" + index + "_4vec"].M()
+					globals()["reco_" + index + "_logM"][i] = log(locals()["reco_" + index + "_4vec"].M())
+				
+
+				ind = 0
+				for index in ["Higgs_B1", "Higgs_B2"]:
+					globals()[index + "_4vec"] = ROOT.TLorentzVector()
+					globals()[index + "_4vec"].SetPtEtaPhiE(df["Jet_Pt[" + str(int(best_comb[ind]))+"]"].values[i],df["Jet_Eta[" + str(int(best_comb[ind]))+"]"].values[i],
+					df["Jet_Phi[" + str(int(best_comb[ind]))+"]"].values[i],df["Jet_E[" + str(int(best_comb[ind]))+"]"].values[i])
+					ind+=1
+
+				globals()["Higgs_B1_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+				globals()["Higgs_B2_4vec"].Boost(reco_Higgs_4vec.BoostVector())
+
+				boost1_Pt[i] = globals()["Higgs_B1_4vec"].Pt()
+				boost_delta_Pt[i] = abs(globals()["Higgs_B1_4vec"].Pt()-globals()["Higgs_B2_4vec"].Pt())
+				boost1_Eta[i] = globals()["Higgs_B1_4vec"].Eta()
+				boost_delta_Eta[i] = abs(globals()["Higgs_B1_4vec"].Eta()-globals()["Higgs_B2_4vec"].Eta())
+				boost1_Phi[i] = globals()["Higgs_B1_4vec"].Phi()
+				boost_delta_Phi[i] = correct_phi(globals()["Higgs_B1_4vec"].Phi()-globals()["Higgs_B2_4vec"].Phi())
+				boost1_E[i] = globals()["Higgs_B1_4vec"].E()
+				boost_delta_E[i] = abs(globals()["Higgs_B1_4vec"].E()-globals()["Higgs_B2_4vec"].E())
+
+
+			
+
+#---------------------------
+
+
+			# (15) Anteil Daten, die mitgenommen werden in Abhaengigkeit der hoehe des delta r cuttes auf die einzelnen jets
+			for u in range(int(r_max*100)):
+				if(minr_b1<u/100. and minr_b2<u/100.):
+					numb[u]+=1
+				
+				if(i==total_nr-1 and u%10 == 0):
+					print "Anteil verwendeter Daten bei Delta R cut ", u/100.," : ", numb[u]/total_nr*100, "%"
+
+
+		
+		# (16) delete all variables except for:
+		df_new = pd.DataFrame()
+		variables_toadd  = ["GenHiggs_B1_Pt","GenHiggs_B1_E","GenHiggs_B1_Phi","GenHiggs_B1_Eta","GenHiggs_B2_Pt","GenHiggs_B2_E","GenHiggs_B2_Phi","GenHiggs_B2_Eta","N_Jets", "N_BTagsM", "Evt_Run","Evt_Lumi", "Evt_ID", "Evt_MET_Pt", "Evt_MET_Phi", "Weight_GEN_nom", "Weight_XS", "Weight_CSV", "N_LooseElectrons", "N_TightMuons","Muon_Pt[0]", "Muon_Eta[0]", "Muon_Phi[0]","Muon_E[0]","Electron_Pt[0]","Electron_Eta[0]","Electron_Phi[0]","Electron_E[0]","N_LooseMuons", "N_TightElectrons", "Evt_Odd"]
+
+		for ind in variables_toadd:
+			df_new[ind] = df[ind].values
+
+		entr=0
+		for index in jets:
+			for index2 in pepec:
+				df[index + "_" + index2] = globals()[index + "_" + index2]
+				entr+=1
+
+		for index in recos:
+			for index2 in pepm:
+				df["reco_" + index + "_" + index2]   = globals()["reco_" + index + "_" + index2]
+				entr+=1
+
+		df["DeltaR"] = DeltaR
+		#df["bkg_scale"] = bkg_scale
+		df["Evt_is_Higgs"]  = is_Higgs
+		df["Delta_Eta"] = DeltaEta
+		df["Delta_Phi"] = DeltaPhi
+		entr+=4
+
+		df["Boosted_B1_Pt"] = boost1_Pt
+		df["Boosted_Delta_Pt"] = boost_delta_Pt
+		df["Boosted_B1_Eta"] = boost1_Eta
+		df["Boosted_Delta_Eta"] = boost_delta_Eta
+		df["Boosted_B1_Phi"] = boost1_Phi
+		df["Boosted_Delta_Phi"] = boost_delta_Phi
+		df["Boosted_B1_E"] = boost1_E
+		df["Boosted_Delta_E"] = boost_delta_E
+		entr+=8
+
+
+		# (19) drop all columns except for those added just before and add variables_toadd again (easier than prooving every column if it is in variables_toadd before dropping)
+		df.drop(df.columns[:-(entr)],inplace = True, axis = 1)
+
+		for ind in variables_toadd:
+			df[ind] = df_new[ind].values
+
+		# (20) delete combinations of events without certain ttH event
+		i,j=0,0
+		while(i<total_nr):
+			if is_Top[j]==0:
+				df=df.drop(df.index[i],axis=0)
+				total_nr -= 1
+				j+=1
+			else:
+				i+=1
+				j+=1
+
+
+		return df
+###########################################################################
+
 
 # function to append a list with sample, label and normalization_weight to a list samples
 def createSampleList(sList, sample, label = None, nWeight = 1):

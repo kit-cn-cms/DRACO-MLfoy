@@ -22,7 +22,15 @@ variables["ge4j_ge3t"] = [
 	"GenHiggs_B2_Phi",
 	"GenHiggs_B2_Eta",
 	#"DeltaR_B1",
-	"DeltaR"
+	"DeltaR",
+	"Boosted_B1_Pt",
+	"Boosted_Delta_Pt",
+	"Boosted_B1_E",
+	"Boosted_Delta_E",
+	"Boosted_B1_Eta",
+	"Boosted_Delta_Eta",
+	"Boosted_B1_Phi",
+	"Boosted_Delta_Phi",
 	]
 
 variables["ge4j_ge2t"] = [
