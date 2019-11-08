@@ -53,7 +53,10 @@ dnn = DNN.GAN(
 
 
 dnn.build_model(config=options.getNetConfig() ,penalty=10)
+
 dnn.train_model()
+
+dnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
 
 # dnn.eval_model()

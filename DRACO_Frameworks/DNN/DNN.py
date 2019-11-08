@@ -1072,7 +1072,6 @@ class GAN(DNN):
        #self.trained_model = self.class_model
         self.predict_event_query("Evt_ID==42702963")
         self.model = self.class_model
-        self.save_model()
 
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
