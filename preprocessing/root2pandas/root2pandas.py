@@ -308,7 +308,8 @@ class Dataset:
                    print(str(tr)+" has no entries - skipping file")
                    continue
 
-                #df = df.reset_index(1, drop = True)
+                # convert to dataframe
+                df = tree.pandas.df(self.variables)
 
                 if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
                     df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
@@ -359,7 +360,7 @@ class Dataset:
                 n_entries += df.shape[0]
 
                 # if number of entries exceeds max threshold, add labels and mem and save dataframe
-                if (n_entries > self.maxEntries or f == ntuple_files[-1]):
+                if (n_entries > self.maxEntries or f == files[-1]):
                     print("*"*50)
                     print("max entries reached ...")
 
@@ -367,7 +368,7 @@ class Dataset:
                     concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                     # add indexing
-                    concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
+                    concat_df.set_index([self.varName_Run, self.varName_LumiBlock, self.varName_Event], inplace=True, drop=True)
 
                     # add MEM variables
                     if self.addMEM:
@@ -377,7 +378,7 @@ class Dataset:
                     concat_df = self.removeTriggerVariables(concat_df)
 
                     # write data to file
-                    self.createDatasets(concat_df, sample.categories.categories)
+                    self.createDatasets(concat_df, sample.categories.categories, chunkNumber)
                     print("*"*50)
 
                     # reset counters
@@ -484,6 +485,10 @@ class Dataset:
         
             with pd.HDFStore(outFile, "a") as store:
                 for f in threadFiles:
+                    print("merging file {}".format(f))
+                    if not os.path.exists(f): 
+                        print("\t-> does not exist?!")
+                        continue
                     store.append("data", pd.read_hdf(f), index = False)
                     os.remove(f)
                 print("number of events: {}".format(store.get_storer("data").nrows))

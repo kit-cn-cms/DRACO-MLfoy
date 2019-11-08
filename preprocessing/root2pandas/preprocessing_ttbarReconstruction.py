@@ -91,7 +91,7 @@ ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples_ttbar/"
 
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath + "TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*1_*nominal*.root",
     categories  = ttbar_categories,
     selections  = ttbar_selection
 )
