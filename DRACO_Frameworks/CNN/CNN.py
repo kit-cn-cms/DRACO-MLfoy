@@ -159,10 +159,6 @@ class CNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables:
-           out_file = self.cp_path + "/variable_norm.csv"
-           self.data.norm_csv.to_csv(out_file)
-           print("saved variabe norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -317,8 +313,8 @@ class CNN():
 
         # compile the model
         model.compile(
-            loss        = self.architecture["loss_function"],
-            optimizer   = self.architecture["optimizer"],
+            loss        = "binary_crossentropy",
+            optimizer   = keras.optimizers.Adagrad(),
             metrics     = self.eval_metrics)
 
         # save the model
@@ -335,6 +331,7 @@ class CNN():
 
         # add early stopping if activated
         callbacks = None
+        '''
         if self.architecture["earlystopping_percentage"] or self.architecture["earlystopping_epochs"]:
             callbacks = [EarlyStopping(
                 monitor         = "loss",
@@ -342,12 +339,12 @@ class CNN():
                 min_epochs      = 50,
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
-
+        '''
         # train main net
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
-            batch_size          = self.architecture["batch_size"],
+            batch_size          = 100,
             epochs              = self.train_epochs,
             shuffle             = True,
             callbacks           = callbacks,

@@ -63,16 +63,19 @@ class Sample:
                 if phi_padding != 0:
                     u=np.reshape(u,self.shape)
                     u=np.concatenate((u[:,-npixel_topad:],u,u[:,:npixel_topad]), axis=1)
-                    u=u.flatten()
+                    #u=u.flatten()
 
                 H_List_Dict[column_name].append(u)
+
             df[column_name]=H_List_Dict[column_name]
             print(str(len(empty_imgs_evtids))+" empty images found at evtids "+str(empty_imgs_evtids))
         
-        event_list=np.array(H_List_Dict[columns_to_decode[0]])
+        #event_list=np.array(H_List_Dict[columns_to_decode[0]])
 
         if phi_padding!=0:
             self.shape=shape_padded
+        self.shape.append(len(columns_to_decode))
+        print(self.shape)
 
         '''
         # phipadding debugging plot test
@@ -85,8 +88,13 @@ class Sample:
         exit()
         '''
 
-        event_list=event_list.reshape(-1,*self.shape)
-        #print(df)
+        #event_list=event_list.reshape(-1,*self.shape)
+        #debugdata=df[[columns_to_decode[0]]].values
+        #debugdata=np.stack(debugdata)
+        #print(debugdata)
+        #print(debugdata.shape)
+        #print(debugdata[2].shape)
+        #exit()
         #print(event_list)
 
 
@@ -150,6 +158,7 @@ class InputSamples:
         self.test_percentage = float(test_percentage)
         if self.test_percentage <= 0. or self.test_percentage >= 1.:
             sys.exit("fraction of events to be used for testing (test_percentage) set to {}. this is not valid. choose something in range (0.,1.)")
+        self.input_shape = None
 
     def addSample(self, sample_path, label, normalization_weight=1., train_weight=1., total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
         if self.activate_samples and not label in self.activate_samples:
@@ -208,9 +217,14 @@ class DataFrame(object):
 
         # loop over all input samples and load dataframe
         train_samples = []
+        self.input_shape = None
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.phi_padding)
             train_samples.append(sample.data)
+            if not self.input_shape is None:
+                if not self.input_shape == sample.shape:
+                    sys.exit("input shapes do not match")
+            self.input_shape = sample.shape
 
         # concatenating all dataframes
         df = pd.concat(train_samples, sort=True)
@@ -284,22 +298,8 @@ class DataFrame(object):
         print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
 
         df = shuffle(df, random_state = self.shuffleSeed)
+        print(df)
 
-        # norm variables if activated
-        unnormed_df = df.copy()
-        norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
-        if norm_variables:
-            for v in train_variables:
-                norm_csv["mu"][v] = unnormed_df[v].mean()
-                norm_csv["std"][v] = unnormed_df[v].std()
-                if norm_csv["std"][v] == 0.:
-                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
-        else:
-            for v in train_variables:
-                norm_csv["mu"][v] = 0.
-                norm_csv["std"][v] = 1.
-        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
-        self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
 
@@ -307,16 +307,15 @@ class DataFrame(object):
         n_test_samples = int( df.shape[0]*test_percentage)
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples)
-        self.df_test_unnormed = unnormed_df.head(n_test_samples)
+
 
         # save variable lists
         self.train_variables = train_variables
+        print(self.train_variables)
         self.output_classes = self.classes
         self.input_samples = input_samples
 
-        # sample balancing if activated
-        if self.balanceSamples:
-           self.balanceTrainSample()
+
 
         # print some counts
         print("total events after cuts:  "+str(df.shape[0]))
@@ -360,8 +359,12 @@ class DataFrame(object):
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
-        if as_matrix: return self.df_train[ self.train_variables ].values
-        else:         return self.df_train[ self.train_variables ]
+        if as_matrix: 
+            traindata=np.stack(self.df_train[ self.train_variables[0] ].values)
+            print(traindata)
+            return traindata
+        else:     
+            return self.df_train[ self.train_variables ]
 
     def get_train_weights(self):
         return self.df_train["train_weight"].values

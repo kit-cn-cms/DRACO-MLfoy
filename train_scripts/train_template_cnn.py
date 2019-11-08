@@ -59,7 +59,7 @@ model = models.Sequential()
 #first layer
 model.add(
     layer.Conv2D( 32, kernel_size = (4,4), activation = "sigmoid", padding = "same",
-    input_shape = cnn.train_data.shape ))
+    input_shape = cnn.data.input_shape ))
 model.add(
     layer.AveragePooling2D( pool_size = (4,4), padding = "same" ))
 model.add(
@@ -95,12 +95,12 @@ model.add(
 
 #output layer
 model.add(
-    layer.Dense( cnn.num_classes, activation = "relu" ))
+    layer.Dense( cnn.data.n_output_neurons, activation = "sigmoid" ))
 
 #================
 # build CNN model
 #================
-cnn.build_model(model) #for now, no cnn-netconfigs 
+cnn.build_model(model=model) #for now, no cnn-netconfigs 
 
 # perform the training
 cnn.train_model()
