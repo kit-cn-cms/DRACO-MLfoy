@@ -1,4 +1,9 @@
 import os
+import sys
+
+sys.path.append("../../train_scripts")
+import optionHandler
+options = optionHandler.optionHandler(sys.argv)
 
 ### some useful functions
 
@@ -39,10 +44,10 @@ def readSampleFile(inPath):
     return sampleList
 
 # function to add samples to InputSamples
-def addToInputSamples(inputSamples, samples, naming="_dnn.h5"):
+def addToInputSamples(inputSamples, samples):
     """ adds each sample in samples to the inputSample """
     for sample in samples:
-        inputSamples.addSample(sample["sample"]+naming, label=sample["label"], normalization_weight = sample["normWeight"])
+        inputSamples.addSample(options.getDefaultName(sample["sample"]), label=sample["label"], normalization_weight = sample["normWeight"])
 
 # function to restore old files, if preprocessing crashed
 def restoreOldFiles(path):

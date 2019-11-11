@@ -17,14 +17,26 @@ def GetPlotColor( cls ):
         "ttbar":        ROOT.kOrange,
         "ttmb":         ROOT.kRed-1,
         "ttb_bb":       ROOT.kRed-1,
+        "tt_bb":        ROOT.kRed-1,
         "ST":           ROOT.kRed-8,
         "tH":           ROOT.kWhite,
-        "sig":   ROOT.kCyan,
-        "bkg":   ROOT.kOrange,
+        "sig":          ROOT.kCyan,
+        "bkg":          ROOT.kOrange,
+        "ttH_pt_1":     ROOT.kCyan-4,
+        "ttH_pt_2":     ROOT.kCyan-2,
+        "ttH_pt_3":     ROOT.kCyan,
+        "ttH_pt_4":     ROOT.kCyan+2,
+        "ttH_0":        ROOT.kCyan-6,
+        "ttH_1":        ROOT.kCyan-4,
+        "ttH_2":        ROOT.kCyan-2,
+        "ttH_3":        ROOT.kCyan,
+        "ttH_4":        ROOT.kCyan+2,
+        "tHW":          ROOT.kGreen,
+        "tHQ":          ROOT.kGreen+2,
         }
 
     if "ttZ" in cls: cls = "ttZ"
-    if "ttH" in cls: cls = "ttH"
+    if "ttH" in cls and cls not in color_dict: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
@@ -196,6 +208,9 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
             latex.DrawLatex(l+0.4,1.-t+0.01, text)
         else:
             latex.DrawLatex(l+0.47,1.-t+0.01, text)
+    else:
+        text = "Correlation = {:.3f}".format(matrix.GetCorrelationFactor())
+        latex.DrawLatex(l+0.43,1.-t+0.01, text)
 
     return canvas
 
