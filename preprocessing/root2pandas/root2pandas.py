@@ -7,6 +7,13 @@ import os
 import shutil
 import math
 import matplotlib.pyplot as plt
+from multiprocessing import Pool
+
+import ttbarReco
+
+# multi processing magic
+def processChunk(info):
+    info["self"].processChunk(info["sample"], info["chunk"], info["chunkNumber"])
 
 import preprocessing_utils as pputils
 
@@ -48,7 +55,7 @@ class Sample:
                 self.selections = "(Evt_Odd == 1)"
 
 class Dataset:
-    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID'):
+    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID', ttbarReco=False, ncores=1):
         # settings for paths
         self.outputdir = outputdir
         self.naming = naming
@@ -64,12 +71,14 @@ class Dataset:
         # settings for dataset
         self.addMEM     = addMEM
         self.maxEntries = int(maxEntries)
+        self.ttbarReco  = ttbarReco
 
         # default values for some configs
         self.baseSelection  = None
         self.samples        = {}
         self.variables      = []
 
+        self.ncores         = int(ncores)
 
     def addBaseSelection(self, selection):
         self.baseSelection = selection
@@ -262,12 +271,28 @@ class Dataset:
 
         # initialize loop over ntuple files
         n_entries = 0
-        concat_df = pd.DataFrame()
         n_files = len(ntuple_files)
+        print("number of files: {}".format(n_files))
 
-        # loop over files
-        for iFile, f in enumerate(ntuple_files):
-            print("({}/{}) loading file {}".format(iFile+1,n_files,f))
+        while not len(ntuple_files)%self.ncores == 0:
+            ntuple_files.append("")
+        ntuple_files = np.array(ntuple_files).reshape(self.ncores, -1)
+    
+        pool = Pool(self.ncores)
+        chunks = [{"chunk": c, "sample": sample, "chunkNumber": i+1, "self": self} for i,c in enumerate(ntuple_files)]
+        pool.map(processChunk, chunks)
+
+        # concatenate single thread files
+        self.mergeFiles(sample.categories.categories)
+
+    def processChunk(self, sample, files, chunkNumber):
+        files = [f for f in files if not f == ""]
+
+        n_entries = 0
+        concat_df = pd.DataFrame()
+        n_files = len(files)
+        for iF, f in enumerate(files):
+            print("chunk #{}: starting file ({}/{}): {}".format(chunkNumber, iF+1, n_files, f))
 
             for tr in self.tree:
                 # open root file
@@ -319,18 +344,23 @@ class Dataset:
                         # append column to original dataframe
                         df.update( idx_df[vecvar].rename(col_name) )
 
+
                 # apply event selection
                 df = self.applySelections(df, sample.selections)
 
-                # add to list of dataframes
-                if concat_df.empty: concat_df = df
-                else: concat_df = concat_df.append(df)
+                # perform ttbar reconstruction
+                if self.ttbarReco:
+                    df = ttbarReco.findbest(df, self.variables)
 
-                # count entries so far
+                    sample.categories.categories["ttbar"] = "(is_ttbar==1)"
+                    sample.categories.categories["bkg"]   = "(is_ttbar==0)"
+
+                if concat_df.empty: concat_df = df
+                else: concat_df = concat_df.append(df)            
                 n_entries += df.shape[0]
 
                 # if number of entries exceeds max threshold, add labels and mem and save dataframe
-                if (n_entries > self.maxEntries or f == ntuple_files[-1]):
+                if (n_entries > self.maxEntries or f == files[-1]):
                     print("*"*50)
                     print("max entries reached ...")
 
@@ -338,7 +368,7 @@ class Dataset:
                     concat_df = self.addClassLabels(concat_df, sample.categories.categories)
 
                     # add indexing
-                    concat_df.set_index([varName_Run, varName_LumiBlock, varName_Event], inplace=True, drop=True)
+                    concat_df.set_index([self.varName_Run, self.varName_LumiBlock, self.varName_Event], inplace=True, drop=True)
 
                     # add MEM variables
                     if self.addMEM:
@@ -348,7 +378,7 @@ class Dataset:
                     concat_df = self.removeTriggerVariables(concat_df)
 
                     # write data to file
-                    self.createDatasets(concat_df, sample.categories.categories)
+                    self.createDatasets(concat_df, sample.categories.categories, chunkNumber)
                     print("*"*50)
 
                     # reset counters
@@ -392,7 +422,6 @@ class Dataset:
             df = df.query(self.baseSelection)
         if sampleSelection:
             df = df.query(sampleSelection)
-
         return df
 
     def addClassLabels(self, df, categories):
@@ -432,9 +461,12 @@ class Dataset:
         df.drop(self.removedVariables, axis = 1, inplace = True)
         return df
 
-    def createDatasets(self, df, categories):
+    def createDatasets(self, df, categories, chunkNumber = None):
         for key in categories:
-            outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            if chunkNumber is None:
+                outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+            else:
+                outFile = self.outputdir+"/"+key+"_"+self.naming+"_"+str(chunkNumber)+".h5"
 
             # create dataframe for category
             cat_df = df.query("(class_label == \""+str(key)+"\")")
@@ -442,15 +474,25 @@ class Dataset:
 
             with pd.HDFStore(outFile, "a") as store:
                 store.append("data", cat_df, index = False)
-
-    def removeOldFiles(self):
-        for key in self.samples:
-            sample = self.samples[key]
-            for cat in sample.categories.categories:
-                outFile = self.outputdir+"/"+cat+"_"+self.naming+".h5"
-                if os.path.exists(outFile):
-                    print("removing file {}".format(outFile))
-                    os.remove(outFile)
+            
+    def mergeFiles(self, categories):
+        print("="*50)
+        print("merging multicore threading files ...")
+        for key in categories:
+            print("category: {}".format(key))
+            threadFiles = [ self.outputdir+"/"+key+"_"+self.naming+"_"+str(chunkNumber+1)+".h5" for chunkNumber in range(self.ncores) ]
+            outFile = self.outputdir+"/"+key+"_"+self.naming+".h5"
+        
+            with pd.HDFStore(outFile, "a") as store:
+                for f in threadFiles:
+                    print("merging file {}".format(f))
+                    if not os.path.exists(f): 
+                        print("\t-> does not exist?!")
+                        continue
+                    store.append("data", pd.read_hdf(f), index = False)
+                    os.remove(f)
+                print("number of events: {}".format(store.get_storer("data").nrows))
+        print("="*50)
 
     def renameOldFiles(self):
         for key in self.samples:
@@ -484,3 +526,4 @@ class Dataset:
             if filename.endswith(".old") and filename.split(".")[0] in rerename:
                 print("re-renaming file {}".format(filename))
                 os.rename(self.outputdir+"/"+filename,self.outputdir+"/"+filename[:-4])
+

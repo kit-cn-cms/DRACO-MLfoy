@@ -13,6 +13,7 @@ parser.add_option("--generateSet",action="store_true",dest="generateSet",default
     help="generate printout for generating a variable_set.py file")
 parser.add_option("-o",dest="outputfile",
     help="specify output file for variable_set.py file")
+parser.add_option("-j",dest="jtregions",help="jet-tag regions (comma separated)",default="ge4j_ge3t")
 (opts, args) = parser.parse_args()
 
 if not opts.file:
@@ -84,7 +85,7 @@ def generateVariableSet(variables, categories, path):
 variables = getAllVariables(opts.file)
 new_variables = figureOutVectors(variables, opts.file)
 if opts.generateSet:
-    generateVariableSet(new_variables, ["4j_ge3t", "5j_ge3t", "ge6j_ge3t"], opts.outputfile)
+    generateVariableSet(new_variables, opts.jtregions.split(","), opts.outputfile)
 else:
     print("variables:")
     for v in variables: print(v)
