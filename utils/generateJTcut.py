@@ -1,6 +1,6 @@
 def getJTstring(cat):
-    # jtstring is '(ge)[NJets]j_(ge)[NTags]t'
-    # output format is '(N_Jets (>=/==) [NJets] and N_BTagsM (>=/==) [NTags])'
+    # jtstring is '(ge)[NJets]j_(ge)[NTags]t_(ge)[NFwdJets]f'
+    # output format is '(N_Jets (>=/==) [NJets] and N_BTagsM (>=/==) [NTags] and N_ForwardJets (>=/==) NFwdJets)'
 
     string_parts = cat.split("_")
     
@@ -12,6 +12,8 @@ def getJTstring(cat):
             cutstring += "N_Jets"
         elif part.endswith("t"):
             cutstring += "N_BTagsM"
+        elif part.endswith("f"):
+            cutstring += "N_ForwardJets"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue
@@ -62,11 +64,13 @@ def getJTlabel(cat):
             partstring += " jet"
         elif part.endswith("t"):
             partstring += " b-tag"
+        elif part.endswith("f"):
+            partstring += " fwd-jet"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue
 
-        # plural
+        # plurasl
         if int(n)>1: partstring += "s"
 
         if not part == string_parts[-1]:
