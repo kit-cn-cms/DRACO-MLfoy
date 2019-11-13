@@ -75,7 +75,7 @@ class Sample:
         if phi_padding!=0:
             self.shape=shape_padded
         self.shape.append(len(columns_to_decode))
-        print(self.shape)
+        #print(self.shape)
 
         '''
         # phipadding debugging plot test
@@ -89,8 +89,9 @@ class Sample:
         '''
 
         #event_list=event_list.reshape(-1,*self.shape)
-        #debugdata=df[[columns_to_decode[0]]].values
-        #debugdata=np.stack(debugdata)
+        #traindata=np.expand_dims(self.df_train[ self.train_variables[0] ].values,axis=3)
+        #debugdata=df[columns_to_decode[0]].values
+        #debugdata=np.expand_dims(np.stack(debugdata),axis=3)
         #print(debugdata)
         #print(debugdata.shape)
         #print(debugdata[2].shape)
@@ -298,7 +299,8 @@ class DataFrame(object):
         print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
 
         df = shuffle(df, random_state = self.shuffleSeed)
-        print(df)
+        #debug print of df after shuffle
+        #print(df)
 
 
         self.unsplit_df = df.copy()
@@ -360,8 +362,12 @@ class DataFrame(object):
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
         if as_matrix: 
-            traindata=np.stack(self.df_train[ self.train_variables[0] ].values)
-            print(traindata)
+            if len(self.train_variables)==1:
+                traindata=np.expand_dims(np.stack(self.df_train[ self.train_variables[0] ].values),axis=3)
+            else:
+                df_variables_tmp=[np.expand_dims(np.stack(self.df_train[ channel ].values), axis=3) for channel in self.train_variables]
+                traindata=np.concatenate(df_variables_tmp,axis=3)
+            #print(traindata)
             return traindata
         else:     
             return self.df_train[ self.train_variables ]
