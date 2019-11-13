@@ -6,7 +6,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
 
-import root2pandas
+import root2pandas as root2pandas
 
 """
 USE: python preprocessing.py --outputdirectory=DIR --variableSelection=FILE --maxentries=INT --MEM=BOOL
@@ -32,8 +32,11 @@ parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=Fals
 parser.add_option("-n", "--name", dest="Name", default="dnn",
         help="STR of the output file name", metavar="Name")
 
-parser.add_option("-s", "--scale", dest="Scale", action= "store_true", default=False,
-        help="BOOl to use every wrong bkg event (1) or just one (0)", metavar="Scale")
+parser.add_option("--HiggsReco", dest="HiggsReco", action= "store_true", default=True,
+        help="activate preprocessing for Higgs reconstruction", metavar="HiggsReco")
+
+parser.add_option("--cores", dest="ncores", default = 1,
+        help="number of cores for parallel multiprocessing")
 
 
 (options, args) = parser.parse_args()
@@ -56,7 +59,7 @@ else:
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
 # N<13 could be removed, because in the given dataset there is no event with N>12
-base = "(N_Jets<14 and N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
 
 
 # single lepton selections
@@ -66,12 +69,12 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1)"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
-ttbar_selection = "(Evt_Odd == 1)"
+ttH_selection = "(Evt_Odd == 1)"
 
-ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttH")
-#ttbar_categories.addCategory("ttbar")
-ttbar_categories.addCategory("bkg")
+ttH_categories = root2pandas.EventCategories()
+ttH_categories.addCategory("ttH")
+ttH_categories.addCategory("bkg")
+#ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -79,27 +82,18 @@ dataset = root2pandas.Dataset(
     naming      = options.Name,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
-    Scale       = options.Scale)
+    HiggsReco   = options.HiggsReco,
+    ncores      = options.ncores)
 
 # add base event selection
-dataset.addBaseSelection(base_selection)
-
-
-
-#ntuplesPath = "/nfs/dust/cms/user/mwassmer/ttH_2019/ntuples_2018/"
-# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ/"
-# ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttZ_v2/"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2017/"
-
-
+dataset.addBaseSelection(base)
+ntuplesPath = "/ceph/mheim/ntuples/ttH.root"
 
 dataset.addSample(
-    sampleName  = "TTHbb",
-    #ntuples     = "/ceph/mheim/ntuples/ttbar.root",
-    #ntuples     = "/ceph/mheim/ntuples/ttH.root",
-    ntuples     = ntuplesPath+"ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
-    categories  = ttbar_categories,
-    selections  = ttbar_selection
+    sampleName  = "TTToSL",
+    ntuples     = ntuplesPath,
+    categories  = ttH_categories,
+    selections  = ttH_selection
 )
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)
@@ -115,13 +109,9 @@ additional_variables = [
     "Evt_Run",
     "Evt_Lumi"
     ]
-import time
-start_time = time.time()
-# your script
-elapsed_time = time.time() - start_time
-time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
 
 # run the preprocessing
 dataset.runPreprocessing()
+
