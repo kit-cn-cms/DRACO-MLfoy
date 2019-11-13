@@ -370,7 +370,7 @@ class DataFrame(object):
             #print(traindata)
             return traindata
         else:     
-            return self.df_train[ self.train_variables ]
+            return self.df_train[ self.train_variables ]#not adjusted for cnn yet
 
     def get_train_weights(self):
         return self.df_train["train_weight"].values
@@ -385,9 +385,17 @@ class DataFrame(object):
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix=True, normed=True):
-        if not normed: return self.df_test_unnormed[ self.train_variables ]
-        if as_matrix:  return self.df_test[ self.train_variables ].values
-        else:          return self.df_test[ self.train_variables ]
+        if not normed: 
+            return self.df_test_unnormed[ self.train_variables ]#not adjusted for cnn yet
+        if as_matrix:  
+            if len(self.train_variables)==1:
+                testdata=np.expand_dims(np.stack(self.df_test[ self.train_variables[0] ].values),axis=3)
+            else:
+                df_variables_tmp=[np.expand_dims(np.stack(self.df_test[ channel ].values), axis=3) for channel in self.train_variables]
+                testdata=np.concatenate(df_variables_tmp,axis=3)
+            return testdata
+        else:          
+            return self.df_test[ self.train_variables ]#not adjusted for cnn yet
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values

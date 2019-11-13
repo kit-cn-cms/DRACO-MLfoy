@@ -109,20 +109,20 @@ cnn.train_model()
 cnn.eval_model()
 
 # save information
-cnn.save_model(sys.argv, filedir)
+#cnn.save_model(sys.argv, filedir)
 
 # save and print variable ranking
-cnn.get_input_weights()
+#cnn.get_input_weights()
 
 # plotting
 if options.doPlots():
     # plot the evaluation metrics
-    dnn.plot_metrics(privateWork = options.isPrivateWork())
+    cnn.plot_metrics(privateWork = options.isPrivateWork())
 
     if options.isBinary():
         # plot output node
         bin_range = options.getBinaryBinRange()
-        dnn.plot_binaryOutput(
+        cnn.plot_binaryOutput(
             log         = options.doLogPlots(), 
             privateWork = options.isPrivateWork(), 
             printROC    = options.doPrintROC(), 
@@ -131,12 +131,12 @@ if options.doPlots():
             sigScale    = options.getSignalScale())
     else:
         # plot the confusion matrix
-        dnn.plot_confusionMatrix(
+        cnn.plot_confusionMatrix(
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC())
 
         # plot the output discriminators
-        dnn.plot_discriminators(
+        cnn.plot_discriminators(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
@@ -144,7 +144,7 @@ if options.doPlots():
             sigScale            = options.getSignalScale())
 
         # plot the output nodes
-        dnn.plot_outputNodes(
+        cnn.plot_outputNodes(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
@@ -152,14 +152,14 @@ if options.doPlots():
             sigScale            = options.getSignalScale())
 
         # plot event yields
-        dnn.plot_eventYields(
+        cnn.plot_eventYields(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
             sigScale            = options.getSignalScale())
 
         # plot closure test
-        dnn.plot_closureTest(
+        cnn.plot_closureTest(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
