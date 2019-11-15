@@ -55,6 +55,8 @@ cnn = CNN.CNN(
 #define CNN model
 #================
 
+
+''' #FROM HAUKE
 model = models.Sequential()
 #first layer
 model.add(
@@ -96,6 +98,27 @@ model.add(
 #output layer
 model.add(
     layer.Dense( cnn.data.n_output_neurons, activation = "sigmoid" ))
+'''
+
+model = models.Sequential()
+#first layer
+model.add(
+    layer.Conv2D( 8, kernel_size = (4,4), activation = "linear", padding = "same",
+    input_shape = cnn.data.input_shape ))
+
+# first dense layer
+model.add(
+    layer.Flatten())
+model.add(
+    layer.Dense( 50, activation = "relu" ))
+model.add(
+    layer.Dropout(0.5))
+
+#output layer
+model.add(
+    layer.Dense( cnn.data.n_output_neurons, activation = "sigmoid" ))
+
+print("number of free parameters: "+str(model.count_params()))
 
 #================
 # build CNN model

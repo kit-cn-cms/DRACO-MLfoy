@@ -60,15 +60,15 @@ class Sample:
                 else:
                     empty_imgs_evtids.append(index[2])
                 
+                u=np.reshape(u,self.shape)
                 if phi_padding != 0:
-                    u=np.reshape(u,self.shape)
                     u=np.concatenate((u[:,-npixel_topad:],u,u[:,:npixel_topad]), axis=1)
-                    #u=u.flatten()
 
                 H_List_Dict[column_name].append(u)
 
             df[column_name]=H_List_Dict[column_name]
-            print(str(len(empty_imgs_evtids))+" empty images found at evtids "+str(empty_imgs_evtids))
+            #print(str(len(empty_imgs_evtids))+" empty images found at evtids "+str(empty_imgs_evtids))
+            print(str(len(empty_imgs_evtids))+" empty images found")
         
         #event_list=np.array(H_List_Dict[columns_to_decode[0]])
 
