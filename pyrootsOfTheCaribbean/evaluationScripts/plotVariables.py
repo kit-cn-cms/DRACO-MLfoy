@@ -154,10 +154,10 @@ class variablePlotter:
                 plot_name = plot_name.replace("[","_").replace("]","")
 
                 # generate plot
-                #histInfo = self.histVariable(
-                #    variable    = variable,
-                #    plot_name   = plot_name,
-                #    cat         = cat)
+                histInfo = self.histVariable(
+                    variable    = variable,
+                    plot_name   = plot_name,
+                    cat         = cat)
 
                 if saveKSValues:
                     ks_dict[variable] = histInfo["KSScore"]
