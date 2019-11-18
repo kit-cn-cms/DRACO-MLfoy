@@ -439,7 +439,8 @@ class plotClosureTest:
                 test.SetLineWidth(1)
                 test.SetMarkerSize(2)
 
-                plotOptions = {"logscale": self.logscale}
+                plotOptions = {"logscale": self.logscale,
+			       "ratio" : ratio}
 
                 # init canvas
                 canvas = setup.drawClosureTestOnCanvas(
@@ -571,7 +572,8 @@ class plotClosureTest:
             bkg_test.SetMarkerStyle(20)
             bkg_test.SetMarkerSize(2)
 
-            plotOptions = {"logscale": self.logscale}
+            plotOptions = {"logscale": self.logscale,
+			   "ratio": ratio }
 
             # init canvas
             canvas = setup.drawClosureTestOnCanvas(
