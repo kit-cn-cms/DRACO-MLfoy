@@ -101,7 +101,7 @@ dataset.addSample(
 
 dataset.addSample(	#for 2017 samples the files seem to be splitted
     sampleName  = "ttbar_bb",
-    ntuples     = [ntuplesPath+"/TTbb_Powheg_Openloops_new_pmx/*nominal*.root", ""]
+    ntuples     = ntuplesPath+"/TTbb_Powheg_Openloops_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)"
@@ -109,7 +109,7 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
 
 dataset.addSample(	#for 2017 samples the files seem to be splitted
     sampleName  = "ttbar_else",
-    ntuples     = [ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root", ""]
+    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories,
     even_odd    = options.even_odd_splitting,
     selections  = None

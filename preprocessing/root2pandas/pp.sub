@@ -1,0 +1,7 @@
+Universe = standard
+Executable = pp.sh
+Output = pp.out
+Error = error.txt
+Request_cpus = 1
+
+Queue
