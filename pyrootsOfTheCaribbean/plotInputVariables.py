@@ -145,7 +145,8 @@ plotter.addSample(
 plotter.addSample(
     sampleName      = "tt+H",
     sampleFile      = data_dir+"/ttH"+naming,
-    plotColor       = ROOT.kRed+1)
+    plotColor       = ROOT.kRed+1,
+    signalSample    = True)
 
 
 # add JT categories
