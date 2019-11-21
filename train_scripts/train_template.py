@@ -60,7 +60,7 @@ dnn.train_model()
 dnn.eval_model()
 
 # save information
-dnn.save_model(sys.argv, filedir)
+dnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
 # save and print variable ranking according to the input layer weights
 dnn.get_input_weights()

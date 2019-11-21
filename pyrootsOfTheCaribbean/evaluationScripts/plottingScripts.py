@@ -50,6 +50,7 @@ class plotDiscriminators:
 
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
+            if i>=self.data.n_output_neurons: continue
             print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
 
             # get index of node
@@ -79,6 +80,7 @@ class plotDiscriminators:
 
             # loop over all classes to fill hists according to truth level class
             for j, truth_cls in enumerate(self.event_classes):
+                if j>=self.data.n_output_neurons: continue
                 classIndex = self.data.class_translation[truth_cls]
 
                 # filter values per event class
@@ -227,6 +229,7 @@ class plotOutputNodes:
 
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
+            if i>=self.data.n_output_neurons: continue
             # get output values of this node
             out_values = self.prediction_vector[:,i]
 
@@ -249,6 +252,7 @@ class plotOutputNodes:
 
             # loop over all classes to fill hists according to truth level class
             for j, truth_cls in enumerate(self.event_classes):
+                if j>=self.data.n_output_neurons: continue
                 classIndex = self.data.class_translation[truth_cls]
 
                 # filter values per event class
@@ -390,6 +394,7 @@ class plotClosureTest:
 
         # loop over output nodes
         for i, node_cls in enumerate(self.event_classes):
+            if i>=self.data.n_output_neurons: continue
             # get index of node
             nodeIndex = self.data.class_translation[node_cls]
             if self.signal_class:
@@ -516,9 +521,9 @@ class plotClosureTest:
             setup.printCategoryLabel(canvas, self.event_category)
 
 
-            # add private work label if activated
-            if self.privateWork:
-                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+            # # add private work label if activated
+            # if self.privateWork:
+            #     setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
 
             out_path = self.plotdir+"/closureTest_at_{}_node.pdf".format(node_cls)
             setup.saveCanvas(canvas, out_path)
@@ -540,10 +545,11 @@ class plotConfusionMatrix:
         self.predicted_classes = np.argmax(self.prediction_vector, axis = 1)
 
         self.event_classes     = event_classes
-        self.n_classes         = len(self.event_classes)
+        self.n_classes         = data.n_output_neurons
 
         self.event_category    = event_category
         self.plotdir           = plotdir
+        print(len(self.predicted_classes))
 
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
@@ -589,7 +595,7 @@ class plotEventYields:
         self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
 
         self.event_classes      = event_classes
-        self.n_classes          = len(self.event_classes)
+        self.n_classes          = data.n_output_neurons
         self.signal_class       = signal_class
         self.signalIndex       = []
 
@@ -597,7 +603,7 @@ class plotEventYields:
             for signal in signal_class:
                 self.signalIndex.append(self.data.class_translation[signal])
         else:
-            self.signalIndex = [self.data.class_translation["ttHbb"]]
+            self.signalIndex = [self.data.class_translation["ttH"]]
 
         self.event_category     = event_category
         self.plotdir            = plotdir
@@ -628,12 +634,14 @@ class plotEventYields:
 
         # generate one plot per output node
         for i, truth_cls in enumerate(self.event_classes):
+            if i>=self.data.n_output_neurons: continue
             classIndex = self.data.class_translation[truth_cls]
 
             class_yields = []
 
             # loop over output nodes
             for j, node_cls in enumerate(self.event_classes):
+                if j>=self.data.n_output_neurons: continue
 
                 # get output values of this node
                 out_values = self.prediction_vector[:,i]
@@ -847,138 +855,138 @@ class plotBinaryOutput:
 
 
 
-class plotEventYields:
-    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):
-        self.data               = data
-        self.prediction_vector  = prediction_vector
-        self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
+# class plotEventYields:
+#     def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):
+#         self.data               = data
+#         self.prediction_vector  = prediction_vector
+#         self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
 
-        self.event_classes      = event_classes
-        self.n_classes          = len(self.event_classes)
-        self.signal_class       = signal_class
-        self.signalIndex       = []
+#         self.event_classes      = event_classes
+#         self.n_classes          = len(self.event_classes)
+#         self.signal_class       = signal_class
+#         self.signalIndex       = []
 
-        if self.signal_class:
-            for signal in signal_class:
-                self.signalIndex.append(self.data.class_translation[signal])
-        else:
-            self.signalIndex = [self.data.class_translation["ttH"]]
+#         if self.signal_class:
+#             for signal in signal_class:
+#                 self.signalIndex.append(self.data.class_translation[signal])
+#         else:
+#             self.signalIndex = [self.data.class_translation["ttH"]]
 
-        self.event_category     = event_category
-        self.plotdir            = plotdir
+#         self.event_category     = event_category
+#         self.plotdir            = plotdir
 
-        self.logscale           = logscale
+#         self.logscale           = logscale
 
-        self.privateWork = False
+#         self.privateWork = False
 
-    def plot(self, privateWork = False, ratio = False):
-        self.privateWork = privateWork
+#     def plot(self, privateWork = False, ratio = False):
+#         self.privateWork = privateWork
 
-        # loop over processes
-        sigHists = []
-        sigLabels = []
-        bkgHists = []
-        bkgLabels = []
+#         # loop over processes
+#         sigHists = []
+#         sigLabels = []
+#         bkgHists = []
+#         bkgLabels = []
 
-        plotOptions = {
-            "ratio":      ratio,
-            "ratioTitle": "#frac{scaled Signal}{Background}",
-            "logscale":   self.logscale}
-        yTitle = "event Yield"
-        if privateWork:
-            yTitle = setup.GetyTitle(privateWork)
+#         plotOptions = {
+#             "ratio":      ratio,
+#             "ratioTitle": "#frac{scaled Signal}{Background}",
+#             "logscale":   self.logscale}
+#         yTitle = "event Yield"
+#         if privateWork:
+#             yTitle = setup.GetyTitle(privateWork)
 
-        totalBkgYield = 0
+#         totalBkgYield = 0
 
-        # generate one plot per output node
-        for i, truth_cls in enumerate(self.event_classes):
-            classIndex = self.data.class_translation[truth_cls]
+#         # generate one plot per output node
+#         for i, truth_cls in enumerate(self.event_classes):
+#             classIndex = self.data.class_translation[truth_cls]
 
-            class_yields = []
+#             class_yields = []
 
-            # loop over output nodes
-            for j, node_cls in enumerate(self.event_classes):
+#             # loop over output nodes
+#             for j, node_cls in enumerate(self.event_classes):
 
-                # get output values of this node
-                out_values = self.prediction_vector[:,i]
+#                 # get output values of this node
+#                 out_values = self.prediction_vector[:,i]
 
-                nodeIndex = self.data.class_translation[node_cls]
+#                 nodeIndex = self.data.class_translation[node_cls]
 
-                # get yields
-                class_yield = sum([ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
-                    and self.predicted_classes[k] == nodeIndex])
-                class_yields.append(class_yield)
-
-
-
-            if i in self.signalIndex:
-                histogram = setup.setupYieldHistogram(
-                    yields  = class_yields,
-                    classes = self.event_classes,
-                    xtitle  = str(truth_cls)+" event yield",
-                    ytitle  = yTitle,
-                    color   = setup.GetPlotColor(truth_cls),
-                    filled  = False)
-
-                # set signal histogram linewidth
-                histogram.SetLineWidth(3)
-                sigHists.append(histogram)
-                sigLabels.append(truth_cls)
-
-
-            else:
-                histogram = setup.setupYieldHistogram(
-                    yields  = class_yields,
-                    classes = self.event_classes,
-                    xtitle  = str(truth_cls)+" event yield",
-                    ytitle  = yTitle,
-                    color   = setup.GetPlotColor(truth_cls),
-                    filled  = True)
-                bkgHists.append(histogram)
-                bkgLabels.append(truth_cls)
-
-                totalBkgYield += sum(class_yields)
+#                 # get yields
+#                 class_yield = sum([ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
+#                     if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+#                     and self.predicted_classes[k] == nodeIndex])
+#                 class_yields.append(class_yield)
 
 
 
-        # scale histograms according to options
-        scaleFactors=[]
-        for sig in sigHists:
-            scaleFactors.append(totalBkgYield/sig.Integral())
-        if privateWork:
-            for sig in sigHists:
-                sig.Scale(1./sig.Integral())
-            for h in bkgHists:
-                h.Scale(1./totalBkgYield)
-        else:
-            for i,sig in enumerate(sigHists):
-                sig.Scale(scaleFactors[i])
+#             if i in self.signalIndex:
+#                 histogram = setup.setupYieldHistogram(
+#                     yields  = class_yields,
+#                     classes = self.event_classes,
+#                     xtitle  = str(truth_cls)+" event yield",
+#                     ytitle  = yTitle,
+#                     color   = setup.GetPlotColor(truth_cls),
+#                     filled  = False)
 
-        # initialize canvas
-        canvas = setup.drawHistsOnCanvas(
-            sigHists, bkgHists, plotOptions,
-            canvasName = "event yields per node")
+#                 # set signal histogram linewidth
+#                 histogram.SetLineWidth(3)
+#                 sigHists.append(histogram)
+#                 sigLabels.append(truth_cls)
 
-        # setup legend
-        legend = setup.getLegend()
 
-        # add signal entry
-        for i,sig in enumerate(sigHists):
-            legend.AddEntry(sig, sigLabels[i]+" x {:4.0f}".format(scaleFactors[i]), "L")
+#             else:
+#                 histogram = setup.setupYieldHistogram(
+#                     yields  = class_yields,
+#                     classes = self.event_classes,
+#                     xtitle  = str(truth_cls)+" event yield",
+#                     ytitle  = yTitle,
+#                     color   = setup.GetPlotColor(truth_cls),
+#                     filled  = True)
+#                 bkgHists.append(histogram)
+#                 bkgLabels.append(truth_cls)
 
-        # add background entries
-        for i, h in enumerate(bkgHists):
-            legend.AddEntry(h, bkgLabels[i], "F")
+#                 totalBkgYield += sum(class_yields)
 
-        # draw legend
-        legend.Draw("same")
 
-        # add lumi
-        setup.printLumi(canvas, ratio = plotOptions["ratio"])
 
-        # add category label
-        setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+#         # scale histograms according to options
+#         scaleFactors=[]
+#         for sig in sigHists:
+#             scaleFactors.append(totalBkgYield/sig.Integral())
+#         if privateWork:
+#             for sig in sigHists:
+#                 sig.Scale(1./sig.Integral())
+#             for h in bkgHists:
+#                 h.Scale(1./totalBkgYield)
+#         else:
+#             for i,sig in enumerate(sigHists):
+#                 sig.Scale(scaleFactors[i])
 
-        out_path = self.plotdir + "/event_yields.pdf"
-        setup.saveCanvas(canvas, out_path)
+#         # initialize canvas
+#         canvas = setup.drawHistsOnCanvas(
+#             sigHists, bkgHists, plotOptions,
+#             canvasName = "event yields per node")
+
+#         # setup legend
+#         legend = setup.getLegend()
+
+#         # add signal entry
+#         for i,sig in enumerate(sigHists):
+#             legend.AddEntry(sig, sigLabels[i]+" x {:4.0f}".format(scaleFactors[i]), "L")
+
+#         # add background entries
+#         for i, h in enumerate(bkgHists):
+#             legend.AddEntry(h, bkgLabels[i], "F")
+
+#         # draw legend
+#         legend.Draw("same")
+
+#         # add lumi
+#         setup.printLumi(canvas, ratio = plotOptions["ratio"])
+
+#         # add category label
+#         setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+
+#         out_path = self.plotdir + "/event_yields.pdf"
+#         setup.saveCanvas(canvas, out_path)

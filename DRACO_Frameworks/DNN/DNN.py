@@ -30,7 +30,7 @@ import pandas as pd
 # Limit gpu usage
 import tensorflow as tf
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
@@ -101,14 +101,15 @@ class DNN():
             eval_metrics       = None,
             shuffle_seed       = None,
             balanceSamples     = False,
-            evenSel            = None):
+            evenSel            = None,
+            addSampleSuffix    = ""):
 
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
 
-        # norm variables or not
-        self.norm_variables = norm_variables
+        # suffix of additional (ttbb) sample
+        self.addSampleSuffix = addSampleSuffix
 
         # output directory for results
         self.save_path = save_path
@@ -187,6 +188,7 @@ class DNN():
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
+            addSampleSuffix  = self.addSampleSuffix
         )
 
     def _load_architecture(self, config):
@@ -250,6 +252,7 @@ class DNN():
             print("output:" + str(output))
 
             for i, node in enumerate(self.event_classes):
+                if i>=6: continue
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
 
@@ -356,7 +359,7 @@ class DNN():
             shuffle             = True,
             callbacks           = callbacks,
             validation_split    = 0.25,
-            sample_weight       = self.data.get_train_weights())
+            sample_weight       = self.data.get_adversary_weights_classifier())
 
     def save_model(self, argv, execute_dir, netConfigName):
         ''' save the trained model '''
@@ -889,9 +892,36 @@ class DNN():
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-class GAN(DNN):
+# Classifying Adversarial Network
+class CAN(DNN):
 
-    def build_model(self, config = None, penalty = 0):
+    def _load_architecture(self, config):
+        ''' load the architecture configs '''
+
+        # define default network configuration
+        self.architecture = {
+          "layers":                   [100,100,100],
+          "loss_function":            "categorical_crossentropy",
+          "Dropout":                  0.50,
+          "L1_Norm":                  0,
+          "L2_Norm":                  1e-5,
+          "batch_size":               4096,
+          "optimizer":                optimizers.Adam(1e-4),
+          "activation_function":      "elu",
+          "output_activation":        "Softmax",
+          "earlystopping_percentage": 0.02,
+          "earlystopping_epochs":     100,
+          "adversary_layers":         [100,100],
+          "pretrain_class_epochs":    200,
+          "pretrain_adv_epochs":      50,
+          "adversary_epochs":         10,
+          "adversary_iterations":     100,
+        }
+
+        for key in config:
+            self.architecture[key] = config[key]
+
+    def build_model(self, config = None, penalty = 10):
         ''' build default straight forward GAN from architecture dictionary '''
 
         if config:
@@ -907,6 +937,7 @@ class GAN(DNN):
             activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
         output_activation           = self.architecture["output_activation"]
+        number_of_neurons_per_adv_layer = self.architecture["adversary_layers"]
 
         Inputs = keras.layers.Input(
             shape = (number_of_input_neurons,),
@@ -944,14 +975,14 @@ class GAN(DNN):
 
         #self.class_model.summary()
         adv_layers = self.class_model(Inputs)
-        adv_layers = keras.layers.Dense(
-            units               = 100,
-            activation          = activation_function,
-            kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta))(adv_layers)
-        adv_layers = keras.layers.Dense(
-            units               = 100,
-            activation          = activation_function,
-            kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta))(adv_layers)
+        # loop over adversary dense layers
+        for iLayer, nNeurons in enumerate(number_of_neurons_per_adv_layer):
+            adv_layers = keras.layers.Dense(
+                units               = nNeurons,
+                activation          = activation_function,
+                kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta))(adv_layers)
+
+        # generate adversary output layer
         adv_layers = keras.layers.Dense(
             units               = 1,
             activation          = 'sigmoid',
@@ -984,8 +1015,7 @@ class GAN(DNN):
         self.adv_model.trainable = True
         self.class_model.trainable = False
         self.adv_class_model = keras.models.Model(inputs=[Inputs], outputs=[self.adv_model(Inputs)])
-        self.adv_class_model.compile(loss =[make_loss_Adv(c=1.)], optimizer=self.architecture["optimizer"],
-            metrics = self.eval_metrics)
+        self.adv_class_model.compile(loss =[make_loss_Adv(c=1.)], optimizer=self.architecture["optimizer"], metrics = self.eval_metrics)
 
         self.adv_class_model.summary()
 
@@ -1024,7 +1054,7 @@ class GAN(DNN):
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
             batch_size          = self.architecture["batch_size"],
-            epochs              = 200,
+            epochs              = self.architecture["pretrain_class_epochs"],
             shuffle             = True,
             callbacks           = callbacks,
             validation_split    = 0.25,
@@ -1036,21 +1066,21 @@ class GAN(DNN):
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_adversary_labels(),
             batch_size          = self.architecture["batch_size"],
-            epochs              = 50,
+            epochs              = self.architecture["pretrain_adv_epochs"],
             shuffle             = True,
             callbacks           = callbacks,
             validation_split    = 0.25,
             sample_weight       = self.data.get_adversary_weights_adversary())
-        self.predict_event_query("Evt_ID==42702963")
+        # self.predict_event_query("Evt_ID==1163")
         
-        for i in range(100):
+        for i in range(self.architecture["adversary_iterations"]):
             self.adv_model.trainable = False
             self.class_model.trainable = True
             self.class_adv_model.fit(            
                 x = self.data.get_train_data(as_matrix = True),
                 y = [self.data.get_train_labels(),self.data.get_adversary_labels()],
                 batch_size          = self.architecture["batch_size"],
-                epochs              = 10,
+                epochs              = self.architecture["adversary_epochs"],
                 shuffle             = True,
                 callbacks           = callbacks,
                 validation_split    = 0.25,
@@ -1063,14 +1093,14 @@ class GAN(DNN):
                 x = self.data.get_train_data(as_matrix = True),
                 y = self.data.get_adversary_labels(),
                 batch_size          = self.architecture["batch_size"],
-                epochs              = 10,
+                epochs              = self.architecture["adversary_epochs"],
                 shuffle             = True,
                 callbacks           = callbacks,
                 validation_split    = 0.25,
                 sample_weight       = self.data.get_adversary_weights_adversary())
 
-       #self.trained_model = self.class_model
-        self.predict_event_query("Evt_ID==42702963")
+        # self.trained_model = self.class_model
+        # self.predict_event_query("Evt_ID==1163")
         self.model = self.class_model
 
 

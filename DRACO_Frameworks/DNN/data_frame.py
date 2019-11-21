@@ -7,7 +7,7 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2, total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
+    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2, total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', addSampleSuffix = ""):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
@@ -17,6 +17,7 @@ class Sample:
         self.min=0.0
         self.max=1.0
         self.total_weight_expr = total_weight_expr
+        self.addSampleSuffix = addSampleSuffix
 
     def load_dataframe(self, event_category, lumi, evenSel = ""):
         print("-"*50)
@@ -47,8 +48,8 @@ class Sample:
 
         df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.normalization_weight / self.test_percentage)
 
-        if "OL" in self.label:
-            df["class_label"] = pd.Series([ c + "_OL" for c in df["class_label"].values], index = df.index)
+        if self.addSampleSuffix in self.label:
+            df["class_label"] = pd.Series([ c + self.addSampleSuffix for c in df["class_label"].values], index = df.index)
 
         self.data = df
         print("-"*50)
@@ -73,11 +74,12 @@ class Sample:
         self.lumi_weights = self.data["lumi_weight"].values
 
 class InputSamples:
-    def __init__(self, input_path, activateSamples = None, test_percentage = 0.2):
+    def __init__(self, input_path, activateSamples = None, test_percentage = 0.2, addSampleSuffix = ""):
         self.binary_classification = False
         self.input_path = input_path
         self.samples = []
         self.activate_samples = activateSamples
+        self.addSampleSuffix = addSampleSuffix
         if self.activate_samples:
             self.activate_samples = self.activate_samples.split(",")
         self.test_percentage = float(test_percentage)
@@ -92,9 +94,9 @@ class InputSamples:
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
-        self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr))
+        self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr, addSampleSuffix = self.addSampleSuffix))
 
-        if label.endswith("_OL"):
+        if label.endswith(self.addSampleSuffix):
             self.additional_samples +=1
 
     def getClassConfig(self):
@@ -132,7 +134,8 @@ class DataFrame(object):
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
-                evenSel = ""):
+                evenSel = "",
+                addSampleSuffix = ""):
 
         self.event_category = event_category
         self.lumi = lumi
@@ -140,6 +143,7 @@ class DataFrame(object):
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
+        self.addSampleSuffix = addSampleSuffix
 
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification: self.bkg_target = input_samples.bkg_target
@@ -169,14 +173,16 @@ class DataFrame(object):
 
             # add flag for ttH to dataframe
             df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
-            df["is_ttBB"] = pd.Series( [1 if ("ttb" in c or "tt2b" in c) else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttBB"] = pd.Series( [1 if ("ttbb" in c) else 0 for c in df["class_label"].values], index = df.index )
 
             # print(df["class_label"].values)
-            df["generator_flag"] = pd.Series( [1 if ("OL" in c) else 0 for c in df["class_label"].values], index = df.index )
+            df["generator_flag"] = pd.Series( [1 if (self.addSampleSuffix in c) else 0 for c in df["class_label"].values], index = df.index )
 
             # add index labelling to dataframe
             # df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
-            df["index_label"] = pd.Series( [self.class_translation[c[:-3]] if (c.endswith('_OL')) else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
+            # give additional samples with other ending the same index_label value as samples without the other ending
+            df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if (c.endswith(self.addSampleSuffix)) 
+                else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
             
             
             # norm weights to mean(1)

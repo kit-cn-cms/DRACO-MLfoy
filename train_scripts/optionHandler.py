@@ -72,6 +72,14 @@ binaryOptions.add_option("--signal", dest="signal_class", default=None, metavar=
         help="STR of signal class for binary classification (allows comma separated list) (same as --signalclass)")
 parser.add_option_group(binaryOptions)
 
+adversaryopts = optparse.OptionGroup(parser, "Adversary Settings")
+adversaryopts.add_option("--adversary", dest="adversary", action = "store_true", default=False,
+        help="activate to train a classifying adversarial network")
+adversaryopts.add_option("--penalty", dest="penalty", default=10,
+        help="INT number of penalty in loss function for adversary training (default 10)", metavar="PENALTY")
+adversaryopts.add_option("--addsamplenaming", dest="AddSampleNaming", default="_dnn_OL.h5",
+        help="file ending for the samples in input directory (default _dnn_OL.h5)", metavar="SAMPLENAMING")
+
 
 class optionHandler:
     def __init__(self, argv):
@@ -238,3 +246,15 @@ class optionHandler:
 
     def getSignalScale(self):
         return self.__options.sigScale
+
+    def isAdversary(self):
+        return self.__options.adversary
+
+    def getPenalty(self):
+        return int(self.__options.penalty)
+
+    def getAddSampleName(self, sample):
+        return sample+self.__options.AddSampleNaming
+
+    def getAddSampleSuffix(self):
+        return self.__options.AddSampleNaming.replace("_dnn", "", 1)[:-3]
