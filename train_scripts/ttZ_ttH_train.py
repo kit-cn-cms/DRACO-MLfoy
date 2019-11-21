@@ -25,10 +25,10 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = options.getNomWeight())
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
