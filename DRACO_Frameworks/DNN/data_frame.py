@@ -335,5 +335,14 @@ class DataFrame(object):
         return self.df_test["is_ttH"].values
 
     # full sample ----------------------------------
-    def get_full_df(self):
-        return self.unsplit_df[self.train_variables]
+    def get_full_df(self, as_matrix=True):
+        if as_matrix: return self.unsplit_df[self.train_variables].values
+        else:         return self.unsplit_df[self.train_variables]
+
+    def get_full_df_labels(self, as_categorical = True):
+        if self.binary_classification: return self.unsplit_df["binaryTarget"].values
+        if as_categorical: return to_categorical( self.unsplit_df["index_label"].values )
+        else:              return self.unsplit_df["index_label"].values
+
+    def get_full_df_lumi_weights(self):
+        return self.unsplit_df["lumi_weight"].values

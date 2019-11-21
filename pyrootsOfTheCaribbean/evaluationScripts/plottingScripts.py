@@ -213,12 +213,12 @@ class getDiscriminators:
             self.signalFlag.append(self.data.get_class_flag(signal_class))
 
 
-    def getHistograms(self):
+    def getHistograms(self,tag=None):
         Histograms = {}
 
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
-            print("\nPLOTTING OUTPUT NODE '"+str(node_cls))+"'"
+            print("\nGETTING OUTPUT NODE '"+str(node_cls))+"'"
 
             # get index of node
             nodeIndex = self.data.class_translation[node_cls]
@@ -238,6 +238,8 @@ class getDiscriminators:
             bkgLabels = []
             weightIntegral = 0
 
+            Histograms[node_cls]={}
+
             sig_values = []
             sig_labels = []
             sig_weights = []
@@ -248,15 +250,16 @@ class getDiscriminators:
 
                 # filter values per event class
                 filtered_values = [ out_values[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                    if self.data.get_full_df_labels(as_categorical = False)[k] == classIndex \
                     and self.predicted_classes[k] == nodeIndex]
 
-                filtered_weights = [ self.data.get_lumi_weights()[k] for k in range(len(out_values)) \
-                    if self.data.get_test_labels(as_categorical = False)[k] == classIndex \
+                filtered_weights = [ self.data.get_full_df_lumi_weights()[k] for k in range(len(out_values)) \
+                    if self.data.get_full_df_labels(as_categorical = False)[k] == classIndex \
                     and self.predicted_classes[k] == nodeIndex]
 
                 print("{} events in discriminator: {}\t(Integral: {})".format(truth_cls, len(filtered_values), sum(filtered_weights)))
 
+                
                 if j in signalIndex:
                     # signal histogram
                     sig_values.append(filtered_values)
@@ -265,23 +268,29 @@ class getDiscriminators:
                 else:
                     # background histograms
                     weightIntegral += sum(filtered_weights)
-
+                    if tag == None:
+                        xtitle = str(truth_cls)+" at "+str(node_cls)+" node"
+                    else:
+                        xtitle = str(truth_cls)+" at "+str(node_cls)+" node in "+str(tag)
                     histogram = setup.setupHistogram(
                         values    = filtered_values,
                         weights   = filtered_weights,
                         nbins     = self.nbins,
                         bin_range = self.bin_range,
                         color     = setup.GetPlotColor(truth_cls),
-                        xtitle    = str(truth_cls)+" at "+str(node_cls)+" node",
+                        xtitle    = xtitle,
                         ytitle    = setup.GetyTitle(),
-                        filled    = True)
+                        filled    = False)
 
-                    bkgHists.append( histogram )
-                    bkgLabels.append( truth_cls )
+                    Histograms[node_cls][truth_cls]=histogram
 
             sigHists = []
             scaleFactors = []
             for iSig in range(len(sig_labels)):
+                if tag == None:
+                    xtitle = str(sig_labels[iSig])+" at "+str(node_cls)+" node"
+                else:
+                    xtitle = str(sig_labels[iSig])+" at "+str(node_cls)+" node in "+str(tag)
                 # setup signal histogram
                 sigHist = setup.setupHistogram(
                     values    = sig_values[iSig],
@@ -289,17 +298,123 @@ class getDiscriminators:
                     nbins     = self.nbins,
                     bin_range = self.bin_range,
                     color     = setup.GetPlotColor(sig_labels[iSig]),
-                    xtitle    = str(sig_labels[iSig])+" at "+str(node_cls)+" node",
+                    xtitle    = xtitle,
                     ytitle    = setup.GetyTitle(),
                     filled    = False)
 
                 # set signal histogram linewidth
                 sigHist.SetLineWidth(3)
-        
-            Histograms[node_cls]={}
-            Histograms[node_cls]["sigHists"]=sigHist
-            Histograms[node_cls]["bkgHists"]=bkgHists
+                Histograms[node_cls][self.signal_class]=sigHist
+           
         return Histograms
+class plotShapes:
+    def __init__(self, histograms, outputdir, categorylabel, DNNname):
+        self.histograms = histograms
+        self.outputdir = outputdir
+        if not os.path.exists(self.outputdir):
+            os.makedirs(self.outputdir)
+            print("Directory '%s' created" %self.outputdir) 
+        self.DNNname = DNNname
+        self.categorylabel = categorylabel
+
+    def plot(self):
+        for node in self.histograms:
+            for process in self.histograms[node]:
+                print("\nPLOTTING OUTPUT NODE '"+str(node)+"' PROCESS '"+str(process)+"'")
+                canvasname=node+"_"+process
+                canvas = self.getCanvas(canvasname)
+                # setup legend
+                legend = self.getLegend()
+
+                yMax = 1e-9
+                yMinMax = 1000.
+                for i, dnn in enumerate(self.histograms[node][process]):
+                    h=self.histograms[node][process][dnn]
+                    yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
+                    if h.GetBinContent(h.GetMaximumBin()) > 0:
+                        yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
+
+
+                option = "histo"
+                histtitle= self.DNNname+": "+process+" at "+node+" node"
+                for i, dnn in enumerate(self.histograms[node][process]):
+                    histogram=self.histograms[node][process][dnn]
+                    if i==0:
+                        histogram.SetLineColor(i+2)
+                        histogram.GetXaxis().SetTitle(histtitle)
+                        histogram.GetYaxis().SetRangeUser(0, yMax*1.5)
+                        histogram.DrawCopy(option+"")
+                    else:
+                        histogram.SetLineColor(i+2)
+                        histogram.DrawCopy(option+"same")
+                    legend.AddEntry(histogram, dnn, "F")
+                
+
+                # draw legend
+                legend.Draw("same")
+
+                # add lumi or private work label to plot
+                # if self.privateWork:
+                #     setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+                # else:
+                #     setup.printLumi(canvas, ratio = plotOptions["ratio"])
+
+                # add category label
+                
+                self.printCategoryLabel(canvas,self.categorylabel)
+
+                nodepath= self.outputdir+"/{}/".format(node)
+                if not os.path.exists(nodepath):
+                    os.makedirs(nodepath)
+                    print("Directory '%s' created" %nodepath)
+
+                out_path = nodepath + "/outputNode_{}_{}.pdf".format(node, process)
+                
+                self.saveCanvas(canvas, out_path)
+
+        # # add the histograms together
+        # workdir = os.path.dirname(self.plotdir[:-1])
+        # cmd = "pdfunite "+str(self.plotdir)+"/outputNode_*.pdf "+str(workdir)+"/outputNodes.pdf"
+        # print(cmd)
+        # os.system(cmd)
+
+    def getCanvas(self, name):
+        canvas = ROOT.TCanvas(name, name, 1024, 768)
+        canvas.SetTopMargin(0.07)
+        canvas.SetBottomMargin(0.15)
+        canvas.SetRightMargin(0.05)
+        canvas.SetLeftMargin(0.15)
+        canvas.SetTicks(1,1)
+        return canvas
+
+    def getLegend(self):
+        legend=ROOT.TLegend(0.70,0.6,0.95,0.9)
+        legend.SetBorderSize(0);
+        legend.SetLineStyle(0);
+        legend.SetTextFont(42);
+        legend.SetTextSize(0.05);
+        legend.SetFillStyle(0);
+        return legend
+
+    def saveCanvas(self, canvas, path):
+        canvas.SaveAs(path)
+        canvas.SaveAs(path.replace(".pdf",".png"))
+        canvas.Clear()
+
+    def printCategoryLabel(self, pad, catLabel):
+        pad.cd(1)
+        l = pad.GetLeftMargin()
+        t = pad.GetTopMargin()
+        r = pad.GetRightMargin()
+        b = pad.GetBottomMargin()
+
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+
+        latex.DrawLatex(l+0.02,1.-t-0.06, catLabel)
+
+    
 
 class plotOutputNodes:
     def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):

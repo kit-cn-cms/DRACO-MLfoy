@@ -237,6 +237,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
+    
 
 
     def predict_event_query(self, query ):
@@ -728,7 +729,7 @@ class DNN():
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-    def get_discriminators(self, signal_class = None, nbins = None, bin_range = None):
+    def get_discriminators(self, signal_class = None, nbins = None, bin_range = None, tag=None):
 
         ''' plot all events classified as one category '''
         if not bin_range:
@@ -746,11 +747,28 @@ class DNN():
             event_category      = self.category_label,
             plotdir             = self.plot_path)
 
-        self.Histograms = plotDiscrs.getHistograms()
+        self.Histograms = plotDiscrs.getHistograms(tag)
+
+    def evaluate_dataset(self, inputDirectory):
+        ''' load an already trained model '''
+        checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
+
+        # get the keras model
+        self.model = keras.models.load_model(checkpoint_path)
+        self.model.summary()
+        # evaluate test dataset with keras model
+        #self.model_eval = self.model.evaluate(self.data.get_full_df(as_matrix = True), self.data.get_test_labels())
+
+        # save predictions  with keras model
+        self.model_prediction_vector = self.model.predict(self.data.get_full_df(as_matrix = True) )
+
+        # save predicted classes with argmax  with keras model
+        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+
 
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
-category_label= None, inputData=None, data_era=None):
+category_label= None, inputData=None, data_era=None, shuffleSeed=None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -765,14 +783,27 @@ category_label= None, inputData=None, data_era=None):
     # load samples
     if inputData==None:
         input_samples = data_frame.InputSamples(config["inputData"])
+        print "using config"
     else:
         input_samples = data_frame.InputSamples(str(inputData))
+    print input_samples
+    print inputData
+
+    if shuffleSeed==None:
+        shuffle_seed = config["shuffleSeed"]
+    else:
+        shuffle_seed = shuffleSeed
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
 
     for sample in config["eventClasses"]:
-        input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
+        if inputData==None:
+            input_samples.addSample(sample["samplePath"], sample["sampleLabel"], normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
+        else:
+            samplePath=inputData+sample["sampleLabel"]+"_dnn.h5"
+            print samplePath
+            input_samples.addSample(samplePath, sample["sampleLabel"],normalization_weight = sample["sampleWeight"], total_weight_expr = total_weight_expr)
 
     print("shuffle seed: {}".format(config["shuffleSeed"]))
     # init DNN class
@@ -781,14 +812,14 @@ category_label= None, inputData=None, data_era=None):
       input_samples   = input_samples,
       category_name  = config["JetTagCategory"],
       train_variables = config["trainVariables"],
-      shuffle_seed    = config["shuffleSeed"],
+      shuffle_seed    = shuffle_seed,
       dataEra       = data_era,
     )
 
 
 
-    # load the trained model
-    dnn.load_trained_model(inputDirectory)
+    # evaluate the trained model
+    dnn.evaluate_dataset(inputDirectory)
 #    dnn.predict_event_query()
 
     return dnn
