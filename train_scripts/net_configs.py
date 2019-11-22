@@ -176,8 +176,8 @@ config_dict["adversary_test"] = {
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
         "adversary_layers":         [100,100],
-        "pretrain_class_epochs":    20,
-        "pretrain_adv_epochs":      5,
-        "adversary_epochs":         1,
-        "adversary_iterations":     1,
+        "pretrain_class_epochs":    200,
+        "pretrain_adv_epochs":      50,
+        "adversary_epochs":         10,
+        "adversary_iterations":     100,
 }

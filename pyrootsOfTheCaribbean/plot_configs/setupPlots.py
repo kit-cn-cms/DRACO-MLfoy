@@ -75,10 +75,10 @@ def setupHistogram(
 
 def setupYieldHistogram(yields, classes, xtitle, ytitle, color = ROOT.kBlack, filled = True):
     # define histogram
-    histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", len(classes), 0, len(classes))
+    histogram = ROOT.TH1D(xtitle.replace(" ","_"), "", len(classes)-1, 0, len(classes)-1)
     histogram.Sumw2(True)
 
-    for iBin in range(len(classes)):
+    for iBin in range(len(classes)-1):
         histogram.SetBinContent(iBin+1, yields[iBin])
         histogram.SetBinError(iBin+1, np.sqrt(yields[iBin]))
 
@@ -106,6 +106,7 @@ def setupYieldHistogram(yields, classes, xtitle, ytitle, color = ROOT.kBlack, fi
         histogram.SetLineWidth(2)
 
     for i, cls in enumerate(classes):
+        if i>=6: continue
         histogram.GetXaxis().SetBinLabel(i+1, cls)
 
     return histogram

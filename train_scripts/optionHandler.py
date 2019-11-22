@@ -251,7 +251,7 @@ class optionHandler:
         return self.__options.adversary
 
     def getPenalty(self):
-        return int(self.__options.penalty)
+        return float(self.__options.penalty)
 
     def getAddSampleName(self, sample):
         return sample+self.__options.AddSampleNaming

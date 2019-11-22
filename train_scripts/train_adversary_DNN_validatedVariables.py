@@ -121,4 +121,7 @@ if options.doPlots():
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
 
-# example: python train_adversary_reference.py -i /storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/ --naming _dnn_newJEC.h5 -n adversary_test -c ge6j_ge3t -v newJEC_validated -p -P -R -e 1200 -o adversary_test
+# example: python train_adversary.py -i /storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/ --naming _dnn_newJEC.h5 -n adversary_test -c ge4j_3t -v newJEC_validated -p -P -R --penalty 0 -o adversary_v1/adversary_0lambda
+
+# TODO: addapt Lea's evaluation with other inputData (DNN/DNN.py: loadDNN, evaluate_dataset; utils/getVarianceDNNcombined16.py)
+#       --> KS test with different ttbb samples
