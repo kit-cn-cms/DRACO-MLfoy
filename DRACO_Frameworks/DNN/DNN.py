@@ -729,7 +729,7 @@ class DNN():
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-    def get_discriminators(self, signal_class = None, nbins = None, bin_range = None, tag=None):
+    def get_discriminators(self, signal_class = None, nbins = None, bin_range = None, tag=None, binning=None, binflag=None):
 
         ''' plot all events classified as one category '''
         if not bin_range:
@@ -745,7 +745,9 @@ class DNN():
             bin_range           = bin_range,
             signal_class        = signal_class,
             event_category      = self.category_label,
-            plotdir             = self.plot_path)
+            plotdir             = self.plot_path,
+            binning             = binning,
+            binflag             = binflag)
 
         self.Histograms = plotDiscrs.getHistograms(tag)
 

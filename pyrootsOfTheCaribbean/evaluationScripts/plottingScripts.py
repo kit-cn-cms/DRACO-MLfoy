@@ -192,7 +192,7 @@ class plotDiscriminators:
         os.system(cmd)
 
 class getDiscriminators:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, binning=None,binflag=None):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
@@ -205,6 +205,8 @@ class getDiscriminators:
         self.plotdir           = plotdir
         self.signalIndex       = []
         self.signalFlag        = []
+        self.binning           = binning
+        self.binflag           = binflag
 
         if self.signal_class:
             print self.signal_class
@@ -231,6 +233,12 @@ class getDiscriminators:
 
             # get output values of this node
             out_values = self.prediction_vector[:,i]
+
+            if not self.binning == None:
+                self.bin_range=self.binning[node_cls]
+                print self.bin_range
+                self.nbins = self.bin_range.size - 1
+                print self.nbins
 
 
             # fill lists according to class
@@ -280,7 +288,8 @@ class getDiscriminators:
                         color     = setup.GetPlotColor(truth_cls),
                         xtitle    = xtitle,
                         ytitle    = setup.GetyTitle(),
-                        filled    = False)
+                        filled    = False,
+                        binflag   = self.binflag)
 
                     Histograms[node_cls][truth_cls]=histogram
 
@@ -300,14 +309,16 @@ class getDiscriminators:
                     color     = setup.GetPlotColor(sig_labels[iSig]),
                     xtitle    = xtitle,
                     ytitle    = setup.GetyTitle(),
-                    filled    = False)
+                    filled    = False,
+                    binflag   = self.binflag)
 
                 # set signal histogram linewidth
                 sigHist.SetLineWidth(3)
                 Histograms[node_cls][self.signal_class]=sigHist
            
         return Histograms
-class plotShapes:
+
+class meanAndMeanError:
     def __init__(self, histograms, outputdir, categorylabel, DNNname):
         self.histograms = histograms
         self.outputdir = outputdir
@@ -317,7 +328,74 @@ class plotShapes:
         self.DNNname = DNNname
         self.categorylabel = categorylabel
 
-    def plot(self):
+    def calculate(self):
+
+
+        for dataera in self.histograms:
+            meanHistograms = {}
+            stdHistograms = {}
+            for model in self.histograms[dataera]:
+                for node in self.histograms[dataera][model]:
+                    meanHistograms[node] = {}
+                    stdHistograms[node] = {}
+                    for process in self.histograms[dataera][model][node]:
+                        meanHistograms[node][process] = {}
+                        stdHistograms[node][process] = {}
+
+            print meanHistograms
+            print stdHistograms
+
+            for model in self.histograms[dataera]:
+                for node in self.histograms[dataera][model]:
+                    for process in self.histograms[dataera][model][node]:
+                        hist_mean = self.histograms[dataera][model][node][process]["dnn0"].Clone()
+                        hist_std = self.histograms[dataera][model][node][process]["dnn0"].Clone()
+                        for n in range(self.histograms[dataera][model][node][process]["dnn0"].GetNbinsX()):
+                            print "Bin {}".format(n)
+                            dnnbincontent = []
+                            for dnnname in self.histograms[dataera][model][node][process]:
+                                dnn=self.histograms[dataera][model][node][process][dnnname]
+                                dnnbincontent.append(dnn.GetBinContent(n))
+                            temp = np.array(dnnbincontent)
+                            temp_mean = np.mean(temp)
+                            temp_std = np.std(temp)
+
+                            hist_mean.SetBinContent(n,temp_mean)
+                            hist_mean.SetBinError(n,temp_std)
+                            hist_std.SetBinContent(n,temp_std)
+
+                        meanHistograms[node][process][model] = hist_mean
+                        stdHistograms[node][process][model] = hist_std
+
+            print meanHistograms
+            print stdHistograms
+            outputdir=self.outputdir+"/Dataera_"+str(dataera)+"/"
+
+            PSmean = plotShapes(histograms=meanHistograms, 
+                                outputdir=outputdir+"/mean/",
+                                categorylabel=self.categorylabel,DNNname="mean")
+            PSmean.plot(error=True)
+
+            PSstd = plotShapes(histograms=stdHistograms, 
+                                outputdir=outputdir+"/standardDeviation/",
+                                categorylabel=self.categorylabel,DNNname="standard deviation")
+            PSstd.plot()
+
+
+
+
+
+class plotShapes:   
+    def __init__(self, histograms, outputdir, categorylabel, DNNname):
+        self.histograms = histograms
+        self.outputdir = outputdir
+        if not os.path.exists(self.outputdir):
+            os.makedirs(self.outputdir)
+            print("Directory '%s' created" %self.outputdir) 
+        self.DNNname = DNNname
+        self.categorylabel = categorylabel
+
+    def plot(self, error=None):
         for node in self.histograms:
             for process in self.histograms[node]:
                 print("\nPLOTTING OUTPUT NODE '"+str(node)+"' PROCESS '"+str(process)+"'")
@@ -325,6 +403,11 @@ class plotShapes:
                 canvas = self.getCanvas(canvasname)
                 # setup legend
                 legend = self.getLegend()
+
+                #move Over and Underflow
+                for dnn in self.histograms[node][process]:
+                    histogram=self.histograms[node][process][dnn]
+                    self.moveOverUnderFlow(histogram)
 
                 yMax = 1e-9
                 yMinMax = 1000.
@@ -334,8 +417,9 @@ class plotShapes:
                     if h.GetBinContent(h.GetMaximumBin()) > 0:
                         yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
 
-
-                option = "histo"
+                if error==None:
+                    option = "histo"
+                else: option="histo E0"
                 histtitle= self.DNNname+": "+process+" at "+node+" node"
                 for i, dnn in enumerate(self.histograms[node][process]):
                     histogram=self.histograms[node][process][dnn]
@@ -413,6 +497,25 @@ class plotShapes:
         latex.SetTextColor(ROOT.kBlack)
 
         latex.DrawLatex(l+0.02,1.-t-0.06, catLabel)
+
+    def moveOverUnderFlow(self, hist):
+        # move underflow
+        hist.SetBinContent(1, hist.GetBinContent(0)+hist.GetBinContent(1))
+        # move overflow
+        hist.SetBinContent(hist.GetNbinsX(), hist.GetBinContent(hist.GetNbinsX()+1)+hist.GetBinContent(hist.GetNbinsX()))
+
+        # set underflow error
+        hist.SetBinError(1, ROOT.TMath.Sqrt(
+            ROOT.TMath.Power(hist.GetBinError(0),2) + ROOT.TMath.Power(hist.GetBinError(1),2) ))
+        # set overflow error
+        hist.SetBinError(hist.GetNbinsX(), ROOT.TMath.Sqrt(
+            ROOT.TMath.Power(hist.GetBinError(hist.GetNbinsX()),2) + 
+            ROOT.TMath.Power(hist.GetBinError(hist.GetNbinsX()+1),2) ))
+        #delete overflow and underflow after moving
+        hist.SetBinContent(0,0)
+        hist.SetBinError(0,0)
+        hist.SetBinContent(hist.GetNbinsX()+1,0)
+        hist.SetBinError(hist.GetNbinsX()+1,0)
 
     
 

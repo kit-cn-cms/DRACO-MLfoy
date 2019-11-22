@@ -40,9 +40,12 @@ def setupHistogram(
         values, weights,
         nbins, bin_range,
         xtitle, ytitle,
-        color = ROOT.kBlack, filled = True):
+        color = ROOT.kBlack, filled = True, binflag=None):
     # define histogram
-    histogram = ROOT.TH1D(xtitle, "", nbins, *bin_range)
+    if binflag == None:
+        histogram = ROOT.TH1D(xtitle, "", nbins, *bin_range)
+    else:
+        histogram = ROOT.TH1D(xtitle, "", nbins, bin_range)
     histogram.Sumw2(True)
 
     for v, w in zip(values, weights):
