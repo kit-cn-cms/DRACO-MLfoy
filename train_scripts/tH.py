@@ -26,19 +26,20 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 
 # define all samples
 # only ttH sample needs even/odd splitting for 2017 MC
-input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = 1.)# options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tH"), label = "tH", normalization_weight = 1.)
-input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = 1.)
-input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
-input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("t_ttH"),  label = "t_ttH",  normalization_weight = 1.)# options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = 1.)# options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("tH"), label = "tH", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = 1.)
 #input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = 1.)
-input_samples.addSample(options.getDefaultName("ttb_bb"),  label = "ttb_bb",  normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttb_bb"),  label = "ttb_bb",  normalization_weight = 1.)
 
-#sampleDict = pputils.readSampleFile(options.getInputDirectory())
-#print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-#print sampleDict
-#print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-#pputils.addToInputSamples(input_samples, sampleDict)
+sampleDict = pputils.readSampleFile(options.getInputDirectory())
+print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+print sampleDict
+print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+pputils.addToInputSamples(input_samples, sampleDict)
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
