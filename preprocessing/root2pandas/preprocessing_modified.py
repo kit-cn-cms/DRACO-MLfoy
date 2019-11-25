@@ -118,7 +118,7 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
 
 dataset.addSample(
     sampleName  = "ttZ",
-    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_1/*nominal*.root",
     categories  = ttZ_categories,
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)"

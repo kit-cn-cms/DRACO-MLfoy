@@ -8,4 +8,4 @@ eval `scramv1 runtime -sh`
 
 cd -
 
-python preprocessing_modified.py -o DNN_Input_allVar -v RawVariables_firstSelec
+python preprocessing_modified.py -o DNN_Input_allVar -v firstSelec
