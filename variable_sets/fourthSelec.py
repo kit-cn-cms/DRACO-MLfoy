@@ -344,6 +344,22 @@ variables["ge6j_ge3t"] = variables["5j_ge3t"] + [
     #'RecoTTH_cosdTheta_Higgs_topLep',
     'Reco_best_higgs_mass',
     'Reco_dEta_fn',
+    'Reco_ttH_btophad_eta',
+    'Reco_ttH_btophad_idx',
+    'Reco_ttH_btophad_m',
+    'Reco_ttH_btophad_phi',
+    'Reco_ttH_btophad_pt',
+    'Reco_ttH_btoplep_eta',
+    'Reco_ttH_btoplep_idx',
+    'Reco_ttH_btoplep_m',
+    'Reco_ttH_btoplep_phi',
+    'Reco_ttH_btoplep_pt',
+    'Reco_ttH_btoplep_w_dr',
+    
+    'RecoTTH_TopHad_M',
+    'RecoTTH_TopHad_W_Pt',
+
+
     
     #additional jet vars
     'CSV[5]',

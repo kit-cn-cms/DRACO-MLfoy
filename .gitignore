@@ -6,4 +6,5 @@
 *.aux
 *.nav
 *.out
+error.txt
 workdir/

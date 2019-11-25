@@ -65,6 +65,7 @@ inputdir = opts.workdir+"/"+opts.inputdir
 if not "JTSTRING" in inputdir:
     inputdir+="_JTSTRING/"
 print("using input directory {}".format(inputdir))
+#print(args)
 
 if not os.path.exists(opts.outdir):
     os.makedirs(opts.outdir)
