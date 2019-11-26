@@ -60,7 +60,7 @@ config_dict["STXS_2017"] = {
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.50,
         "L2_Norm":                  1e-5,
-        "batch_size":               100,
+        "batch_size":               10000,
         "optimizer":                optimizers.Adam(1e-4),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
