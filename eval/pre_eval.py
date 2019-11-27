@@ -3,7 +3,7 @@ import sys
 import optparse
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
-basedir = os.path.dirname(os.path.dirname(filedir))
+basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 import root2pandas as root2pandas
@@ -72,9 +72,10 @@ base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 ttH_selection = "(Evt_Odd == 1)"
 
 ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH")
-ttH_categories.addCategory("bkg")
+#ttH_categories.addCategory("ttH")
+#ttH_categories.addCategory("bkg")
 #ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
+ttH_categories.addCategory("All_Combs")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(

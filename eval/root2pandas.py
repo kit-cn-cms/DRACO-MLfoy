@@ -7,7 +7,7 @@ import os
 from multiprocessing import Pool
 
 import HiggsReco
-import HiggsReco_mitPlot
+#import bkgReco
 
 # multi processing magic
 def processChunk(info):
@@ -270,7 +270,6 @@ class Dataset:
 
 	def processChunk(self, sample, files, chunkNumber):
 		files = [f for f in files if not f == ""]
-
 		n_entries = 0
 		concat_df = pd.DataFrame()
 		n_files = len(files)
@@ -294,7 +293,7 @@ class Dataset:
 			df = tree.pandas.df(self.variables)
 
 			# delete subentry index
-			df = df.reset_index( drop = True)
+			df = df.reset_index(drop = True)
 
 			# handle vector variables, loop over them
 			for vecvar in self.vector_variables:
@@ -325,10 +324,10 @@ class Dataset:
 
 			# perform ttH reconstruction
 			if self.HiggsReco:
-				df = HiggsReco.findbestHiggs(df, self.variables)
+#				df = HiggsReco.findbestHiggs(df, self.variables)
 
-				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
-				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
+#				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
+#				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
 
 #			 Top Bkg:
 
@@ -340,6 +339,11 @@ class Dataset:
 #				df = HiggsReco.findallbkg(df, self.variables)
 #				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
 
+#			eval:
+
+				df = HiggsReco.eval(df, self.variables)
+
+				sample.categories.categories["All_Combs"] = "(Event_Nr > 0)"
 
 
 			if concat_df.empty: concat_df = df
