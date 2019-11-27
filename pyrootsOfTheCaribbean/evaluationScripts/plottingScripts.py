@@ -16,7 +16,7 @@ import plot_configs.setupPlots as setup
 
 
 class plotDiscriminators:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1, lang="en"):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax( self.prediction_vector, axis = 1)
@@ -31,6 +31,7 @@ class plotDiscriminators:
         self.sigScale          = sigScale
         self.signalIndex       = []
         self.signalFlag        = []
+        self.lang              = lang
 
         if self.signal_class:
             for signal in signal_class:
@@ -195,7 +196,7 @@ class plotDiscriminators:
 
 
 class plotOutputNodes:
-    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1):
+    def __init__(self, data, prediction_vector, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, sigScale = -1, lang="en"):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.event_classes     = event_classes
@@ -208,6 +209,7 @@ class plotOutputNodes:
         self.sigScale          = sigScale
         self.signalIndex       = []
         self.signalFlag        = []
+        self.lang              = lang
 
         if self.signal_class:
             for signal in signal_class:
@@ -352,7 +354,7 @@ class plotOutputNodes:
 
 
 class plotClosureTest:
-    def __init__(self, data, test_prediction, train_prediction, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
+    def __init__(self, data, test_prediction, train_prediction, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False, lang="en"):
         self.data               = data
         self.test_prediction    = test_prediction
         self.train_prediction   = train_prediction
@@ -368,6 +370,7 @@ class plotClosureTest:
         self.plotdir            = plotdir
         self.logscale           = logscale
         self.signalIndex       = []
+        self.lang              = lang
 
         if self.signal_class:
             for signal in signal_class:
@@ -627,7 +630,7 @@ class plotClosureTest:
 
 
 class plotConfusionMatrix:
-    def __init__(self, data, prediction_vector, event_classes, event_category, plotdir):
+    def __init__(self, data, prediction_vector, event_classes, event_category, plotdir, lang="en"):
         self.data              = data
         self.prediction_vector = prediction_vector
         self.predicted_classes = np.argmax(self.prediction_vector, axis = 1)
@@ -637,6 +640,7 @@ class plotConfusionMatrix:
 
         self.event_category    = event_category
         self.plotdir           = plotdir
+        self.lang              = lang
 
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
@@ -676,7 +680,7 @@ class plotConfusionMatrix:
 
 
 class plotEventYields:
-    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale, sigScale = -1):
+    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale, sigScale = -1, lang="en"):
         self.data               = data
         self.prediction_vector  = prediction_vector
         self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
@@ -685,6 +689,7 @@ class plotEventYields:
         self.n_classes          = len(self.event_classes)
         self.signal_class       = signal_class
         self.signalIndex       = []
+        self.lang              = lang
 
         if self.signal_class:
             for signal in signal_class:
@@ -817,7 +822,7 @@ class plotEventYields:
 
 
 class plotBinaryOutput:
-    def __init__(self, data, test_predictions, train_predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1):
+    def __init__(self, data, test_predictions, train_predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1, lang="en"):
         self.data               = data
         self.test_predictions   = test_predictions
         self.train_predictions  = train_predictions
@@ -827,6 +832,7 @@ class plotBinaryOutput:
         self.plotdir            = plotdir
         self.logscale           = logscale
         self.sigScale           = sigScale
+        self.lang               = lang
 
         self.printROCScore = False
         self.privateWork = False
@@ -921,7 +927,7 @@ class plotBinaryOutput:
 
 
 class plotEventYields:
-    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):
+    def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale, lang="en"):
         self.data               = data
         self.prediction_vector  = prediction_vector
         self.predicted_classes  = np.argmax(self.prediction_vector, axis = 1)
@@ -929,7 +935,8 @@ class plotEventYields:
         self.event_classes      = event_classes
         self.n_classes          = len(self.event_classes)
         self.signal_class       = signal_class
-        self.signalIndex       = []
+        self.signalIndex        = []
+        self.lang               = lang
 
         if self.signal_class:
             for signal in signal_class:

@@ -188,9 +188,14 @@ if opts.generate_variableset:
                 tableVariables[jt] = variables
             allVariables+=tableVariables[jt]
         allVariables = list(sorted(set(allVariables)))
-
+        
+        foundNoLatex = False
         for v in allVariables:
-            table += makeLatexCompatible(translationFile.loc[v,"displayname"])
+            try:
+                table += makeLatexCompatible(translationFile.loc[v,"displayname"])
+            except:
+                table += str(v) + "NOLATEX"
+                foundNoLatex = True
             for jt in jtRegions:
                 table += " & "
                 if v in tableVariables[jt]:
@@ -204,6 +209,7 @@ if opts.generate_variableset:
         with open(outfile, "w") as f:
             f.write(table)
         print("wrote latex table to {}".format(outfile))
-
+        if foundNoLatex:
+            print("there were variables with no explicist definition for latex code")
 
 
