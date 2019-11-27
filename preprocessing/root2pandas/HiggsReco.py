@@ -66,14 +66,14 @@ def findbestHiggs(df, additionalVariables):
 		bestIndices = np.full(2,int(1))
 
 		for iHiggs1 in range(nJets):
-			#if event["Jet_CSV[{}]".format(iHiggs1)] < csvWP: continue
+			if event["Jet_CSV[{}]".format(iHiggs1)] < csvWP: continue
 			deltaR_B1 = getDeltaR(event, "GenHiggs_B1", iHiggs1)
 			if deltaR_B1 < bestDeltaR1:
 				bestDeltaR1 = deltaR_B1
 				bestIndices[0] = iHiggs1
 
 		for iHiggs2 in range(nJets):
-			#if event["Jet_CSV[{}]".format(iHiggs2)] < csvWP: continue
+			if event["Jet_CSV[{}]".format(iHiggs2)] < csvWP: continue
 			deltaR_B2 = getDeltaR(event, "GenHiggs_B2", iHiggs2)
 			if deltaR_B2 < bestDeltaR2:
 				bestDeltaR2 = deltaR_B2
@@ -95,25 +95,27 @@ def findbestHiggs(df, additionalVariables):
 		assignments.append(np.array(bestIndices))
 
 		# generate random wrong assignments
-#		for iWrong in range(nWrongAssignments):
-#			foundNew = False
-#			while not foundNew:
-#				wrong = np.random.permutation(nJets)[:2]
-#				foundNew = True
-#				for p in bestIndices:
-#					if (p == wrong[0] or p == wrong[1]):
-#						foundNew = False
-#			assignments.append(wrong)
-
 		for iWrong in range(nWrongAssignments):
-			wrong = np.random.permutation(nJets)[:2]
-			foundNew = True
-			for p in bestIndices:
-				if (p == wrong[0] or p == wrong[1]):
-					foundNew = False
-			if foundNew == True:
-				assignments.append(wrong)
+			foundNew = False
+			while not foundNew:
+				wrong = np.random.permutation(nJets)[:2]
+				foundNew = True
+				for p in bestIndices:
+					if (p == wrong[0] or p == wrong[1]):
+						foundNew = False
+			assignments.append(wrong)
 
+
+	#Generate less bkg
+#		for iWrong in range(nWrongAssignments):
+#			wrong = np.random.permutation(nJets)[:2]
+#			foundNew = True
+#			for p in bestIndices:
+#				if (p == wrong[0] or p == wrong[1]):
+#					foundNew = False
+#			if foundNew == True:
+#				assignments.append(wrong)
+#
 		# fill assignments
 		for idx, ass in enumerate(assignments):
 			# fill variables
