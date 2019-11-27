@@ -6,8 +6,13 @@ import numpy as np
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
-        "ttZ":          ROOT.kCyan,
         "ttH":          ROOT.kBlue+1,
+        "ttH_1":        830,
+        "ttH_2":        418,
+        "ttH_3":        433,
+        "ttH_4":        867,
+        "ttH_5":        602,
+        "ttZ":          ROOT.kCyan,
         "ttlf":         ROOT.kRed-7,
         "ttcc":         ROOT.kRed+1,
         "ttbb":         ROOT.kRed+3,
@@ -24,7 +29,7 @@ def GetPlotColor( cls ):
         }
 
     if "ttZ" in cls: cls = "ttZ"
-    if "ttH" in cls: cls = "ttH"
+    if "ttH" in cls and cls not in color_dict: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
