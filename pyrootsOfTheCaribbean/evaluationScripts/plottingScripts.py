@@ -549,7 +549,6 @@ class plotConfusionMatrix:
 
         self.event_category    = event_category
         self.plotdir           = plotdir
-        print(len(self.predicted_classes))
 
         self.confusion_matrix = confusion_matrix(
             self.data.get_test_labels(as_categorical = False), self.predicted_classes)
@@ -660,6 +659,7 @@ class plotEventYields:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
                     classes = self.event_classes,
+                    n_classes = self.n_classes,
                     xtitle  = str(truth_cls)+" event yield",
                     ytitle  = yTitle,
                     color   = setup.GetPlotColor(truth_cls),
@@ -675,6 +675,7 @@ class plotEventYields:
                 histogram = setup.setupYieldHistogram(
                     yields  = class_yields,
                     classes = self.event_classes,
+                    n_classes = self.n_classes,
                     xtitle  = str(truth_cls)+" event yield",
                     ytitle  = yTitle,
                     color   = setup.GetPlotColor(truth_cls),
