@@ -39,3 +39,16 @@ config_dict["ttZAnalysis3"] = {
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     20,
         }
+
+config_dict["ttZAnalysis4"] = {
+        "layers":                   [30, 25],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "batch_size":               250,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     20,
+        }
