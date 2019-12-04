@@ -15,6 +15,7 @@ sys.path.append(basedir)
 
 # import class for DNN training
 import DRACO_Frameworks.DNN.DNN as DNN
+import DRACO_Frameworks.DNN.BNN as BNN
 import DRACO_Frameworks.DNN.data_frame as df
 
 options.initArguments()
@@ -33,8 +34,8 @@ input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normal
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
-# initializing DNN training class
-dnn = DNN.DNN(
+# initializing BNN training class
+bnn = BNN.BNN(
     save_path       = options.getOutputDir(),
     input_samples   = input_samples,
     category_name   = options.getCategory(),
@@ -52,47 +53,48 @@ dnn = DNN.DNN(
     norm_variables  = options.doNormVariables())
 
 # build DNN model
-dnn.build_model(options.getNetConfig())
+bnn.build_model(options.getNetConfig())
 
-# perform the training
-dnn.train_model()
+# # perform the training
+bnn.train_model()
 
-# evalute the trained model
-dnn.eval_model()
+# # evalute the trained model
+bnn.eval_model()
 
-# save information
-dnn.save_model(sys.argv, filedir, options.getNetConfigName())
+# # save information
+bnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
-# save and print variable ranking according to the input layer weights
-dnn.get_input_weights()
+# # save and print variable ranking according to the input layer weights
+# bnn.get_input_weights()
 
-# save and print variable ranking according to all layer weights
-dnn.get_weights()
+# # save and print variable ranking according to all layer weights
+# bnn.get_weights()
 
 
 # plotting
 if options.doPlots():
     # plot the evaluation metrics
-    dnn.plot_metrics(privateWork = options.isPrivateWork())
+    bnn.plot_metrics(privateWork = options.isPrivateWork())
 
     if options.isBinary():
         # plot output node
         bin_range = options.getBinaryBinRange()
-        dnn.plot_binaryOutput(
+        bnn.plot_binaryOutput(
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
+            nbins       = 15,
             bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
     else:
         # plot the confusion matrix
-        dnn.plot_confusionMatrix(
+        bnn.plot_confusionMatrix(
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC())
 
         # plot the output discriminators
-        dnn.plot_discriminators(
+        bnn.plot_discriminators(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
@@ -100,7 +102,7 @@ if options.doPlots():
             sigScale            = options.getSignalScale())
 
         # plot the output nodes
-        dnn.plot_outputNodes(
+        bnn.plot_outputNodes(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
@@ -108,14 +110,14 @@ if options.doPlots():
             sigScale            = options.getSignalScale())
 
         # plot event yields
-        dnn.plot_eventYields(
+        bnn.plot_eventYields(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork(),
             sigScale            = options.getSignalScale())
 
         # plot closure test
-        dnn.plot_closureTest(
+        bnn.plot_closureTest(
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())

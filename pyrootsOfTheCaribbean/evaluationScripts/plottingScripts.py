@@ -744,7 +744,7 @@ class plotEventYields:
 
 
 class plotBinaryOutput:
-    def __init__(self, data, test_predictions, train_predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1):
+    def __init__(self, data, test_predictions, train_predictions, nbins, bin_range, event_category, plotdir, logscale = False, sigScale = -1, save_name="binaryDiscriminator"):
         self.data               = data
         self.test_predictions   = test_predictions
         self.train_predictions  = train_predictions
@@ -754,6 +754,7 @@ class plotBinaryOutput:
         self.plotdir            = plotdir
         self.logscale           = logscale
         self.sigScale           = sigScale
+        self.save_name          = save_name
 
         self.printROCScore = False
         self.privateWork = False
@@ -767,7 +768,7 @@ class plotBinaryOutput:
             roc = roc_auc_score(self.data.get_test_labels(), self.test_predictions)
             print("ROC: {}".format(roc))
 
-        f = ROOT.TFile(self.plotdir + "/binaryDiscriminator.root", "RECREATE")
+        f = ROOT.TFile(self.plotdir + "/" + self.save_name + ".root", "RECREATE")
         f.cd()
 
         sig_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
@@ -847,7 +848,7 @@ class plotBinaryOutput:
         legend.Draw("same")
 
         # add ROC score if activated
-        if self.printROCScore:
+        if self.printROCScore and self.save_name=="binaryDiscriminator":
             setup.printROCScore(canvas, roc, plotOptions["ratio"])
 
         # add lumi or private work label to plot
@@ -859,7 +860,7 @@ class plotBinaryOutput:
         # add category label
         setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
-        out_path = self.plotdir + "/binaryDiscriminator.pdf"
+        out_path = self.plotdir + "/" + self.save_name + ".pdf"
         setup.saveCanvas(canvas, out_path)
 
         # returns = np.round_(hist2array(bkg_hist)).astype(int), np.round(hist2array(sig_hist_unscaled)).astype(int)

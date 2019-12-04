@@ -1,4 +1,6 @@
-from keras import optimizers
+import keras.optimizers as optimizers
+import tensorflow as tf
+from new_losses import *
 
 config_dict = {}
 
@@ -122,14 +124,14 @@ config_dict["ttH_2017_DL"] = {
         }
 
 config_dict["binary_crossentropy_Adam"] = {
-        "layers":                   [200,100],
+        "layers":                   [80],
         "loss_function":            "binary_crossentropy",
         "Dropout":                  0.30,
-        "L2_Norm":                  1e-3,
-        "L1_Norm":                  1e-4,
-        "batch_size":               64,
+        "L2_Norm":                  1e-5,
+        #"L1_Norm":                  1e-4,
+        "batch_size":               2000,
         "optimizer":                optimizers.Adam(1e-3),
-        "activation_function":      "elu",
+        "activation_function":      "relu",
         "output_activation":        "Sigmoid",
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
@@ -159,6 +161,20 @@ config_dict["binary_squared_SGD"] = {
         "optimizer":                optimizers.SGD(1e-3),
         "activation_function":      "tanh",
         "output_activation":        "Tanh",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
+}
+
+config_dict["BNN"] = {
+        "layers":                   [20],
+        #"loss_function":            "neg_log_likelihood",
+        #"Dropout":                  0.,
+        #"L1_Norm":                  0,
+        #"L2_Norm":                  1e-5,
+        "batch_size":               2000,
+        "optimizer":                tf.keras.optimizers.Adam(1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "Sigmoid",
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
 }
