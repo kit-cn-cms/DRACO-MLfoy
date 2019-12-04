@@ -68,7 +68,7 @@ dnn.get_input_weights()
 # save and print variable ranking according to all layer weights
 dnn.get_propagated_weights()
 
-dnn.get_variations()
+
 
 # plotting 
 if options.doPlots():
@@ -85,6 +85,8 @@ if options.doPlots():
             bin_range   = bin_range, 
             name        = options.getName())
     else:
+        dnn.get_variations()
+        
         # plot the confusion matrix
         dnn.plot_confusionMatrix(
             privateWork = options.isPrivateWork(), 

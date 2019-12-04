@@ -52,3 +52,16 @@ config_dict["ttZAnalysis4"] = {
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     20,
         }
+
+config_dict["ttZAnalysis_bin"] = {
+        "layers":                   [50, 50],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-5,
+        "batch_size":               250,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     20,
+        }
