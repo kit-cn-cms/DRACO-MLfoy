@@ -181,7 +181,7 @@ class DataFrame(object):
             # add index labelling to dataframe
             # df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
             # give additional samples with other ending the same index_label value as samples without the other ending
-            df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if (c.endswith(self.addSampleSuffix)) 
+            df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if self.addSampleSuffix
                 else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
             
             
@@ -256,6 +256,11 @@ class DataFrame(object):
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples)
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
+
+        # split ttbb test samples with one generator
+        if addSampleSuffix:
+            self.df_test_nominal = self.df_test[ self.df_test.class_label != "ttbb"+self.addSampleSuffix ]
+            self.df_test_additional = self.df_test[ self.df_test.class_label != "ttbb" ]
 
         # save variable lists
         self.train_variables = train_variables
@@ -365,6 +370,7 @@ class DataFrame(object):
     def get_full_df(self):
         return self.unsplit_df[self.train_variables]
 
+    # adversary test data --------------------------
     def get_adversary_labels(self):
         return self.df_train["generator_flag"].values
 
@@ -373,3 +379,35 @@ class DataFrame(object):
 
     def get_adversary_weights_adversary(self):
         return pd.Series([c if self.df_train["is_ttBB"].values[i]==1 else 0 for i, c in enumerate(self.df_train["train_weight"].values)],index = self.df_train.index).values
+
+    def get_test_data_nominal(self, as_matrix=True, normed=True):
+        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if as_matrix:  return self.df_test_nominal[ self.train_variables ].values
+        else:          return self.df_test_nominal[ self.train_variables ]
+
+    def get_test_data_additional(self, as_matrix=True, normed=True):
+        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if as_matrix:  return self.df_test_additional[ self.train_variables ].values
+        else:          return self.df_test_additional[ self.train_variables ]
+
+    def get_test_weights_nominal(self):
+        return self.df_test_nominal["total_weight"].values
+
+    def get_test_weights_additional(self):
+        return self.df_test_additional["total_weight"].values
+
+    def get_lumi_weights_nominal(self):
+        return self.df_test_nominal["lumi_weight"].values
+
+    def get_lumi_weights_additional(self):
+        return self.df_test_additional["lumi_weight"].values
+
+    def get_test_labels_nominal(self, as_categorical = True):
+        if self.binary_classification: return self.df_test_nominal["binaryTarget"].values
+        if as_categorical: return to_categorical( self.df_test_nominal["index_label"].values )
+        else:              return self.df_test_nominal["index_label"].values
+
+    def get_test_labels_additional(self, as_categorical = True):
+        if self.binary_classification: return self.df_test_additional["binaryTarget"].values
+        if as_categorical: return to_categorical( self.df_test_additional["index_label"].values )
+        else:              return self.df_test_additional["index_label"].values

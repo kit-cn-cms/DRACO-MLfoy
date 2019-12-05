@@ -14,6 +14,7 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 # import class for DNN training
+import DRACO_Frameworks.DNN.CAN as CAN
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
@@ -25,36 +26,57 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 input_samples.addSample(options.getDefaultName("ttHbb"),     label = "ttH", normalization_weight = 2.)
 input_samples.addSample(options.getDefaultName("ttbb"),      label = "ttbb")
-input_samples.addSample(options.getDefaultName("tt2b"),      label = "tt2b")
-input_samples.addSample(options.getDefaultName("ttb"),       label = "ttb")
-input_samples.addSample(options.getDefaultName("ttcc"),      label = "ttcc")
-input_samples.addSample(options.getDefaultName("ttlf"),      label = "ttlf")
-input_samples.addSample(options.getAddSampleName("ttbb"),    label = "ttbb"+options.getAddSampleSuffix())
+# input_samples.addSample(options.getDefaultName("tt2b"),      label = "tt2b")
+# input_samples.addSample(options.getDefaultName("ttb"),       label = "ttb")
+# input_samples.addSample(options.getDefaultName("ttcc"),      label = "ttcc")
+# input_samples.addSample(options.getDefaultName("ttlf"),      label = "ttlf")
+# input_samples.addSample(options.getAddSampleName("ttbb"),    label = "ttbb"+options.getAddSampleSuffix())
 # input_samples.addSample("ttbb_dnn_OL.h5",   label = "ttbb_OL")
 # input_samples.addSample("ttb_dnn_OL.h5",    label = "ttb_OL")
 #input_samples.addSample("ttZ"+naming,   label = "ttZ", isTrainSample = False, signalSample = True)
 
-# initializing DNN training class
-dnn = DNN.CAN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples,
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(), # hard coded in backend
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    addSampleSuffix = options.getAddSampleSuffix())
 
+if not options.isAdversary():
+    # initializing DNN training class
+    dnn = DNN.DNN(
+        save_path       = options.getOutputDir(),
+        input_samples   = input_samples,
+        category_name   = options.getCategory(),
+        train_variables = options.getTrainVariables(),
+        # number of epochs
+        train_epochs    = options.getTrainEpochs(),
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = options.getTestPercentage(),
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.doBalanceSamples(),
+        evenSel         = options.doEvenSelection(),
+        norm_variables  = options.doNormVariables())
+    # build DNN model
+    dnn.build_model(config=options.getNetConfig())
+else:
+    # initializing CAN training class
+    dnn = CAN.CAN(
+        save_path       = options.getOutputDir(),
+        input_samples   = input_samples,
+        category_name   = options.getCategory(),
+        train_variables = options.getTrainVariables(),
+        # number of epochs
+        train_epochs    = options.getTrainEpochs(), # hard coded in backend
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = options.getTestPercentage(),
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.doBalanceSamples(),
+        evenSel         = options.doEvenSelection(),
+        norm_variables  = options.doNormVariables(),
+        addSampleSuffix = options.getAddSampleSuffix(),
+        shuffle_seed    = 1337)
 
-# build DNN model
-dnn.build_model(config=options.getNetConfig(), penalty=options.getPenalty())
+    # build DNN model
+    dnn.build_model(config=options.getNetConfig(), penalty=options.getPenalty())
 
 # perform the training
 dnn.train_model()
@@ -121,7 +143,10 @@ if options.doPlots():
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
 
-# example: python train_adversary.py -i /storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/ --naming _dnn_newJEC.h5 -n adversary_test -c ge6j_ge3t -v newJEC_validated -p -P -R --penalty 0 -o adversary_v1/adversary_0lambda
+        # plot ttbb KS test
+        dnn.plot_ttbbKS(
+            log                 = options.doLogPlots(),
+            signal_class        = options.getSignal(),
+            privateWork         = options.isPrivateWork())
 
-# TODO: addapt Lea's evaluation with other inputData (DNN/DNN.py: loadDNN, evaluate_dataset; utils/getVarianceDNNcombined16.py)
-#       --> KS test with different ttbb samples
+# example: python train_template_CAN.py -i /storage/9/jschindler/DNN_adversary_2019/DNN_newJEC/ --naming _dnn_newJEC.h5 -n adversary_test --adversary -c ge6j_ge3t -v newJEC_validated -p -P -R --penalty 0 -o adversary_v1/adversary_0lambda
