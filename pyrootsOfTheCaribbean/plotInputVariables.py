@@ -134,7 +134,7 @@ plotter.addSample(
     sampleFile      = data_dir+"/singlet"+naming,
     plotColor       = ROOT.kOrange+7,
     signalSample    = True,
-    XSscaling       = 0.01)
+    XSscaling       = 0.001)
 
 # add background samples
 plotter.addSample(
