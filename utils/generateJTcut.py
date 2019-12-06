@@ -1,6 +1,7 @@
 def getJTstring(cat):
     # jtstring is '(ge)[NJets]j_(ge)[NTags]t'
     # output format is '(N_Jets (>=/==) [NJets] and N_BTagsM (>=/==) [NTags])'
+    if cat == "inclusive": return "1."
 
     string_parts = cat.split("_")
     

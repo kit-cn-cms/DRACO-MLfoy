@@ -3,6 +3,23 @@ ROOT.gROOT.SetBatch(True)
 import re
 import numpy as np
 
+def translateName(name):
+    name = name.replace("ljets","")
+    name = name.replace("ge6j_ge3t","")
+    name = name.replace("ge4j_ge3t","")
+    name = name.replace("ge4j_3t","")
+    name = name.replace("ge4j_ge4t","")
+    name = name.replace("4j_ge3t","")
+    name = name.replace("le5j_ge3t","")
+    name = name.replace("5j_ge3t","")
+
+    name = name.replace("ttZ","t#bar{t}+Z")
+    name = name.replace("ttH","t#bar{t}+H")
+    name = name.replace("ttbb","t#bar{t}+b#bar{b}")
+    name = name.replace("ttlf","t#bar{t}+lf")
+    name = name.replace("ttcc","t#bar{t}+c#bar{c}")
+    return name
+
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
@@ -16,7 +33,6 @@ def GetPlotColor( cls ):
         "tthf":         ROOT.kRed-3,
         "ttbar":        ROOT.kOrange,
         "ttmb":         ROOT.kRed-1,
-        "ttb_bb":       ROOT.kRed-1,
         "ST":           ROOT.kRed-8,
         "tH":           ROOT.kWhite,
         "sig":   ROOT.kCyan,
@@ -139,9 +155,9 @@ def setupConfusionMatrix(matrix, ncls, xtitle, ytitle, binlabel, errors = None):
     cm.GetZaxis().SetRangeUser(minimum, maximum)
 
     for xit in range(ncls):
-        cm.GetXaxis().SetBinLabel(xit+1, binlabel[xit])
+        cm.GetXaxis().SetBinLabel(xit+1, translateName(binlabel[xit]))
     for yit in range(ncls):
-        cm.GetYaxis().SetBinLabel(yit+1, binlabel[yit])
+        cm.GetYaxis().SetBinLabel(yit+1, translateName(binlabel[yit]))
 
     cm.GetXaxis().SetLabelSize(0.05)
     cm.GetYaxis().SetLabelSize(0.05)
@@ -162,7 +178,7 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     # init canvas
     canvas = ROOT.TCanvas(canvasName, canvasName, 1024, 1024)
     canvas.SetTopMargin(0.15)
-    canvas.SetBottomMargin(0.15)
+    canvas.SetBottomMargin(0.18)
     canvas.SetRightMargin(0.15)
     canvas.SetLeftMargin(0.15)
     canvas.SetTicks(1,1)
@@ -204,38 +220,39 @@ def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOption
 
     # move over/underflow bins into plotrange
     moveOverUnderFlow(sig_train)
-    moveOverUnderFlow(bkg_train)
+    if not bkg_train is None: moveOverUnderFlow(bkg_train)
     moveOverUnderFlow(sig_test)
-    moveOverUnderFlow(bkg_test)
+    if not bkg_test is None: moveOverUnderFlow(bkg_test)
 
     # figure out plotrange
     canvas.cd(1)
     yMax = 1e-9
     yMinMax = 1000.
     for h in [sig_train, bkg_train, sig_test, bkg_test]:
+        if h is None: continue
         yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
         if h.GetBinContent(h.GetMaximumBin()) > 0:
             yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
 
     # draw first hist
     if plotOptions["logscale"]:
-        bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        sig_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
         canvas.SetLogy()
     else:
-        bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
-    bkg_train.GetXaxis().SetTitle(canvasName)
+        sig_train.GetYaxis().SetRangeUser(0, yMax*1.5)
+    sig_train.GetXaxis().SetTitle(canvasName)
 
     option = "histo"
-    bkg_train.DrawCopy(option+"E0")
+    sig_train.DrawCopy(option+"E0")
 
     # draw the other histograms
-    sig_train.DrawCopy(option+"E0 same")
-    bkg_test.DrawCopy("E0 same")
+    if not bkg_train is None: bkg_train.DrawCopy(option+"E0 same")
+    if not bkg_test is None: bkg_test.DrawCopy("E0 same")
     sig_test.DrawCopy("E0 same")
 
     # redraw axis
     canvas.cd(1)
-    bkg_train.DrawCopy("axissame")
+    sig_train.DrawCopy("axissame")
 
     return canvas
 

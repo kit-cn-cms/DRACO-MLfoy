@@ -40,9 +40,9 @@ class Sample:
             self.data = store.select("data", stop = self.stop)
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
-        self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
+        #self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
 
-    def cutData(self, cut, variables, lumi_scale):
+    def cutData(self, cut, variables, lumi_scale, eventWeight):
         # if lumi scale was set to zero set scale to 1
         scale = lumi_scale
         if lumi_scale == 0:
@@ -50,24 +50,24 @@ class Sample:
 
         if not self.applyCut or cut in ["inclusive", "SL"]:
             self.cut_data[cut] = self.data
-            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale)
+            self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: eval(eventWeight)*scale*self.XSScale)
             return
 
         # cut events according to JT category
         category_cut = JTcut.getJTstring(cut)
 
         # only save variables that are needed
-        variables += ["Weight_XS", "Weight_GEN_nom"]
+        #variables += ["Weight_XS", "Weight_GEN_nom"]
         self.cut_data[cut] = self.data.query(category_cut)
         self.cut_data[cut] = self.cut_data[cut][list(set(variables))]
 
         # add weight entry for scaling
-        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
+        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: eval(eventWeight)*scale*self.XSScale)
             
         
 
 class variablePlotter:
-    def __init__(self, output_dir, variable_set, add_vars = [], ignored_vars = [], max_entries = None, plotOptions = {}):
+    def __init__(self, output_dir, variable_set, add_vars = [], ignored_vars = [], max_entries = None, plotOptions = {}, eventWeight = "1."):
         self.output_dir     = output_dir
         self.variable_set   = variable_set
         self.add_vars       = list(add_vars)
@@ -80,6 +80,8 @@ class variablePlotter:
         self.variableconfig = pandas.read_csv(basedir+'/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv')
         self.variableconfig.set_index('variablename',inplace=True)
 
+        self.eventWeight = eventWeight
+        
         # handle options
         defaultOptions = {
             "ratio":        False,
@@ -117,7 +119,7 @@ class variablePlotter:
         variables = list(set(variables+self.add_vars))
         return variables
 
-    def plot(self, saveKSValues = False):
+    def plot(self, saveKSValues = False, plotCorrelationMatrix = False):
         # loop over categories and get list of variables
         for cat in self.categories:
             print("starting with category {}".format(cat))
@@ -141,8 +143,9 @@ class variablePlotter:
 
             # filter events according to JT category
             for key in self.samples:
-                self.samples[key].cutData(cat, variables, self.options["lumiScale"])
+                self.samples[key].cutData(cat, variables, self.options["lumiScale"], self.eventWeight)
 
+            correlations = {}
             # loop over all variables and perform plot each time
             for variable in variables:
                 if variable in self.ignored_vars: continue
@@ -160,11 +163,99 @@ class variablePlotter:
 
                 if saveKSValues:
                     ks_dict[variable] = histInfo["KSScore"]
+                if plotCorrelationMatrix:
+                    correlations[variable] = {}
+                    for v2 in variables:
+                        corrFactor = self.getCorrelation(variable, v2, cat)
+                        correlations[variable][v2] = corrFactor
 
             if saveKSValues:
                 with open(ks_file, "w") as f:
                     for key, value in sorted(ks_dict.iteritems(), key = lambda (k,v): (v,k)):
                         f.write("{},{}\n".format(key, value))
+
+            if plotCorrelationMatrix:
+                outfile = self.output_dir+"/"+cat+"_correlations.pdf"
+                self.plotCorrelationMatrix(correlations, cat, outfile)
+
+    def getCorrelation(self, v1, v2, cat):
+        v1values = []
+        v2values = []
+        
+        for key in self.samples:
+            sample = self.samples[key]
+            v1values += list(sample.cut_data[cat][v1].values)
+            v2values += list(sample.cut_data[cat][v2].values)
+
+        return np.corrcoef(v1values, v2values)[0, 1]
+            
+    def plotCorrelationMatrix(self, correlations, cat, outfile):
+
+        ncls = len(correlations)
+        varlist = sorted(list(correlations.keys()))
+        # init histogram
+        cm = ROOT.TH2D("correlationMatrix", "", ncls, 0, ncls, ncls, 0, ncls)
+        cm.SetStats(False)
+        ROOT.gStyle.SetPaintTextFormat(".2f")
+
+
+        for xit in range(cm.GetNbinsX()):
+            for yit in range(cm.GetNbinsY()):
+                cm.SetBinContent(xit+1,yit+1, correlations[varlist[xit]][varlist[yit]])
+
+        cm.GetXaxis().SetTitle("")
+        cm.GetYaxis().SetTitle("")
+
+        cm.SetMarkerColor(ROOT.kBlack)
+
+        cm.GetZaxis().SetRangeUser(-1, 1)
+
+        for xit in range(ncls):
+            try:
+                varname = self.variableconfig.loc[varlist[xit],"displayname"]
+            except:
+                varname = varlist[xit]
+            cm.GetXaxis().SetBinLabel(xit+1, varname)
+        for yit in range(ncls):
+            try:
+                varname = self.variableconfig.loc[varlist[yit],"displayname"]
+            except:
+                varname = varlist[yit]
+            cm.GetYaxis().SetBinLabel(yit+1, varname)
+
+        cm.GetXaxis().SetLabelSize(0.025)
+        cm.GetXaxis().LabelsOption("v")
+        cm.GetYaxis().SetLabelSize(0.025)
+        cm.SetMarkerSize(0.6)
+
+        # init canvas
+        canvas = ROOT.TCanvas("", "", 5000, 5000)
+        canvas.SetTopMargin(0.1)
+        canvas.SetBottomMargin(0.3)
+        canvas.SetRightMargin(0.12)
+        canvas.SetLeftMargin(0.3)
+        canvas.SetTicks(1,1)
+
+        # draw histogram
+        ROOT.gStyle.SetPalette(ROOT.kRedBlue)
+        draw_option = "colz text1"
+        cm.DrawCopy(draw_option)
+
+        # setup TLatex
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+        latex.SetTextSize(0.03)
+
+        l = canvas.GetLeftMargin()
+        t = canvas.GetTopMargin()
+
+        # add category label
+        latex.DrawLatex(l+0.001,1.-t+0.01, JTcut.getJTlabel(cat))
+
+        canvas.SaveAs(outfile)
+        
+
 
 
     def histVariable(self, variable, plot_name, cat):

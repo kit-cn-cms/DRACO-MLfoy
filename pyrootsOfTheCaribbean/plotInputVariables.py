@@ -49,6 +49,8 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
 parser.add_option("--lumiscale", dest="lumiScale", default=41.5,
         help="FLOAT to scale Luminosity", metavar="lumiScale")
 
+parser.add_option("--corr",dest="correlationMatrix",default=False,action="store_true",
+        help="activate plotting of correlation matrix")
 
 (options, args) = parser.parse_args()
 
@@ -80,6 +82,10 @@ else:
         os.makedirs(plot_dir)
    
 
+
+weight = "x.puWeight*x.weight_deepjet_medium_nominal*x.weight_lsf"
+
+
 # plotting options
 plotOptions = {
     "ratio":        options.ratio,
@@ -99,12 +105,16 @@ plotOptions = {
 
 # additional variables to plot
 additional_variables = [
+    "puWeight",
+    "weight_deepjet_medium_nominal",
+    "weight_lsf",
     ]
 
 # variables that are not plotted
 ignored_variables = [
-    "Weight_XS",
-    "Weight_GEN_nom",
+    "puWeight",
+    "weight_deepjet_medium_nominal",
+    "weight_lsf",
     ]
 
 # initialize plotter
@@ -113,47 +123,35 @@ plotter = variablePlotter(
     variable_set    = variable_set,
     add_vars        = additional_variables,
     ignored_vars    = ignored_variables,
-    plotOptions     = plotOptions
+    plotOptions     = plotOptions,
+    eventWeight     = weight
     )
 
 naming = options.naming
 # add signal samples
 plotter.addSample(
-    sampleName      = "ttH",
-    sampleFile      = data_dir+"/ttH"+naming,
-    plotColor       = ROOT.kBlue+1,
-    signalSample    = True)
+    sampleName      = "singlet",
+    sampleFile      = data_dir+"/singlet"+naming,
+    plotColor       = ROOT.kOrange+7,
+    signalSample    = True,
+    XSscaling       = 0.01)
 
 # add background samples
 plotter.addSample(
-    sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb"+naming,
-    plotColor       = ROOT.kRed+3)
+    sampleName      = "t#bar{t} (SL)",
+    sampleFile      = data_dir+"/ttsl"+naming,
+    plotColor       = ROOT.kAzure+3,
+    XSscaling       = 0.45)
 
 plotter.addSample(
-    sampleName      = "tt2b",
-    sampleFile      = data_dir+"/tt2b"+naming,
-    plotColor       = ROOT.kRed+2)
-
-plotter.addSample(
-    sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb"+naming,
-    plotColor       = ROOT.kRed-2)
-
-plotter.addSample(
-    sampleName      = "ttcc",
-    sampleFile      = data_dir+"/ttcc"+naming,
-    plotColor       = ROOT.kRed+1)
-
-plotter.addSample(
-    sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf"+naming)
-
-
+    sampleName      = "t#bar{t} (DL)",
+    sampleFile      = data_dir+"/ttdl"+naming,
+    plotColor       = ROOT.kAzure+8,
+    XSscaling       = 0.11)
 
 # add JT categories
-plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("inclusive")
 
 
 # perform plotting routine
-plotter.plot(saveKSValues = options.KSscore)
+plotter.plot(saveKSValues = options.KSscore, plotCorrelationMatrix = options.correlationMatrix)

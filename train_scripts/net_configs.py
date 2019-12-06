@@ -120,6 +120,32 @@ config_dict["ttH_2017_DL"] = {
         "earlystopping_percentage":  0.02,
         "earlystopping_epochs":      100,
         }
+config_dict["singlet2"] = {
+        "layers":                   [100,100],
+        "loss_function":            "squared_hinge",
+        "Dropout":                  0.25,
+        "L2_Norm":                  0.,
+        "L1_Norm":                  0.,
+        "batch_size":               512,
+        "optimizer":                optimizers.Adam(),
+        "activation_function":      "relu",
+        "output_activation":        "Tanh",
+        "earlystopping_percentage":  0.1,
+        "earlystopping_epochs":      10,
+}
+config_dict["singlet"] = {
+        "layers":                   [100,100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.25,
+        "L2_Norm":                  0.,
+        "L1_Norm":                  0.,
+        "batch_size":               512,
+        "optimizer":                optimizers.Adam(),
+        "activation_function":      "relu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.1,
+        "earlystopping_epochs":      10,
+}
 
 config_dict["binary_crossentropy_Adam"] = {
         "layers":                   [200,100],

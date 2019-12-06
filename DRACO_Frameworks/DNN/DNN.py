@@ -884,7 +884,7 @@ class DNN():
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
                         nbins = None, bin_range = [0.,1.], name = "binary_discriminator",
-                        sigScale = -1):
+                        sigScale = -1, asimovFit = False):
 
         if not nbins:
             nbins = int(50*(1.-bin_range[0]))
@@ -901,8 +901,10 @@ class DNN():
             sigScale            = sigScale)
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
-        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
+        if asimovFit:
+            print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+            print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
     def calc_LL(self,n_obs, n_exp):
         if n_obs > 0 and n_exp >= 0:
