@@ -340,7 +340,7 @@ class Dataset:
                         col_name = str(vecvar)+"["+str(idx)+"]"
 
                         # initialize column in original dataframe
-                        df[col_name] = 0.
+                        df.loc[:,col_name] = 0.
                         # append column to original dataframe
                         df.update( idx_df[vecvar].rename(col_name) )
 
@@ -432,7 +432,7 @@ class Dataset:
                 tmp_df = df.query(categories[key])
             else:
                 tmp_df = df
-            tmp_df["class_label"] = pd.Series([key]*tmp_df.shape[0], index = tmp_df.index)
+            tmp_df.loc[:,"class_label"] = key
             split_dfs.append(tmp_df)
 
         # concatenate the split dataframes again
@@ -442,7 +442,7 @@ class Dataset:
     def addMEMVariable(self, df, memdf):
         print("adding MEM to dataframe ...")
         # create variable with default value
-        df["memDBp"] = pd.Series([-1]*df.shape[0], index = df.index)
+        df.loc[:, "memDBp"] = -1
 
         # add mem variable
         df.update( memdf["mem_p"].rename("memDBp") )
