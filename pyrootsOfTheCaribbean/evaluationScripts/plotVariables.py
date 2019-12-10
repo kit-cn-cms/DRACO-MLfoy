@@ -145,14 +145,16 @@ class variablePlotter:
 
             correlations = {}
             # loop over all variables and perform plot each time
-            for variable in variables:
+            
+	    for variable in variables:
                 if variable in self.ignored_vars: continue
                 print("plotting variable: {}".format(variable))
 
                 # generate plot output name
                 plot_name = cat_dir + "/{}.pdf".format(variable)
                 plot_name = plot_name.replace("[","_").replace("]","")
-
+                
+                '''
                 # generate plot
                 histInfo = self.histVariable(
                     variable    = variable,
@@ -161,12 +163,13 @@ class variablePlotter:
 
                 if saveKSValues:
                     ks_dict[variable] = histInfo["KSScore"]
+                '''
                 if plotCorrelationMatrix:
                     correlations[variable] = {}
                     for v2 in variables:
                         corrFactor = self.getCorrelation(variable, v2, cat)
                         correlations[variable][v2] = corrFactor
-
+                        
             if saveKSValues:
                 with open(ks_file, "w") as f:
                     for key, value in sorted(ks_dict.iteritems(), key = lambda (k,v): (v,k)):
@@ -191,6 +194,7 @@ class variablePlotter:
 
         ncls = len(correlations)
         varlist = sorted(list(correlations.keys()))
+        print(varlist)
         # init histogram
         cm = ROOT.TH2D("correlationMatrix", "", ncls, 0, ncls, ncls, 0, ncls)
         cm.SetStats(False)
@@ -218,7 +222,7 @@ class variablePlotter:
             try:
                 varname = self.variableconfig.loc[varlist[xit],"displayname"]
             except:
-                varname = varlist[xit]
+                varname = varlist[yit]
             cm.GetYaxis().SetBinLabel(yit+1, varname)
 
         cm.GetXaxis().SetLabelSize(0.025)
