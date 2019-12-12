@@ -194,7 +194,6 @@ class variablePlotter:
 
         ncls = len(correlations)
         varlist = sorted(list(correlations.keys()))
-        print(varlist)
         # init histogram
         cm = ROOT.TH2D("correlationMatrix", "", ncls, 0, ncls, ncls, 0, ncls)
         cm.SetStats(False)
@@ -254,6 +253,9 @@ class variablePlotter:
 
         # add category label
         latex.DrawLatex(l+0.001,1.-t+0.01, JTcut.getJTlabel(cat))
+        
+        #self.corr_histo = cm
+        cm.SaveAs(outfile[:-3]+"root")  ## saving shit
 
         canvas.SaveAs(outfile)
         

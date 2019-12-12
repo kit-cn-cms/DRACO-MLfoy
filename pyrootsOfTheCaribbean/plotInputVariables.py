@@ -8,6 +8,8 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
+import utils.generateJTcut as JTcut
+
 from evaluationScripts.plotVariables import variablePlotter
 
 usage="usage=%prog [options] \n"
@@ -109,9 +111,10 @@ ignored_variables = [
     "Weight_GEN_nom",
     ]
 
+
 # initialize plotter
 plotter = variablePlotter(
-    output_dir      = plot_dir,
+    output_dir      = plot_dir+"_ttZonly",  #was added, "ttZonly" can be removed
     variable_set    = variable_set,
     add_vars        = additional_variables,
     ignored_vars    = ignored_variables,
@@ -127,6 +130,7 @@ plotter.addSample(
     signalSample    = True)
 
 # add background samples
+#samples temporarily removed for binary correlation
 plotter.addSample(
     sampleName      = "tt+bb",
     sampleFile      = data_dir+"/ttbb"+naming,
@@ -157,3 +161,72 @@ plotter.addCategory("4j_ge3t")
 
 # perform plotting routine
 plotter.plot(saveKSValues = options.KSscore, plotCorrelationMatrix = options.correlationMatrix)
+
+
+''' hopeless attempt to display difference in correlations of ttZ and ttH
+# initialize plotter
+plotter2 = variablePlotter(
+    output_dir      = plot_dir+"_ttHonly",
+    variable_set    = variable_set,
+    add_vars        = additional_variables,
+    ignored_vars    = ignored_variables,
+    plotOptions     = plotOptions
+    )
+
+plotter2.addSample(
+    sampleName      = "tt+H",
+    sampleFile      = data_dir+"/ttH"+naming,
+    plotColor       = ROOT.kRed+1,
+    signalSample    = True)
+
+# add JT categories
+plotter2.addCategory("ge6j_ge3t")
+plotter2.addCategory("5j_ge3t")
+plotter2.addCategory("4j_ge3t")
+
+#plotter.corr_histo.SaveAs(basedir+"/workdir/corr_hist1.root")
+#plotter2.corr_histo.SaveAs(basedir+"/workdir/corr_hist2.root")
+
+# perform plotting routine
+plotter2.plot(saveKSValues = options.KSscore, plotCorrelationMatrix = options.correlationMatrix)
+
+
+def plot_correlation_diff(categories=["ge6j_ge3t", "5j_ge3t", "4j_ge3t"]):
+    for cat in categories:
+        histfile = ROOT.TFile(plot_dir+"_ttHonly/"+cat+"_correlations.root")
+        hist1 = ROOT.TH2D()
+        hist1.Scale(10)
+        histfile.GetObject("correlationMatrix", hist1)
+        histfile2 = ROOT.TFile(plot_dir+"_ttZonly/"+cat+"_correlations.root")
+        hist2 = ROOT.TH2D()
+        histfile2.GetObject("correlationMatrix", hist2)
+        #hist1.Add(hist2, -10.)
+        
+        # init canvas
+        canvas = ROOT.TCanvas("", "", 5000, 5000)
+        canvas.SetTopMargin(0.1)
+        canvas.SetBottomMargin(0.3)
+        canvas.SetRightMargin(0.12)
+        canvas.SetLeftMargin(0.3)
+        canvas.SetTicks(1,1)
+        
+        # draw histogram
+        ROOT.gStyle.SetPalette(ROOT.kRedBlue)
+        draw_option = "colz text1"
+        hist1.DrawCopy(draw_option)
+
+        # setup TLatex
+        latex = ROOT.TLatex()
+        latex.SetNDC()
+        latex.SetTextColor(ROOT.kBlack)
+        latex.SetTextSize(0.03)
+
+        l = canvas.GetLeftMargin()
+        t = canvas.GetTopMargin()
+
+        # add category label
+        latex.DrawLatex(l+0.001,1.-t+0.01, JTcut.getJTlabel(cat))
+        
+        canvas.SaveAs(plot_dir+"/"+cat+"_correlations_diff.pdf")
+        
+plot_correlation_diff() '''
