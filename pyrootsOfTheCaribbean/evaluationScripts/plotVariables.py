@@ -209,10 +209,16 @@ class variablePlotter:
         cm.GetZaxis().SetRangeUser(-1, 1)
 
         for xit in range(ncls):
-            varname = self.variableconfig.loc[varlist[xit],"displayname"]
+            try:
+                varname = self.variableconfig.loc[varlist[xit],"displayname"]
+            except:
+                varname = varlist[xit]
             cm.GetXaxis().SetBinLabel(xit+1, varname)
         for yit in range(ncls):
-            varname = self.variableconfig.loc[varlist[yit],"displayname"]
+            try:
+                varname = self.variableconfig.loc[varlist[xit],"displayname"]
+            except:
+                varname = varlist[xit]
             cm.GetYaxis().SetBinLabel(yit+1, varname)
 
         cm.GetXaxis().SetLabelSize(0.025)
