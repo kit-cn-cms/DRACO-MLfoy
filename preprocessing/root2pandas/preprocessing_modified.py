@@ -87,12 +87,12 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v1/"
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttH",
-    ntuples     = ntuplesPath+"/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttH_categories,
     even_odd    = options.even_odd_splitting,
     selections  = None,
@@ -112,13 +112,13 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories_else,
     even_odd    = options.even_odd_splitting,
-    selections  = None
+    selections  = "(Evt_Odd==1)"
     )
 
 
 dataset.addSample(
     sampleName  = "ttZ",
-    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8_1/*nominal*.root",
+    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
     categories  = ttZ_categories,
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)"
