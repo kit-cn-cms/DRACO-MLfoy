@@ -63,17 +63,17 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
 # define output classes
-ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH", selection = None)
+#ttH_categories = root2pandas.EventCategories()
+#ttH_categories.addCategory("ttH", selection = None)
 
-ttbar_categories_bb = root2pandas.EventCategories()
-ttbar_categories_bb.addCategory("ttbb",        selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories_else = root2pandas.EventCategories()
-ttbar_categories_else.addCategory("ttlf",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories_else.addCategory("ttcc",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+#ttbar_categories_bb = root2pandas.EventCategories()
+#ttbar_categories_bb.addCategory("ttbb",        selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories_else = root2pandas.EventCategories()
+#ttbar_categories_else.addCategory("ttlf",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories_else.addCategory("ttcc",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
-#ttZ_categories = root2pandas.EventCategories()
-#ttZ_categories.addCategory("ttZ", selection = None)
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZ", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -87,9 +87,10 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v1_ttZAnalysis/"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v1/"
 
 # add samples to dataset
+'''
 dataset.addSample(
     sampleName  = "ttH",
     ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
@@ -103,7 +104,7 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
     sampleName  = "ttbar_bb",
     ntuples     = ntuplesPath+"/TTbb_Powheg_Openloops_new_pmx/*nominal*.root",
     categories  = ttbar_categories_bb,
-    even_odd    = options.even_odd_splitting,
+    even_odd    = options.even_odd_splitting,#    selections  = "(Evt_Odd==1)"
     selections  = "(Evt_Odd==1)"
     )
 
@@ -114,15 +115,15 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
     even_odd    = options.even_odd_splitting,
     selections  = "(Evt_Odd==1)"
     )
+'''
 
-
-#dataset.addSample(
-#    sampleName  = "ttZ",
-#    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
-#    categories  = ttZ_categories,
-#    even_odd    = options.even_odd_splitting,
-#    selections  = "(Evt_Odd==1)"
-#    )
+dataset.addSample(
+    sampleName  = "ttZ",
+    ntuples     = ntuplesPath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    categories  = ttZ_categories,
+    even_odd    = options.even_odd_splitting,
+    selections  = "(Evt_Odd==1)"
+    )
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
