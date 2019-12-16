@@ -154,7 +154,7 @@ class variablePlotter:
                 plot_name = cat_dir + "/{}.pdf".format(variable)
                 plot_name = plot_name.replace("[","_").replace("]","")
                 
-                '''
+                
                 # generate plot
                 histInfo = self.histVariable(
                     variable    = variable,
@@ -163,7 +163,7 @@ class variablePlotter:
 
                 if saveKSValues:
                     ks_dict[variable] = histInfo["KSScore"]
-                '''
+                
                 if plotCorrelationMatrix:
                     correlations[variable] = {}
                     for v2 in variables:

@@ -114,7 +114,7 @@ ignored_variables = [
 
 # initialize plotter
 plotter = variablePlotter(
-    output_dir      = plot_dir+"_ttZonly",  #was added, "ttZonly" can be removed
+    output_dir      = plot_dir,
     variable_set    = variable_set,
     add_vars        = additional_variables,
     ignored_vars    = ignored_variables,
@@ -154,9 +154,11 @@ plotter.addSample(
 
 
 # add JT categories
-plotter.addCategory("ge6j_ge3t")
-plotter.addCategory("5j_ge3t")
-plotter.addCategory("4j_ge3t")
+#plotter.addCategory("ge6j_ge3t")
+#plotter.addCategory("5j_ge3t")
+#plotter.addCategory("4j_ge3t")
+plotter.addCategory("ge4j_3t")
+plotter.addCategory("ge4j_ge4t")
 
 
 # perform plotting routine

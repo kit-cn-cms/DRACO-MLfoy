@@ -605,7 +605,51 @@ class DNN():
             plt.savefig(outpath)
             plt.savefig(outpath.replace(".pdf",".png"))
             print("plot saved at {}".format(outpath))
+            
+    def get_binary_variations(self):
+        ''' make sure to only use when binary classification is done '''
+        if not os.path.exists(self.save_path + "/variations/"):
+            os.makedirs(self.save_path + "/variations/")
+        import matplotlib.pyplot as plt
+
+        print("making plots for input feature variations")
+        for i, v in enumerate(self.train_variables):
+
+            test_values = np.linspace(-2,2,500)
+            testset = np.array([
+                np.array([0 if not j==i else k for j in range(len(self.train_variables))])
+                for k in test_values])
+
+            predictions = self.model.predict(testset)
+
+            yrange = [0., 2./len(self.event_classes)]
+            
+            
+            plt.clf()
+            plt.plot([-2,2],[1./len(self.event_classes),1./len(self.event_classes)], "-", color = "black")
+            plt.plot([0.,0.],yrange, "-", color = "black")
+
+            #for node in enumerate(self.event_classes):
+            node = self.event_classes
+            plt.plot(test_values, predictions[:,0], "-", linewidth = 2, label = node[0]+" node")
+            #plt.plot(test_values, 1-predictions[:,0], "-", linewidth = 2, label = node[1]+" node")
                 
+            plt.grid()
+            plt.legend()
+            title = self.category_label
+            title = title.replace("\\geq", "$\geq$")
+            title = title.replace("\\leq", "$\leq$")
+            plt.title(title, loc = "right", fontsize = 16)
+            plt.xlabel(v, fontsize = 16)
+            plt.ylabel("node output", fontsize = 16)
+            plt.xlim([-2,2])
+            plt.ylim(yrange)
+            plt.tight_layout()
+            outpath = self.save_path + "/variations/"+str(v)+".pdf"
+            #plt.savefig(outpath)
+            #plt.savefig(outpath.replace(".pdf",".png"))
+            print("plot saved not at {}".format(outpath))
+            
 
             
     # --------------------------------------------------------------------

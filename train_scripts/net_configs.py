@@ -56,7 +56,7 @@ config_dict["ttZAnalysis4"] = {
 config_dict["ttZAnalysis_bin"] = {
         "layers":                   [50, 50],
         "loss_function":            "binary_crossentropy",
-        "Dropout":                  0.4,
+        "Dropout":                  0.25,
         "L2_Norm":                  1e-5,
         "batch_size":               250,
         "optimizer":                optimizers.Adagrad(),

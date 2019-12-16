@@ -84,6 +84,9 @@ if options.doPlots():
             printROC    = options.doPrintROC(), 
             bin_range   = bin_range, 
             name        = options.getName())
+        
+        dnn.get_binary_variations()
+        
     else:
         dnn.get_variations()
         
