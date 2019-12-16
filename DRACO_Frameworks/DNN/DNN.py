@@ -640,15 +640,15 @@ class DNN():
             title = title.replace("\\geq", "$\geq$")
             title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
-            plt.xlabel(v, fontsize = 16)
+            plt.xlabel(str(v), fontsize = 16)            #not yet the best solution for string processing
             plt.ylabel("node output", fontsize = 16)
             plt.xlim([-2,2])
             plt.ylim(yrange)
             plt.tight_layout()
             outpath = self.save_path + "/variations/"+str(v)+".pdf"
-            #plt.savefig(outpath)
-            #plt.savefig(outpath.replace(".pdf",".png"))
-            print("plot saved not at {}".format(outpath))
+            plt.savefig(outpath)
+            plt.savefig(outpath.replace(".pdf",".png"))
+            print("plot saved at {}".format(outpath))
             
 
             
