@@ -45,8 +45,8 @@ class Sample:
         # add lumi weight
         # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
 
-        df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.normalization_weight / self.test_percentage)
-
+        df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.train_weight * self.normalization_weight / self.test_percentage)
+        print("sum of lumi weights: {}".format(sum(df["lumi_weight"].values)))
         self.data = df
         print("-"*50)
 
@@ -197,6 +197,7 @@ class DataFrame(object):
             bkg_weight = sum( bkg_df["train_weight"].values )
             sig_df["train_weight"] = sig_df["train_weight"]/(2*signal_weight)*df.shape[0]
             bkg_df["train_weight"] = bkg_df["train_weight"]/(2*bkg_weight)*df.shape[0]
+
             #sig_df["class_label"] = "sig"
             #bkg_df["class_label"] = "bkg"
             sig_df["binaryTarget"] = 1.
