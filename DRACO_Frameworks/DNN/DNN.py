@@ -3,7 +3,9 @@ import sys
 import numpy as np
 import json
 import pickle
+import math
 from array import array
+import ROOT
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -176,6 +178,15 @@ class DNN():
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
+
+    def logarithmic(self, array):
+        indices = [i for i, x in enumerate(array) if x <= 0]
+        for i in indices:
+            print("# DEBUG: logarithmic, entries: ", array[i])
+        return map(lambda x: math.log(x), array)
+
+    def factorial(self, array):
+        return map(lambda x: math.factorial(x), array)
 
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
@@ -825,7 +836,9 @@ class DNN():
             logscale            = log,
             sigScale            = sigScale)
 
-        plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        bkg_hist, sig_hist = plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
         ''' plot confusion matrix '''
@@ -891,7 +904,69 @@ class DNN():
             logscale            = log,
             sigScale            = sigScale)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
+    def calc_LL(self,n_obs, n_exp):
+        if n_obs > 0 and n_exp >= 0:
+            n_obs = int(round(n_obs))
+            tmp = n_exp - n_obs*math.log(n_exp) + math.log(math.factorial(n_obs))
+        else:
+            tmp = 0
+        return tmp
+
+
+    def binned_likelihood(self, bkg_bins, sig_bins, mu):
+        '''Calculates sigma1 and sigma2 for asimov data set and makes a plot'''
+        save_path = self.save_path + "plots/"
+        obs_bins = bkg_bins + mu * sig_bins
+        #remove bins with no bkg events -> they will couse problems due to log
+        indices = [i for i, x in enumerate(bkg_bins) if x <= 0]
+        obs_bins = np.delete(obs_bins, indices)
+        bkg_bins = np.delete(bkg_bins, indices)
+        sig_bins = np.delete(sig_bins, indices)
+
+        mu_scan = np.linspace(0, 2, 100, endpoint = True)
+
+        ll_scan = []
+        for m in mu_scan:
+            s_b_bins = bkg_bins + sig_bins*m
+            # print("scanning {}".format(m))
+            tmp = 0
+            for obs, pred in zip(obs_bins,s_b_bins):
+                ll = self.calc_LL(obs,pred)
+                tmp+=ll
+            ll_scan.append(2*tmp)
+        ll_scan=ll_scan-min(ll_scan)
+
+        indices = [i for i, x in enumerate(ll_scan) if x > 10]
+        ll_scan = np.delete(ll_scan, indices)
+        mu_scan = np.delete(mu_scan, indices)
+
+
+        c=ROOT.TCanvas("c","c",800,600)
+        c.cd()
+        gr = ROOT.TGraph(len(ll_scan),mu_scan,ll_scan)
+        gr.Draw("A*")
+
+        line = ROOT.TLine(gr.GetXaxis().GetXmin(),1,gr.GetXaxis().GetXmax(),1)
+        line.SetLineColor(ROOT.kRed)
+        line.Draw("same")
+
+        fit = gr.Fit("pol4","S")
+        f = gr.GetFunction("pol4")
+        sigmin = abs(f.GetX(1,0,f.GetMinimumX()) - f.GetMinimumX())
+        sigmax = abs(f.GetX(1,f.GetMinimumX(),2) - f.GetMinimumX())
+        gr.GetXaxis().SetTitle("#mu")
+        gr.GetYaxis().SetTitle("2NLL")
+        text = ROOT.TLatex(0.11,0.8,"{0} + {1} - {2}".format(f.GetMinimumX(),sigmax, sigmin))
+        text.SetNDC(ROOT.kTRUE);
+        text.Draw()
+        c.Print(save_path + "/LL_mu" + str(mu) +".pdf")
+        c.Print(save_path + "/LL_mu" + str(mu) +".png")
+        return sigmin, sigmax
+
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
 category_label= None):
