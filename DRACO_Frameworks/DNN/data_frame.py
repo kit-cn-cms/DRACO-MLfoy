@@ -96,7 +96,7 @@ class InputSamples:
             sample_path = self.input_path + "/" + sample_path
         self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr, addSampleSuffix = self.addSampleSuffix))
 
-        if label.endswith(self.addSampleSuffix):
+        if bool(self.addSampleSuffix) and label.endswith(self.addSampleSuffix):
             self.additional_samples +=1
 
     def getClassConfig(self):
@@ -171,21 +171,21 @@ class DataFrame(object):
                 index += 1
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            # add flag for ttH to dataframe
+            # add flag for ttH and ttbb to dataframe
             df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
             df["is_ttBB"] = pd.Series( [1 if ("ttbb" in c) else 0 for c in df["class_label"].values], index = df.index )
 
-            # print(df["class_label"].values)
-            df["generator_flag"] = pd.Series( [1 if (self.addSampleSuffix in c) else 0 for c in df["class_label"].values], index = df.index )
+            # add generator flag for adversary training
+            if input_samples.additional_samples:
+                df["generator_flag"] = pd.Series( [1 if (self.addSampleSuffix in c) else 0 for c in df["class_label"].values], index = df.index )
 
-            # add index labelling to dataframe
-            # df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )
-            # give additional samples with other ending the same index_label value as samples without the other ending
-            df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if self.addSampleSuffix
-                else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
+                df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if (c.endswith(self.addSampleSuffix)) 
+                    else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
+            else:
+                df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )   
             
-            
-            # norm weights to mean(1)
+            # norm weights to mean(1) 
+            # TODO: adjust train_weights for adversary training (processes with different samples from different generators)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
 
             # save some meta data about network
@@ -205,8 +205,20 @@ class DataFrame(object):
 
             df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
 
+            # add_bkg_df = None
+            if not input_samples.additional_samples:
+                bkg_df = df.query("index_label == 0")
+            else:
+                df["is_ttBB"] = pd.Series( [1 if ("ttbb" in c) else 0 for c in df["class_label"].values], index = df.index )
+                df["generator_flag"] = pd.Series( [1 if (self.addSampleSuffix in c) else 0 for c in df["class_label"].values], index = df.index )
+
+                bkg_df = df.query("index_label == 0 and generator_flag == 0")
+                add_bkg_df = df.query("index_label == 0 and generator_flag == 1")
+                add_bkg_weight = sum(add_bkg_df["train_weight"].values)
+                add_bkg_df["train_weight"] = add_bkg_df["train_weight"]/(2*add_bkg_weight)*df.shape[0]
+                add_bkg_df["binaryTarget"] = float(self.bkg_target)
+            
             sig_df = df.query("index_label == 1")
-            bkg_df = df.query("index_label == 0")
 
             sig_weight = sum(sig_df["train_weight"].values)
             bkg_weight = sum(bkg_df["train_weight"].values)
@@ -220,7 +232,12 @@ class DataFrame(object):
             sig_df["binaryTarget"] = 1.
             bkg_df["binaryTarget"] = float(self.bkg_target)
 
-            df = pd.concat([sig_df, bkg_df])
+            if input_samples.additional_samples == 0:
+                df = pd.concat([sig_df, bkg_df])
+                print("True")
+            else:
+                print("False")
+                df = pd.concat([sig_df, bkg_df, add_bkg_df])
 
             self.n_input_neurons = len(train_variables)
             self.n_output_neurons = 1
@@ -257,7 +274,7 @@ class DataFrame(object):
         self.df_train = df.tail(df.shape[0] - n_test_samples)
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
 
-        # split ttbb test samples with one generator
+        # split ttbb test samples into nominal and add sample according to ttbb generator
         if addSampleSuffix:
             self.df_test_nominal = self.df_test[ self.df_test.class_label != "ttbb"+self.addSampleSuffix ]
             self.df_test_additional = self.df_test[ self.df_test.class_label != "ttbb" ]

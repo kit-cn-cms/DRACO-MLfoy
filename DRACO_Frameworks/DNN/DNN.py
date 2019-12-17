@@ -296,7 +296,8 @@ class DNN():
             if not dropout == 0:
                 X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
-        # generate output layer
+        # generate output laye
+        print(self.data.n_output_neurons)
         X = keras.layers.Dense(
             units               = self.data.n_output_neurons,
             activation          = output_activation.lower(),
@@ -310,7 +311,7 @@ class DNN():
 
         return model
 
-    def build_model(self, config = None, model = None):
+    def build_model(self, config = None, model = None, penalty = None):
         ''' build a DNN model
             use options defined in 'config' dictionary '''
 
@@ -359,7 +360,7 @@ class DNN():
             shuffle             = True,
             callbacks           = callbacks,
             validation_split    = 0.25,
-            sample_weight       = self.data.get_adversary_weights_classifier())
+            sample_weight       = self.data.get_train_weights())
 
     def save_model(self, argv, execute_dir, netConfigName):
         ''' save the trained model '''
@@ -420,6 +421,7 @@ class DNN():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
+        configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
 
         # save information for binary DNN
@@ -907,7 +909,7 @@ category_label= None):
 
 
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"])
+    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"])
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
@@ -920,9 +922,10 @@ category_label= None):
     dnn = DNN(
       save_path       = outputDirectory,
       input_samples   = input_samples,
-      category_name  = config["JetTagCategory"],
+      category_name   = config["JetTagCategory"],
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
+      addSampleSuffix = config["addSampleSuffix"],
     )
 
 

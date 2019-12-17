@@ -125,9 +125,9 @@ config_dict["binary_crossentropy_Adam"] = {
         "layers":                   [200,100],
         "loss_function":            "binary_crossentropy",
         "Dropout":                  0.30,
-        "L2_Norm":                  1e-3,
         "L1_Norm":                  1e-4,
-        "batch_size":               64,
+        "L2_Norm":                  1e-3,
+        "batch_size":               4096,
         "optimizer":                optimizers.Adam(1e-3),
         "activation_function":      "elu",
         "output_activation":        "Sigmoid",
@@ -163,7 +163,7 @@ config_dict["binary_squared_SGD"] = {
         "earlystopping_epochs":      100,
 }
 
-config_dict["adversary_test"] = {
+config_dict["adversary_multi"] = {
         "layers":                   [100,100,100],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.50,
@@ -173,6 +173,25 @@ config_dict["adversary_test"] = {
         "optimizer":                optimizers.Adam(1e-4),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        "adversary_layers":         [100,100],
+        "pretrain_class_epochs":    2,
+        "pretrain_adv_epochs":      5,
+        "adversary_epochs":         1,
+        "adversary_iterations":     1,
+}
+
+config_dict["adversary_binary"] = {
+        "layers":                   [200,100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.30,
+        "L1_Norm":                  1e-4,
+        "L2_Norm":                  1e-3,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adam(1e-3),
+        "activation_function":      "elu",
+        "output_activation":        "Sigmoid",
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
         "adversary_layers":         [100,100],

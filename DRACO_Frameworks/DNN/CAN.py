@@ -112,7 +112,8 @@ class CAN(DNN):
 
         def make_loss_Class(c):
             def loss_Class(y_true, y_pred):
-                return c * keras.losses.categorical_crossentropy(y_true,y_pred)
+                if self.data.binary_classification: return c * keras.losses.binary_crossentropy(y_true,y_pred)
+                else: return c * keras.losses.categorical_crossentropy(y_true,y_pred)
             return loss_Class
 
         def make_loss_Adv(c):
@@ -241,6 +242,36 @@ class CAN(DNN):
             nbins = int(40*(1.-bin_range[0]))
 
         ttbbKS = plottingScripts.plotttbbKS(
+            data                        = self.data,
+            test_prediction_nominal     = self.model_prediction_vector_nominal,
+            test_prediction_additional  = self.model_prediction_vector_additional,
+            event_classes               = self.event_classes,
+            nbins                       = nbins,
+            bin_range                   = bin_range,
+            signal_class                = signal_class,
+            event_category              = self.category_label,
+            plotdir                     = self.plot_path,
+            logscale                    = log,
+            addSampleSuffix             = self.addSampleSuffix)
+
+        ttbbKS.plot(ratio = False, privateWork = privateWork)
+
+    def plot_ttbbKS_binary(self, log = False, privateWork = False,
+                        signal_class = None, nbins = None, bin_range = None):
+        ''' plot comparison between ttbb samples binary case '''
+
+        # evaluate trained model with different ttbb samples
+
+        # save predicitons
+        self.model_prediction_vector_nominal = self.model.predict(self.data.get_test_data_nominal (as_matrix = True))
+        self.model_prediction_vector_additional = self.model.predict(self.data.get_test_data_additional (as_matrix = True))
+
+        if not bin_range:
+            bin_range = [0., 1.]
+        if not nbins:
+            nbins = int(40*(1.-bin_range[0]))
+
+        ttbbKS = plottingScripts.plotttbbKS_binary(
             data                        = self.data,
             test_prediction_nominal     = self.model_prediction_vector_nominal,
             test_prediction_additional  = self.model_prediction_vector_additional,

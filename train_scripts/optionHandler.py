@@ -75,10 +75,10 @@ parser.add_option_group(binaryOptions)
 adversaryopts = optparse.OptionGroup(parser, "Adversary Settings")
 adversaryopts.add_option("--adversary", dest="adversary", action = "store_true", default=False,
         help="activate to train a classifying adversarial network")
-adversaryopts.add_option("--penalty", dest="penalty", default=10,
-        help="INT number of penalty in loss function for adversary training (default 10)", metavar="PENALTY")
+adversaryopts.add_option("--penalty", dest="penalty", default=10, type = float,
+        help="FLOAT number of penalty in loss function for adversary training (default 10)", metavar="PENALTY")
 adversaryopts.add_option("--addsamplenaming", dest="AddSampleNaming", default="_dnn_OL.h5",
-        help="file ending for the samples in input directory (default _dnn_OL.h5)", metavar="SAMPLENAMING")
+        help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
 
 
 class optionHandler:
@@ -95,6 +95,7 @@ class optionHandler:
         self.__loadVariables()
         self.__setSignalClass()
         self.__setNetConfig()
+        self.__setAdversary()
 
     # setters
 
@@ -170,6 +171,15 @@ class optionHandler:
         else:
             self.__config = config_dict["example_config"]
             print("no net config was specified - using 'example_config'")
+
+    def __setAdversary(self):
+        if self.__options.adversary:
+            if not self.__options.binary:
+                print("WARNING: Weighting for multiclass adversary training is incorrect!")
+            if self.__options.AddSampleNaming == "_dnn_OL.h5":
+                print("no additional sample name was specified - using '_dnn_OL.h5'")
+            if self.__options.naming == self.__options.AddSampleNaming:
+                sys.exit("ERROR: need to use samples from different generators")
 
 
 

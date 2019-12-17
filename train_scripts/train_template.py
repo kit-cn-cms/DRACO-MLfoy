@@ -20,10 +20,10 @@ import DRACO_Frameworks.DNN.data_frame as df
 options.initArguments()
 
 # load samples
-input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage())
+input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage(), options.getAddSampleSuffix())
 
 # define all samples
-input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
@@ -48,10 +48,11 @@ dnn = DNN.DNN(
     # balance samples per epoch such that there amount of samples per category is roughly equal
     balanceSamples  = options.doBalanceSamples(),
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables())
+    norm_variables  = options.doNormVariables(),
+    addSampleSuffix = options.getAddSampleSuffix())
 
 # build DNN model
-dnn.build_model(options.getNetConfig())
+dnn.build_model(options.getNetConfig(), penalty=options.getPenalty())
 
 # perform the training
 dnn.train_model()
