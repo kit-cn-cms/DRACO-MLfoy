@@ -270,7 +270,7 @@ class DNN():
         if activation_function == "leakyrelu":
             activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
-        # l1_regularization_beta      = self.architecture["L1_Norm"]
+        l1_regularization_beta      = self.architecture["L1_Norm"]
         output_activation           = self.architecture["output_activation"]
 
         # define input layer
@@ -296,8 +296,7 @@ class DNN():
             if not dropout == 0:
                 X = keras.layers.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
-        # generate output laye
-        print(self.data.n_output_neurons)
+        # generate output layer
         X = keras.layers.Dense(
             units               = self.data.n_output_neurons,
             activation          = output_activation.lower(),
@@ -893,7 +892,6 @@ class DNN():
             sigScale            = sigScale)
 
         binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-
 
 def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
 category_label= None):
