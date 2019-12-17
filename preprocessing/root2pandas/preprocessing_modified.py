@@ -113,7 +113,7 @@ dataset.addSample(	#for 2017 samples the files seem to be splitted
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttbar_categories_else,
     even_odd    = options.even_odd_splitting,
-    selections  = "(Evt_Odd==1)"  ## no splitting
+    selections  = None , ## no splitting
     )
 
 
