@@ -75,8 +75,8 @@ parser.add_option_group(binaryOptions)
 adversaryopts = optparse.OptionGroup(parser, "Adversary Settings")
 adversaryopts.add_option("--adversary", dest="adversary", action = "store_true", default=False,
         help="activate to train a classifying adversarial network")
-adversaryopts.add_option("--penalty", dest="penalty", default=10, type = float,
-        help="FLOAT number of penalty in loss function for adversary training (default 10)", metavar="PENALTY")
+adversaryopts.add_option("--penalty", dest="penalty", default=1,
+        help="FLOAT number of penalty in loss function for adversary training (default 1)", metavar="PENALTY")
 adversaryopts.add_option("--addsamplenaming", dest="AddSampleNaming", default="_dnn_OL.h5",
         help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
 

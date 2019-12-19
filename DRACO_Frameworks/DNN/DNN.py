@@ -210,6 +210,7 @@ class DNN():
           "layers":                   [200],
           "loss_function":            "categorical_crossentropy",
           "Dropout":                  0.2,
+          "L1_Norm":                  0.,
           "L2_Norm":                  1e-5,
           "batch_size":               5000,
           "optimizer":                optimizers.Adagrad(decay=0.99),
@@ -595,7 +596,7 @@ class DNN():
         print("wrote propagated weight ranking to "+str(rank_path))
 
 
-    def get_variations(self):
+    def get_variations(self, is_binary):
         if not os.path.exists(self.save_path + "/variations/"):
             os.makedirs(self.save_path + "/variations/")
 
@@ -617,6 +618,7 @@ class DNN():
 
             for n, node in enumerate(self.event_classes):
                 plt.plot(test_values, predictions[:,n], "-", linewidth = 2, label = node+" node")
+                if is_binary: break
 
             plt.grid()
             plt.legend()
@@ -919,7 +921,7 @@ class DNN():
 
     def binned_likelihood(self, bkg_bins, sig_bins, mu):
         '''Calculates sigma1 and sigma2 for asimov data set and makes a plot'''
-        save_path = self.save_path + "plots/"
+        save_path = self.save_path + "/plots/"
         obs_bins = bkg_bins + mu * sig_bins
         #remove bins with no bkg events -> they will couse problems due to log
         indices = [i for i, x in enumerate(bkg_bins) if x <= 0]

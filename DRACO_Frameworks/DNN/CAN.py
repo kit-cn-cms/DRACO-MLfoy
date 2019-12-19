@@ -42,7 +42,7 @@ class CAN(DNN):
         for key in config:
             self.architecture[key] = config[key]
 
-    def build_model(self, config = None, penalty = 10):
+    def build_model(self, config = None, penalty = 1):
         ''' build default straight forward GAN from architecture dictionary '''
 
         if config:

@@ -68,6 +68,7 @@ or use the following options
     - `--adversary` activate adversary training with an additional network competing with the classifier. Which samples are set as nominal is defined by `naming` and additional samples by `addsamplenaming`.
     - `--penalty=FLOAT` change the penalty parameter in the adversary loss function (default ist `10`)
     - `--addsamplenaming=STR` to adjust the naming of the input files of additional samples from other generators (default is `_dnn_OL.h5`)
+    - specify hyperparameters for adversarial training, like training epochs and adversary iterations, in `net_configs.py`.
 
 
 Example:
