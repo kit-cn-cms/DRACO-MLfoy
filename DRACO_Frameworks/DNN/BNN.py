@@ -34,13 +34,14 @@ import pandas as pd
 # Limit gpu usage
 import tensorflow as tf
 import tensorflow_probability as tfp
-tfd = tfp.distributions
+import tensorflow_probability.python.distributions as tfd
 
 import matplotlib.pyplot as plt
+from BNN_layer import DenseVariational
 
-config = tf.ConfigProto()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.set_session(tf.Session(config=config))
+tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
 
 class EarlyStopping(tf.keras.callbacks.Callback):
     ''' custom implementation of early stopping
@@ -213,7 +214,7 @@ class BNN():
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
         # get the keras model
-        self.model = keras.models.load_model(checkpoint_path)
+        self.model = models.load_model(checkpoint_path, custom_objects={'tf':tf, 'tfp':tfp, 'tfd':tfd, 'DenseVariational':DenseVariational, 'neg_log_likelihood':self.neg_log_likelihood})
         self.model.summary()
 
         # evaluate test dataset with keras model
@@ -221,20 +222,14 @@ class BNN():
 
         # save predicitons
         test_pred  = []
-        #train_pred = []
         print "Calculating the mean and std: "
-        for i in tqdm.tqdm(range(5)):
+        for i in tqdm.tqdm(range(50)):
             test_pred_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
-            #train_pred_vector  = self.model.predict(self.data.get_train_data (as_matrix = True))
             test_pred.append(test_pred_vector)
-            #train_pred.append(train_pred_vector)
 
         test_preds = np.concatenate(test_pred, axis=1)
-        #train_preds = np.concatenate(train_pred, axis=1)
         self.model_prediction_vector = np.mean(test_preds, axis=1)
-        #self.model_train_prediction  = np.mean(train_preds, axis=1)
         self.model_prediction_vector_std = np.std(test_preds, axis=1)
-        #self.model_train_prediction_std  = np.std(train_preds, axis=1)
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
@@ -256,55 +251,89 @@ class BNN():
 
         # Specify the posterior distributions for kernel and bias
         def posterior(kernel_size, bias_size=0, dtype=None):
+            from tensorflow_probability import layers
+            from tensorflow_probability import distributions as tfd
+            import numpy as np
+            import tensorflow as tf
             n = kernel_size + bias_size
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
-                tfp.layers.VariableLayer(2 * n, dtype=dtype),
-                tfp.layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[..., :n], scale=1e-5 + tf.nn.softplus(c + t[..., n:])), reinterpreted_batch_ndims=1)),
+                layers.VariableLayer(2 * n, dtype=dtype),
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[..., :n], scale=1e-5 + tf.nn.softplus(c + t[..., n:])), reinterpreted_batch_ndims=1)),
                 ])
 
         # Specify the prior distributions for kernel and bias
         def prior(kernel_size, bias_size=0, dtype=None):
+            from tensorflow_probability import layers
+            from tensorflow_probability import distributions as tfd
+            import numpy as np
+            import tensorflow as tf
             n = kernel_size + bias_size
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
-                tfp.layers.VariableLayer(2*n, dtype=dtype),
-                tfp.layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[:n], scale=1e-5 + tf.nn.softplus(c + t[n:])), reinterpreted_batch_ndims=1)),
+                layers.VariableLayer(n, dtype=dtype),
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[:n], scale=1.), reinterpreted_batch_ndims=1)), #1e-5 + tf.nn.softplus(c + t[n:])
                 ])
 
         # define input layer
         Inputs = layer.Input(
             shape = (number_of_input_neurons,),
             name  = self.inputName)
+
         X = Inputs
         self.layer_list = [X]
 
-        ## loop over dense layers
+        n_train_samples = 0.75 * self.data.get_train_data(as_matrix = True).shape[0]
+
+        # loop over dense layers
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
-            X = tfp.layers.DenseVariational(
+            X = DenseVariational(
                 units               = nNeurons,
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
-                kl_weight           = self.architecture["batch_size"] / self.data.get_train_data(as_matrix = True).shape[0],
+                kl_weight           = 1. / n_train_samples,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
 
         # generate output layer
-        X = tfp.layers.DenseVariational(
+        X = DenseVariational(
             units               = self.data.n_output_neurons,
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
-            kl_weight           = self.architecture["batch_size"] / self.data.get_train_data(as_matrix = True).shape[0],
+            kl_weight           = 1. / n_train_samples,
             activation          = output_activation.lower(),
             name                = self.outputName
             )(X)
+
+        # # loop over dense layers
+        # for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
+        #     X = tfp.layers.DenseFlipout(
+        #         units               = nNeurons,
+        #         activation          = activation_function,
+        #         kernel_divergence_fn  = lambda q, p, _: tfd.kl_divergence(q, p) / n_train_batches,
+        #         name                = "DenseLayer_"+str(iLayer)
+        #         )(X)
+
+        # # generate output layer
+        # X = tfp.layers.DenseFlipout(
+        #     units               = self.data.n_output_neurons,
+        #     activation          = output_activation.lower(),
+        #     kernel_divergence_fn  = lambda q, p, _: tfd.kl_divergence(q, p) / n_train_batches,
+        #     name                = self.outputName
+        #     )(X)
 
         # define model
         model = models.Model(inputs = [Inputs], outputs = [X])
         model.summary()
 
         return model
+
+    # custom loss definition
+    def neg_log_likelihood(self, y_true, y_pred):
+        sigma = 1.
+        dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        return -dist.log_prob(y_true)
 
     def build_model(self, config = None, model = None):
         ''' build a BNN model
@@ -318,15 +347,9 @@ class BNN():
             print("building model from config")
             model = self.build_default_model()
 
-        # custom loss definition
-        def neg_log_likelihood(y_true, y_pred):
-            sigma = 1.
-            dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-            return -dist.log_prob(y_true)   # tf.math.reduce_mean(input_tensor=dist.log_prob(y_true))
-
         # compile the model
         model.compile(
-            loss        = neg_log_likelihood,
+            loss        = self.neg_log_likelihood,
             optimizer   = self.architecture["optimizer"],
             metrics     = self.eval_metrics)
 
@@ -376,20 +399,14 @@ class BNN():
 
         # save predicitons
         test_pred  = []
-        #train_pred = []
         print "Calculating the mean and std: "
         for i in tqdm.tqdm(range(50)):
-            test_pred_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
-            #train_pred_vector  = self.model.predict(self.data.get_train_data (as_matrix = True))
+            test_pred_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
             test_pred.append(test_pred_vector)
-            #train_pred.append(train_pred_vector)
 
         test_preds = np.concatenate(test_pred, axis=1)
-        #train_preds = np.concatenate(train_pred, axis=1)
         self.model_prediction_vector = np.mean(test_preds, axis=1)
-        #self.model_train_prediction  = np.mean(train_preds, axis=1)
         self.model_prediction_vector_std = np.std(test_preds, axis=1)
-        #self.model_train_prediction_std  = np.std(train_preds, axis=1)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -400,7 +417,8 @@ class BNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
-        #return self.model_prediction_vector, self.model_prediction_vector_std
+
+        # return self.model_prediction_vector, self.model_prediction_vector_std
 
     def save_model(self, argv, execute_dir, netConfigName):
         ''' save the trained model '''
@@ -519,25 +537,12 @@ class BNN():
         print "sigma_over_mu.pdf was created"
         plt.close()
 
-        # sig_values_std = [ self.model_prediction_vector_std[k] for k in range(len(self.model_prediction_vector_std)) if self.data.get_test_labels()[k] == 1 ]
-        # bkg_values_std = [ self.model_prediction_vector_std[k] for k in range(len(self.model_prediction_vector_std)) if not self.data.get_test_labels()[k] == 1 ]
-        # sf = len(bkg_values_std) / len(sig_values_std)
-        # plt.hist(bkg_values_std, 30, range=[0.0, 0.1], facecolor='orange', edgecolor='black', label='background', alpha=0.5)
-        # plt.hist(sig_values_std, 30, range=[0.0, 0.1], histtype='step', edgecolor='blue', label='signal')
-        # plt.xlim(0.0, 0.1)
-        # plt.xlabel("$\sigma$", fontsize = 16)
-        # plt.ylabel("$Events$", fontsize = 16)
-        # plt.legend(loc='upper right')
-        # plt.savefig(self.save_path+"/sigma.pdf")
-        # print "sigma.pdf was created"
-        # plt.close()
-
         binaryOutput_std = plottingScripts.plotBinaryOutput(
             data                = self.data,
             test_predictions    = self.model_prediction_vector_std,
-            train_predictions   = None,#self.model_train_prediction_std,
+            train_predictions   = None, # self.model_train_prediction_std,
             nbins               = 30,
-            bin_range           = [0.,0.1],
+            bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
             event_category      = self.category_label,
             plotdir             = self.save_path,
             logscale            = log,

@@ -55,10 +55,11 @@ dnn = DNN.DNN(
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables())
 
+out_dir_1 = "/home/nshadskiy/Documents/draco-bnns/workdir/ANNs_1"
 pred_list = []
-for i in range(5):
+for i in range(50):
     i+=1
-    preds = dnn.load_trained_model("/home/nshadskiy/Documents/draco-bnns/workdir/ANNs_2/ann_{}_ge4j_ge3t".format(i))
+    preds = dnn.load_trained_model(out_dir_1 + "/ann_{}_ge4j_ge3t".format(i))
     pred_list.append(preds)
 
 test_preds = np.concatenate(pred_list, axis=1)
@@ -82,6 +83,23 @@ bnn = BNN.BNN(
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables())
+
+# bnn2 = BNN.BNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples,
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables())
 
 # # build DNN model
 # bnn.build_model(options.getNetConfig())
@@ -112,28 +130,41 @@ bnn = BNN.BNN(
 #             name        = options.getName(),
 #             sigScale    = options.getSignalScale())
 
+# out_dir_1 = "/home/nshadskiy/Documents/draco-bnns/workdir/bnn_1_ge4j_ge3t"
+# bnn_pred1, bnn_pred_std1 = bnn.load_trained_model(out_dir_1)
 
-bnn_pred, bnn_pred_std = dnn.load_trained_model("/home/nshadskiy/Documents/draco-bnns/workdir/ANNs_2/bnn1_ge4j_ge3t")
+out_dir_2 = "/home/nshadskiy/Documents/draco-bnns/workdir/bnn_4_ge4j_ge3t"
+bnn_pred, bnn_pred_std = bnn.load_trained_model(out_dir_2)
 
 from matplotlib.colors import LogNorm
 plt.hist2d(ann_pred_vector, bnn_pred, bins=[50,50], cmin=1, norm=LogNorm())
+#plt.hist2d(bnn_pred1, bnn_pred, bins=[50,50], cmin=1, norm=LogNorm())
 plt.plot([0,1],[0,1],'k')
 plt.colorbar()
 plt.xlabel("$\mu$ ANNs", fontsize = 16)
+#plt.xlabel("$\mu$ BNN 1", fontsize = 16)
 plt.ylabel("$\mu$ BNN", fontsize = 16)
-plt.savefig(options.getOutputDir()+"/bnn_ann_mu.png")
+plt.savefig(out_dir_2+"/bnn_ann_mu_l2-3_dout30.png")
+#plt.savefig(out_dir_2+"/bnn1_bnn2_mu.png")
 print "bnn_ann_mu.png was created"
-plt.savefig(options.getOutputDir()+"/bnn_ann_mu.pdf")
+plt.savefig(out_dir_2+"/bnn_ann_mu_l2-3_dout30.pdf")
+#plt.savefig(out_dir_2+"/bnn1_bnn2_mu.pdf")
 print "bnn_ann_mu.pdf was created"
 plt.close()
 
-plt.hist2d(ann_pred_vector_std, bnn_pred_std, bins=[50,50], range=[[0.,0.1],[0.,0.1]], cmin=1, norm=LogNorm())
-plt.plot([0,0.2],[0,0.2],'k')
+n_max = np.amax([np.amax(ann_pred_vector_std), np.amax(bnn_pred_std)])
+#n_max = np.amax([np.amax(bnn_pred_std1), np.amax(bnn_pred_std)])
+plt.hist2d(ann_pred_vector_std, bnn_pred_std, bins=[50,50], range=[[0.,n_max],[0.,n_max]], cmin=1, norm=LogNorm())
+#plt.hist2d(bnn_pred_std1, bnn_pred_std, bins=[50,50], range=[[0.,n_max],[0.,n_max]], cmin=1, norm=LogNorm())
+plt.plot([0,n_max],[0,n_max],'k')
 plt.colorbar()
 plt.xlabel("$\sigma$ ANNs", fontsize = 16)
+#plt.xlabel("$\sigma$ BNN 1", fontsize = 16)
 plt.ylabel("$\sigma$ BNN", fontsize = 16)
-plt.savefig(options.getOutputDir()+"/bnn_ann_std.png")
+plt.savefig(out_dir_2+"/bnn_ann_std_l2-3_dout30.png")
+#plt.savefig(out_dir_2+"/bnn1_bnn2_std.png")
 print "bnn_ann_std.png was created"
-plt.savefig(options.getOutputDir()+"/bnn_ann_std.pdf")
+plt.savefig(out_dir_2+"/bnn_ann_std_l2-3_dout30.pdf")
+#plt.savefig(out_dir_2+"/bnn1_bnn2_std.pdf")
 print "bnn_ann_std.pdf was created"
 plt.close()

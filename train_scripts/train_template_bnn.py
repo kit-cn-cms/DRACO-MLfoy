@@ -14,7 +14,7 @@ basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
 # import class for DNN training
-import DRACO_Frameworks.DNN.DNN as DNN
+#import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.BNN as BNN
 import DRACO_Frameworks.DNN.data_frame as df
 
@@ -55,13 +55,13 @@ bnn = BNN.BNN(
 # build DNN model
 bnn.build_model(options.getNetConfig())
 
-# # perform the training
+# perform the training
 bnn.train_model()
 
-# # evalute the trained model
+# evalute the trained model
 bnn.eval_model()
 
-# # save information
+# save information
 bnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
 # # save and print variable ranking according to the input layer weights
@@ -69,7 +69,7 @@ bnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
 # # save and print variable ranking according to all layer weights
 # bnn.get_weights()
-
+#bnn.build_flip_model(options.getNetConfig())
 
 # plotting
 if options.doPlots():
