@@ -103,14 +103,15 @@ class DNN():
             eval_metrics       = None,
             shuffle_seed       = None,
             balanceSamples     = False,
-            evenSel            = None):
+            evenSel            = None,
+            addSampleSuffix    = ""):
 
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
 
-        # norm variables or not
-        self.norm_variables = norm_variables
+        # suffix of additional (ttbb) sample
+        self.addSampleSuffix = addSampleSuffix
 
         # output directory for results
         self.save_path = save_path
@@ -198,6 +199,7 @@ class DNN():
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
+            addSampleSuffix  = self.addSampleSuffix
         )
 
     def _load_architecture(self, config):
@@ -208,6 +210,7 @@ class DNN():
           "layers":                   [200],
           "loss_function":            "categorical_crossentropy",
           "Dropout":                  0.2,
+          "L1_Norm":                  0.,
           "L2_Norm":                  1e-5,
           "batch_size":               5000,
           "optimizer":                optimizers.Adagrad(decay=0.99),
@@ -261,6 +264,7 @@ class DNN():
             print("output:" + str(output))
 
             for i, node in enumerate(self.event_classes):
+                if i>=6: continue
                 print(str(node)+" node: "+str(output[i]))
             print("-------------------->")
 
@@ -318,7 +322,7 @@ class DNN():
 
         return model
 
-    def build_model(self, config = None, model = None):
+    def build_model(self, config = None, model = None, penalty = None):
         ''' build a DNN model
             use options defined in 'config' dictionary '''
 
@@ -428,6 +432,7 @@ class DNN():
         configs["shuffleSeed"] = self.data.shuffleSeed
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
+        configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
 
         # save information for binary DNN
@@ -574,7 +579,7 @@ class DNN():
             else:
                 propagated_weights.append(
                     [np.sum(np.abs(out_weights)*propagated_weights[i-1]) for out_weights in weight_layers[index]]
-#                    [propagated_weights[i-1][j]*weight_layers[index][j] for j in range(len(weight_layers[index]))]
+                    # [propagated_weights[i-1][j]*weight_layers[index][j] for j in range(len(weight_layers[index]))]
                     )
             print(propagated_weights[i])
 
@@ -591,7 +596,7 @@ class DNN():
         print("wrote propagated weight ranking to "+str(rank_path))
 
 
-    def get_variations(self):
+    def get_variations(self, is_binary):
         if not os.path.exists(self.save_path + "/variations/"):
             os.makedirs(self.save_path + "/variations/")
 
@@ -613,6 +618,7 @@ class DNN():
 
             for n, node in enumerate(self.event_classes):
                 plt.plot(test_values, predictions[:,n], "-", linewidth = 2, label = node+" node")
+                if is_binary: break
 
             plt.grid()
             plt.legend()
@@ -781,7 +787,7 @@ class DNN():
             plt.grid()
             plt.xlabel("epoch", fontsize = 16)
             plt.ylabel(metric.replace("_"," "), fontsize = 16)
-#            plt.ylim(ymin=0.)
+            # plt.ylim(ymin=0.)
 
             # add legend
             plt.legend()
@@ -915,7 +921,7 @@ class DNN():
 
     def binned_likelihood(self, bkg_bins, sig_bins, mu):
         '''Calculates sigma1 and sigma2 for asimov data set and makes a plot'''
-        save_path = self.save_path + "plots/"
+        save_path = self.save_path + "/plots/"
         obs_bins = bkg_bins + mu * sig_bins
         #remove bins with no bkg events -> they will couse problems due to log
         indices = [i for i, x in enumerate(bkg_bins) if x <= 0]
@@ -978,7 +984,7 @@ category_label= None):
 
 
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"])
+    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"])
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
@@ -991,15 +997,16 @@ category_label= None):
     dnn = DNN(
       save_path       = outputDirectory,
       input_samples   = input_samples,
-      category_name  = config["JetTagCategory"],
+      category_name   = config["JetTagCategory"],
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
+      addSampleSuffix = config["addSampleSuffix"],
     )
 
 
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
-#    dnn.predict_event_query()
+    # dnn.predict_event_query()
 
     return dnn
