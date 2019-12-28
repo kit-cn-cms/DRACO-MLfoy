@@ -622,7 +622,7 @@ class DNN():
 
             predictions = self.model.predict(testset)
 
-            yrange = [0., 2./len(self.event_classes)]
+            yrange = [0.3, 0.7]
             
             
             plt.clf()
@@ -631,7 +631,7 @@ class DNN():
 
             #for node in enumerate(self.event_classes):
             node = self.event_classes
-            plt.plot(test_values, predictions[:,0], "-", linewidth = 2, label = node[0]+" node")
+            plt.plot(test_values, predictions[:,0], "-", linewidth = 2, label = "output node")
             #plt.plot(test_values, 1-predictions[:,0], "-", linewidth = 2, label = node[1]+" node")
                 
             plt.grid()
@@ -640,10 +640,10 @@ class DNN():
             title = title.replace("\\geq", "$\geq$")
             title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
-            plt.xlabel(str(v), fontsize = 16)            #not yet the best solution for string processing
+            plt.xlabel(v.replace("_","\_"), fontsize = 16)            #not yet the best solution for string processing
             plt.ylabel("node output", fontsize = 16)
             plt.xlim([-2,2])
-            plt.ylim(yrange)
+            plt.ylim(yrange) 
             plt.tight_layout()
             outpath = self.save_path + "/variations/"+str(v)+".pdf"
             plt.savefig(outpath)
