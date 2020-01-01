@@ -87,7 +87,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v4/"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v5/"
 
 # add samples to dataset
 
