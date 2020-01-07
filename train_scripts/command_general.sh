@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set=allVars_comb_S01
+set=allVars
 echo $set
-for i in 1 #2 3 4 5
+for i in 2 3 4 5
 do
 	for cat in 4j_ge3t 5j_ge3t ge6j_ge3t #ge4j_3t ge4j_ge4t
 	do
