@@ -596,7 +596,7 @@ class DNN():
             title = title.replace("\\geq", "$\geq$")
             title = title.replace("\\leq", "$\leq$")
             plt.title(title, loc = "right", fontsize = 16)
-            plt.xlabel(v, fontsize = 16)
+            plt.xlabel(v.replace("_","\_"), fontsize = 16)
             plt.ylabel("node output", fontsize = 16)
             plt.xlim([-2,2])
             plt.ylim(yrange)

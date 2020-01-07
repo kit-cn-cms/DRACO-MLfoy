@@ -255,7 +255,7 @@ class variablePlotter:
         latex.DrawLatex(l+0.001,1.-t+0.01, JTcut.getJTlabel(cat))
         
         #self.corr_histo = cm
-        cm.SaveAs(outfile[:-3]+"root")  ## saving shit
+        #cm.SaveAs(outfile[:-3]+"root")  ## saving shit
 
         canvas.SaveAs(outfile)
         

@@ -88,7 +88,6 @@ if options.doPlots():
         dnn.get_binary_variations()
         
     else:
-        dnn.get_variations()
         
         # plot the confusion matrix
         dnn.plot_confusionMatrix(
@@ -125,4 +124,5 @@ if options.doPlots():
             signal_class        = ["ttZ"],
             privateWork         = options.isPrivateWork())
 
-
+	# plot variations
+	dnn.get_variations()
