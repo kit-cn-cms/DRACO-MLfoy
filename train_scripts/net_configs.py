@@ -183,9 +183,135 @@ config_dict["STXS_2017"] = {
         "Dropout":                  0.50,
         "L1_Norm":                  0.,
         "L2_Norm":                  1e-5,
-        "batch_size":               4096,
+        "batch_size":               1000,
         "optimizer":                optimizers.Adam(1e-4),
         "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_1"] = {
+        "layers":                   [50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               1000,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_2"] = {
+        "layers":                   [50,50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               1000,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_3"] = {
+        "layers":                   [100,75,50,25,10],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               1000,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_4"] = {
+        "layers":                   [50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_5"] = {
+        "layers":                   [50,50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_6"] = {
+        "layers":                   [100,75,50,25,10],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_7"] = {
+        "layers":                   [1000],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_8"] = {
+        "layers":                   [10,10,10,10,10,10,10],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+
+config_dict["STXS_2017_9"] = {
+        "layers":                   [10,25,50,75,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               200,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
         "earlystopping_epochs":     100,
