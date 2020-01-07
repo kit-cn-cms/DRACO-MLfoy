@@ -1,6 +1,6 @@
 variables = {}
 
-variables["ge4j_ge3t"] = [
+variables["4j_ge3t"] = [
     # "Reco_tHW_h_pt",
     # "Reco_tHW_whad_pt",
     # "Reco_tHW_whad_m",
@@ -36,7 +36,7 @@ variables["ge4j_ge3t"] = [
     ]
 
 
-variables["ge4j_ge4t"] = [
+variables["5j_ge3t"] = [
 
     # "Reco_tHW_wtop_pt",
     # "Reco_tHq_hdau_eta2",
@@ -86,7 +86,7 @@ variables["ge4j_ge4t"] = [
     ]
 
 
-variables["ge4j_3t"] = [
+variables["ge6j_3t"] = [
     "Reco_ttbar_tophad_m",
 
     "Evt_CSV_avg",
