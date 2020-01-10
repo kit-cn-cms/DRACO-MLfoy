@@ -178,7 +178,7 @@ class variablePlotter:
             displayname = self.variableconfig.loc[variable,'displayname']
             logoption = self.variableconfig.loc[variable,'logoption']
         else:
-            bins = 30
+            bins = 50
             maxValue = max([max(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             minValue = min([min(self.samples[sample].cut_data[cat][variable].values) for sample in self.samples])
             displayname = variable
