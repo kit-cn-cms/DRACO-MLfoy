@@ -1,8 +1,5 @@
 variablename,minvalue,maxvalue,numberofbins,logoption,displayname
 CSV[0],0.3,1,50,x,highest b-tag value
-CSV[1],0.3,1,50,x,second highest b-tag value
-CSV[2],0.3,1,50,x,third highest b-tag value
-CSV[3],0,1,50,x,fourth highest b-tag value
 CSV[4],0,1,50,x,fifth highest b-tag value
 CSV[5],0,1,50,x,sixth highest b-tag value
 Evt_CSV_Average,0.3,1,50,x,average b-tag value
@@ -11,10 +8,7 @@ Evt_CSV_Dev,0,0.25,50,-,deviation of b-tag value
 Evt_CSV_Dev_Tagged,0,0.12,50,x,deviation of b-tag value of tagged jets
 Evt_CSV_Min,0,0.6,50,x,min b-tag value
 Evt_CSV_Min_Tagged,0.3,1,50,x,min b-tag value of tagged jets
-Evt_Deta_JetsAverage,0.25,2.5,50,-,average #Delta#eta(jets)
-Evt_Deta_TaggedJetsAverage,0,3,50,-,average #Delta#eta(tags)
 Evt_Deta_UntaggedJetsAverage,0,3,50,-,average #Delta#eta(untagged)
-Evt_Dr_JetsAverage,0.7,3.5,50,-,average #DeltaR(jets)
 Evt_Dr_Jets_Average,1.5,3.5,50,-,average #DeltaR(jets)
 Evt_Dr_MinDeltaRJets,0.4,2.2,50,-,min #DeltaR(jet jet)
 Evt_Dr_MinDeltaRLeptonJet,0.3,3,50,-,min #DeltaR(lep jet)
@@ -32,21 +26,16 @@ Evt_HT,200,1700,50,x,H_{T}
 Evt_HT_Jets,150,1700,50,x,H_{T} of jets
 Evt_JetPtOverJetE,0.2,1,50,-,p_{T}(jets)/E(jets)
 Evt_Jet_MaxDeta_Jets,0,4.5,50,-,max #Delta#eta(jet jet)
-Evt_M2_JetsAverage,50,500,50,-,average M_{2}(jets)
-Evt_M2_TaggedJetsAverage,50,550,50,-,average M_{2}(tags)
 Evt_M2_UntaggedJetsAverage,50,400,50,-,average M_{2}(untagged)
 Evt_M3,50,1000,50,-,M_{3} with highest p_{T}
 Evt_MHT,0,400,50,-,missing H_{T}
-Evt_M_JetsAverage,5,30,50,-,average M(jets)
 Evt_M_MedianTaggedJets,50,500,50,-,median M(tags)
 Evt_M_MinDeltaRJets,20,200,50,-,mass of min #DeltaR(jet jet)
 Evt_M_MinDeltaRLeptonJet,20,250,50,-,mass of min #DeltaR(lep jet)
 Evt_M_MinDeltaRLeptonTaggedJet,20,300,50,-,mass of min #DeltaR(lep tag)
 Evt_M_MinDeltaRTaggedJets,20,400,50,-,mass of min #DeltaR(tag tag)
 Evt_M_PrimaryLepton,-0.25,0.35,50,-,Mass PrimaryLepton
-Evt_M_TaggedJetsAverage,5,50,50,-,average M(tags)
 Evt_M_TaggedJetsClosestTo125,50,250,50,-,M(tags) closest to 125 GeV
-Evt_M_Total,250,3000,50,x,total mass
 Evt_M_UntaggedJetsAverage,0,60,50,-,average M(untagged)
 Evt_Phi_MET,-3.14159265358979,3.14159265358979,50,-,#phi(MET)
 Evt_Phi_PrimaryLepton,-3.14159265358979,3.14159265358979,50,-,#phi(PrimaryLepton)
@@ -79,7 +68,6 @@ Jet_Eta[2],-2.4,2.4,50,-,#eta of third jet
 Jet_Eta[3],-2.4,2.4,50,-,#eta of fourth jet
 Jet_Eta[4],-2.4,2.4,50,-,#eta of fifth jet
 Jet_Eta[5],-2.4,2.4,50,-,#eta of sixth jet
-Jet_M[0],0,100,50,-,mass of leading jet
 Jet_M[1],0,60,50,-,mass of subleading jet
 Jet_M[2],0,40,50,-,mass of third jet
 Jet_M[3],0,50,30,-,mass of fourth jet
@@ -92,7 +80,6 @@ Jet_Phi[3],-3.14159265358979,3.14159265358979,50,-,#phi of fourth jet
 Jet_Phi[4],-3.14159265358979,3.14159265358979,50,-,#phi of fifth jet
 Jet_Phi[5],-3.14159265358979,3.14159265358979,50,-,#phi of sixth jet
 Jet_Pt[0],0,600,50,x,p_{T} of leading jet
-Jet_Pt[1],0,500,50,x,p_{T} of subleading jet
 Jet_Pt[2],50,300,30,x,p_{T} of third jet
 Jet_Pt[3],50,200,30,x,p_{T} of fourth jet
 Jet_Pt[4],50,150,30,x,p_{T} of fifth jet
@@ -104,10 +91,7 @@ LooseLepton_Phi[0],-3.14159265358979,3.14159265358979,50,-,#phi(lep)
 LooseLepton_Pt[0],0,400,50,x,p_{T}(lep)
 N_AK8Jets,-0.5,6.5,7,-,N(AK8Jets)
 N_AdditionalGenBQuarks,-0.5,6.5,7,-,N(AdditionalGenBQuarks)
-N_BTagsL,2.5,8.5,6,-,number of b-tags (loose)
-N_BTagsM,2.5,7.5,5,-,number of b-tags (medium)
 N_BTagsT,-0.5,5.5,6,-,number of b-tags (tight)
-N_Jets,1.5,11.5,10,-,number of jets
 N_LooseJets,3.5,10.5,7,-,N(LooseJets)
 N_LooseLeptons,-0.5,6.5,7,-,N(LooseLeptons)
 N_PrimaryVertices,0,60,50,-,N(PrimaryVertices)
@@ -169,12 +153,8 @@ Jet_DeepJet_uds[2],0,1,50,x,DeepJet(uds) of third jet
 Jet_DeepJet_uds[3],0,1,50,x,DeepJet(uds) of fourth jet
 Jet_DeepJet_uds[4],0,1,50,x,DeepJet(uds) of fifth jet
 Jet_DeepJet_uds[5],0,1,50,x,DeepJet(uds) of sixth jet
-Evt_CSV_avg,0.1,0.9,50,-,average b-tag value
-Evt_CSV_avg_tagged,0.3,1,50,-,average b-tag value of tagged jets
-Evt_CSV_dev,0,0.24,50,-,average deviation of b-tag value
 Evt_CSV_dev_tagged,0,0.12,50,-,average deviation of b-tag value of tagged jets
 Evt_CSV_min,0,1,50,-,minimal b-tag value
-Evt_CSV_min_tagged,0.28,1,50,-,minimal b-tag value of tagged jets
 Evt_Deta_maxDetaJetJet,0,2,50,-,"#Delta#eta( max #Delta#eta(jet,jet) )"
 Evt_Deta_maxDetaJetTag,0,1.8,50,-,"#Delta#eta( max #Delta#eta(jet,tag) )"
 Evt_Deta_maxDetaTagTag,0,1.8,50,-,"#Delta#eta( max #Delta#eta(tag,tag) )"
@@ -184,15 +164,11 @@ Evt_Dr_maxDrUntaggedJets,0,5.5,50,-,"#DeltaR( max #Delta#eta(untag,untag) )"
 Evt_Dr_minDrJets,0.4,1.8,50,-,"#DeltaR( min #DeltaR(jet,jet) )"
 Evt_Dr_minDrLepJet,0.4,3,50,-,"#DeltaR( min #DeltaR(lep,jet) )"
 Evt_Dr_minDrLepTag,0.4,3.5,50,-,"#DeltaR( min #DeltaR(lep,tag) )"
-Evt_Dr_minDrTaggedJets,0.4,3.5,50,-,"#DeltaR( min #DeltaR(tag,tag) )"
 Evt_Dr_minDrUntaggedJets,0.4,3.5,50,-,"#DeltaR( min #DeltaR(untag,untag) )"
-Evt_E_JetsAverage,0,600,50,-,average E(jets)
 Evt_E_TaggedJetsAverage,0,800,50,-,average E(tags)
 Evt_E_UntaggedJetsAverage,0,800,50,-,average E(untagged)
 Evt_HT_jets,200,1500,50,-,H_{T}(jets)
-Evt_HT_tags,100,1000,50,-,H_{T}(tags)
 Evt_HT_wo_MET,200,1500,50,-,H_{T} without MET
-Evt_JetPt_over_JetE,0.3,1,50,-,p_{T}(jets)/E(jets)
 Evt_M2_closestTo125TaggedJets,0,300,50,-,"M_{2}(tag,tag) closest to 125 GeV"
 Evt_M2_closestTo91TaggedJets,0,300,50,-,"M_{2}(tag,tag) closest to 91 GeV"
 Evt_M2_minDrJets,0,200,50,-,"M_{2}( min #DeltaR(jet,jet) )"
@@ -204,19 +180,13 @@ Evt_MET_Phi,-3.14159265358979,3.14159265358979,50,-,#phi(MET)
 Evt_MET_Pt,20,400,50,-,p_{T}(MET)
 Evt_MTW,0,300,50,-,MTW
 Evt_M_minDrLepJet,0,200,50,-,"M_{2}( min #DeltaR(lep,jet) )"
-Evt_M_minDrLepTag,0,250,50,-,"M_{2}( min #DeltaR(lep,tag) )"
-Evt_Pt_JetsAverage,0,250,50,-,average p_{T}(jets)
-Evt_Pt_TaggedJetsAverage,0,300,50,-,average p_{T}(tags)
 Evt_Pt_UntaggedJetsAverage,0,400,50,-,average p_{T}(untagged)
 Evt_Pt_minDrJets,0,600,50,-,"p_{T}( min #DeltaR(jet,jet) )"
-Evt_Pt_minDrTaggedJets,0,500,50,-,"p_{T}( min #DeltaR(tag,tag) )"
 Evt_Pt_minDrUntaggedJets,0,500,50,-,"p_{T}( min #DeltaR(untag,untag) )"
 Evt_TaggedJetPt_over_TaggedJetE,0.2,1,50,-,p_{T}(tags)/E(tags)
 Evt_aplanarity,0,0.4,50,-,aplanarity
 Evt_aplanarity_jets,0,0.4,50,-,aplanarity of jets
 Evt_aplanarity_tags,0,0.4,50,x,aplanarity of tagged jets
-Evt_h0,0.2,0.45,50,-,first fox wolfram moment
-Evt_h1,-0.2,0.35,50,-,second fox wolfram moment
 Evt_h2,-0.1,0.3,50,-,third fox wolfram moment
 Evt_h3,-0.15,0.25,50,-,fourth fox wolfram moment
 Evt_sphericity,0,1,50,-,sphericity
@@ -831,12 +801,10 @@ Reco_ttbar_btophad_eta,-4,4,50,-,Reco_ttbar_btophad_eta
 Reco_ttH_tophad_m,0,800,50,-,Reco_ttH_tophad_m
 Reco_ttH_h_phi,-4,4,50,-,Reco_ttH_h_phi
 Reco_ttH_h_eta,-4,-4,50,-,Reco_ttH_h_eta
-Reco_ttH_tophad_pt,0,800,50,-,Reco_ttH_tophad_pt
 Reco_ttH_whad_dr,0,4,50,-,Reco_ttH_whad_dr
 Reco_ttH_whaddau_m2,0,50,50,-,Reco_ttH_whaddau_m2
 Reco_JABDT_ttH_tophad_pt__P__toplep_pt__P__h_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt,0,1,20,-,Reco_JABDT_ttH_tophad_pt__P__toplep_pt__P__h_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt
 Reco_JABDT_ttbar_log_toplep_pt,0,10,50,-,Reco_JABDT_ttbar_log_toplep_pt
-Reco_JABDT_ttbar_Jet_CSV_whaddau1 ,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_whaddau1
 blr, 0,1, 50,-,blr
 blr_transformed, -7,14,50,-,blr_transformed
 MEM, 0,1, 50,-,MEM
@@ -877,3 +845,84 @@ HT_jets,0,600,50,-,HT_jets
 twist_tag_tag_max_mass, -1.6,1.6, 100,-,twist_tag_tag_max_mass
 twist_jet_tag_max_mass, -1.6,1.6, 100,-,twist_jet_tag_max_mass
 twist_jet_jet_max_mass, -1.6,1.6, 100,-,twist_jet_jet_max_mass
+Reco_JABDT_ttbar_Jet_CSV_whaddau2,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_whaddau2
+Evt_Deta_JetsAverage,0,3,50,-,Evt_Deta_JetsAverage
+Reco_JABDT_ttbar_Jet_CSV_whaddau1,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_whaddau1
+Evt_CSV_avg_tagged,0.3,1,50,-,Evt_CSV_avg_tagged
+Jet_M[0],5.,150,50,-,Jet_M[0]
+Reco_JABDT_ttbar_Jet_CSV_btoplep,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_btoplep
+Reco_ttH_tophad_pt,-1.5,1000,50,-,Reco_ttH_tophad_pt
+Evt_M_JetsAverage,5,50,50,-,Evt_M_JetsAverage
+Reco_tHq_h_m,-1.5,500,50,-,Reco_tHq_h_m
+Evt_CSV_min_tagged,0.277,1,50,-,Evt_CSV_min_tagged
+TaggedJet_Pt[3],30,300,50,-,TaggedJet_Pt[3]
+Reco_tHW_top_h_dr,-1.5,8,50,-,Reco_tHW_top_h_dr
+Evt_CSV_dev,0,0.25,50,-,Evt_CSV_dev
+Reco_JABDT_tHq_log_top_m,-1.5,7,50,-,Reco_JABDT_tHq_log_top_m
+N_Jets,3.5,10.5,7,-,N_Jets
+Evt_E_JetsAverage,40,500,50,-,Evt_E_JetsAverage
+Evt_M2_TaggedJetsAverage,40,1000,50,-,Evt_M2_TaggedJetsAverage
+Evt_CSV_avg,0.15,1,50,-,Evt_CSV_avg
+CSV[2],0.277,1,50,-,CSV[2]
+Reco_ttH_bestJABDToutput,-1,0.7,50,-,Reco_ttH_bestJABDToutput
+Reco_tHq_bestJABDToutput,-1,0.7,50,-,Reco_tHq_bestJABDToutput
+CSV[1],0.277,1,50,-,CSV[1]
+Evt_Pt_JetsAverage,30,500,50,-,Evt_Pt_JetsAverage
+CSV[3],0.0,0.277,50,-,CSV[3]
+Reco_tHW_bestJABDToutput,-1,0.6,50,-,Reco_tHW_bestJABDToutput
+Reco_JABDT_tHW_Jet_CSV_btop,-1.5,1,50,-,Reco_JABDT_tHW_Jet_CSV_btop
+Reco_ttbar_bestJABDToutput,-0.4,0.7,50,-,Reco_ttbar_bestJABDToutput
+TaggedJet_CSV[3],0.277,1,50,-,TaggedJet_CSV[3]
+Reco_JABDT_ttH_log_toplep_pt,-1.5,7,50,-,Reco_JABDT_ttH_log_toplep_pt
+Evt_M_TaggedJetsAverage,5.,70,50,-,Evt_M_TaggedJetsAverage
+N_BTagsL,3.5,9.5,6,-,N_BTagsL
+Jet_Pt[1],30,500,50,-,Jet_Pt[1]
+N_BTagsM,3.5,8.5,5,-,N_BTagsM
+Reco_tHW_hdau_m1,-1.5,100,50,-,Reco_tHW_hdau_m1
+Reco_JABDT_tHq_Jet_CSV_hdau1,-1.5,1,50,-,Reco_JABDT_tHq_Jet_CSV_hdau1
+Evt_Deta_TaggedJetsAverage,0,3,50,-,Evt_Deta_TaggedJetsAverage
+Reco_JABDT_tHq_Jet_CSV_btop,-1.5,1,50,-,Reco_JABDT_tHq_Jet_CSV_btop
+TaggedJet_M[3],1.5,40,50,-,TaggedJet_M[3]
+Evt_Pt_minDrTaggedJets,20,600,50,-,Evt_Pt_minDrTaggedJets
+Reco_tHW_whad_dr,-1.5,5,50,-,Reco_tHW_whad_dr
+TaggedJet_CSV[0],0.277,1,50,-,TaggedJet_CSV[0]
+Reco_tHW_hdau_phi1,-5,3.1416,50,-,Reco_tHW_hdau_phi1
+Evt_Dr_minDrTaggedJets,0.35,2.5,50,-,Evt_Dr_minDrTaggedJets
+Evt_h0,0.1,0.45,50,-,Evt_h0
+Evt_blr_transformed,-2.5,15,50,-,Evt_blr_transformed
+Reco_JABDT_tHW_Jet_CSV_whaddau1,-1.5,1,50,-,Reco_JABDT_tHW_Jet_CSV_whaddau1
+Reco_JABDT_ttH_Jet_CSV_hdau2,-1.5,1,50,-,Reco_JABDT_ttH_Jet_CSV_hdau2
+Reco_JABDT_ttbar_Jet_CSV_btophad,0,1,50,-,Reco_JABDT_ttbar_Jet_CSV_btophad
+Reco_tHW_wb_h_dr,-1.5,10,50,-,Reco_tHW_wb_h_dr
+Reco_JABDT_ttH_Jet_CSV_hdau1,-1.5,1,50,-,Reco_JABDT_ttH_Jet_CSV_hdau1
+TaggedJet_Pt[1],30,700,50,-,TaggedJet_Pt[1]
+TaggedJet_M[0],0,200,50,-,TaggedJet_M[0]
+TaggedJet_M[2],0,50,50,-,TaggedJet_M[2]
+Evt_Pt_TaggedJetsAverage,30,600,50,-,Evt_Pt_TaggedJetsAverage
+Reco_ttbar_whad_m,0,600,50,-,Reco_ttbar_whad_m
+Reco_ttbar_whaddau_m1,0,250,50,-,Reco_ttbar_whaddau_m1
+Reco_ttbar_toplep_m,80,500,50,-,Reco_ttbar_toplep_m
+TaggedJet_Pt[2],30,300,50,-,TaggedJet_Pt[2]
+Reco_JABDT_tHW_Jet_CSV_hdau2,-1.5,1,50,-,Reco_JABDT_tHW_Jet_CSV_hdau2
+TaggedJet_M[1],0,150,50,-,TaggedJet_M[1]
+Evt_JetPt_over_JetE,0,1,50,-,Evt_JetPt_over_JetE
+Reco_JABDT_ttbar_log_tophad_m,4,8,50,-,Reco_JABDT_ttbar_log_tophad_m
+Reco_JABDT_ttbar_log_whad_m,3,8,50,-,Reco_JABDT_ttbar_log_whad_m
+Evt_h1,-0.2,0.4,50,-,Evt_h1
+Reco_JABDT_tHq_abs_ljet_eta,-1.5,4.5,50,-,Reco_JABDT_tHq_abs_ljet_eta
+Evt_M_minDrLepTag,15.,400.,50,-,Evt_M_minDrLepTag
+Reco_ttH_toplep_m,-1.5,750.,50,-,Reco_ttH_toplep_m
+Reco_JABDT_ttH_Jet_CSV_btoplep,-1.5,1.,50,-,Reco_JABDT_ttH_Jet_CSV_btoplep
+Reco_JABDT_tHW_top_pt__P__h_pt__P__wb_pt__DIV__Evt_HT__P__Evt_Pt_MET__P__Lep_Pt,-1.5,1.,50,-,Reco_JABDT_tHW_energy_fraction
+Reco_tHW_whaddau_m1,-1.5,100.,50,-,Reco_tHW_whaddau_m1
+Reco_JABDT_ttH_log_toplep_m,-1.5,7.5,50,-,Reco_JABDT_ttH_log_toplep_m
+Reco_JABDT_tHq_ljet_e__M__btop_e,-1000.,2000.,50,-,Reco_JABDT_tHq_ljet_e__M__btop_e
+Reco_tHq_costhetastar,-5.0,1.,50,-,Reco_tHq_costhetastar
+Evt_M2_JetsAverage,50.,600.,50,-,Evt_M2_JetsAverage
+Evt_HT_tags,100.,1000.,50,-,Evt_HT_tags
+Reco_JABDT_tHq_log_ljet_pt,3.,7.5,50,-,Reco_JABDT_tHq_log_ljet_pt
+Reco_JABDT_tHW_log_top_m,-1.5,8.,50,-,Reco_JABDT_tHW_log_top_m
+Evt_M_Total,200.,3000.,50,-,Evt_M_Total
+Evt_Dr_JetsAverage,0.5,4.0,50,-,Evt_Dr_JetsAverage
+Reco_tHq_ljet_m,10.,75.,50,-,Reco_tHq_ljet_m
+Reco_JABDT_tHW_log_wb_m,-1.5,8.5,50,-,Reco_JABDT_tHW_log_wb_m
