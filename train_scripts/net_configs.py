@@ -28,12 +28,27 @@ config_dict["test_config"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["ttH_SL_legacy"] = {
+        "layers":                   [50,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               1000,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
 config_dict["ttZ_2018_final"] = {
         "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.4,
-        "L2_Norm":                  1e-4,
-        "batch_size":               200,
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               1000,
         "optimizer":                optimizers.Adagrad(),
         "activation_function":      "leakyrelu",
         "output_activation":        "Softmax",
@@ -81,16 +96,16 @@ config_dict["ttH_2017_baseline"] = {
         }
 
 config_dict["legacy_2018"] = {
-        "layers":                   [200,100,50],
+        "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.20,
         "L2_Norm":                  1e-5,
-        "batch_size":               50000,
+        "batch_size":               512,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     100,
+        "earlystopping_epochs":     50,
         }
 
 config_dict["dnn_config"] = {

@@ -119,40 +119,42 @@ plotter = variablePlotter(
 naming = options.naming
 # add signal samples
 plotter.addSample(
-    sampleName      = "ttH",
+    sampleName      = "tt+H",
     sampleFile      = data_dir+"/ttH"+naming,
     plotColor       = ROOT.kBlue+1,
+    XSscaling       = 1.,
     signalSample    = True)
 
 # add background samples
 plotter.addSample(
-    sampleName      = "ttbb",
-    sampleFile      = data_dir+"/ttbb"+naming,
+    sampleName      = "tt+b",
+    sampleFile      = data_dir+"/ttmb"+naming,
+    XSscaling       = 2.*35.9*0.44,
     plotColor       = ROOT.kRed+3)
 
 plotter.addSample(
-    sampleName      = "tt2b",
+    sampleName      = "tt+2b",
     sampleFile      = data_dir+"/tt2b"+naming,
+    XSscaling       = 2.*35.9*0.44,
     plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
-    sampleName      = "ttb",
-    sampleFile      = data_dir+"/ttb"+naming,
-    plotColor       = ROOT.kRed-2)
-
-plotter.addSample(
-    sampleName      = "ttcc",
+    sampleName      = "tt+cc",
     sampleFile      = data_dir+"/ttcc"+naming,
+    XSscaling       = 2.,
     plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
-    sampleName      = "ttlf",
-    sampleFile      = data_dir+"/ttlf"+naming)
+    sampleName      = "tt+lf",
+    XSscaling       = 2.,
+    sampleFile      = data_dir+"/ttlf"+naming,
+    plotColor       = ROOT.kRed-7)
 
 
 
 # add JT categories
-plotter.addCategory("ge4j_ge3t")
+plotter.addCategory("ge4j_ge4t")
+plotter.addCategory("ge4j_3t")
 
 
 # perform plotting routine
