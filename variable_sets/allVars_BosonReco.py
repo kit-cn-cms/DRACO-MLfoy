@@ -31,8 +31,8 @@ variables["4j_ge3t"] = [
     'Evt_JetPt_over_JetE',
     'Evt_M2_JetsAverage',
     'Evt_M2_TaggedJetsAverage',
-    'Evt_M2_closestTo125TaggedJets',
-    'Evt_M2_closestTo91TaggedJets',
+    #'Evt_M2_closestTo125TaggedJets',
+    #'Evt_M2_closestTo91TaggedJets',
     'Evt_M2_minDrJets',
     'Evt_M2_minDrTaggedJets',
     'Evt_M3',
@@ -244,12 +244,12 @@ variables["5j_ge3t"] = variables["4j_ge3t"] +  [
     #'LooseLepton_M[0]',
     #'LooseLepton_Phi[0]',
     #'LooseLepton_Pt[0]',
-    'TaggedJet_CSV[4]',
-    'TaggedJet_E[4]',
-    'TaggedJet_Eta[4]',
-    'TaggedJet_M[4]',
-    'TaggedJet_Phi[4]',
-    'TaggedJet_Pt[4]',
+    #'TaggedJet_CSV[4]',
+    #'TaggedJet_E[4]',
+    #'TaggedJet_Eta[4]',
+    #'TaggedJet_M[4]',
+    #'TaggedJet_Phi[4]',
+    #'TaggedJet_Pt[4]',
     ]
 
 variables["ge6j_ge3t"] = variables["5j_ge3t"] + [
@@ -289,13 +289,16 @@ variables["ge6j_ge3t"] = variables["5j_ge3t"] + [
     #'LooseLepton_M[0]',
     #'LooseLepton_Phi[0]',
     #'LooseLepton_Pt[0]',
-    'TaggedJet_CSV[5]',
-    'TaggedJet_E[5]',
-    'TaggedJet_Eta[5]',
-    'TaggedJet_M[5]',
-    'TaggedJet_Phi[5]',
-    'TaggedJet_Pt[5]',
+    #'TaggedJet_CSV[5]',
+    #'TaggedJet_E[5]',
+    #'TaggedJet_Eta[5]',
+    #'TaggedJet_M[5]',
+    #'TaggedJet_Phi[5]',
+    #'TaggedJet_Pt[5]',
     ]
+
+variables["ge3j_3t"] = variables["4j_ge3t"]
+variables["ge3j_ge4t"] = variables["4j_ge3t"]
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
 
