@@ -60,6 +60,10 @@ plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", 
         help="activate to print ROC value for confusion matrix")
 plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
+plotopts.add_option("-G","--gradients", dest="gradients", default=False, action="store_true",
+        help="activate gradient calculation with tensorflow")
+plotopts.add_option("-V","--variations", dest="variations", default=False, action="store_true",
+        help="activate variation plots")
 parser.add_option_group(plotopts)
 
 binaryOptions = optparse.OptionGroup(parser, "Binary Options",
@@ -238,3 +242,9 @@ class optionHandler:
 
     def getSignalScale(self):
         return self.__options.sigScale
+
+    def doVariations(self):
+        return self.__options.variations
+
+    def doGradients(self):
+        return self.__options.gradients

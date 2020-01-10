@@ -30,6 +30,8 @@ input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normal
 input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight())
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
@@ -61,7 +63,7 @@ dnn.train_model()
 dnn.eval_model()
 
 # save information
-dnn.save_model(sys.argv, filedir, options.getNetConfigName())
+dnn.save_model(sys.argv, filedir, options.getNetConfigName(), get_gradients = options.doGradients())
 
 # save and print variable ranking according to the input layer weights
 dnn.get_input_weights()
@@ -70,7 +72,8 @@ dnn.get_input_weights()
 dnn.get_weights()
 
 # variation plots
-dnn.get_variations()
+if options.doVariations() and not options.isBinary():
+    dnn.get_variations()
 
 # plotting
 if options.doPlots():
@@ -121,3 +124,6 @@ if options.doPlots():
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
+
+if options.doGradients():
+    dnn.get_gradients(options.isBinary())
