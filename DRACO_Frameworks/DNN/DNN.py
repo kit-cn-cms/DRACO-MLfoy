@@ -369,7 +369,7 @@ class DNN():
             validation_split    = 0.25,
             sample_weight       = self.data.get_train_weights())
 
-    def save_model(self, argv, execute_dir, netConfigName):
+    def save_model(self, argv, execute_dir, netConfigName, get_gradients = True):
         ''' save the trained model '''
 
         # save executed command
@@ -450,7 +450,8 @@ class DNN():
         print("wrote config of input variables to {}".format(plot_file))
 
         # Serialize the test inputs for the analysis of the gradients
-        pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
+        if get_gradients:
+            pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
 
 
     def eval_model(self):
@@ -683,7 +684,6 @@ class DNN():
         mean_abs_deriv = {}
 
         for class_ in event_classes:
-            print("Process class %s.", class_)
 
             weight = array("f", [-999])
             deriv_class = np.zeros((len(self.data.get_test_data(as_matrix = True)),len(self.train_variables)))
@@ -702,12 +702,8 @@ class DNN():
 
         # Normalize rows
         matrix = np.vstack([mean_abs_deriv[class_] for class_ in event_classes])
-        print()
         for i_class, class_ in enumerate(event_classes):
-            print(matrix[i_class, :])
-            print(np.sum(matrix[i_class, :]))
             matrix[i_class, :] = matrix[i_class, :] / np.sum(matrix[i_class, :])
-            print(matrix[i_class, :])
 
 
         # Make plot
@@ -718,19 +714,24 @@ class DNN():
         print(matrix.shape[0])
         print(matrix.shape[1])
 
-        for i in range(matrix.shape[0]):
-            for j in range(matrix.shape[1]):
+        csvtext = "variable,"+",".join(event_classes)
+        for j in range(matrix.shape[1]):
+            csvtext+="\n"+variables[j]
+            for i in range(matrix.shape[0]):
+                csvtext+=",{:.3f}".format(matrix[i,j])
                 axis.text(
                     j + 0.5,
                     i + 0.5,
                     '{:.3f}'.format(matrix[i, j]),
                     ha='center',
                     va='center')
+
         q = plt.pcolormesh(matrix, cmap='Oranges')
         #cbar = plt.colorbar(q)
         #cbar.set_label("mean(abs(Taylor coefficients))", rotation=270, labelpad=20)
+        variables_label = [v.replace("_","\_") for v in variables]
         plt.xticks(
-            np.array(range(len(variables))) + 0.5, variables, rotation='vertical')
+            np.array(range(len(variables))) + 0.5, variables_label, rotation='vertical')
         plt.yticks(
             np.array(range(len(event_classes))) + 0.5, event_classes, rotation='horizontal')
         plt.xlim(0, len(variables))
@@ -743,6 +744,10 @@ class DNN():
         plt.savefig(output_path+".pdf", bbox_inches='tight')
         print("Save plot to {}.pdf".format(output_path))
 
+        with open(output_path+".csv", "w") as f:
+            f.write(csvtext)
+        print("wrote coefficient information to {}.csv".format(output_path))
+                 
 
 
     # --------------------------------------------------------------------
@@ -833,8 +838,8 @@ class DNN():
             sigScale            = sigScale)
 
         bkg_hist, sig_hist = plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
-        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
-        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+        #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
         ''' plot confusion matrix '''
