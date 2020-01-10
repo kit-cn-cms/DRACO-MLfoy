@@ -76,6 +76,14 @@ binaryOptions.add_option("--signal", dest="signal_class", default=None, metavar=
         help="STR of signal class for binary classification (allows comma separated list) (same as --signalclass)")
 parser.add_option_group(binaryOptions)
 
+adversaryopts = optparse.OptionGroup(parser, "Adversary Settings")
+adversaryopts.add_option("--adversary", dest="adversary", action = "store_true", default=False,
+        help="activate to train a classifying adversarial network")
+adversaryopts.add_option("--penalty", dest="penalty", default=1,
+        help="FLOAT number of penalty in loss function for adversary training (default 1)", metavar="PENALTY")
+adversaryopts.add_option("--addsamplenaming", dest="AddSampleNaming", default="_dnn_OL.h5",
+        help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
+
 
 class optionHandler:
     def __init__(self, argv):
@@ -91,6 +99,7 @@ class optionHandler:
         self.__loadVariables()
         self.__setSignalClass()
         self.__setNetConfig()
+        self.__setAdversary()
 
     # setters
 
@@ -166,6 +175,15 @@ class optionHandler:
         else:
             self.__config = config_dict["example_config"]
             print("no net config was specified - using 'example_config'")
+
+    def __setAdversary(self):
+        if self.__options.adversary:
+            if not self.__options.binary:
+                print("WARNING: Weighting for multiclass adversary training is incorrect!")
+            if self.__options.AddSampleNaming == "_dnn_OL.h5":
+                print("no additional sample name was specified - using '_dnn_OL.h5'")
+            if self.__options.naming == self.__options.AddSampleNaming:
+                sys.exit("ERROR: need to use samples from different generators")
 
 
 
@@ -248,3 +266,15 @@ class optionHandler:
 
     def doGradients(self):
         return self.__options.gradients
+
+    def isAdversary(self):
+        return self.__options.adversary
+
+    def getPenalty(self):
+        return float(self.__options.penalty)
+
+    def getAddSampleName(self, sample):
+        return sample+self.__options.AddSampleNaming
+
+    def getAddSampleSuffix(self):
+        return self.__options.AddSampleNaming.replace("_dnn", "", 1)[:-3]
