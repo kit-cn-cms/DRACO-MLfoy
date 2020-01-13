@@ -32,13 +32,14 @@ class EventCategories:
         return selections
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, lumiWeight = 1.):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
         self.categories = categories
         self.MEMs       = MEMs
         self.ownVars    = ownVars
+        self.lumiWeight = lumiWeight
         self.even_odd   = even_odd
         self.evenOddSplitting()
 
@@ -366,6 +367,9 @@ class Dataset:
 
                     # add class labels
                     concat_df = self.addClassLabels(concat_df, sample.categories.categories)
+    
+                    # add lumi weight
+                    concat_df.loc[:,"lumiWeight"] = sample.lumiWeight
 
                     # add indexing
                     concat_df.set_index([self.varName_Run, self.varName_LumiBlock, self.varName_Event], inplace=True, drop=True)
