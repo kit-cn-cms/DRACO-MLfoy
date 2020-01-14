@@ -154,11 +154,11 @@ plotter.addSample(
 
 
 # add JT categories
-plotter.addCategory("ge6j_ge3t")
-plotter.addCategory("5j_ge3t")
-plotter.addCategory("4j_ge3t")
-#plotter.addCategory("ge4j_3t")
-#plotter.addCategory("ge4j_ge4t")
+#plotter.addCategory("ge6j_ge3t")
+#plotter.addCategory("5j_ge3t")
+#plotter.addCategory("4j_ge3t")
+plotter.addCategory("ge4j_3t")
+plotter.addCategory("ge4j_ge4t")
 
 
 # perform plotting routine

@@ -79,11 +79,11 @@ RecoZ_Pt,0,500,40,-,Z reconstruction p_{T}(Z),$\text{Z}$ reconstruction $p_{\tex
 RecoZ_Deta,0,3,40,-,"Z reconstruction #Delta#eta^{b,b}_{Z}","$\text{Z}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{Z}}$"
 RecoZ_Dr,0.4,4.5,40,-,"Z reconstruction #DeltaR^{b,b}_{Z}","$\text{Z}$ reconstruction $\DeltaR^{\text{b},\text{b}}_{\text{Z}}$"
 RecoZ_BJet1_Pt,30,230,40,-,Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_M,30,110,40,-,Z reconstruction m(b_{Z}^{(1)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_E,30,150,40,-,Z reconstruction E(b_{Z}^{(1)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(1)})$
+RecoZ_BJet1_M,20,110,40,-,Z reconstruction m(b_{Z}^{(1)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(1)})$
+RecoZ_BJet1_E,30,190,40,-,Z reconstruction E(b_{Z}^{(1)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(1)})$
 RecoZ_BJet2_Pt,30,230,40,-,Z reconstruction p_{T}(b_{Z}^{(2)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(2)})$
-RecoZ_BJet2_M,30,110,40,-,Z reconstruction m(b_{Z}^{(2)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(2)})$
-RecoZ_BJet2_E,30,150,40,-,Z reconstruction E(b_{Z}^{(2)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(2)})$
+RecoZ_BJet2_M,20,110,40,-,Z reconstruction m(b_{Z}^{(2)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(2)})$
+RecoZ_BJet2_E,30,190,40,-,Z reconstruction E(b_{Z}^{(2)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(2)})$
 
 RecoHiggs_Chi2_Log,-20,8,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
 RecoHiggs_Chi2,0,200,40,-,H reconstruction #chi^{2},$\text{H}$ reconstruction $\chi^{2}$
@@ -92,11 +92,11 @@ RecoHiggs_M_log,3.5,6,40,-,H reconstruction ln(m)(H),$\text{H}$ reconstruction $
 RecoHiggs_E,20,300,40,-,H reconstruction E(H),$\text{H}$ reconstruction $E(\text{H})$
 RecoHiggs_Pt,0,500,40,-,H reconstruction p_{T}(H),$\text{H}$ reconstruction $p_{\text{T}}(\text{H})$
 RecoHiggs_Deta,0,3,40,-,"H reconstruction #Delta#eta^{b,b}_{H}","$\text{H}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{H}}$"
-RecoHiggs_Dphi,0,3.5,40,-,"H reconstruction #Delta#phi^{b,b}_{H}","$\text{H}$ reconstruction $\Delta\phi^{\text{b},\text{b}}_{\text{H}}$"
+RecoHiggs_Dphi,0,3.15,40,-,"H reconstruction #Delta#phi^{b,b}_{H}","$\text{H}$ reconstruction $\Delta\phi^{\text{b},\text{b}}_{\text{H}}$"
 RecoHiggs_Dr,0.4,4.5,40,-,"H reconstruction #DeltaR^{b,b}_{H}","$\text{H}$ reconstruction $\Delta R^{\text{b},\text{b}}_{\text{H}}$"
 RecoHiggs_BJet1_Pt,30,230,40,-,H reconstruction p_{T}(b_{H}^{(1)}),$\text{H}$ reconstruction $p_{\text{T}}(\text{b}_{\text{H}}^{(1)})$
-RecoHiggs_BJet1_M,30,110,40,-,H reconstruction m(b_{H}^{(1)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(1)})$
+RecoHiggs_BJet1_M,20,110,40,-,H reconstruction m(b_{H}^{(1)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(1)})$
 RecoHiggs_BJet1_Eta,0,3,40,-,H reconstruction #eta^{(1)}_{b}, $\text{H}$ reconstruction $\eta^{(1)}_{\text{b}}$
 RecoHiggs_BJet2_Pt,30,230,40,-,H reconstruction p_{T}(b_{H}^{(2)}),$\text{H}$ reconstruction $p_{\text{T}}(\text{b}_{\text{H}}^{(2)})$
-RecoHiggs_BJet2_M,30,110,40,-,H reconstruction m(b_{H}^{(2)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(2)})$
+RecoHiggs_BJet2_M,20,110,40,-,H reconstruction m(b_{H}^{(2)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(2)})$
 

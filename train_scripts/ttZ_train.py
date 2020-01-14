@@ -125,4 +125,4 @@ if options.doPlots():
             privateWork         = options.isPrivateWork())
 
 	# plot variations
-	dnn.get_variations()
+	#dnn.get_variations()

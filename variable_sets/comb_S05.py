@@ -101,15 +101,17 @@ variables["ge6j_ge3t"] = [
     "RecoZ_M_log",
     ]
 
+
 variables["ge4j_ge4t"] = [
-    "CSV[2]",
-    "CSV[3]",
+    #"CSV[2]",
+    #"CSV[3]",
     "Evt_CSV_dev",
+    "Evt_CSV_avg",
     "Evt_Deta_TaggedJetsAverage",
-    "Evt_Dr_JetsAverage",
+    #"Evt_Dr_JetsAverage",
     "Evt_M2_TaggedJetsAverage",
-    "Evt_M3_oneTagged",
-    "Evt_M_TaggedJetsAverage",
+    #"Evt_M3_oneTagged",
+    #"Evt_M_TaggedJetsAverage",
     "Evt_Pt_minDrTaggedJets",
     "Evt_blr_transformed",
     "RecoHiggs_cosdTheta",
@@ -136,14 +138,15 @@ variables["ge4j_ge4t"] = [
 
 
 variables["ge4j_3t"] = [
-    "CSV[2]",
-    "CSV[3]",
+    #"CSV[2]",
+    #"CSV[3]",
     "Evt_CSV_dev",
+    "Evt_CSV_avg",
     "Evt_Deta_TaggedJetsAverage",
-    "Evt_Dr_JetsAverage",
+    #"Evt_Dr_JetsAverage",
     "Evt_M2_TaggedJetsAverage",
-    "Evt_M3_oneTagged",
-    "Evt_M_TaggedJetsAverage",
+    #"Evt_M3_oneTagged",
+    #"Evt_M_TaggedJetsAverage",
     "Evt_Pt_minDrTaggedJets",
     "Evt_blr_transformed",
     "RecoTTZ_Deta_bLep_bHad",
@@ -167,5 +170,6 @@ variables["ge4j_3t"] = [
     "RecoTTZ_TopHad_M",
     "RecoTTZ_Chi2Total_log",
     ]
+
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))

@@ -415,13 +415,5 @@ variables["ge6j_ge3t"] = variables["5j_ge3t"] + [
     #'TaggedJet_Pt[5]',
     ]
 
-variables["ge4j_3t"]    = variables["4j_ge3t"] 
-
-variables["ge4j_ge4t"]  = variables["4j_ge3t"] 
-
-variables["ge6j_3t"] = variables["ge6j_ge3t"]
-
-variables["le5j_3t"] = variables["ge4j_3t"]
-
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
 
