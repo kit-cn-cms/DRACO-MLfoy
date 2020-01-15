@@ -456,12 +456,22 @@ class DNN():
         # print evaluations
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        
+        eval_text = "\nROC-AUC score, {}".format(self.roc_auc_score)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
-            print("model test loss: {}".format(self.model_eval[0]))
+            eval_text += "\nmodel test loss, {}".format(self.model_eval[0])
+            print("model test loss, {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
-                print("model test {}: {}".format(metric, self.model_eval[im+1]))
+                eval_text += "\nmodel test {}, {}".format(metric, self.model_eval[im+1])
+                print("model test {}, {}".format(metric, self.model_eval[im+1]))
+        
+        rank_path = self.save_path + "/eval_metrics.csv"
+        with open(rank_path, "w") as f:
+            f.write(eval_text)
+        print("wrote eval metrics to "+str(rank_path))
+        
 
     def get_ranges(self):
         if not self.data.binary_classification:

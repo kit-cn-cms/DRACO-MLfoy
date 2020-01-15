@@ -70,7 +70,7 @@ RecoTTZ_Z_M,20,300,40,-,t#bar{t}+Z reconstruction m(Z),$\text{t}\bar{\text{t}}+\
 RecoTTZ_Z_M_log,3.5,6,40,-,t#bar{t}+Z reconstruction ln(m)(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
 RecoTTZ_Z_Pt,0,500,40,-,t#bar{t}+Z reconstruction p_{T}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$
 
-RecoZ_Chi2_Log,-20,8,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
+RecoZ_Chi2_log,-20,8,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
 RecoZ_Chi2,0,200,40,-,Z reconstruction #chi^{2},$\text{Z}$ reconstruction $\chi^{2}$
 RecoZ_M,20,300,40,-,Z reconstruction m(Z),$\text{Z}$ reconstruction $m(\text{Z})$
 RecoZ_M_log,3.5,6,40,-,Z reconstruction ln(m)(Z),$\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
@@ -85,7 +85,7 @@ RecoZ_BJet2_Pt,30,230,40,-,Z reconstruction p_{T}(b_{Z}^{(2)}),$\text{Z}$ recons
 RecoZ_BJet2_M,20,110,40,-,Z reconstruction m(b_{Z}^{(2)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(2)})$
 RecoZ_BJet2_E,30,190,40,-,Z reconstruction E(b_{Z}^{(2)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(2)})$
 
-RecoHiggs_Chi2_Log,-20,8,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
+RecoHiggs_Chi2_log,-20,8,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
 RecoHiggs_Chi2,0,200,40,-,H reconstruction #chi^{2},$\text{H}$ reconstruction $\chi^{2}$
 RecoHiggs_M,20,300,40,-,H reconstruction m(H),$\text{H}$ reconstruction $m(\text{H})$
 RecoHiggs_M_log,3.5,6,40,-,H reconstruction ln(m)(H),$\text{H}$ reconstruction $\text{ln}(m)(\text{H})$
