@@ -328,12 +328,12 @@ class Dataset:
 				df = HiggsReco.findbestHiggs(df, self.variables)
 
 				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
-				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
+				sample.categories.categories["half"] = "(is_Higgs == 0)"
 
 #			 Top Bkg:
 
-#				df = HiggsReco.findbestTopBs(df, self.variables)
- #			   sample.categories.categories["Top bkg"] = "(is_Higgs == 0)"
+			#	df = HiggsReco.findbestTopBs(df, self.variables)
+ 			#	sample.categories.categories["TopBkg"] = "(is_Higgs == 0)"
 
 #			all Bkg:
 

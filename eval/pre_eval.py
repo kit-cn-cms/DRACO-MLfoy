@@ -20,7 +20,7 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="ttH",
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
 parser.add_option("-e", "--maxentries", dest="maxEntries", default=50000,
@@ -75,7 +75,7 @@ ttH_categories = root2pandas.EventCategories()
 #ttH_categories.addCategory("ttH")
 #ttH_categories.addCategory("bkg")
 #ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
-ttH_categories.addCategory("All_Combs")
+ttH_categories.addCategory("eval_allCombs")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -89,14 +89,17 @@ dataset = root2pandas.Dataset(
 # add base event selection
 dataset.addBaseSelection(base)
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
+#print "using ttbar sample"
+#ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
 
+# !!! only for evaluation !!!
+ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
 
 dataset.addSample(
-    sampleName  = "TTToSL",
+    sampleName  = "eval",
     ntuples     = ntuplesPath,
     categories  = ttH_categories,
-    selections  = ttH_selection
+    selections  = None#ttH_selection
 )
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)

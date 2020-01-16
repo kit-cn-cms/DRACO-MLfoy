@@ -73,7 +73,8 @@ ttH_selection = "(Evt_Odd == 1)"
 
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH")
-ttH_categories.addCategory("bkg")
+ttH_categories.addCategory("half")
+#ttH_categories.addCategory("TopBkg")
 #ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
 # initialize dataset class

@@ -1,5 +1,4 @@
 import ROOT
-import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from math import sin, cos, log
 
@@ -53,6 +52,9 @@ parser.add_option("-e", "--events", dest="events", default=10000000,
 parser.add_option("-s", "--schalter", dest="schalter", default="0",
 		help="number of plots of reconstruction you want to create", metavar="schalter")
 
+#parser.add_option("-d", "--dataframe", dest="datafr",default="test",
+#		help="DIR of h5 files", metavar="datafr")
+
 (options, args) = parser.parse_args()
 #get input directory path
 if not os.path.isabs(options.inputDir):
@@ -61,7 +63,14 @@ elif os.path.exists(options.inputDir):
 	inPath=options.inputDir
 else:
 	sys.exit("ERROR: Input Directory does not exist!")
-
+#get df directory path
+#if not os.path.isabs(options.datafr):
+#	dfPath = basedir+"/workdir/"+options.datafr
+#elif os.path.exists(options.datafr):
+#	dfPath=options.datafr
+#else:
+#	sys.exit("ERROR: DataFrame Directory does not exist!")
+#import Variable Selection
 if not os.path.isabs(options.variableSelection):
 	sys.path.append(basedir+"/variable_sets/")
 	variable_set = __import__(options.variableSelection)
@@ -91,8 +100,112 @@ if int(options.events):
 else:
 	print("ERROR: Please enter number bigger than 0")
 
+schalter = int(options.schalter)
 
-HiggsM = 117.6
+
+
+# initialize list with columns to be written into dataframe
+dataframe_columns = copy.deepcopy(variables)
+
+#create df for event
+eval_df = pd.DataFrame(columns = dataframe_columns)
+df = pd.read_hdf(basedir+"/workdir/eval_dataframes/eval_df_10k3/eval_allCombs_dnn.h5") 
+nevents = len(np.unique(df.index.get_level_values(2)))
+df = df.reset_index(drop=True)
+
+eval_df_ttbar = pd.DataFrame(columns = dataframe_columns)
+df_ttbar = pd.read_hdf(basedir+"/workdir/eval_dataframes/ttbar_evalDf/eval_allCombs_dnn.h5") 
+nevents_ttbar = len(np.unique(df_ttbar.index.get_level_values(2)))
+df_ttbar = df_ttbar.reset_index(drop=True)
+
+
+print "\n  done part 1  \n", variables
+
+#############################
+def loadDNN(inputDirectory, outputDirectory, binary = True, signal = "ttH", binary_target = 0., total_weight_expr = "1", category_cutString = None,
+category_label= None):
+
+	# get net config json
+	configFile = inputDirectory+"/checkpoints/net_config.json"
+	if not os.path.exists(configFile):
+		sys.exit("config needed to load trained DNN not found\n{}".format(configFile))
+
+	with open(configFile) as f:
+		config = f.read()
+	config = json.loads(config)
+
+	# load samples
+	input_samples = data_frame.InputSamples(config["inputData"])
+
+	for sample in config["eventClasses"]:
+		input_samples.addBinaryLabel(signal,binary_target)
+
+	print("shuffle seed: {}".format(config["shuffleSeed"]))
+	# init DNN class
+	dnn = DNN.DNN(
+		save_path	   = outputDirectory,
+		input_samples   = input_samples,
+		event_category  = config["JetTagCategory"],
+		train_variables = config["trainVariables"],
+		shuffle_seed	= config["shuffleSeed"]
+		)
+
+	#print(dnn.data.values)
+	checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
+
+	# get the model
+	dnn.model = keras.models.load_model(checkpoint_path)
+	dnn.model.summary()
+
+	return dnn.model
+
+
+def findHiggs(dataframe,df, model):
+	model_predict = model.predict(dataframe.values, verbose=1)
+
+	#plt.hist(model_predict,bins = 100,range=(0,1))
+	#plt.show()
+
+	best_index = np.zeros(nevents_ttbar)
+	predictionVal = np.zeros(nevents_ttbar)
+	imax = -10
+	files = 0
+	event_nr = 0
+	perm = 0
+	N_permutation = -1
+	nJets = -1
+
+	for iEvt in df.index:
+
+		if iEvt%10000 == 0:
+			print "Event",event_nr,"von",nevents_ttbar
+		event = df.loc[iEvt]
+		if nJets != int(min(event["N_Jets"], 10)) and perm != N_permutation and iEvt != 0:
+			print "! Probably wrong Permutations !"
+
+		nJets = int(min(event["N_Jets"], 10))
+
+		if perm == N_permutation:
+			imax = -10
+			event_nr += 1
+			if event_nr == nevents_ttbar:
+				break
+			perm = 0
+		perm += 1
+		N_permutation = scipy.special.binom(nJets,2)
+
+		if model_predict[iEvt] > imax:
+			imax = model_predict[iEvt]
+			best_index[event_nr] = int(iEvt)
+			predictionVal[event_nr] = imax
+
+		if(imax<-1): print "error in model prediction!!"
+
+
+	#print best_index
+
+	return best_index, predictionVal
+
 
 def normalize(df,inputdir):
 	unnormed_df = df
@@ -126,14 +239,14 @@ def plotBinary(predictions,valids, ratio = False, printROC = False, privateWork 
 
 	sig_values = [ predictions[k] for k in range(len(predictions)) \
 		if valids[k] == 1 ]
-	sig_weights = np.full(nevents,2)
+	sig_weights = np.ones(nevents)
 	sig_hist = setup.setupHistogram(
 		values      = sig_values,
 		weights     = sig_weights,
 		nbins       = 30,
 		bin_range   = [0.,1.],
 		color       = ROOT.kCyan,
-		xtitle      = "signal",
+		xtitle      = "ttH Event",
 		ytitle      = "Events expected",
 		filled      = False)  
 	sig_hist.SetLineWidth(3)
@@ -147,7 +260,7 @@ def plotBinary(predictions,valids, ratio = False, printROC = False, privateWork 
 		nbins       = 30,
 		bin_range   = [0.,1.],
 		color       = ROOT.kOrange,
-		xtitle      = "background",
+		xtitle      = "ttbar Event",
 		ytitle      = "Events expected",
 		filled      = True)  
 
@@ -168,10 +281,10 @@ def plotBinary(predictions,valids, ratio = False, printROC = False, privateWork 
 	legend = setup.getLegend()
 
 	# add signal entry
-	legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
+	legend.AddEntry(sig_hist, "ttH sample x {:4.0f}".format(scaleFactor), "L")
         
 	# add background entries
-	legend.AddEntry(bkg_hist, "background", "F")
+	legend.AddEntry(bkg_hist, "ttbar sample", "F")
 
 	# draw legend
 	legend.Draw("same")
@@ -180,141 +293,74 @@ def plotBinary(predictions,valids, ratio = False, printROC = False, privateWork 
 #	if self.printROCScore:
 #		setup.printROCScore(canvas, roc, plotOptions["ratio"])
 
+	#private work label
+	setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+
 	# add category label
 	setup.printCategoryLabel(canvas, options.category, ratio = plotOptions["ratio"])
 
-	out_path = basedir + "/workdir/chi2/binaryDiscriminator.pdf"
+	out_path = basedir +"/workdir/Vergleich/binaryDiscriminator.pdf"
 	setup.saveCanvas(canvas, out_path)
 
-###############################
-# initialize list with columns to be written into dataframe
-dataframe_columns = copy.deepcopy(variables)
+###################################################################################################################################
 
-#create df for event
-eval_df = pd.DataFrame(columns = dataframe_columns)
-df = pd.read_hdf(basedir+"/workdir/eval_dataframes/possible_reco/eval_allCombs_dnn.h5") 
-nevents = len(np.unique(df.index.get_level_values(2)))
-df = df.reset_index(drop=True)
 
-BestIndex, predVal = np.zeros(nevents),np.zeros(nevents)
-perm = 0
-N_permutation = -1
-event_nr = 0
-MinDelta = 1000
+model = loadDNN(inPath, "output")
 
-for iEvt in df.index:
-	if iEvt%10000==0:
-		print "Event",event_nr
-	event = df.loc[iEvt]
-	nJets = int(min(event["N_Jets"], 10))
+eval_df = normalize(df[variables],inPath)
+BestIndex, predVal = findHiggs(eval_df,df, model)
 
-	if perm == N_permutation:
-		MinDelta = 1000
-		event_nr += 1
-		perm = 0
-	perm += 1
-	N_permutation = scipy.special.binom(nJets,2)
-	
-	Delta = (event["Reco_Higgs_M"]-HiggsM)*(event["Reco_Higgs_M"]-HiggsM)
-	if Delta < MinDelta:
-		MinDelta = Delta
-		BestIndex[event_nr] = int(iEvt)
-		predVal[event_nr] = MinDelta
-
+eval_df_ttbar = normalize(df_ttbar[variables],inPath)
+BestIndex_ttbar, predVal_ttbar = findHiggs(eval_df_ttbar,df_ttbar, model)
 
 PtRap_b1 = ROOT.TH2F("PtRap_Higgs_B1", " ; #eta(Higgs B1); p_{T}(Higgs B1) in GeV", 150, -5, 5, 200, 0, 600)
 pt_eff = ROOT.TEfficiency("pt_eff", " ;p_{T}) in GeV; Effizienz", 60,0,600)
 pt_eff_2 = ROOT.TH1F("pt_eff_2", " ;Transversalimpuls p_{T} in GeV; Effizienz", 60,0,600)
-reco_Higgs_M = ROOT.TH1F("reco_M", " ;Masse des Rekonstruierten Higgs-Bosons in GeV; Events", 60,0,600)
+reco_Higgs_M = ROOT.TH1F("reco_M", " ;Reco Higgs Masse in GeV; Events", 60,0,600)
+reco_Higgs_M_ttbar = ROOT.TH1F("reco_M", " ;Masse des Rekonstruierten Higgs-Bosons in GeV; Events", 60,0,600)
+gen_M = ROOT.TH1F("reco_M", " ;Masse des Rekonstruierten Higgs-Bosons in GeV; Events", 60,0,600)
 n = 0
-valids = np.zeros(nevents)
-b1b2counter = 0
-valid_events = 0
+valids = np.zeros(2*nevents_ttbar)
+predVal12 = np.zeros(2*nevents_ttbar)
+
+
+
+
 
 for iEvt in BestIndex:
 
-	minR1 = 10000
-	minR2 = 10000
 	event = df.loc[iEvt]
+
+	gen_M.Fill(event["GenHiggs_M"])
+
+	valids[n] = 1
+	predVal12[n] = predVal[n]
+
 	nJets = int(min(event["N_Jets"], 10))
 
-	if(nJets>10 or nJets<4):
-		print "ok cool, next one"
-		continue
-
-	for j in [1,2]:
-		deltaR1 = getDeltaR(event, "GenHiggs_B1",str(j))
-		if deltaR1 < minR1:
-			minR1 = deltaR1
-			higgs1 = j
-
-		deltaR2 = getDeltaR(event, "GenHiggs_B2",str(j))
-		if deltaR2 < minR2:
-			minR2 = deltaR2
-			higgs2 = j
-
-	if minR1 <= 0.4 and minR2 <= 0.4: 
-		valid_events+=1
-		valids[n] = 1
-
-
-	if higgs1 == higgs2:
-		#print "shit, B1 = B2"
-		b1b2counter+=1
-		if (minR1 < minR2 and higgs1 == 1) or (minR1 > minR2 and higgs1 == 2):
-			higgs1 = 1
-			higgs2 = 2
-		else:
-			higgs1 = 2
-			higgs2 = 1
-	if n%1000 == 0:
-		print "Event",n,"minR1", minR1,"valid events",valid_events
-
+	if n%10000 == 0:
+		print "Event",n#,"minR1", minR1,"valid events",valid_events
 
 	n+=1
-
-	pt_eff.Fill((minR1<=0.4 and minR2 <=0.4), event["Reco_Higgs_Pt"])
-
-	if minR1 < 0.4:
-		PtRap_b1.Fill(event["Reco_Higgs_B1_Eta"],event["Reco_Higgs_B1_Pt"])
 	reco_Higgs_M.Fill(event["Reco_Higgs_M"])
+
+n=0
+for iEvt in BestIndex_ttbar:
+
+	predVal12[n+nevents_ttbar] = predVal_ttbar[n]
+	event = df_ttbar.loc[iEvt]
+	nJets = int(min(event["N_Jets"], 10))
+
+	if n%10000 == 0:
+		print "Event",n #,"minR1", minR1,"valid events",valid_events
+
+	n+=1
+	reco_Higgs_M_ttbar.Fill(event["Reco_Higgs_M"])
 
 
 #Binary Output Plot
-plotBinary(predVal,valids)
+plotBinary(predVal12,valids)
 
-#Efficiency Plot
-for i in range(valid_events):
-    pt_eff_2.SetBinContent(i, pt_eff.GetEfficiency(i))
-    pt_eff_2.SetBinError(i, pt_eff.GetEfficiencyErrorLow(i))
-
-c2 = ROOT.TCanvas("c2", "quality of reconstruction", 700,600)
-c2.SetRightMargin(0.15)
-c2.SetLeftMargin(0.15)
-c2.SetBottomMargin(0.15)
-c2.SetTopMargin(0.15)
-
-pt_eff_2.SetFillColor(ROOT.kBlue)
-pt_eff_2.SetStats(0)
-pt_eff_2.SetTitleSize(0.05,"xy")
-pt_eff_2.Draw("E3")
-
-c2.SaveAs(basedir + "/workdir/chi2/Efficiency.pdf")
-
-# Pt ueber Eta Plot
-c3 = ROOT.TCanvas("c3", "quality of reconstruction", 700,600)
-c3.DrawFrame(-2.5,0,2.5,600)
-c3.SetRightMargin(0.15)
-c3.SetLeftMargin(0.15)
-c3.SetBottomMargin(0.15)
-c3.SetTopMargin(0.15)
-
-PtRap_b1.SetStats(0)
-PtRap_b1.SetTitleSize(.05, "xy")
-PtRap_b1.Draw("COLZ")
-
-
-c3.SaveAs(basedir + "/workdir/chi2/PtRap.pdf")
 
 #Higgs M Plot
 c4 = ROOT.TCanvas("c2", "quality of reconstruction", 700,600)
@@ -325,12 +371,33 @@ c4.SetTopMargin(0.15)
 
 reco_Higgs_M.SetStats(0)
 reco_Higgs_M.SetTitleSize(0.05,"xy")
+reco_Higgs_M.SetLineColor(ROOT.kRed)
 reco_Higgs_M.Draw("C")
 
-c4.SaveAs(basedir + "workdir/chi2/Higgs_M.pdf")
+reco_Higgs_M_ttbar.SetStats(0)
+reco_Higgs_M_ttbar.SetTitleSize(0.05,"xy")
+reco_Higgs_M_ttbar.Draw("SAME C")
 
-print valid_events,"valid events,", valid_events/float(nevents)*100,"%"
+gen_M.SetStats(0)
+gen_M.SetLineColor(ROOT.kBlack)
+gen_M.SetTitleSize(0.05,"xy")
+gen_M.Draw("SAME C")
 
-print b1b2counter,"mal b1=b2, von",nevents,"events;\t",b1b2counter/float(nevents)*100,"%"
+#Higgs_M = ROOT.TLine(125,0,125,8000)
+#Higgs_M.Draw("SAME")
+
+legend = ROOT.TLegend(0.75,0.55, 1., 0.85)
+legend.AddEntry(reco_Higgs_M, "ttH sample", "L")
+legend.AddEntry(reco_Higgs_M_ttbar, "ttbar sample", "L")
+legend.AddEntry(gen_M, "Gen Higgs Masse", "L")
+legend.Draw("SAME")
+
+c4.SaveAs(basedir +"/workdir/Vergleich/Higgs_M.pdf")
+
+#print valid_events,"ttH events,", valid_events/float(nevents)*100,"%"
+
+#print b1b2counter,"mal b1=b2, von",nevents,"events;\t",b1b2counter/float(nevents)*100,"%"
+
+
 
 

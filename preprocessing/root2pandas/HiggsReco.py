@@ -43,7 +43,6 @@ def findbestHiggs(df, additionalVariables):
 	dataframe_columns.append("Delta_R")
 	dataframe_columns.append("Delta_R3D")
 	dataframe_columns.append("Angle")
-	dataframe_columns.append("EventNr")
 
 	for v in boostVars:
 		dataframe_columns.append("Boosted1_"+v)
@@ -95,16 +94,23 @@ def findbestHiggs(df, additionalVariables):
 		assignments.append(np.array(bestIndices))
 
 		# generate random wrong assignments
-		for iWrong in range(nWrongAssignments):
-			foundNew = False
-			while not foundNew:
-				wrong = np.random.permutation(nJets)[:2]
-				foundNew = True
-				for p in bestIndices:
-					if (p == wrong[0] or p == wrong[1]):
-						foundNew = False
-			assignments.append(wrong)
+	#	for iWrong in range(nWrongAssignments):
+	#		foundNew = False
+	#		while not foundNew:
+	#			wrong = np.random.permutation(nJets)[:2]
+	#			foundNew = True
+	#			for p in bestIndices:
+	#				if (p == wrong[0] or p == wrong[1]):
+	#					foundNew = False
+	#		assignments.append(wrong)
 
+	#Generate all bkg
+#		for ihiggs1 in range(nJets):
+#			if ihiggs1 == bestIndices[0] or ihiggs1 == bestIndices[1]: continue
+#			for ihiggs2 in range(iHiggs1):
+#				if ihiggs2 == bestIndices[0] or ihiggs2 == bestIndices[1] or ihiggs1 == ihiggs2: continue
+#				wrong = [ihiggs1,ihiggs2]
+#				assignments.append(wrong)
 
 	#Generate less bkg
 #		for iWrong in range(nWrongAssignments):
@@ -115,12 +121,24 @@ def findbestHiggs(df, additionalVariables):
 #					foundNew = False
 #			if foundNew == True:
 #				assignments.append(wrong)
-#
+
+	#Generate bkg with 1 right jet
+		foundNew = False
+		while foundNew == False:
+		#for iWrong in range(nWrongAssignments):
+			wrong = np.random.permutation(nJets)[:2]
+			foundNew = True
+			if (bestIndices[0] != wrong[0] and bestIndices[0] != wrong[1] and bestIndices[1] != wrong[0] and bestIndices[1] != wrong[1]):
+				foundNew = False
+			elif (bestIndices[0] == wrong[0] and bestIndices[1] == wrong[1]) or (bestIndices[0] == wrong[1] and bestIndices[1] == wrong[0]):
+				foundNew = False
+			if foundNew == True:
+				assignments.append(wrong)
+
 		# fill assignments
 		for idx, ass in enumerate(assignments):
 			# fill variables
 			entry = {v: None for v in dataframe_columns}
-			entry["EventNr"] = n
 			for v in additionalVariables:
 				entry[v] = event[v]
 			if idx == 0:
@@ -232,14 +250,14 @@ def findbestTopBs(df, additionalVariables):
 		bestIndices = np.full(2,int(1))
 
 		for iHiggs1 in range(nJets):
-			#if event["Jet_CSV[{}]".format(iHiggs1)] < csvWP: continue
+			if event["Jet_CSV[{}]".format(iHiggs1)] < csvWP: continue
 			deltaR_B1 = getDeltaR(event, "GenTopHad_B", iHiggs1)
 			if deltaR_B1 < bestDeltaR1:
 				bestDeltaR1 = deltaR_B1
 				bestIndices[0] = iHiggs1
 
 		for iHiggs2 in range(nJets):
-			#if event["Jet_CSV[{}]".format(iHiggs2)] < csvWP: continue
+			if event["Jet_CSV[{}]".format(iHiggs2)] < csvWP: continue
 			deltaR_B2 = getDeltaR(event, "GenTopLep_B", iHiggs2)
 			if deltaR_B2 < bestDeltaR2:
 				bestDeltaR2 = deltaR_B2
@@ -266,10 +284,7 @@ def findbestTopBs(df, additionalVariables):
 			entry = {v: None for v in dataframe_columns}
 			for v in additionalVariables:
 				entry[v] = event[v]
-			if idx == 0:
-				entry["is_Higgs"] = 1
-			else:
-				entry["is_Higgs"] = 0
+			entry["is_Higgs"] = 0
 
 			# fill assigned jets
 			# DANGERZONE: make sure the order of entries in assignedJets list is the same as in the assignments list

@@ -341,9 +341,9 @@ class Dataset:
 
 #			eval:
 
-				df = HiggsReco.eval(df, self.variables)
+				df = HiggsReco.Eval(df, self.variables)
 
-				sample.categories.categories["All_Combs"] = "(Event_Nr > 0)"
+				sample.categories.categories["eval_allCombs"] = "(Event_Nr > 0)"
 
 
 			if concat_df.empty: concat_df = df

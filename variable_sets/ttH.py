@@ -113,6 +113,7 @@ variables["ge4j_ge3t"] = [
 	"GenHiggs_B2_Phi",
 	"GenHiggs_B1_Eta",
 	"GenHiggs_B2_Eta",
+
 	"GenHiggs_B1_Pt",
 	"GenHiggs_B1_E",
 	"GenHiggs_B2_Pt",
@@ -120,7 +121,7 @@ variables["ge4j_ge3t"] = [
 	"GenHiggs_Pt",
 	"GenHiggs_Eta",
 	"GenHiggs_Phi",
-	#"GenHiggs_M",
+	"GenHiggs_E",
 	#"GenHiggs_logM"
 	]
 
