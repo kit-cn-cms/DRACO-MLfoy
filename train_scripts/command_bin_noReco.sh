@@ -2,9 +2,9 @@
 
 set=allVars_noReco
 echo $set
-for i in  02 04 05 06 07 08 09 10
+for i in 01 #02 04 05 06 07 08 09 10
 do
-    for cat in 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t #le5j_3t ge6j_3t 
+    for cat in  5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t #4j_ge3t #le5j_3t ge6j_3t 
     do
         if [ ${i} == 01 ];
         then
