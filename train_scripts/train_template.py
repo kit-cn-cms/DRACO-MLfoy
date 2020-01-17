@@ -130,6 +130,7 @@ naming = options.naming
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 
 input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
+input_samples.addSample("bkg"+naming,  label = "bkg")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
 input_samples.addSample("ttb"+naming,   label = "ttb")

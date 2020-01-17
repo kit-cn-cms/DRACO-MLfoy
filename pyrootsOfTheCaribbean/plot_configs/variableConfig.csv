@@ -578,21 +578,21 @@ TopLep_B_Jet_Pt,30,300,30,x,p_{T} of third jet
 TopHad_Q1_Jet_Pt,30,200,30,x,p_{T} of fourth jet
 TopHad_Q2_Jet_Pt,30,150,30,x,p_{T} of fifth jet
 N_Jets,1.5,11.5,10,-,number of jets
-Higgs_B1_Pt,20,1000,30,-,p_{T} of first Higgs B-Jet
-Higgs_B1_Eta,-2.4,2.4,30,-,#eta of first Higgs B-jet
-Higgs_B1_Phi,-3.1415926536,3.1415926536,30,-,#phi of first Higgs B-Jet
-Higgs_B1_E,20,1000,30,-,Energy of first Higgs B-Jet
-Higgs_B1_CSV,0,1,30,x,CSV value of first Higgs B-Jet
-Higgs_B2_Pt,20,1000,30,-,p_{T} of second Higgs B-Jet
-Higgs_B2_Eta,-2.4,2.4,30,-,#eta of second Higgs B-jet
-Higgs_B2_Phi,-3.1415926536,3.1415926536,30,-,#phi of second Higgs B-Jet
-Higgs_B2_E,20,1000,30,-,Energy of second Higgs B-Jet
-Higgs_B2_CSV,0,1,30,x,CSV value of second Higgs B-Jet
-reco_Higgs_Pt,20,1000,30,-,Reconstructed Higgs p_{T}
-reco_Higgs_Eta,-2.4,2.4,30,-,reconstructed Higgs #eta
-reco_Higgs_Phi,-3.1415926536,3.1415926536,30,-,reconstructed Higgs #phi
-reco_Higgs_M,50,200,30,-,reconstructed Higgs Mass
-reco_Higgs_logM,0,10,30,-,logarithmic reconstructed Higgs mass
+Reco_Higgs_B1_Pt,20,1000,30,-,p_{T} of first Higgs B-Jet
+Reco_Higgs_B1_Eta,-2.4,2.4,30,-,#eta of first Higgs B-jet
+Reco_Higgs_B1_Phi,-3.1415926536,3.1415926536,30,-,#phi of first Higgs B-Jet
+Reco_Higgs_B1_E,20,1000,30,-,Energy of first Higgs B-Jet
+Reco_Higgs_B1_CSV,0,1,30,x,CSV value of first Higgs B-Jet
+Reco_Higgs_B2_Pt,20,1000,30,-,p_{T} of second Higgs B-Jet
+Reco_Higgs_B2_Eta,-2.4,2.4,30,-,#eta of second Higgs B-jet
+Reco_Higgs_B2_Phi,-3.1415926536,3.1415926536,30,-,#phi of second Higgs B-Jet
+Reco_Higgs_B2_E,20,1000,30,-,Energy of second Higgs B-Jet
+Reco_Higgs_B2_CSV,0,1,30,x,CSV value of second Higgs B-Jet
+Reco_Higgs_Pt,20,1000,30,-,Reconstructed Higgs p_{T}
+Reco_Higgs_Eta,-2.4,2.4,30,-,reconstructed Higgs #eta
+Reco_Higgs_Phi,-3.1415926536,3.1415926536,30,-,reconstructed Higgs #phi
+Reco_Higgs_M,50,200,30,-,reconstructed Higgs Mass
+Reco_Higgs_logM,0,10,30,-,logarithmic reconstructed Higgs mass
 GenHiggs_B1_Phi,-3.1415926536,3.1415926536,30,-,#phi of first generated Higgs B-Jet
 GenHiggs_B1_Eta,-2.4,2.4,30,-,#eta of first generated Higgs B-Jet
 GenHiggs_B2_Phi,-3.1415926536,3.1415926536,30,-,#phi of second generated Higgs B-Jet
@@ -600,4 +600,21 @@ GenHiggs_B2_Eta,-2.4,2.4,30,-,#eta of second generated Higgs B-Jet
 DeltaR_B1,0,3,50,-,#DeltaR of first Higgs B-Jet
 DeltaR_B2,0,3,50,-,#DeltaR of second Higgs B-Jet
 DeltaR_B1_B2,0,4,50,-,summed #DeltaR of Higgs B-Jets
-DeltaR,0,4,20,-,#DeltaR of Higgs B-Jets
+Delta_R,0,4,20,-,#DeltaR of Higgs B-Jets
+Reco_Higgs_B1_logPt,3,7.5,20,-,log(Pt) of first Higgs B-Jet
+Reco_Higgs_B1_logE,3,8,20,-,log(E) of first Higgs B-Jet
+Reco_Higgs_B2_logPt,3,7.5,20,-,log(Pt) of second Higgs B-Jet
+Reco_Higgs_B2_logE,3,8,20,-,log(E) of second Higgs B-Jet
+Reco_Higgs_E,20,1000,30,-,Energy of reconstructed Higgs
+Reco_Higgs_logPt,0,7.5,20,-,log(Pt) of reconstructed Higgs
+Reco_Higgs_logE,3,8,20,-,log(E) of reconstructed Higgs
+Angle,0,3.5,20,-,Angle between Reco Higgs B-Jets
+Boosted1_Eta,-6,6,20,-,#eta of first boosted Higgs B-Jet
+Boosted1_logPt,0,7,20,-,log(Pt) of first boosted Higgs B-Jets
+Boosted1_Pt,0,1000,30,-,Pt of first boosted Higgs B-Jet
+Boosted2_Eta,-6,6,20,-,#eta of second boosted Higgs B-Jet
+Boosted2_logPt,0,7,20,-,log(Pt) of second boosted Higgs B-Jets
+Boosted2_Pt,0,1000,30,-,Pt of second boosted Higgs B-Jet
+Delta_Eta,0,4.5,20,-,#Delta #eta
+Delta_Phi,0,3.14,20,-,#Delta #phi
+Delta_R3D,0,1.2,20,-,#Delta R 3D

@@ -419,7 +419,6 @@ class DNN():
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
 
-
     def eval_model(self):
         ''' evaluate trained model '''
 
