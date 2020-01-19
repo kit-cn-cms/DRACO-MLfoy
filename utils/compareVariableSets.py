@@ -26,7 +26,7 @@ sys.path.append(os.path.dirname(opts.variable_set1))
 set1 = __import__(os.path.basename(opts.variable_set1).replace(".py",""))
 set2 = __import__(os.path.basename(opts.variable_set2).replace(".py",""))
 set1_name = str(opts.variable_set1)
-set2_name = str(opts.variable_set1)
+set2_name = str(opts.variable_set2)
 
 
 # specify the compared variable sets

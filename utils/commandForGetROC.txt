@@ -1,0 +1,1 @@
+python getROC.py -w ../workdir/ -v MergeAll_S01,MergeNoRecoReco_S01,MergeNoRecoRecoExclBin_S01 -n sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t

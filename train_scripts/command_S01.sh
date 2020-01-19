@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for varset in MergeAll_S01 MergeNoRecoReco_S01 MergeNoRecoRecoExclBin_S01 MergeNoRecoRecoExclBin_S01
+for varset in MergeAllExclBin_S01 #MergeAll_S01 MergeNoRecoReco_S01 MergeNoRecoRecoExclBin_S01 MergeNoRecoRecoExclBin_S01
 do
     echo $varset
     for i in 01
