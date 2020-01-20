@@ -1,5 +1,5 @@
 variables = {}
-variables["6j_ge3t"] = [
+variables["ge6j_ge3t"] = [
     'Jet_Pt[0-16]_Hist',
     ]
 

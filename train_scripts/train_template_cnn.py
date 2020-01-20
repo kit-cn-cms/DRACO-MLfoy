@@ -49,7 +49,7 @@ cnn = CNN.CNN(
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables(),
     # phi_padding factor: a factor of 0.25 adds the upper quarter of the image to the button and vice versa. default 0 leaves the image unchanged
-    phi_padding     = 0.25)
+    phi_padding     = 0)
 
 #================
 #define CNN model
@@ -103,7 +103,7 @@ model.add(
 model = models.Sequential()
 #first layer
 model.add(
-    layer.Conv2D( 8, kernel_size = (4,4), activation = "linear", padding = "same",
+    layer.Conv2D(8, kernel_size = (4,4), activation = "linear", padding = "same",
     input_shape = cnn.data.input_shape ))
 
 # first dense layer

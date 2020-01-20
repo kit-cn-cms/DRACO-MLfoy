@@ -68,7 +68,7 @@ class Sample:
 
             df[column_name]=H_List_Dict[column_name]
             #print(str(len(empty_imgs_evtids))+" empty images found at evtids "+str(empty_imgs_evtids))
-            print(str(len(empty_imgs_evtids))+" empty images found")
+            print("====> "+str(len(empty_imgs_evtids))+" empty images found in channel "+column_name)
         
         #event_list=np.array(H_List_Dict[columns_to_decode[0]])
 
