@@ -28,7 +28,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 
 # define all samples
 input_samples.addSample(options.getDefaultName("ttZ"),  label = "ttZ",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
 #input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = options.getNomWeight())
 #input_samples.addSample(options.getDefaultName("tthf"), label = "tthf", normalization_weight = options.getNomWeight())
 #input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = options.getNomWeight())
@@ -57,6 +57,7 @@ RecoVarsOnly = __importVariableSelection("RecoVarsOnly_S01")
     #input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
 # initializing DNN training class, only use this for getting the JT string
+'''
 dnn = DNN.DNN(
     save_path       = options.getOutputDir(),
     input_samples   = input_samples,
@@ -72,9 +73,10 @@ dnn = DNN.DNN(
     balanceSamples  = options.doBalanceSamples(),
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables())
-
+'''
 #generate that JT string to get the new varibale selection
-trainVarsCombined = RecoVarsOnly[dnn.category_label] + NoRecoVars[dnn.category_label]
+
+trainVarsCombined = RecoVarsOnly.variables[options.getCategory()] + NoRecoVars.variables[options.getCategory()]
 
 #now load the DNN again with the variable selection of both sets combined
 dnn = DNN.DNN(
@@ -96,13 +98,15 @@ dnn = DNN.DNN(
 # build DNN model
 #dnn.build_model(options.getNetConfig())
 def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
-    ''' build default straight forward DNN from architecture dictionary '''
+    ''' build branched model using architecture dictionary '''
     
 
     # infer number of input neurons from number of train variables
-    NumInputNeuronsNoReco = len(NoRecoVars[dnn.category_label])
-    NumInputNeuronsRecoOnly = len(RecoVarsOnly[dnn.category_label])
-    
+    NumInputNeuronsNoReco = len(NoRecoVars.variables[options.getCategory()])
+
+    NumInputNeuronsRecoOnly = len(RecoVarsOnly.variables[options.getCategory()])
+   
+    dnn._load_architecture(options.getNetConfig()) 
     # get all the architecture settings needed to build model
     number_of_neurons_per_layer = dnn.architecture["layers"]
     dropout                     = dnn.architecture["Dropout"]
@@ -116,7 +120,7 @@ def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
     NoRecoInputs = keras.layers.Input(
         shape = (NumInputNeuronsNoReco,),
         name  = "NoReco_Input")
-    X = noRecoInputs
+    X = NoRecoInputs
     #self.layer_list = [X]
 
     # loop over dense layers
@@ -128,7 +132,7 @@ def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
             name                = "X_DenseLayer_"+str(iLayer)
             )(X)
 
-        if self.architecture["activation_function"] == "leakyrelu":
+        if dnn.architecture["activation_function"] == "leakyrelu":
             X = keras.layers.LeakyReLU(alpha=0.1)(X)
 
         # add dropout percentage to layer if activated
@@ -151,7 +155,7 @@ def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
             name                = "Y_DenseLayer_"+str(iLayer)
             )(X)
 
-        if self.architecture["activation_function"] == "leakyrelu":
+        if dnn.architecture["activation_function"] == "leakyrelu":
             Y = keras.layers.LeakyReLU(alpha=0.1)(X)
 
         # add dropout percentage to layer if activated
@@ -170,15 +174,13 @@ def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
         
     #generate main output layer
     mainOutput = keras.layers.Dense(
-        units               = self.data.n_output_neurons,
+        units               = dnn.data.n_output_neurons,
         activation          = output_activation.lower(),
         kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
         name                = "NoReco_output"
         )(X)
     
-    combinedLayers = keras.layers.Average([mainOutput,sideOutput], 
-        name =              = "CombinedOutput"
-        )
+    combinedLayers = keras.layers.Average([mainOutput,sideOutput])
     
     #CombinedOutput = keras.layers.Dense(
         #units               = self.data.n_output_neurons,
@@ -189,7 +191,7 @@ def build_branched_model(dnn, NoRecoVars, RecoVarsOnly):
     
     
     # define model
-    model = models.Model(inputs = [noRecoInputs, RecoVarsInputs], outputs = [mainOutput,sideOutput,combinedLayers])
+    model = models.Model(inputs = [NoRecoInputs, RecoVarsInputs], outputs = [mainOutput,sideOutput,combinedLayers])
     model.summary()
 
     return model
@@ -201,11 +203,11 @@ dnn.build_model(model=BranchedModel)
 
 # for training we need another setup than for the DNN class
 dnn.trained_model = dnn.model.fit(
-    {'NoReco_Input': dnn.data.df_train[ NoRecoVars[dnn.category_label]].values, 
-    'RecoVars_Input': dnn.data.df_train[ RecoVarsOnly[dnn.category_label]].values,
+    {'NoReco_Input': dnn.data.df_train[ NoRecoVars[options.getCategory()]].values, 
+    'RecoVars_Input': dnn.data.df_train[ RecoVarsOnly[options.getCategory()]].values,
     'NoReco_Output': dnn.data.get_train_labels(),
     'RecoVars_Output': dnn.data.get_train_labels(),
-    'CombinedOutput': dnn.data.get_train_labels()}
+    'CombinedOutput': dnn.data.get_train_labels()},
     batch_size          = dnn.architecture["batch_size"],
     epochs              = dnn.train_epochs,
     shuffle             = True,

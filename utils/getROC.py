@@ -49,6 +49,8 @@ parser.add_option("-o","--output",dest="outdir",default="./",
     help = "path to output directory e.g. for plots or tables")
 parser.add_option("-v","--variableset",dest="varsets",default=False,
     help = "comma seperated list of trainings/variable sets to compare the ROC-values of")
+parser.add_option("-l","--latex",dest="ToLatex",default=False,
+    help = "renders resulting datafram to latex table")
 
 #parser.add_option("-l","--latex",dest="latex",default=False,action="store_true",
     #help = "generate latex table of new variable sets")
@@ -67,7 +69,8 @@ varsetNames = {}
 initarray = np.zeros(shape=(len(args),len(varsets)))
 rocvalues = pd.DataFrame(data=initarray, columns = varsets)#, index=dict(list(enumerate(args))))
 rocvalues.rename(index=dict(list(enumerate(args))), inplace=True)
-                         
+
+
 for varset in varsets:
     inputdir = opts.workdir+"/"+varset+"/"+opts.naming
     if not "JTSTRING" in inputdir:
@@ -101,7 +104,32 @@ for varset in varsets:
         
 print("\noverall results of mean of ROC-AUC:\n")
 print(rocvalues)
+rocvalues.to_hdf("tmp_out.hdf5", "a")
 
+if opts.ToLatex:
+    #builtin function is nice idea but only partially suited for formatting:
+    #table = rocvalues.to_latex(float_format="\\num{{ {:0.3f} }}".format)
+    
+    #Hence: old-fashioned way
+    size = len(rocvalues.columns)
+    table = "begin{tabular}{l" +str(size*"r")+"}} \n\\toprule \n{}"
+    for varset in varsets:
+        table += " & {} ".format(varset)
+    
+    table += " \\ \n\midrule \n"
+    for jtcat in args:
+        table += "\\"+jtcat.replace("_","")
+        for numbers in rocvalues.loc[jtcat]:
+            table += " & \\num{{ {:0.3f} }} ".format(numbers)
+        table += " \\\ \n"
+    #table += "& \\num{{ {} }} ".format(varset)
+    table += "\\bottomrule \n\\end{tabular}"
+    
+    
+    #print(table)
+
+    with open(opts.outdir+"/ROCtable.tex","w+") as f:
+        f.write(table)
     ## generate lists sorted by mean variable importance
     #var = []
     #varNames = []
