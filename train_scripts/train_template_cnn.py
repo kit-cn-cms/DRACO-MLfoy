@@ -125,6 +125,8 @@ print("number of free parameters: "+str(model.count_params()))
 #================
 cnn.build_model(model=model) #for now, no cnn-netconfigs 
 
+model.summary()
+
 # perform the training
 cnn.train_model()
 

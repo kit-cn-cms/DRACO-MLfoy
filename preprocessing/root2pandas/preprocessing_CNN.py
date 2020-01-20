@@ -97,13 +97,13 @@ dataset.addBaseSelection(base_selection)
 
 
 #ntuplesPath = "/nfs/dust/cms/user/yseyffer/data/"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntuple/2018"
+ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017"
 
 # add samples to dataset
 
 dataset.addSample(
     sampleName  = "TTToSL",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*_8*nominal*.root",
+    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root", #*_2*nominal*
     categories  = ttbar_categories,
     selections  = None, #"(Evt_Odd == 1)" <=for even odd splitting in final form
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
@@ -111,7 +111,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "TTH",
-    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*_5*nominal*.root",
+    ntuples     = ntuplesPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root", #*_2*nominal*
     categories  = ttH_categories,
     selections  = None,#"(Evt_Odd == 1)" <=for even odd splitting in final form #ttbar_selection,
     #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
@@ -149,11 +149,12 @@ phi_range = [-3.14159265358979, 3.14159265358979]
 n_px_eta = int( (eta_range[1]-eta_range[0])/d_eta )
 n_px_phi = int( (phi_range[1]-phi_range[0])/d_phi )
 print("creating image with size "+str(n_px_eta)+" x "+str(n_px_phi)+" pixels")
+print("using rotation type "+str(options.rotation_cnn))
 
 # putting above info into following object
 imageconfig = root2pandas.ImageConfig(
     x ="Eta", y="Phi",
-    channels  = ["Jet_Pt[0-16]"],# "Electron_Pt"],
+    channels  = ["TaggedJet_Pt[0-9]", "Jet_Pt[0-16]"],# "Electron_Pt[0-9]",
     imageSize = [n_px_eta, n_px_phi],
     xRange    = eta_range,
     yRange    = phi_range,
