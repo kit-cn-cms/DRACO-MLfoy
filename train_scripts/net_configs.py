@@ -53,6 +53,19 @@ config_dict["ttZAnalysis4"] = {
         "earlystopping_epochs":     20,
         }
 
+config_dict["Experimental"] = {
+        "layers":                   [30],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0,
+        "L2_Norm":                  1e-5,
+        "batch_size":               250,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.0,
+        "earlystopping_epochs":     0,
+        }
+
 config_dict["ttZAnalysis_bin"] = {
         "layers":                   [50, 50],
         "loss_function":            "binary_crossentropy",
