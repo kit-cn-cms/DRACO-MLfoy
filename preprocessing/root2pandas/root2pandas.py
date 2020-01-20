@@ -340,6 +340,21 @@ class Dataset:
             phi_array_rotated.append(phi)
         return phi_array_rotated
 
+    def calc_phi(self, x, y):
+        '''
+        returns a phi value in the range -pi to +pi for given x and y components
+        '''
+        if x==0:
+            phi = 0.5*np.pi*np.sign(y)
+        elif np.sign(y)==-1 and np.sign(x)==-1:
+            phi = -np.pi+np.arctan(y/x)
+        elif np.sign(y)==1 and np.sign(x)==-1:
+            phi =  np.pi+np.arctan(y/x)
+        else:
+            phi = np.arctan(y/x)
+
+        return phi
+
     def getSp(self, df):
         nJets = df["N_Jets"]
        
@@ -405,20 +420,10 @@ class Dataset:
         #print(aplanarity)
         #print(np.float(df["Evt_aplanarity"]))
         #exit()
-        if(eigenvec[0][0]==0):
-            ev1_phi=np.sign(eigenvec[1][0])*0.5*np.pi
-        else:
-            ev1_phi=np.arctan(eigenvec[1][0]/eigenvec[0][0])
-        
-        if(eigenvec[0][1]==0):
-            ev2_phi=np.sign(eigenvec[1][1])*0.5*np.pi
-        else:
-            ev2_phi=np.arctan(eigenvec[1][1]/eigenvec[0][1])
-        
-        if(eigenvec[0][2]==0):
-            ev3_phi=np.sign(eigenvec[1][2])*0.5*np.pi
-        else:
-            ev3_phi=np.arctan(eigenvec[1][2]/eigenvec[0][2])
+
+        ev1_phi=calc_phi(eigenvec[0][0], eigenvec[1][0])
+        ev2_phi=calc_phi(eigenvec[0][1], eigenvec[1][1])
+        ev3_phi=calc_phi(eigenvec[0][2], eigenvec[1][2])
 
         #print(ev1_phi, ev2_phi, ev3_phi)
         #exit()
