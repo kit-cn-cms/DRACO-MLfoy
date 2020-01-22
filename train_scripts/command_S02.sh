@@ -1,9 +1,9 @@
 #!/bin/bash
 
-for varset in MergeNoRecoReco_S01 MergeNoRecoRecoExclBin_S01 #MergeNoRecoRecoExclBin_S01
+for varset in MergeNoRecoReco_S02 MergeNoRecoRecoExclBin_S02 #MergeNoRecoRecoExclBin_S01
 do
     echo $varset
-    for i in 01
+    for i in 01 02 03
     do
         for cat in 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t #le5j_3t ge6j_3t 
         do

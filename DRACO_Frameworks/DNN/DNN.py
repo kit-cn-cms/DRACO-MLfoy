@@ -752,7 +752,7 @@ class DNN():
 
         plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
 
-    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
+    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False, SaveValues=True):
         ''' plot confusion matrix '''
         plotCM = plottingScripts.plotConfusionMatrix(
             data                = self.data,
@@ -760,8 +760,10 @@ class DNN():
             event_classes       = self.event_classes,
             event_category      = self.category_label,
             plotdir             = self.save_path)
+        
 
         plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
+        if SaveValues: plotCM.savevalues()
 
     def plot_closureTest(self, log = False, privateWork = False,
                         signal_class = None, nbins = None, bin_range = None):

@@ -675,6 +675,20 @@ class plotConfusionMatrix:
         canvas = setup.drawConfusionMatrixOnCanvas(cm, "confusion matrix", self.event_category, self.ROCScore, privateWork = privateWork)
         setup.saveCanvas(canvas, self.plotdir+"/confusionMatrix.pdf")
 
+        
+    def savevalues(self, filetitle="ConfStats.csv"):
+        TruePositives = self.confusion_matrix.diagonal()
+        TruePositiveSum = TruePositives.sum()
+        TruePositiveMean = TruePositives.mean()
+        TruePositiveStd = TruePositives.std(ddof=1)
+        text = "event_classes, '[ {} ]' ".format(','.join([str(x) for x in self.event_classes]))
+        text += "\nTruePositives, {}\nTruePositiveSum, {}\nTruePositiveMean, {}\nTruePositiveStd, {}".format(np.array2string(TruePositives, separator=','),TruePositiveSum, TruePositiveMean, TruePositiveStd)
+        
+        with open(self.plotdir+"/"+filetitle, "w+") as f:
+            f.write(text)
+        print("wrote Confusion Statistics to {}".format(self.plotdir+"/"+filetitle))
+        
+        
 
 
 
@@ -819,6 +833,7 @@ class plotEventYields:
 
         out_path = self.plotdir + "/event_yields.pdf"
         setup.saveCanvas(canvas, out_path)
+
 
 
 class plotBinaryOutput:

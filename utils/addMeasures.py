@@ -84,7 +84,7 @@ ConfStats = pd.DataFrame(data=initarray, columns = varsets)#, index=dict(list(en
 ConfStats.rename(index=dict(list(enumerate(args))), inplace=True)
 
 
-'''
+
 for varset in varsets:
     inputdir = opts.workdir+"/"+varset+"/"+opts.naming
     if not "JTSTRING" in inputdir:
@@ -101,8 +101,8 @@ for varset in varsets:
             del network
         
 print("done")
-'''
 
+'''
 for varset in varsets:
     inputdir = opts.workdir+"/"+varset+"/"+opts.naming
     if not "JTSTRING" in inputdir:
@@ -183,46 +183,29 @@ if opts.ToLatex:
     #builtin function is nice idea but only partially suited for formatting:
     #table = RocValues.to_latex(float_format="\\num{{ {:0.3f} }}".format)
     
-    
-    ################# this here for JT categories in rows #########################
     #Hence: old-fashioned way
-    #SubDict = {"4j":"FourJ", "5j":"FiveJ", "6j":"SixJ", "3t":"ThreeT", "4t":"FourT", "_":" " }
-    #size = len(RocValues.columns)
-    #table = "begin{tabular}{l" +str(size*"r")+"}} \n\\toprule \n{}"
-    #for varset in varsets:
-        #table += " & {} ".format(varset)
-    
-    #table += " \\ \n\midrule \n"
-    #for jtcat in args:
-        #table += "\\"+replace_all(jtcat,SubDict)
-        #for numbers in RocValues.loc[jtcat]:
-            #table += " & \\num{{ {:0.3f} }} ".format(numbers)
-        #table += " \\\ \n"
-    ##table += "& \\num{{ {} }} ".format(varset)
-    #table += "\\bottomrule \n\\end{tabular}"
-    #table.replace("0.000", "---")
-    
-    SubDict = {"4j":"FourJ", "5j":"FiveJ", "6j":"SixJ", "3t":"ThreeT", "4t":"FourT", "_":"" }
-    size = len(RocValues.index)
-    table = "begin{tabular}{l |" +str(size*"r")+"} \n\\toprule \n{}"
-    for jtcat in args:
-        table += " & \\{} ".format(replace_all(jtcat,SubDict))
-    
-    table += " \\\ \n\midrule \n"
+    SubDict = {"4j":"FourJ", "5j":"FiveJ", "6j":"SixJ", "3t":"ThreeT", "4t":"FourT", "_":" " }
+    size = len(RocValues.columns)
+    table = "begin{tabular}{l" +str(size*"r")+"}} \n\\toprule \n{}"
     for varset in varsets:
-        table += "{}".format(varset)
-        for numbers in RocValues[varset]:
-            table += " & \\num{{ {:0.3f} }}".format(numbers)
+        table += " & {} ".format(varset)
+    
+    table += " \\ \n\midrule \n"
+    for jtcat in args:
+        table += "\\"+replace_all(jtcat,SubDict)
+        for numbers in RocValues.loc[jtcat]:
+            table += " & \\num{{ {:0.3f} }} ".format(numbers)
         table += " \\\ \n"
     #table += "& \\num{{ {} }} ".format(varset)
     table += "\\bottomrule \n\\end{tabular}"
     table.replace("0.000", "---")
-    
+
     
     #print(table)
 
     with open(opts.outdir+"/ROCtable.tex","w+") as f:
         f.write(table)
+'''
     ## generate lists sorted by mean variable importance
     #var = []
     #varNames = []
