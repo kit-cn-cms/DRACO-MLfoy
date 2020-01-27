@@ -20,6 +20,7 @@ else:
     sys.exit("DNN set directory already exists")
 
 mode = "replace"
+print(opts.input)
 if not "CATEGORY" in opts.input:
     mode = "append"
     print("'CATEGORY' not found in input string - path will be appended")

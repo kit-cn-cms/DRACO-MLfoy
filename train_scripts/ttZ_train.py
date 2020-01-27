@@ -69,6 +69,11 @@ dnn.get_input_weights()
 dnn.get_propagated_weights()
 
 
+if not options.isBinary:
+    dnn.plot_confusionMatrix(
+            privateWork = options.isPrivateWork(), 
+            printROC    = options.doPrintROC())
+
 
 # plotting 
 if options.doPlots():
