@@ -8,6 +8,7 @@ from array import array
 import ROOT
 import tqdm
 import matplotlib.pyplot as plt
+from functools import partial, update_wrapper
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -174,6 +175,11 @@ class BNN():
         if not os.path.exists(self.plot_path):
             os.makedirs(self.plot_path)
 
+        # make eventdir
+        self.event_path = self.save_path+"/events/"
+        if not os.path.exists(self.event_path):
+            os.makedirs(self.event_path)
+
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
@@ -220,23 +226,43 @@ class BNN():
         # evaluate test dataset with keras model
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
-        # save predicitons
-        test_pred  = []
-        print "Calculating the mean and std: "
-        for i in tqdm.tqdm(range(50)):
-            test_pred_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
-            test_pred.append(test_pred_vector)
-
-        test_preds = np.concatenate(test_pred, axis=1)
-        self.model_prediction_vector = np.mean(test_preds, axis=1)
-        self.model_prediction_vector_std = np.std(test_preds, axis=1)
+        # save predictions
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=20)
+        self.plot_event_outout_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=318058, n_hist_bins=15)
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector, self.model_prediction_vector_std
+        return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
+
+    # make plots of the output distribution for one single event
+    def plot_event_outout_distribution(self, save_dir, preds, n_events=20, n_hist_bins=20):
+        if len(preds) < n_events: return "not enouth events to draw outout distribution"
+        for i in range(n_events):
+            if self.model_prediction_vector[i] < 0.59 and self.model_prediction_vector[i] > 0.5 and self.model_prediction_vector_std[i] < 0.008:
+                n, bins, patches = plt.hist(preds[i], n_hist_bins, facecolor='g', alpha=0.75)
+                plt.xlabel("$\mu$ of event", fontsize = 16)
+                plt.ylabel("number of samples", fontsize = 16)
+                plt.savefig(save_dir+"/events/hist_event_{}.pdf".format(i))
+                plt.close()
+                event_path = save_dir + "/events/event_{}_vars.csv".format(i)
+                with open(event_path, "w") as f:
+                    f.write("variable,value\n")
+                    for k in range(len(self.train_variables)):
+                        f.write("{},{}\n".format(self.train_variables[k], self.data.get_test_data(as_matrix = True, normed=False).iloc[i,k]))
+
+
+    # sampling output values from the intern tensorflow output distribution
+    def bnn_calc_mean_std(self, n_samples=50):
+        test_pred  = []
+        print "Calculating the mean and std: "
+        for i in tqdm.tqdm(range(n_samples)):
+            test_pred_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
+            test_pred.append(test_pred_vector)
+            test_preds = np.concatenate(test_pred, axis=1)
+        return np.mean(test_preds, axis=1), np.std(test_preds, axis=1), test_preds
 
     def build_default_model(self):
         ''' build default straight forward BNN from architecture dictionary '''
@@ -259,7 +285,7 @@ class BNN():
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
                 layers.VariableLayer(2 * n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[..., :n], scale=1e-5 + tf.nn.softplus(c + t[..., n:])), reinterpreted_batch_ndims=1)),
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[..., :n], scale=1e-5 + tf.math.softplus(c + t[..., n:])), reinterpreted_batch_ndims=1)),
                 ])
 
         # Specify the prior distributions for kernel and bias
@@ -272,7 +298,7 @@ class BNN():
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
                 layers.VariableLayer(n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[:n], scale=1.), reinterpreted_batch_ndims=1)), #1e-5 + tf.nn.softplus(c + t[n:])
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[:n], scale=0.1), reinterpreted_batch_ndims=1)), #1e-5 + tf.math.softplus(c + t[n:])
                 ])
 
         # define input layer
@@ -283,7 +309,8 @@ class BNN():
         X = Inputs
         self.layer_list = [X]
 
-        n_train_samples = 0.75 * self.data.get_train_data(as_matrix = True).shape[0]
+        n_train_samples = 0.75 * self.data.get_train_data(as_matrix = True).shape[0] #1.0*self.architecture["batch_size"]
+        self.use_bias = True
 
         # loop over dense layers
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
@@ -292,6 +319,8 @@ class BNN():
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
                 kl_weight           = 1. / n_train_samples,
+                kl_use_exact        = True,
+                use_bias            = self.use_bias,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
@@ -302,9 +331,13 @@ class BNN():
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
             kl_weight           = 1. / n_train_samples,
+            kl_use_exact        = True,
+            use_bias            = self.use_bias,
             activation          = output_activation.lower(),
             name                = self.outputName
             )(X)
+
+        #X = tfp.layers.DistributionLambda(lambda t: tfd.Normal(loc=t[..., :1],scale=1e-5 + tf.math.softplus(0.01 * t[...,1:])))(X)
 
         # # loop over dense layers
         # for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
@@ -333,7 +366,12 @@ class BNN():
     def neg_log_likelihood(self, y_true, y_pred):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        return -dist.log_prob(y_true)
+        return -tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+
+    def wrapped_partial(self, func, *args, **kwargs):
+        partial_func = partial(func, *args, **kwargs)
+        update_wrapper(partial_func, func)
+        return partial_func
 
     def build_model(self, config = None, model = None):
         ''' build a BNN model
@@ -351,7 +389,7 @@ class BNN():
         model.compile(
             loss        = self.neg_log_likelihood,
             optimizer   = self.architecture["optimizer"],
-            metrics     = self.eval_metrics)
+            metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood)])
 
         # save the model
         self.model = model
@@ -398,15 +436,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        test_pred  = []
-        print "Calculating the mean and std: "
-        for i in tqdm.tqdm(range(50)):
-            test_pred_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
-            test_pred.append(test_pred_vector)
-
-        test_preds = np.concatenate(test_pred, axis=1)
-        self.model_prediction_vector = np.mean(test_preds, axis=1)
-        self.model_prediction_vector_std = np.std(test_preds, axis=1)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -503,6 +533,46 @@ class BNN():
         # Serialize the test inputs for the analysis of the gradients
         pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
 
+    def get_input_weights(self):
+        ''' get the weights of the input layer and sort input variables by weight sum '''
+
+         # get weights
+        first_layer = self.model.layers[1]
+        weights = first_layer.get_weights()[0]
+        if self.use_bias:
+            weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables)+1)
+            weights_std  = weights[len(weights)/2:]
+            weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables)+1)
+        else:
+            weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables))
+            weights_std  = weights[len(weights)/2:]
+            weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables))
+
+        print "layer 1 post: ",self.model.layers[1].get_weights()[0][:10]
+        print "layer 1 pri: ",self.model.layers[1].get_weights()[1][:10]
+        print "layer 2 post: ",self.model.layers[2].get_weights()[0][:10]
+        print "layer 2 pri: ",self.model.layers[2].get_weights()[1][:10]
+        # print "layer 3 post: ",self.model.layers[3].get_weights()[0][:10]
+        # print "layer 3 pri: ",self.model.layers[3].get_weights()[1][:10]
+        #print self.model.layers[4].get_weights()
+
+        self.weight_dict = {}
+        for out_weights_mean, out_weights_std, variable in zip(weights_mean, weights_std, self.train_variables):
+            w_mean_sum = np.sum(np.abs(out_weights_mean))
+            w_std_sum = np.sqrt(np.sum(np.power(out_weights_std,2)))
+            self.weight_dict[variable] = (w_mean_sum, w_std_sum)
+
+        # sort weight dict
+        rank_path = self.save_path + "/first_layer_weights.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,weight_mean_sum,weight_std_sum\n")
+            for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                f.write("{},{},{}\n".format(key,val[0],val[1]))
+        print("wrote weight ranking to "+str(rank_path))
+
+    def get_model(self):
+        return self.model
+
     # --------------------------------------------------------------------
     # result plotting functions
     # --------------------------------------------------------------------
@@ -526,17 +596,6 @@ class BNN():
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-        from matplotlib.colors import LogNorm
-        plt.hist2d(self.model_prediction_vector, self.model_prediction_vector_std, bins=[40,40], cmin=1, norm=LogNorm())
-        plt.colorbar()
-        plt.xlabel("$\mu$", fontsize = 16)
-        plt.ylabel("$\sigma$", fontsize = 16)
-        plt.savefig(self.save_path+"/sigma_over_mu.png")
-        print "sigma_over_mu.png was created"
-        plt.savefig(self.save_path+"/sigma_over_mu.pdf")
-        print "sigma_over_mu.pdf was created"
-        plt.close()
-
         binaryOutput_std = plottingScripts.plotBinaryOutput(
             data                = self.data,
             test_predictions    = self.model_prediction_vector_std,
@@ -552,11 +611,26 @@ class BNN():
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
+        self.plot_2D_hist_std_over_mean(bin_range=[50,50])
+
+    def plot_2D_hist_std_over_mean(self, bin_range=[40,40]):
+        from matplotlib.colors import LogNorm
+        plt.hist2d(self.model_prediction_vector, self.model_prediction_vector_std, bins=bin_range, cmin=1, norm=LogNorm())
+        plt.colorbar()
+        plt.xlabel("$\mu$", fontsize = 16)
+        plt.ylabel("$\sigma$", fontsize = 16)
+        plt.savefig(self.save_path+"/sigma_over_mu.png")
+        print "sigma_over_mu.png was created"
+        plt.savefig(self.save_path+"/sigma_over_mu.pdf")
+        print "sigma_over_mu.pdf was created"
+        plt.close()
+
+
     def plot_metrics(self, privateWork = False):
         plt.rc('text', usetex=True)
 
         ''' plot history of loss function and evaluation metrics '''
-        metrics = ["loss"]
+        metrics = ["loss", "neg_log_likelihood"]
         if self.eval_metrics: metrics += self.eval_metrics
 
         # loop over metrics and generate matplotlib plot
@@ -595,3 +669,38 @@ class BNN():
             plt.savefig(out_path)
             print("saved plot of "+str(metric)+" at "+str(out_path))
             plt.close()
+
+        train_history_KLD = np.array(self.model_history["loss"]) - np.array(self.model_history["neg_log_likelihood"])
+        val_history_KLD = np.array(self.model_history["val_loss"]) - np.array(self.model_history["val_neg_log_likelihood"])
+
+        plt.clf()
+
+        n_epochs = len(train_history_KLD)
+        epochs = np.arange(1,n_epochs+1,1)
+
+        # plot histories
+        plt.plot(epochs, train_history_KLD, "b-", label = "train", lw = 2)
+        plt.plot(epochs, val_history_KLD, "r-", label = "validation", lw = 2)
+        if privateWork:
+            plt.title("CMS private work", loc = "left", fontsize = 16)
+
+        # add title
+        title = self.category_label
+        title = title.replace("\\geq", "$\geq$")
+        title = title.replace("\\leq", "$\leq$")
+        plt.title(title, loc = "right", fontsize = 16)
+
+        # make it nicer
+        plt.grid()
+        plt.xlabel("epoch", fontsize = 16)
+        plt.ylabel("KLD", fontsize = 16)
+        #plt.ylim(ymin=0.)
+
+        # add legend
+        plt.legend()
+
+        # save
+        out_path = self.save_path + "/model_history_"+"KLD"+".pdf"
+        plt.savefig(out_path)
+        print("saved plot of "+"KLD"+" at "+str(out_path))
+        plt.close()

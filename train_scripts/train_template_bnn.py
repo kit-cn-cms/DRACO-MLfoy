@@ -27,7 +27,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
 
@@ -64,12 +64,11 @@ bnn.eval_model()
 # save information
 bnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
-# # save and print variable ranking according to the input layer weights
-# bnn.get_input_weights()
+# save and print variable ranking according to the input layer weights
+bnn.get_input_weights()
 
 # # save and print variable ranking according to all layer weights
 # bnn.get_weights()
-#bnn.build_flip_model(options.getNetConfig())
 
 # plotting
 if options.doPlots():
