@@ -66,10 +66,10 @@ base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH", selection = None)
 
-ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbb",        selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttlf",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
-ttbar_categories.addCategory("ttcc",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+#ttbar_categories = root2pandas.EventCategories()
+#ttbar_categories.addCategory("ttbb",        selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttlf",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttcc",        selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 
 ttZ_categories = root2pandas.EventCategories()
 ttZ_categories.addCategory("ttZ", selection = None)
@@ -86,7 +86,7 @@ dataset.addBaseSelection(base_selection)
 
 
 
-ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v5"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6"
 
 # add samples to dataset
 dataset.addSample(
@@ -98,13 +98,13 @@ dataset.addSample(
     ) 
 
 
-dataset.addSample(	#for 2017 samples the files seem to be splitted
-    sampleName  = "ttbar",
-    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
-    even_odd    = options.even_odd_splitting,
-    selections  = "(Evt_Odd==1)"
-    )
+#dataset.addSample(	#for 2017 samples the files seem to be splitted
+#    sampleName  = "ttbar",
+#    ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+#    categories  = ttbar_categories,
+#    even_odd    = options.even_odd_splitting,
+#    selections  = "(Evt_Odd==1)"
+#    )
 
 dataset.addSample(
     sampleName  = "ttZ",
