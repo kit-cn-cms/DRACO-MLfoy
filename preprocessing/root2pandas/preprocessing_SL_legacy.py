@@ -115,7 +115,7 @@ dataset.addBaseSelection(base_selection)
 ntuplesPath2018 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2018_ttH_newJEC/"
 ntuplesPath2017 = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017_JECgroups/"
 ntuplesPath2016 = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/legacy_2016_ttH_newJEC/"
-memPath = None#"/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
+memPath = "/nfs/dust/cms/user/vdlinden/legacyTTH/memes/rootfiles/"#"/nfs/dust/cms/user/mwassmer/ttH_2018/MEMs_v2/"
 
 # add samples to dataset
 dataset.addSample(
@@ -124,7 +124,7 @@ dataset.addSample(
     categories  = ttH_categories,
     lumiWeight  = 59.7,
     #selections  = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2018/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8.root",
     ) 
 
 dataset.addSample(
@@ -133,7 +133,7 @@ dataset.addSample(
     categories  = ttH_categories,
     lumiWeight  = 41.5,
     #selections  = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8.root",
     )
 
 dataset.addSample(
@@ -142,7 +142,7 @@ dataset.addSample(
     categories  = ttH_categories,
     lumiWeight  = 35.9,
     #selections  = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2016/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8.root",
     )
 
 
@@ -152,7 +152,7 @@ dataset.addSample(
     categories  = ttbar_categories,
     lumiWeight  = 59.7,
     selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2018/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root",
     )
 
 dataset.addSample(
@@ -161,7 +161,7 @@ dataset.addSample(
     categories  = ttbar_categories,
     lumiWeight  = 41.5,
     #selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8.root",
     )
 
 dataset.addSample(
@@ -170,7 +170,7 @@ dataset.addSample(
     categories  = ttbar_categories,
     lumiWeight  = 35.9,
     selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2016/TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8.root",
     )
 
 
@@ -180,7 +180,7 @@ dataset.addSample(
     categories  = ttbb_categories,
     lumiWeight  = 59.7,
     selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2018/TTbb_4f_TTToSemiLeptonic_TuneCP5-Powheg-Openloops-Pythia8.root",
     )
 
 dataset.addSample(
@@ -189,7 +189,7 @@ dataset.addSample(
     categories  = ttbb_categories,
     lumiWeight  = 41.5,
     selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2017/TTbb_Powheg_Openloops.root",
     )
 
 dataset.addSample(
@@ -198,7 +198,7 @@ dataset.addSample(
     categories  = ttbb_categories,
     lumiWeight  = 35.9,
     selections   = "(Evt_Odd == 1)",
-    #MEMs        = memPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/*.root",
+    MEMs        = memPath+"2016/TTbb_4f_TTToSemiLeptonic_TuneCP5-Powheg-Openloops-Pythia8.root",
     )
 
 
@@ -209,6 +209,7 @@ dataset.addSample(
     categories  = tHq_categories,
     lumiWeight  = 59.7,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2018/THQ_4f_Hincl_13TeV_madgraph_pythia8.root",
     )
 
 dataset.addSample(
@@ -217,6 +218,7 @@ dataset.addSample(
     categories  = tHq_categories,
     lumiWeight  = 41.5,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2017/THQ_4f_Hincl_13TeV_madgraph_pythia8.root",
     )
 
 dataset.addSample(
@@ -225,6 +227,7 @@ dataset.addSample(
     categories  = tHq_categories,
     lumiWeight  = 35.9,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2016/THQ_Hincl_13TeV-madgraph-pythia8_TuneCUETP8M1.root",
     )
 
 
@@ -234,6 +237,7 @@ dataset.addSample(
     categories  = tHW_categories,
     lumiWeight  = 59.7,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2018/THW_5f_Hincl_13TeV_madgraph_pythia8.root",
     )
 
 dataset.addSample(
@@ -242,6 +246,7 @@ dataset.addSample(
     categories  = tHW_categories,
     lumiWeight  = 41.5,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2017/THW_5f_Hincl_13TeV_madgraph_pythia8.root",
     )
 
 dataset.addSample(
@@ -250,6 +255,7 @@ dataset.addSample(
     categories  = tHW_categories,
     lumiWeight  = 35.9,
     #selections  = "(Evt_Odd == 1)",
+    MEMs        = memPath+"2016/THW_Hincl_13TeV-madgraph-pythia8_TuneCUETP8M1.root",
     )
 
 # initialize variable list 
