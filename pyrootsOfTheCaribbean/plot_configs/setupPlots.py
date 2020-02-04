@@ -22,10 +22,16 @@ def GetPlotColor( cls ):
         "tHW":          ROOT.kBlue+3,
         "sig":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
+
+        "ttH_HTXS_0":          ROOT.kAzure,
+        "ttH_HTXS_1":          ROOT.kBlue-1,
+        "ttH_HTXS_2":          ROOT.kBlue-2,
+        "ttH_HTXS_3":          ROOT.kBlue-3,
+        "ttH_HTXS_4":          ROOT.kBlue-4,
         }
 
     if "ttZ" in cls: cls = "ttZ"
-    if "ttH" in cls: cls = "ttH"
+    if "ttH" and not "HTXS" in cls: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
