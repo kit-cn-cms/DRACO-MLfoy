@@ -80,6 +80,28 @@ def ttZ_2018_final_tensorflow(input_placeholder, keras_model):
     f = tf.nn.softmax(tf.add(b3, tf.matmul(l2, w3)))
     return f
 
+def ttH_SL_legacy_tensorflow(input_placeholder, keras_model):
+    # Get weights as numpy arrays
+    weights = {}
+    for layer in keras_model.layers:
+        for weight, array in zip(layer.weights, layer.get_weights()):
+            weights[weight.name] = np.array(array)
+
+    # Load weights in tensorflow variables
+    w1 = tf.get_variable('w1', initializer=weights['DenseLayer_0_1/kernel:0'])
+    b1 = tf.get_variable('b1', initializer=weights['DenseLayer_0_1/bias:0'])
+    w2 = tf.get_variable('w2', initializer=weights['DenseLayer_1_1/kernel:0'])
+    b2 = tf.get_variable('b2', initializer=weights['DenseLayer_1_1/bias:0'])
+    w3 = tf.get_variable('w3', initializer=weights['outputLayer_1/kernel:0'])
+    b3 = tf.get_variable('b3', initializer=weights['outputLayer_1/bias:0'])
+
+
+    # Build tensorflow graph with weights from keras model
+    l1 = tf.nn.leaky_relu(tf.add(b1, tf.matmul(input_placeholder, w1)))
+    l2 = tf.nn.leaky_relu(tf.add(b2, tf.matmul(l1, w2)))
+
+    f = tf.nn.softmax(tf.add(b3, tf.matmul(l2, w3)))
+    return f
 
 def ttH_2017_tensorflow(input_placeholder, keras_model):
     # Get weights as numpy arrays
