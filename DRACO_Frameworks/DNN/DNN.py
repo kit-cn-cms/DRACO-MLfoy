@@ -736,12 +736,13 @@ class DNN():
         #cbar = plt.colorbar(q)
         #cbar.set_label("mean(abs(Taylor coefficients))", rotation=270, labelpad=20)
         variables_label = [v.replace("_","\_") for v in variables]
+        event_classes_label = [v.replace("_","\_") for v in event_classes]
         plt.xticks(
             np.array(range(len(variables))) + 0.5, variables_label, rotation='vertical')
         plt.yticks(
-            np.array(range(len(event_classes))) + 0.5, event_classes, rotation='horizontal')
+            np.array(range(len(event_classes))) + 0.5, event_classes_label, rotation='horizontal')
         plt.xlim(0, len(variables))
-        plt.ylim(0, len(event_classes))
+        plt.ylim(0, len(event_classes_label))
         output_path = os.path.join(self.cp_path,
                                    "keras_taylor_1D")
 
