@@ -32,8 +32,8 @@ parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=Fals
 parser.add_option("-n", "--name", dest="Name", default="dnn",
         help="STR of the output file name", metavar="Name")
 
-parser.add_option("--HiggsReco", dest="HiggsReco", action= "store_true", default=True,
-        help="activate preprocessing for Higgs reconstruction", metavar="HiggsReco")
+parser.add_option("--ZReco", dest="ZReco", action= "store_true", default=True,
+        help="activate preprocessing for Z reconstruction", metavar="ZReco")
 
 parser.add_option("--cores", dest="ncores", default = 1,
         help="number of cores for parallel multiprocessing")
@@ -69,12 +69,12 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1)"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
-ttH_selection = "(Evt_Odd == 1)"
+ttZ_selection = "(Evt_Odd == 1)"
 
-ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH")
-ttH_categories.addCategory("half")
-#ttH_categories.addCategory("TopBkg")
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZ")
+ttZ_categories.addCategory("bkg")
+#ttZ_categories.addCategory("TopBkg")
 #ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
 # initialize dataset class
@@ -83,20 +83,21 @@ dataset = root2pandas.Dataset(
     naming      = options.Name,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
-    HiggsReco   = options.HiggsReco,
+    ZReco   = options.ZReco,
     ncores      = options.ncores)
 
 # add base event selection
 dataset.addBaseSelection(base)
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
-ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
+#ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v5/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
 
 
 dataset.addSample(
     sampleName  = "TTToSL",
     ntuples     = ntuplesPath,
-    categories  = ttH_categories,
-    selections  = ttH_selection
+    categories  = ttZ_categories,
+    selections  = ttZ_selection
 )
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)

@@ -38,7 +38,7 @@ parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="train_epochs")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="trainZ",
         help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="variableSelection")
 
 parser.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,

@@ -6,8 +6,8 @@ import glob
 import os
 from multiprocessing import Pool
 
-import HiggsReco
-import HiggsReco_mitPlot
+import ZReco
+
 
 # multi processing magic
 def processChunk(info):
@@ -66,7 +66,7 @@ class Dataset:
 		# settings for dataset
 		self.addMEM	 = addMEM
 		self.maxEntries = int(maxEntries)
-		self.HiggsReco  = HiggsReco
+		self.ZReco  = ZReco
 
 		# default values for some configs
 		self.baseSelection  = None
@@ -324,11 +324,11 @@ class Dataset:
 			df = self.applySelections(df, sample.selections)
 
 			# perform ttH reconstruction
-			if self.HiggsReco:
-				df = HiggsReco.findbestHiggs(df, self.variables)
+			if self.ZReco:
+				df = ZReco.findbestZ(df, self.variables)
 
-				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
-				sample.categories.categories["half"] = "(is_Higgs == 0)"
+				sample.categories.categories["ttZ"] = "(is_Z == 1)"
+				sample.categories.categories["bkg"] = "(is_Z == 0)"
 
 #			 Top Bkg:
 
@@ -418,6 +418,7 @@ class Dataset:
 			split_dfs.append(tmp_df)
 		# concatenate the split dataframes again
 		df = pd.concat(split_dfs)
+
 		return df
 
 
