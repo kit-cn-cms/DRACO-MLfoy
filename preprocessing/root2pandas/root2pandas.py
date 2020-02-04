@@ -13,7 +13,7 @@ import ttbarReco
 
 # multi processing magic
 def processChunk(info):
-    info["self"].processChunk(info["sample"], info["chunk"], info["chunkNumber"])
+    info["self"].processChunk(info["sample"], info["chunk"], info["chunkNumber"], info["mem_df"])
 
 import preprocessing_utils as pputils
 
@@ -269,6 +269,8 @@ class Dataset:
         if self.addMEM:
             mem_files = glob.glob(sample.MEMs)
             mem_df = self.generateMEMdf(mem_files, sample.sampleName)
+        else:
+            mem_df = None
 
         # initialize loop over ntuple files
         n_entries = 0
@@ -280,15 +282,16 @@ class Dataset:
         ntuple_files = np.array(ntuple_files).reshape(self.ncores, -1)
     
         pool = Pool(self.ncores)
-        chunks = [{"chunk": c, "sample": sample, "chunkNumber": i+1, "self": self} for i,c in enumerate(ntuple_files)]
+        chunks = [{"self": self, "chunk": c, "sample": sample, "chunkNumber": i+1, "mem_df": mem_df} for i,c in enumerate(ntuple_files)]
+        print len(chunks[0]["mem_df"])
         pool.map(processChunk, chunks)
 
         # concatenate single thread files
         self.mergeFiles(sample.categories.categories)
 
-    def processChunk(self, sample, files, chunkNumber):
+    def processChunk(self, sample, files, chunkNumber, mem_df):
         files = [f for f in files if not f == ""]
-
+        
         n_entries = 0
         concat_df = pd.DataFrame()
         n_files = len(files)
@@ -401,7 +404,7 @@ class Dataset:
             # open root file
             with root.open(f) as rf:
                 # get tree
-                tree = rf["tree"]
+                tree = rf["MVATree"]
 
                 # convert tree to df but only extract the variables needed
                 df = tree.pandas.df(memVariables)
