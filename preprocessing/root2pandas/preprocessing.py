@@ -90,8 +90,8 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base)
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
-#ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
-ntuplesPath= "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
+ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
+#ntuplesPath= "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
 
 dataset.addSample(
     sampleName  = "TTToSL",
