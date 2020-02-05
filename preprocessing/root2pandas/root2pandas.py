@@ -54,7 +54,7 @@ class Sample:
 
 
 class Dataset:
-	def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, HiggsReco=True, ncores = 1):
+	def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, ZReco=True, ncores = 1):
 		# settings for paths
 		self.outputdir  = outputdir
 		self.naming	 = naming

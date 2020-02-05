@@ -59,7 +59,7 @@ else:
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
 # N<13 could be removed, because in the given dataset there is no event with N>12
-base = "(N_Jets >= 4 and N_BTagsM >= 2 and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Weight_GEN_nom > 0.)"
 
 
 # single lepton selections
@@ -90,8 +90,8 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base)
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
 #ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
-ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v5/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
-
+#ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
+ntuplesPath= "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
 
 dataset.addSample(
     sampleName  = "TTToSL",
