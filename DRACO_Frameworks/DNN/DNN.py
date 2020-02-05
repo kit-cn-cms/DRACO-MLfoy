@@ -134,18 +134,18 @@ class DNN():
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
 
-        # # load data set
-        # self.data = self._load_datasets(shuffle_seed, balanceSamples)
-        # self.event_classes = self.data.output_classes
-        #
-        # # save variable norm
-        # self.cp_path = self.save_path+"/checkpoints/"
-        # if not os.path.exists(self.cp_path):
-        #     os.makedirs(self.cp_path)
-        # out_file = self.cp_path + "/variable_norm.csv"
-        # self.data.norm_csv.to_csv(out_file)
-        # print("saved variabe norms at "+str(out_file))
-        #
+        # load data set
+        self.data = self._load_datasets(shuffle_seed, balanceSamples)
+        self.event_classes = self.data.output_classes
+        
+        # save variable norm
+        self.cp_path = self.save_path+"/checkpoints/"
+        if not os.path.exists(self.cp_path):
+            os.makedirs(self.cp_path)
+        out_file = self.cp_path + "/variable_norm.csv"
+        self.data.norm_csv.to_csv(out_file)
+        print("saved variabe norms at "+str(out_file))
+        
         # # make plotdir
         # self.plot_path = self.save_path+"/plots/"
         # if not os.path.exists(self.plot_path):
