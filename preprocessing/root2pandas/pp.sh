@@ -8,4 +8,4 @@ eval `scramv1 runtime -sh`
 
 cd -
 
-python preprocessing_modified.py -o DNN_Input_Reco_splitTTToSemiLeptonic -v allVars_expanded
+python preprocessing_modified.py -o DNN_Input_extendedBoost -v allVars_extendedBoost
