@@ -437,8 +437,11 @@ class DNN():
             self.data.get_test_labels())
 
         # save history of eval metrics
-        self.model_history = self.trained_model.history
-
+        try:
+            self.model_history = self.trained_model.history
+        except:
+            pass 
+        
         # save predicitons
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))

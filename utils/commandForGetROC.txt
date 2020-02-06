@@ -1,1 +1,17 @@
-python getROC.py -w ../workdir/ -v MergeAll_S01,MergeNoRecoReco_S01,MergeNoRecoRecoExclBin_S01 -n sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t
+#commands for merge_S01 and S02
+python getROC.py -w ../workdir/ -v MergeAll_S01,MergeAllExclBin_S01,MergeNoRecoReco_S01,MergeNoRecoRecoExclBin_S01,MergeAll_S02,MergeAllExclBin_S02,MergeNoRecoReco_S02,MergeNoRecoRecoExclBin_S02 -n sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t
+
+
+
+#commands for check of top variables of top level training
+python getROC.py -w ../workdir/ -v allVars_S01,allVars_noReco_S01,RecoVarsOnly_S01 -n sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t
+
+
+#commands for top level training, binary and multi
+python getROC.py -w ../workdir/ -v allVars,allVars_noReco,RecoVarsOnly -n sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t
+python getROC.py -w ../workdir/ -v allVars,allVars_noReco,RecoVarsOnly -n bin_sp_v* 4j_ge3t 5j_ge3t ge6j_ge3t ge4j_3t ge4j_ge4t
+
+
+#command for all
+allVars,allVars_noReco,RecoVarsOnly,allVars_S01,allVars_noReco_S01,RecoVarsOnly_S01,MergeAll_S02,MergeAllExclBin_S02,MergeNoRecoReco_S02,MergeNoRecoRecoExclBin_S02,Fit_S01,topVariables_validated_decorr_2018vars
+

@@ -15,7 +15,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 import generateJTcut
-#from DRACO_Frameworks.DNN.DNN import loadDNN
+from DRACO_Frameworks.DNN.DNN import loadDNN
 nameConfig = basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv"
 translationFile = pd.read_csv(nameConfig, sep = ",").set_index("variablename", drop = True)
 
@@ -97,7 +97,8 @@ for varset in varsets:
         for path in netpaths:
             print("loading DNN to produce ConfusionStatsFile afterwards")
             network = loadDNN(path, path)
-            network.plot_confusionMatrix(True,True,True,True)
+            #network.plot_confusionMatrix(True,True,True,True)
+            network.eval_model()
             del network
         
 print("done")

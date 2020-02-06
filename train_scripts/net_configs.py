@@ -28,7 +28,7 @@ config_dict["ttZAnalysis2"] = {
         }
 
 config_dict["ttZAnalysis3"] = {
-        "layers":                   [30, 55, 25],
+        "layers":                   [70, 70, 70],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0.3,
         "L2_Norm":                  1e-5,
@@ -55,6 +55,19 @@ config_dict["ttZAnalysis4"] = {
 
 config_dict["Experimental"] = {
         "layers":                   [30],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0,
+        "L2_Norm":                  1e-5,
+        "batch_size":               250,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.0,
+        "earlystopping_epochs":     0,
+        }
+
+config_dict["Experimental2"] = {
+        "layers":                   [120,120],
         "loss_function":            "categorical_crossentropy",
         "Dropout":                  0,
         "L2_Norm":                  1e-5,

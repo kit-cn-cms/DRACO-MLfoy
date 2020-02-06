@@ -1,16 +1,6 @@
 variables = {}
 
 variables["ge4j_3t"] = [
-    "Evt_Pt_minDrTaggedJets",
-    "N_LooseJets",
-    "Evt_MHT",
-    "RecoHiggs_Chi2",
-    "Evt_blr",
-    "Evt_CSV_avg_tagged",
-    "RecoZ_Chi2_log",
-    "RecoHiggs_Chi2_log",
-    "Evt_Deta_JetsAverage",
-    "RecoTTZ_TopHad_M",
     "CSV[3]",
     "Evt_HT_jets",
     "Evt_CSV_min_tagged",
@@ -25,16 +15,6 @@ variables["ge4j_3t"] = [
 
 
 variables["5j_ge3t"] = [
-    "Jet_Pt[4]",
-    "RecoHiggs_Chi2",
-    "Evt_MHT",
-    "Jet_Pt[3]",
-    "Evt_M_TaggedJetsAverage",
-    "Evt_h1",
-    "RecoTTZ_Chi2WHad_log",
-    "Evt_blr",
-    "RecoZ_Chi2",
-    "Evt_Deta_JetsAverage",
     "Evt_CSV_avg",
     "Evt_Dr_JetsAverage",
     "Evt_CSV_dev",
@@ -49,16 +29,6 @@ variables["5j_ge3t"] = [
 
 
 variables["ge6j_ge3t"] = [
-    "Evt_M2_TaggedJetsAverage",
-    "CSV[4]",
-    "Evt_CSV_avg_tagged",
-    "Evt_M_minDrLepTag",
-    "RecoTTZ_Z_M_log",
-    #"RecoTTH_Chi2Higgs_log",
-    "Evt_Deta_JetsAverage",
-    "RecoTTZ_Chi2Total_log",
-    "Evt_M_TaggedJetsAverage",
-    "Evt_CSV_avg",
     "Jet_Pt[5]",
     "Evt_blr",
     "RecoZ_Chi2_log",
@@ -73,16 +43,6 @@ variables["ge6j_ge3t"] = [
 
 
 variables["ge4j_ge4t"] = [
-    "RecoZ_Pt",
-    "Jet_Pt[3]",
-    "Evt_M2_TaggedJetsAverage",
-    "Evt_h1",
-    "RecoTTZ_TopLep_W_M",
-    "Evt_CSV_avg",
-    "CSV[3]",
-    "Evt_blr",
-    "TaggedJet_Pt[3]",
-    "RecoZ_Chi2",
     "CSV[1]",
     "Evt_CSV_avg_tagged",
     "Evt_h0",
@@ -97,16 +57,6 @@ variables["ge4j_ge4t"] = [
 
 
 variables["4j_ge3t"] = [
-    "RecoHiggs_Chi2",
-    "Evt_Deta_JetsAverage",
-    "Evt_M2_TaggedJetsAverage",
-    "RecoTTZ_Chi2Total",
-    "Evt_CSV_min_tagged",
-    "RecoTTZ_TopHad_Pt",
-    "RecoTTZ_Chi2TopHad",
-    "Evt_CSV_avg",
-    "RecoHiggs_Chi2_log",
-    "RecoTTZ_TopHad_W_M",
     "Evt_M_TaggedJetsAverage",
     "RecoZ_Chi2_log",
     "RecoTTZ_Chi2WHad",

@@ -1,4 +1,5 @@
 variablename,minvalue,maxvalue,numberofbins,logoption,displayname,texname
+CSV[1],0.277,1,40,x,second highest b-tag value,third highest b-tag value
 CSV[2],0.277,1,40,x,third highest b-tag value,third highest b-tag value
 CSV[3],0,0.3,40,x,fourth highest b-tag value,fourth highest b-tag value
 CSV[4],0,0.3,40,x,fifth highest b-tag value,fifth highest b-tag value
@@ -17,6 +18,8 @@ Evt_Dr_minDrJets,0.4,3,40,-,"#DeltaR^{j,j}_{min}","$\DeltaR^{\text{j},\text{j}}_
 Evt_Dr_minDrLepTag,0.4,3,40,-,"#DeltaR^{l,j}_{min}","$\DeltaR^{\ell,\text{j}}_{\text{min}}$"
 Evt_Dr_minDrTaggedJets,0.4,3.1,40,-,"#DeltaR^{b,b}_{min}","$\DeltaR^{\text{b},\text{b}}_{\text{min}}$"
 Evt_Dr_TaggedJetsAverage,0.5,3.5,40,-,"#DeltaR^{b,b}_{avg}","$\DeltaR^{\text{b},\text{b}}_{\text{avg}}$"
+Evt_Dr_closestTo91TaggedJets,0.5,3.5,40,-,"#DeltaR^{b,b} of jets with mass closest to 91 GeV","$\DeltaR^{\text{b},\text{b}}$ of jets with mass closest to 91 GeV"
+Evt_h0,-0.2,0.35,40,-,first Fox-Wolfram moment, first Fox-Wolfram moment
 Evt_h1,-0.2,0.35,40,-,second Fox-Wolfram moment,second Fox-Wolfram moment
 Evt_h2,-0.2,0.35,40,-,999th Fox-Wolfram moment,999th Fox-Wolfram moment
 Evt_h3,-0.2,0.35,40,-,666th Fox-Wolfram moment,666th Fox-Wolfram moment
@@ -50,9 +53,13 @@ Jet_Pt[3],25,80,40,x,p_{T} of fourth jet,$p_{\text{T}}$ of fourth jet
 Jet_Pt[4],25,70,40,x,p_{T} of fifth jet,$p_{\text{T}}$ of fifth jet
 Jet_Pt[5],25,70,40,x,p_{T} of sixth jet,$p_{\text{T}}$ of sixth jet
 Jet_M[0],0,200,40,x,mass of leading jet, mass of leading jet
+TaggedJet_Pt[3],0,500,40,x,p_{T} of fourth highest tagged jet,$p_{\text{T}}$ of fourth highest tagged jet
+TaggedJet_Pt[2],0,500,40,x,p_{T} of third highest tagged jet,$p_{\text{T}}$ of third highest tagged jet
+TaggedJet_M[0],0,200,40,x,mass of highest tagged jet, mass of highest tagged jet
 N_BTagsL,2.5,6.5,4,x,number of b-tags (loose),number of b-tags (loose)
 N_BTagsM,2.5,5.5,3,x,number of b-tags (medium),number of b-tags (medium)
 N_Jets,3.5,10.5,7,x, number of jets (medium), number of jets (medium)
+N_LooseJets,3.5,12.5,9,x, number of jets (loose), number of jets (loose)
 RecoTTZ_Chi2TopHad,0,100,40,x,t#bar{t}+Z reconstruction #chi^{2}(t_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}(\text{t}_{\text{had}})$
 RecoTTZ_Chi2Total,0,150,40,x,t#bar{t}+Z reconstruction #chi^{2},$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\chi^{2}$
 RecoTTZ_Chi2Total_log,-3,9,40,-,t#bar{t}+Z reconstruction ln(#chi^{2}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
@@ -66,12 +73,14 @@ RecoTTZ_TopHad_E,100,500,40,-,t#bar{t}+Z reconstruction E(t_{had}),$\text{t}\bar
 RecoTTZ_TopHad_Pt,0,500,40,-,t#bar{t}+Z reconstruction p_{T}(t_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{t}_{\text{had}})$
 RecoTTZ_TopHad_W_M,20,500,40,-,t#bar{t}+Z reconstruction m(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{W}_{\text{had}})$
 RecoTTZ_TopHad_W_Pt,0,370,40,-,t#bar{t}+Z reconstruction p_{T}(W_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{T}(\text{W}_{\text{had}})$
+RecoTTZ_TopHad_BJet_Pt,30,300,40,-,t#bar{t}+Z reconstruction p_{T}(b_{had}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{had}})$
 RecoTTZ_TopLep_BJet_Pt,30,300,40,-,t#bar{t}+Z reconstruction p_{T}(b_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{lep}})$
 RecoTTZ_TopLep_W_M,50,170,40,-,t#bar{t}+Z reconstruction m(W_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{W}_{\text{lep}})$
 RecoTTZ_TopLep_W_Pt,0,400,40,-,t#bar{t}+Z reconstruction p_{T}(W_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{T}(\text{W}_{\text{lep}})$
 RecoTTZ_TopLep_M,100,500,40,-,t#bar{t}+Z reconstruction m(t_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{t}_{\text{lep}})$
 RecoTTZ_TopLep_Pt,20,300,40,-,t#bar{t}+Z reconstruction p_{T}(t_{lep}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{T}(\text{t}_{\text{lep}})$
-RecoTTZ_Z_BJet2_Pt,30,150,40,-,t#bar{t}+Z reconstruction p_{T}(b_{Z}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}})$
+RecoTTZ_Z_BJet2_Pt,30,150,40,-,t#bar{t}+Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
+RecoTTZ_Z_BJet1_Pt,30,150,40,-,t#bar{t}+Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
 RecoTTZ_Z_M,20,300,40,-,t#bar{t}+Z reconstruction m(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $m(\text{Z})$
 RecoTTZ_Z_M_log,3.5,6,40,-,t#bar{t}+Z reconstruction ln(m)(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
 RecoTTZ_Z_Pt,0,500,40,-,t#bar{t}+Z reconstruction p_{T}(Z),$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$
@@ -80,10 +89,10 @@ RecoTTZ_cosdTheta_topLep_bHad,-1,1,40,-,"t#bar{t}+Z reconstruction cos(#Delta#Th
 RecoTTZ_Deta_Lep_bHad,0,3.15,40,-,"t#bar{t}+Z reconstruction #Delta#eta^{lep,b_{had}}","$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\Delta\eta^{\text{lep,b_{had}}}$"
 
 
-RecoZ_Chi2_log,-16,6,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
+RecoZ_Chi2_log,-14,8,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
 RecoZ_Chi2,0,60,40,-,Z reconstruction #chi^{2},$\text{Z}$ reconstruction $\chi^{2}$
 RecoZ_M,20,210,40,-,Z reconstruction m(Z),$\text{Z}$ reconstruction $m(\text{Z})$
-RecoZ_M_log,4,5.4,40,-,Z reconstruction ln(m)(Z),$\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
+RecoZ_M_log,3.8,5.7,40,-,Z reconstruction ln(m)(Z),$\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
 RecoZ_E,20,300,40,-,Z reconstruction E(Z),$\text{Z}$ reconstruction $E(\text{Z})$
 RecoZ_Pt,0,500,40,-,Z reconstruction p_{T}(Z),$\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$
 RecoZ_Deta,0,3,40,-,"Z reconstruction #Delta#eta^{b,b}_{Z}","$\text{Z}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{Z}}$"
@@ -93,11 +102,12 @@ RecoZ_BJet1_Pt,30,260,40,-,Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{Z}$ recons
 RecoZ_BJet1_M,20,110,40,-,Z reconstruction m(b_{Z}^{(1)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(1)})$
 RecoZ_BJet1_E,30,190,40,-,Z reconstruction E(b_{Z}^{(1)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(1)})$
 RecoZ_BJet1_Pt,30,230,40,-,Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
+RecoZ_BJet1_Eta,0,3,40,-,Z reconstruction #eta^{(1)}_{b}, $\text{Z}$ reconstruction $\eta^{(1)}_{\text{b}}$
 RecoZ_BJet2_Pt,30,200,40,-,Z reconstruction p_{T}(b_{Z}^{(2)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(2)})$
 RecoZ_BJet2_M,0,50,40,-,Z reconstruction m(b_{Z}^{(2)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(2)})$
 RecoZ_BJet2_E,30,190,40,-,Z reconstruction E(b_{Z}^{(2)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(2)})$
 
-RecoHiggs_Chi2_log,-16,6,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
+RecoHiggs_Chi2_log,-14,8,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
 RecoHiggs_Chi2,0,60,40,-,H reconstruction #chi^{2},$\text{H}$ reconstruction $\chi^{2}$
 RecoHiggs_M,20,300,40,-,H reconstruction m(H),$\text{H}$ reconstruction $m(\text{H})$
 RecoHiggs_M_log,3.8,5.7,40,-,H reconstruction ln(m)(H),$\text{H}$ reconstruction $\text{ln}(m)(\text{H})$
