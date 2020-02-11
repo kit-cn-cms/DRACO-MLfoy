@@ -283,7 +283,6 @@ class Dataset:
     
         pool = Pool(self.ncores)
         chunks = [{"self": self, "chunk": c, "sample": sample, "chunkNumber": i+1, "mem_df": mem_df} for i,c in enumerate(ntuple_files)]
-        print len(chunks[0]["mem_df"])
         pool.map(processChunk, chunks)
 
         # concatenate single thread files
@@ -458,10 +457,9 @@ class Dataset:
         if not df.query("memDBp == -1").empty:
             print("ATTENTION: SOME ENTRIES COULD NOT FIND A MATCHING MEM - SET TO -1")
             entries_before = df.shape[0]
-            df = df.query("memDBp != -1")
-            entries_after = df.shape[0]
-            print("    lost {}/{} events".format(entries_before-entries_after, entries_before))
-            print("    we will only save events with mem...")
+            df_tmp = df.query("memDBp != -1")
+            entries_after = df_tmp.shape[0]
+            print("{}/{} events without mem, setting to -1".format(entries_before-entries_after, entries_before))
         return df
 
     def removeTriggerVariables(self, df):
