@@ -21,8 +21,8 @@ Evt_Dr_TaggedJetsAverage,0.5,3.5,40,-,"#DeltaR^{b,b}_{avg}","$\DeltaR^{\text{b},
 Evt_Dr_closestTo91TaggedJets,0.5,3.5,40,-,"#DeltaR^{b,b} of jets with mass closest to 91 GeV","$\DeltaR^{\text{b},\text{b}}$ of jets with mass closest to 91 GeV"
 Evt_h0,-0.2,0.35,40,-,first Fox-Wolfram moment, first Fox-Wolfram moment
 Evt_h1,-0.2,0.35,40,-,second Fox-Wolfram moment,second Fox-Wolfram moment
-Evt_h2,-0.2,0.35,40,-,999th Fox-Wolfram moment,999th Fox-Wolfram moment
-Evt_h3,-0.2,0.35,40,-,666th Fox-Wolfram moment,666th Fox-Wolfram moment
+Evt_h2,-0.2,0.35,40,-,third Fox-Wolfram moment,third Fox-Wolfram moment
+Evt_h3,-0.2,0.35,40,-,fourth Fox-Wolfram moment,fourth Fox-Wolfram moment
 Evt_HT,200,1200,40,-,H_{T},$H_{\text{T}}$
 Evt_HT_jets,200,1200,40,-,H_{T} of jets,$H_{\text{T}}$ of jets
 Evt_HT_tags,200,1200,40,-,H_{T} of tagged jets,$H_{\text{T}}$ of tagged jets

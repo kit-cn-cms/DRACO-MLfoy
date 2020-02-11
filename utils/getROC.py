@@ -107,7 +107,8 @@ for varset in varsets:
         
 print("done")
 '''
-
+measurestringConf = "TruePositiveMean"
+measurestringROC = "ROC-AUC score"
 def addmethodlabel(varset):
     methodlabel=""
     if "S01" in varset:
@@ -169,7 +170,7 @@ for varset in varsets:
             print(mean_dict_Roc)
             #print("\n")
             try: 
-                RocValues.at[jtcat,varset] = mean_dict_Roc['ROC-AUC score']
+                RocValues.at[jtcat,varset] = mean_dict_Roc[measurestringROC]
             except:
                 RocValues.at[jtcat,varset] = "0"
                 print("exception done")
@@ -195,7 +196,7 @@ for varset in varsets:
             print(mean_dict_Conf)
             #print("\n")
             try: 
-                ConfStats.at[jtcat,varset] = mean_dict_Conf['TruePositiveMean']
+                ConfStats.at[jtcat,varset] = mean_dict_Conf[measurestringConf]
             except:
                 ConfStats.at[jtcat,varset] = "0"
                 print("exception done")
@@ -241,6 +242,18 @@ if opts.ToLatex:
         Measure = ConfStats
     if opts.GetRoc and opts.GetConfStats:
         sys.exit("Run either -C or -R to receive the latex table")
+        
+        
+    nsets = len(Measure.columns)
+    numbering='ABCDEFGHIJKLMN'
+    
+    
+    Coding={}
+    binlabel=[]
+    for i in range(nsets):
+        #Coding[numbering[i]] = Measure.columns[i]
+        Coding[Measure.columns[i]] = numbering[i]+addmethodlabel(Measure.columns[i])
+        binlabel.append(Coding[Measure.columns[i]])
     
     SubDict = {"4j":"FourJ", "5j":"FiveJ", "6j":"SixJ", "3t":"ThreeT", "4t":"FourT", "_":"" }
     size = len(Measure.index)
@@ -250,7 +263,7 @@ if opts.ToLatex:
     
     table += " \\\ \n\midrule \n"
     for varset in varsets:
-        table += "{}".format(varset)
+        table += "{}".format(Coding[varset])
         for numbers in Measure[varset]:
             table += " & \\num{{ {:0.3f} }}".format(numbers)
         table += " \\\ \n"
@@ -380,7 +393,7 @@ if opts.DoPlot:
     ytitle = "variable sets"
     xtitle = "categories"
     canvasName = "MatrixCanvas"
-    matrix = np.array([Measure.min(), Measure.max()])
+    matrix = np.array([Measure[Measure>0].min(), Measure[Measure>0].max()])
     privateWork=True
     numbering='ABCDEFGHIJKLMN'
     cm = ROOT.TH2D("Measure Matrix", "", ncats, 0, ncats, nsets, 0, nsets)
@@ -394,12 +407,13 @@ if opts.DoPlot:
             cm.SetBinContent(xit+1,yit+1, a.iat[-yit-1, xit])
             #if has_errors:
                 #cm.SetBinError(xit+1,yit+1, errors[xit, yit])
+
     cm.GetXaxis().SetTitle(xtitle)
     cm.GetYaxis().SetTitle(ytitle)
 
     cm.SetMarkerColor(ROOT.kWhite)
 
-    minimum = np.min(matrix[matrix>0])
+    minimum = np.min(matrix)
     maximum = np.max(matrix)
 
     cm.GetZaxis().SetRangeUser(minimum, maximum)
@@ -417,10 +431,10 @@ if opts.DoPlot:
     for yit in range(nsets):
         #print(Measure.columns[yit])        
         
-        if Measure.columns[yit] in MeanVarnames:
-            cm.GetYaxis().SetBinLabel(yit+1, "#color["+str(ROOT.kRed+1)+"]{"+binlabel[-yit-1]+"}")
-        else:
-            cm.GetYaxis().SetBinLabel(yit+1, binlabel[-yit-1])#RocValues.columns[yit])
+        #if Measure.columns[yit] in MeanVarnames:
+        #    cm.GetYaxis().SetBinLabel(yit+1, "#color["+str(ROOT.kRed+1)+"]{"+binlabel[-yit-1]+"}")
+        #else:
+        cm.GetYaxis().SetBinLabel(yit+1, binlabel[-yit-1])#RocValues.columns[yit])
             
 
     cm.GetXaxis().SetLabelSize(0.05)
@@ -459,14 +473,20 @@ if opts.DoPlot:
 
     if privateWork:
         latex.DrawLatex(l, 1.-t+0.01, "CMS private work")
+    canvas.Update()
     if opts.GetRoc:
-        latex.DrawLatex(1.-r*1.90, 1.-t+0.01, "ROC-AUC")
-        canvas.SaveAs(opts.outdir+"/combination_ROC.png")
-        canvas.SaveAs(opts.outdir+"/combination_ROC.pdf")
+        #latex.SetBBoxX2(1.-r*0.05)
+        measurestringROC = "ROC-AUC"
+        latex.SetTextAlign(31)
+        latex.DrawLatex(1.-r*1.05, 1.-t+0.01, measurestringROC)
+        canvas.SaveAs(opts.outdir+"/combination_"+measurestringROC.replace(" ","")+".png")
+        canvas.SaveAs(opts.outdir+"/combination_"+measurestringROC.replace(" ","")+".pdf")
     if opts.GetConfStats:
-        latex.DrawLatex(1.-r*3.0, 1.-t+0.01, "Mean of True Positives")
-        canvas.SaveAs(opts.outdir+"/combination_TruePositives.png")
-        canvas.SaveAs(opts.outdir+"/combination_TruePositives.pdf")
+        measurestringConf="STD of True Positives"
+        latex.SetTextAlign(31)
+        latex.DrawLatex(1.-r*1.05, 1.-t+0.01, measurestringConf)
+        canvas.SaveAs(opts.outdir+"/combination_"+measurestringConf.replace(" ","")+".png")
+        canvas.SaveAs(opts.outdir+"/combination_"+measurestringConf.replace(" ","")+".pdf")
     # add ROC score if activated
     
     

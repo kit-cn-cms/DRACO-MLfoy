@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set=allVars_bin_S01
+set=allVars_noReco_bin_S01
 echo $set
 for i in 01  #04 05 06 07 08 09 10
 do
