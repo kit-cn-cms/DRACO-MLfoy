@@ -32,7 +32,7 @@ parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatur
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in input directory (default _dnn.h5)", metavar="naming")
 
-parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
+parser.add_option("-c", "--category", dest="category",default="ge4j_ge3t",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="category")
 
 parser.add_option("-e", "--trainepochs", dest="train_epochs",default=1000,
@@ -129,7 +129,7 @@ naming = options.naming
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 
-input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
+input_samples.addSample("ttZ"+naming,   label = "ttZ", normalization_weight = 2.)
 input_samples.addSample("bkg"+naming,  label = "bkg")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
