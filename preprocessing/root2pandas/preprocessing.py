@@ -32,8 +32,11 @@ parser.add_option("-m", "--MEM", dest="MEM", action = "store_true", default=Fals
 parser.add_option("-n", "--name", dest="Name", default="dnn",
         help="STR of the output file name", metavar="Name")
 
-parser.add_option("--ZReco", dest="ZReco", action= "store_true", default=True,
+parser.add_option("--ZReco", dest="ZReco", action= "store_true", default=False,
         help="activate preprocessing for Z reconstruction", metavar="ZReco")
+
+parser.add_option("--HiggsReco", dest="HiggsReco", action= "store_true", default=False,
+        help="activate preprocessing for Higgs reconstruction", metavar="HiggsReco")
 
 parser.add_option("--cores", dest="ncores", default = 1,
         help="number of cores for parallel multiprocessing")
@@ -56,6 +59,11 @@ elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
+#activate preprocessing for Higgs or for Z
+
+if options.ZReco == options.HiggsReco:
+	sys.exit("Choose preprocessing for Z or for Higgs reconstruction")
+
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
 # N<13 could be removed, because in the given dataset there is no event with N>12
@@ -69,13 +77,7 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1)"
 
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
-ttZ_selection = "(Evt_Odd == 1)"
 
-ttZ_categories = root2pandas.EventCategories()
-ttZ_categories.addCategory("ttZ")
-ttZ_categories.addCategory("bkg")
-#ttZ_categories.addCategory("TopBkg")
-#ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -83,22 +85,48 @@ dataset = root2pandas.Dataset(
     naming      = options.Name,
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
-    ZReco   = options.ZReco,
+    ZReco   	= options.ZReco,
+    HiggsReco	= options.HiggsReco,
     ncores      = options.ncores)
 
 # add base event selection
 dataset.addBaseSelection(base)
-#ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
-#ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
-ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
-#ntuplesPath= "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root"
 
-dataset.addSample(
-    sampleName  = "TTToSL",
-    ntuples     = ntuplesPath,
-    categories  = ttZ_categories,
-    selections  = ttZ_selection
-)
+if options.ZReco:
+	ttZ_selection = "(Evt_Odd == 1)"
+
+	ttZ_categories = root2pandas.EventCategories()
+	ttZ_categories.addCategory("ttZ")
+	ttZ_categories.addCategory("bkg")
+	#ttZ_categories.addCategory("TopBkg")
+	#ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
+
+	ntuplesPath = "/nfs/dust/cms/user/lbosch/ntuple_production/ntuple_v6/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root"
+	
+
+	dataset.addSample(
+    	sampleName  = "ttZTobb",
+    	ntuples     = ntuplesPath,
+    	categories  = ttZ_categories,
+    	selections  = ttZ_selection
+		)
+elif options.HiggsReco:
+	ttH_selection = "(Evt_Odd == 1)"
+
+	ttH_categories = root2pandas.EventCategories()
+	ttH_categories.addCategory("ttH")
+	ttH_categories.addCategory("bkg")
+	#ttH_categories.addCategory("TopBkg")
+
+	ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"
+
+	dataset.addSample(
+    	sampleName  = "ttHTobb",
+    	ntuples     = ntuplesPath,
+    	categories  = ttH_categories,
+    	selections  = ttH_selection
+		)
+
 # initialize variable list
 dataset.addVariables(variable_set.all_variables)
 

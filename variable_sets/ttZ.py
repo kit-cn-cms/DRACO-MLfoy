@@ -122,6 +122,7 @@ variables["ge4j_ge3t"] = [
 	"GenZ_Eta",
 	"GenZ_Phi",
 	"GenZ_E",
+	"GenEvt_I_TTZ",
 	#"GenZ_logM"
 	]
 

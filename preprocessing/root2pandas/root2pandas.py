@@ -6,7 +6,8 @@ import glob
 import os
 from multiprocessing import Pool
 
-import ZReco
+import Reco
+
 
 
 # multi processing magic
@@ -54,7 +55,7 @@ class Sample:
 
 
 class Dataset:
-	def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, ZReco=True, ncores = 1):
+	def __init__(self, outputdir, naming = "", addMEM = False, maxEntries = 50000, ZReco = False, HiggsReco = False, ncores = 1):
 		# settings for paths
 		self.outputdir  = outputdir
 		self.naming	 = naming
@@ -67,6 +68,7 @@ class Dataset:
 		self.addMEM	 = addMEM
 		self.maxEntries = int(maxEntries)
 		self.ZReco  = ZReco
+		self.HiggsReco= HiggsReco
 
 		# default values for some configs
 		self.baseSelection  = None
@@ -323,12 +325,17 @@ class Dataset:
 			# apply event selection
 			df = self.applySelections(df, sample.selections)
 
-			# perform ttH reconstruction
+			# perform ttZ or ttH reconstruction
 			if self.ZReco:
-				df = ZReco.findbestZ(df, self.variables)
+				df = Reco.findbestZorH(df, self.variables, "Z")
 
 				sample.categories.categories["ttZ"] = "(is_Z == 1)"
 				sample.categories.categories["bkg"] = "(is_Z == 0)"
+			elif self.HiggsReco:
+				df = Reco.findbestZorH(df, self.variables, "Higgs")
+
+				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
+				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
 
 #			 Top Bkg:
 
@@ -338,7 +345,7 @@ class Dataset:
 #			all Bkg:
 
 #				df = HiggsReco.findallbkg(df, self.variables)
-#				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
+#				sample.categories.categories["half"] = "(is_Higgs == 0)"
 
 
 
