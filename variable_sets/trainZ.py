@@ -8,6 +8,8 @@ variables["ge4j_ge3t"] = [
 	"Reco_Z_B2_Eta",
 	"Reco_Z_B2_E",
 	"Reco_Z_B2_CSV",
+	"Reco_Z_B1_Pt",
+	"Reco_Z_B2_Pt",
 	"Reco_Z_B2_logPt",
 	"Reco_Z_B2_logE",
 	"Reco_Z_Pt",
@@ -17,17 +19,17 @@ variables["ge4j_ge3t"] = [
 	"Reco_Z_E",
 	"Reco_Z_logE",
 	"Reco_Z_logPt",
-	"Delta_R",
-	"Delta_Phi",
-	"Delta_Eta",
-	"Delta_R3D",
-	"Boosted1_Pt",
-	"Boosted1_Eta",
-	"Boosted1_logPt",
-	"Boosted2_Pt",
-	"Boosted2_Eta",
-	"Boosted2_logPt",
-	"Angle"
+	"Reco_Z_Delta_R",
+	"Reco_Z_Delta_Phi",
+	"Reco_Z_Delta_Eta",
+	"Reco_Z_Delta_R3D",
+	"Reco_Z_Boosted1_Pt",
+	"Reco_Z_Boosted1_Eta",
+	"Reco_Z_Boosted1_logPt",
+	"Reco_Z_Boosted2_Pt",
+	"Reco_Z_Boosted2_Eta",
+	"Reco_Z_Boosted2_logPt",
+	"Reco_Z_Angle"
 	]
 
 

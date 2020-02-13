@@ -10,6 +10,8 @@ variables["ge4j_ge3t"] = [
 	"Reco_Higgs_B2_CSV",
 	"Reco_Higgs_B2_logPt",
 	"Reco_Higgs_B2_logE",
+	"Reco_Higgs_B1_Pt",
+	"Reco_Higgs_B2_Pt",
 	"Reco_Higgs_Pt",
 	"Reco_Higgs_Eta",
 	"Reco_Higgs_M",
@@ -17,17 +19,17 @@ variables["ge4j_ge3t"] = [
 	"Reco_Higgs_E",
 	"Reco_Higgs_logE",
 	"Reco_Higgs_logPt",
-	"Delta_R",
-	"Delta_Phi",
-	"Delta_Eta",
-	"Delta_R3D",
-	"Boosted1_Pt",
-	"Boosted1_Eta",
-	"Boosted1_logPt",
-	"Boosted2_Pt",
-	"Boosted2_Eta",
-	"Boosted2_logPt",
-	"Angle"
+	"Reco_Higgs_Delta_R",
+	"Reco_Higgs_Delta_Phi",
+	"Reco_Higgs_Delta_Eta",
+	"Reco_Higgs_Delta_R3D",
+	"Reco_Higgs_Boosted1_Pt",
+	"Reco_Higgs_Boosted1_Eta",
+	"Reco_Higgs_Boosted1_logPt",
+	"Reco_Higgs_Boosted2_Pt",
+	"Reco_Higgs_Boosted2_Eta",
+	"Reco_Higgs_Boosted2_logPt",
+	"Reco_Higgs_Angle"
 	]
 
 
