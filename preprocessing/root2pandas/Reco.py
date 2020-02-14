@@ -54,6 +54,12 @@ def findbestZorH(df, additionalVariables, ZorH):
 	valid_events = 0
 	n = 0
 	for iEvt in df.index:
+
+		#limits events for faster preprocessing of larger nTupels but less data (optional)
+		if n>10000:
+			print("added {}/{} events".format(valid_events, nevents))
+			return new_df
+
 		# get number of jets (max 10)
 		event = df.loc[iEvt]
 		nJets = int(min(event["N_Jets"], 10))
