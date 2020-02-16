@@ -50,7 +50,7 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label", metavar="privateWork")
 
-parser.add_option("--netconfig", dest="net_config",default="ttH_2017",
+parser.add_option("--netconfig", dest="net_config",default="binary_config",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="net_config")
 
 parser.add_option("--signalclass", dest="signal_class", default=None,
@@ -126,9 +126,10 @@ input_samples = df.InputSamples(inPath, options.activateSamples)
 naming = options.naming
 
 
-# during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
+# during preprocessing half of the ttH/ttZ sample is discarded (Even/Odd splitting),
 #       thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
 
+input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
 input_samples.addSample("ttZ"+naming,   label = "ttZ", normalization_weight = 2.)
 input_samples.addSample("bkg"+naming,  label = "bkg")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
