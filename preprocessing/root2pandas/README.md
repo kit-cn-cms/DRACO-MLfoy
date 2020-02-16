@@ -61,6 +61,25 @@ At later steps in the `preprocessing` these MEM values are added to the output f
 
 The MEM variable is saved as `memDBp` in the output files to match the naming scheme used in the single-lepton analysis.
 
+## Concerning friend trees
+variables from other trees can be added as long as the structure of the input files is the same. I.e. the file structure
+```
+basepath/
+----/sample/
+----/----/file1.root
+----/----/file2.root
+```
+has to be retained. Also the order of events in the files has to be the same.
+To add friend trees give a dictionary of friend trees to the `Dataset` class via
+```
+friendTrees = {
+    "ftName": "new/base/path/",
+    ...
+```
+Variables specifically from these friend trees can be obtained via `ftName.varName` in the variable set files.
+This is also the name of these variables in the resulting data frames.
+Currently only non-vectorized variables are supported
+
 ------------------------------------------------------------------------------------------
 
 ## Instructions specific to ttHbb dilepton channel (inputs in DESY-format)
