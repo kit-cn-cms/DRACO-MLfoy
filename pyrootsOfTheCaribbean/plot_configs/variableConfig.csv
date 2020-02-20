@@ -45,7 +45,7 @@ Evt_Pt_JetsAverage,40,250,40,-,"p_{T, avg}^{j,j}","$p_{\text{T},\,\text{avg}}^{\
 Evt_Pt_minDrJets,40,500,40,-,"p_{T}(#DeltaR^{j,j}_{min})","$p_{\text{T}}(\DeltaR^{\text{j},\text{j}}_{\text{min}})$"
 Evt_Pt_minDrTaggedJets,30,450,40,-,"p_{T}(#DeltaR^{b,b}_{min})","$p_{\text{T}}(\DeltaR^{\text{b},\text{b}}_{\text{min}})$"
 Evt_Pt_TaggedJetsAverage,40,250,40,-,"p_{T, avg}^{b,b}","$p_{\text{T},\text{avg}}^{\text{b},\text{b}}$"
-Evt_TaggedJetPt_over_TaggedJetE, 0.15,1,40,-,"#p_{T}^{b,b} / #E^{b,b}","$p_{T}^{\text{b,b}} / E^{\text{b,b}}$" 
+Evt_TaggedJetPt_over_TaggedJetE,0.15,1,40,-,"#p_{T}^{b,b} / #E^{b,b}","$p_{T}^{\text{b,b}} / E^{\text{b,b}}$ "
 Jet_CSV[0],0,1,40,-,b-tag value of hardest jet,b-tag value of hardest jet
 Jet_Pt[0],25,500,40,x,p_{T} of leading jet,$p_{\text{T}}$ of leading jet
 Jet_Pt[1],25,500,40,x,p_{T} of second jet,$p_{\text{T}}$ of leading jet
@@ -88,37 +88,48 @@ RecoTTZ_Dphi_topLep_topHad,0,3.15,40,-,"t#bar{t}+Z reconstruction #Delta#phi^{t_
 RecoTTZ_cosdTheta_topLep_bHad,-1,1,40,-,"t#bar{t}+Z reconstruction cos(#Delta#Theta^{t_{lep},b_{had}})","$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\Cos(\Delta\Theta^{\text{t_{lep},b_{had}}}$"
 RecoTTZ_Deta_Lep_bHad,0,3.15,40,-,"t#bar{t}+Z reconstruction #Delta#eta^{lep,b_{had}}","$\text{t}\bar{\text{t}}+\text{Z}$ reconstruction $\Delta\eta^{\text{lep,b_{had}}}$"
 
-
-RecoZ_Chi2_log,-14,8,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
-RecoZ_Chi2,0,60,40,-,Z reconstruction #chi^{2},$\text{Z}$ reconstruction $\chi^{2}$
-RecoZ_M,20,210,40,-,Z reconstruction m(Z),$\text{Z}$ reconstruction $m(\text{Z})$
+RecoZ_Chi2_log,-13,8,40,-,Z reconstruction ln(#chi^{2}),$\text{Z}$ reconstruction $\text{ln}(\chi^{2})$
+RecoZ_Chi2,0,45,40,-,Z reconstruction #chi^{2},$\text{Z}$ reconstruction $\chi^{2}$
+RecoZ_M,20,210,40,-,Z reconstruction m(Z) [GeV],$\text{Z}$ reconstruction $m(\text{Z})$ [GeV]
 RecoZ_M_log,3.8,5.7,40,-,Z reconstruction ln(m)(Z),$\text{Z}$ reconstruction $\text{ln}(m)(\text{Z})$
-RecoZ_E,20,300,40,-,Z reconstruction E(Z),$\text{Z}$ reconstruction $E(\text{Z})$
-RecoZ_Pt,0,500,40,-,Z reconstruction p_{T}(Z),$\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$
-RecoZ_Deta,0,3,40,-,"Z reconstruction #Delta#eta^{b,b}_{Z}","$\text{Z}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{Z}}$"
-RecoZ_Dphi,0,3.15,40,-,"Z reconstruction #Delta#phi^{b,b}_{Z}","$\text{Z}$ reconstruction $\Delta\phi^{\text{b},\text{b}}_{\text{Z}}$"
-RecoZ_Dr,0.2,3.9,40,-,"Z reconstruction #DeltaR^{b,b}_{Z}","$\text{Z}$ reconstruction $\DeltaR^{\text{b},\text{b}}_{\text{Z}}$"
-RecoZ_BJet1_Pt,30,260,40,-,Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_M,20,110,40,-,Z reconstruction m(b_{Z}^{(1)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_E,30,190,40,-,Z reconstruction E(b_{Z}^{(1)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_Pt,30,230,40,-,Z reconstruction p_{T}(b_{Z}^{(1)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(1)})$
-RecoZ_BJet1_Eta,0,3,40,-,Z reconstruction #eta^{(1)}_{b}, $\text{Z}$ reconstruction $\eta^{(1)}_{\text{b}}$
-RecoZ_BJet2_Pt,30,200,40,-,Z reconstruction p_{T}(b_{Z}^{(2)}),$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}_{\text{Z}}^{(2)})$
-RecoZ_BJet2_M,0,50,40,-,Z reconstruction m(b_{Z}^{(2)}),$\text{Z}$ reconstruction $m(\text{b}_{\text{Z}}^{(2)})$
-RecoZ_BJet2_E,30,190,40,-,Z reconstruction E(b_{Z}^{(2)}),$\text{Z}$ reconstruction $E(\text{b}_{\text{Z}}^{(2)})$
+RecoZ_E,50,1000,40,-,Z reconstruction E(Z) [GeV],$\text{Z}$ reconstruction $E(\text{Z})$ [GeV]
+RecoZ_Pt,0,500,40,-,Z reconstruction p_{T}(Z) [GeV],$\text{Z}$ reconstruction $p_{\text{T}}(\text{Z})$ [GeV]
+RecoZ_Eta,-4.5,4.5,40,-,Z reconstruction #eta(Z), $\text{Z}$ reconstruction $\eta$(Z)
+RecoZ_Phi,-3.14,3.14,40,-,Z reconstruction #phi(Z), $\text{Z}$ reconstruction $\phi$(Z)
+RecoZ_Deta,0,2.8,40,-,"Z reconstruction #Delta#eta^{b,b}","$\text{Z}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{Z}}$"
+RecoZ_Dphi,0,3.15,40,-,"Z reconstruction #Delta#phi^{b,b}","$\text{Z}$ reconstruction $\Delta\phi^{\text{b},\text{b}}_{\text{Z}}$"
+RecoZ_Dr,0.3,3.7,40,-,"Z reconstruction #DeltaR^{b,b}","$\text{Z}$ reconstruction $\DeltaR^{\text{b},\text{b}}_{\text{Z}}$"
+RecoZ_cosdTheta,-1,1,30,-,"Z reconstruction cos(#Delta#Theta^{b,b})","$\text{Z}$ reconstruction $\Cos(\Delta\Theta^{\text{b_{(1)},b_{(2)}}}$"
+RecoZ_BJet1_M,0,58,40,-,Z reconstruction m(b^{(1)}) [GeV],$\text{Z}$ reconstruction $m(\text{b}^{(1)})$ [GeV]
+RecoZ_BJet1_E,30,450,40,-,Z reconstruction E(b^{(1)}) [GeV],$\text{Z}$ reconstruction $E(\text{b}^{(1)})$ [GeV]
+RecoZ_BJet1_Pt,30,245,40,-,Z reconstruction p_{T}(b^{(1)}) [GeV],$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}^{(1)})$ [GeV]
+RecoZ_BJet1_Eta,-2.4,2.4,40,-,Z reconstruction #eta(b^{(1)}), $\text{Z}$ reconstruction $\eta(\text{b}^{(1)})$
+RecoZ_BJet1_Phi,-3.14,3.14,40,-,Z reconstruction #phi(b^{(1)}), $\text{Z}$ reconstruction $\phi(\text{b}^{(2)})$
+RecoZ_BJet2_M,0,35,40,-,Z reconstruction m(b^{(2)}) [GeV],$\text{Z}$ reconstruction $m(\text{b}^{(2)})$ [GeV]
+RecoZ_BJet2_E,30,220,40,-,Z reconstruction E(b^{(2)}) [GeV],$\text{Z}$ reconstruction $E(\text{b}^{(2)})$ [GeV]
+RecoZ_BJet2_Pt,30,185,40,-,Z reconstruction p_{T}(b^{(2)}) [GeV],$\text{Z}$ reconstruction $p_{\text{T}}(\text{b}^{(2)})$ [GeV]
+RecoZ_BJet2_Eta,-2.4,2.4,40,-,Z reconstruction #eta(b^{(2)}), $\text{Z}$ reconstruction $\eta(\text{b}^{(2)})$
+RecoZ_BJet2_Phi,-3.14,3.14,40,-,Z reconstruction #eta(b^{(2)}), $\text{Z}$ reconstruction $\phi(\text{b}^{(2)})$
 
-RecoHiggs_Chi2_log,-14,8,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
-RecoHiggs_Chi2,0,60,40,-,H reconstruction #chi^{2},$\text{H}$ reconstruction $\chi^{2}$
-RecoHiggs_M,20,300,40,-,H reconstruction m(H),$\text{H}$ reconstruction $m(\text{H})$
+RecoHiggs_Chi2_log,-12,7,40,-,H reconstruction ln(#chi^{2}),$\text{H}$ reconstruction $\text{ln}(\chi^{2})$
+RecoHiggs_Chi2,0,35,40,-,H reconstruction #chi^{2},$\text{H}$ reconstruction $\chi^{2}$
+RecoHiggs_M,20,210,40,-,H reconstruction m(H) [GeV],$\text{H}$ reconstruction $m(\text{H})$ [GeV]
 RecoHiggs_M_log,3.8,5.7,40,-,H reconstruction ln(m)(H),$\text{H}$ reconstruction $\text{ln}(m)(\text{H})$
-RecoHiggs_E,20,300,40,-,H reconstruction E(H),$\text{H}$ reconstruction $E(\text{H})$
-RecoHiggs_Pt,0,500,40,-,H reconstruction p_{T}(H),$\text{H}$ reconstruction $p_{\text{T}}(\text{H})$
-RecoHiggs_Deta,0,3,40,-,"H reconstruction #Delta#eta^{b,b}_{H}","$\text{H}$ reconstruction $\Delta\eta^{\text{b},\text{b}}_{\text{H}}$"
-RecoHiggs_Dphi,0,3.15,40,-,"H reconstruction #Delta#phi^{b,b}_{H}","$\text{H}$ reconstruction $\Delta\phi^{\text{b},\text{b}}_{\text{H}}$"
-RecoHiggs_Dr,0.4,4.5,40,-,"H reconstruction #DeltaR^{b,b}_{H}","$\text{H}$ reconstruction $\Delta R^{\text{b},\text{b}}_{\text{H}}$"
-RecoHiggs_BJet1_Pt,30,230,40,-,H reconstruction p_{T}(b_{H}^{(1)}),$\text{H}$ reconstruction $p_{\text{T}}(\text{b}_{\text{H}}^{(1)})$
-RecoHiggs_BJet1_M,20,110,40,-,H reconstruction m(b_{H}^{(1)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(1)})$
-RecoHiggs_BJet1_Eta,0,3,40,-,H reconstruction #eta^{(1)}_{b}, $\text{H}$ reconstruction $\eta^{(1)}_{\text{b}}$
-RecoHiggs_BJet2_Pt,30,200,40,-,H reconstruction p_{T}(b_{H}^{(2)}),$\text{H}$ reconstruction $p_{\text{T}}(\text{b}_{\text{H}}^{(2)})$
-RecoHiggs_BJet2_M,0,50,40,-,H reconstruction m(b_{H}^{(2)}),$\text{H}$ reconstruction $m(\text{b}_{\text{H}}^{(2)})$
-
+RecoHiggs_E,20,1100,40,-,H reconstruction E(H) [GeV],$\text{H}$ reconstruction $E(\text{H})$ [GeV]
+RecoHiggs_Pt,0,500,40,-,H reconstruction p_{T}(H) [GeV],$\text{H}$ reconstruction $p_{\text{T}}(\text{H})$ [GeV]
+RecoHiggs_Eta,-4.5,4.5,40,-,H reconstruction #eta(H), $\text{H}$ reconstruction $\eta$(H)
+RecoHiggs_Phi,-3.14,3.14,40,-,H reconstruction #phi(H), $\text{H}$ reconstruction $\phi$(H)
+RecoHiggs_Deta,0,3,40,-,"H reconstruction #Delta#eta^{b,b}","$\text{H}$ reconstruction $\Delta\eta^{\text{b},\text{b}}$"
+RecoHiggs_Dphi,0,3.15,40,-,"H reconstruction #Delta#phi^{b,b}","$\text{H}$ reconstruction $\Delta\phi^{\text{b},\text{b}}$"
+RecoHiggs_Dr,0.3,3.7,40,-,"H reconstruction #DeltaR^{b,b}","$\text{H}$ reconstruction $\DeltaR^{\text{b},\text{b}}$"
+RecoHiggs_cosdTheta,-1,1,30,-,"H reconstruction cos(#Delta#Theta^{b,b})","$\text{H}$ reconstruction $\Cos(\Delta\Theta^{\text{b_{(1)},b_{(2)}}}$"
+RecoHiggs_BJet1_M,0,50,40,-,H reconstruction m(b^{(1)}) [GeV],$\text{H}$ reconstruction $m(\text{b}^{(1)})$ [GeV]
+RecoHiggs_BJet1_E,30,450,40,-,H reconstruction E(b^{(1)}) [GeV],$\text{H}$ reconstruction $E(\text{b}^{(1)})$ [GeV]
+RecoHiggs_BJet1_Pt,30,260,40,-,H reconstruction p_{T}(b^{(1)}) [GeV],$\text{H}$ reconstruction $p_{\text{T}}(\text{b}^{(1)})$ [GeV]
+RecoHiggs_BJet1_Eta,-2.4,2.4,40,-,H reconstruction #eta(b^{(1)}), $\text{H}$ reconstruction $\eta(\text{b}^{(1)})$
+RecoHiggs_BJet1_Phi,-3.14,3.14,40,-,H reconstruction phi(b^{(1)}), $\text{H}$ reconstruction $\phi(\text{b}^{(1)})$
+RecoHiggs_BJet2_M,0,30,40,-,H reconstruction m(b^{(2)}) [GeV],$\text{H}$ reconstruction $m(\text{b}^{(2)})$ [GeV]
+RecoHiggs_BJet2_E,30,230,40,-,H reconstruction E(b^{(2)}) [GeV],$\text{H}$ reconstruction $E(\text{b}^{(2)})$ [GeV]
+RecoHiggs_BJet2_Pt,30,160,40,-,H reconstruction p_{T}(b^{(2)}) [GeV],$\text{H}$ reconstruction $p_{\text{T}}(\text{b}^{(2)})$ [GeV]
+RecoHiggs_BJet2_Eta,-2.4,2.4,40,-,H reconstruction #eta(b^{(2)}), $\text{H}$ reconstruction $\eta(\text{b}^{(2)})$
+RecoHiggs_BJet2_Phi,-3.14,3.14,40,-,H reconstruction #phi(b^{(2)}), $\text{H}$ reconstruction $\phi(\text{b}^{(2)})$
