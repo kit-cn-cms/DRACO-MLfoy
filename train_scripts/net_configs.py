@@ -151,6 +151,34 @@ config_dict["binary_crossentropy_Adam"] = {
         "earlystopping_epochs":      100,
 }
 
+config_dict["ttbb_reco_v2"] = {
+        "layers":                   [100,100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.2,
+        "L1_Norm":                  1e-3,
+        "L2_Norm":                  1e-3,
+        "batch_size":               128,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.1,
+        "earlystopping_epochs":      100,
+}
+
+config_dict["ttbb_reco"] = {
+        "layers":                   [100,100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.2,
+        "L1_Norm":                  1e-3,
+        "L2_Norm":                  1e-3,
+        "batch_size":               128,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.1,
+        "earlystopping_epochs":      100,
+}
+
 config_dict["binary_squared_Adadelta"] = {
         "layers":                   [200,100],
         "loss_function":            "squared_hinge",

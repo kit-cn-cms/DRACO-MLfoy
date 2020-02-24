@@ -33,6 +33,8 @@ input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normal
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
 input_samples.addSample(options.getDefaultName("ttH_HTXS_0") ,  label = "ttH_HTXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttH_HTXS_1") ,  label = "ttH_HTXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )

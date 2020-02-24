@@ -1,0 +1,38 @@
+variables = {}
+variables["ge4j_ge3t"] = [
+    "ttbbReco_AddB1_Eta",
+    "ttbbReco_AddB2_Eta",
+    "ttbbReco_AddB1_Phi",
+    "ttbbReco_AddB2_Phi",
+    "ttbbReco_AddB1_CSV",
+    "ttbbReco_AddB2_CSV",
+    "ttbbReco_AddB1_M",
+    "ttbbReco_AddB2_M",
+    "ttbbReco_AddB1_E",
+    "ttbbReco_AddB2_E",
+    "ttbbReco_AddB1_Pt",
+    "ttbbReco_AddB2_Pt",
+    "ttbbReco_AddB1_idx",
+    "ttbbReco_AddB2_idx",
+    "ttbbReco_bb_dPhi",
+    "ttbbReco_bb_dEta",
+    "ttbbReco_bb_dPt",
+    "ttbbReco_bb_dR",
+    "ttbbReco_bb_dKin",
+    "ttbbReco_bb_Pt",
+    "ttbbReco_bb_Eta",
+    "ttbbReco_bb_M",
+    "ttbbReco_bb_E",
+    #"ttbbReco_bb_openingAngle",
+    #"ttbbReco_lepTop1_Pt",
+    #"ttbbReco_lepTop1_Eta",
+    #"ttbbReco_lepTop1_M",
+    #"ttbbReco_lepTop1_E",
+    #"ttbbReco_lepTop2_Pt",
+    #"ttbbReco_lepTop2_Eta",
+    #"ttbbReco_lepTop2_M",
+    #"ttbbReco_lepTop2_E",
+    ] 
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))
+
+
