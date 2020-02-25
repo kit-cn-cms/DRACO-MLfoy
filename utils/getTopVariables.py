@@ -16,7 +16,7 @@ sys.path.append(basedir)
 
 usage = "python getTopVariables.py [options] [jtCategories]"
 parser = optparse.OptionParser(usage=usage)
-parser.add_option("-w","--workdir",dest="workdir",default=basedir+"/workdir/",
+parser.add_option("-w","--workdir",dest="workdir",default=basedir+"/workdir",
     help = "path to working directory where trained DNN files are placed")
 parser.add_option("-i","--input",dest="inputdir",default="test_training",
     help = "path to DNN directories relative to WORKDIR. add JTSTRING as placeholder\
