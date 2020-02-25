@@ -102,7 +102,7 @@ ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017"
 # add samples to dataset
 
 dataset.addSample(
-    sampleName  = "TTToSL",
+    sampleName  = "TTbar",
     ntuples     = ntuplesPath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root", #*_2*nominal*
     categories  = ttbar_categories,
     selections  = None, #"(Evt_Odd == 1)" <=for even odd splitting in final form
