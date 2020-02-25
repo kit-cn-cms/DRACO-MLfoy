@@ -124,12 +124,12 @@ config_dict["ttH_2017_DL"] = {
         }
 
 config_dict["binary_crossentropy_Adam"] = {
-        "layers":                   [300,100],
+        "layers":                   [150],
         "loss_function":            "binary_crossentropy",
         "Dropout":                  0.4,
-        "L2_Norm":                  1e-4,
+        "L2_Norm":                  1e-3,
         #"L1_Norm":                  1e-4,
-        "batch_size":               4027,
+        "batch_size":               2000,
         "optimizer":                optimizers.Adam(learning_rate=1e-3),
         "activation_function":      "relu",
         "output_activation":        "Sigmoid",
@@ -166,15 +166,15 @@ config_dict["binary_squared_SGD"] = {
 }
 
 config_dict["BNN"] = {
-        "layers":                   [100,100,100],
+        "layers":                   [50],
         #"loss_function":            "neg_log_likelihood",
-        #"Dropout":                  0.,
+        "Dropout":                  0,
         #"L1_Norm":                  0,
         #"L2_Norm":                  1e-5,
-        "batch_size":               4027,
-        "optimizer":                tf.keras.optimizers.Adamax(learning_rate=1e-2),
+        "batch_size":               2000,
+        "optimizer":                tf.keras.optimizers.Adam(learning_rate=1e-3),
         "activation_function":      "relu",
         "output_activation":        "sigmoid",
-        "earlystopping_percentage":  0.0001,
-        "earlystopping_epochs":      150,
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
 }

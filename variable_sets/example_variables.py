@@ -21,10 +21,10 @@ variables["4j_ge3t"] = [
     "Evt_M_JetsAverage",
     "Evt_M2_TaggedJetsAverage",
 
-    # "CSV[2]",
-    # "Evt_Dr_minDrTaggedJets",
-    # "Evt_CSV_min_tagged",
-    # "Evt_HT_tags",
+    #"CSV[2]",
+    #"Evt_Dr_minDrTaggedJets",
+    #"Evt_CSV_min_tagged",
+    #"Evt_HT_tags",
     ]
 
 variables["ge4j_ge3t"] = variables["4j_ge3t"]

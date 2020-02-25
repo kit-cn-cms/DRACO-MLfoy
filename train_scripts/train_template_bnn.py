@@ -50,7 +50,9 @@ bnn = BNN.BNN(
     balanceSamples  = options.doBalanceSamples(),
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables())
+    norm_variables  = options.doNormVariables(),
+    sys_variation   = False,
+    gen_vars        = False)
 
 # build DNN model
 bnn.build_model(options.getNetConfig())
@@ -78,6 +80,7 @@ if options.doPlots():
     if options.isBinary():
         # plot output node
         bin_range = options.getBinaryBinRange()
+        #bin_range = [-0.5, 1.5]
         bnn.plot_binaryOutput(
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),

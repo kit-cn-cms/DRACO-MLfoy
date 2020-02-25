@@ -109,7 +109,9 @@ class BNN():
             eval_metrics       = None,
             shuffle_seed       = None,
             balanceSamples     = False,
-            evenSel            = None):
+            evenSel            = None,
+            sys_variation      = False,
+            gen_vars           = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -157,7 +159,7 @@ class BNN():
         self.norm_variables = norm_variables
 
         # load data set
-        self.data = self._load_datasets(shuffle_seed, balanceSamples)
+        self.data = self._load_datasets(shuffle_seed, balanceSamples, sys_variation, gen_vars)
         self.event_classes = self.data.output_classes
 
         # save variable norm
@@ -184,7 +186,7 @@ class BNN():
         self.inputName = "inputLayer"
         self.outputName = "outputLayer"
 
-    def _load_datasets(self, shuffle_seed, balanceSamples):
+    def _load_datasets(self, shuffle_seed, balanceSamples, sys_variation, gen_vars):
         ''' load data set '''
         return data_frame.DataFrame(
             input_samples    = self.input_samples,
@@ -195,6 +197,8 @@ class BNN():
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
+            sys_variation    = sys_variation,
+            gen_vars         = gen_vars,
         )
 
     def _load_architecture(self, config):
@@ -204,6 +208,7 @@ class BNN():
         self.architecture = {
           "layers":                   [20],
           "loss_function":            "neg_log_likelihood",
+          # "Dropout":                  0.2,
           "batch_size":               2000,
           "optimizer":                optimizers.Adam(1e-3),
           "activation_function":      "relu",
@@ -228,7 +233,7 @@ class BNN():
 
         # save predictions
         self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=20)
-        self.plot_event_outout_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=318058, n_hist_bins=15)
+        #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
@@ -238,20 +243,20 @@ class BNN():
         return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
 
     # make plots of the output distribution for one single event
-    def plot_event_outout_distribution(self, save_dir, preds, n_events=20, n_hist_bins=20):
-        if len(preds) < n_events: return "not enouth events to draw outout distribution"
-        for i in range(n_events):
-            if self.model_prediction_vector[i] < 0.59 and self.model_prediction_vector[i] > 0.5 and self.model_prediction_vector_std[i] < 0.008:
+    def plot_event_output_distribution(self, save_dir, preds, n_events=20, n_hist_bins=20):
+        #if len(preds) < n_events: return "not enouth events to draw output distribution"
+        for i in tqdm.tqdm(range(n_events)):
+            if self.model_prediction_vector_std[i] > 0.15:
                 n, bins, patches = plt.hist(preds[i], n_hist_bins, facecolor='g', alpha=0.75)
                 plt.xlabel("$\mu$ of event", fontsize = 16)
                 plt.ylabel("number of samples", fontsize = 16)
-                plt.savefig(save_dir+"/events/hist_event_{}.pdf".format(i))
+                plt.savefig(save_dir+"/events/event_{}_hist.pdf".format(i))
                 plt.close()
                 event_path = save_dir + "/events/event_{}_vars.csv".format(i)
                 with open(event_path, "w") as f:
-                    f.write("variable,value\n")
+                    f.write("variable,value,normed value\n")
                     for k in range(len(self.train_variables)):
-                        f.write("{},{}\n".format(self.train_variables[k], self.data.get_test_data(as_matrix = True, normed=False).iloc[i,k]))
+                        f.write("{},{},{}\n".format(self.train_variables[k], self.data.get_test_data(normed=False).iloc[i,k], self.data.get_test_data(as_matrix = False).iloc[i,k]))
 
 
     # sampling output values from the intern tensorflow output distribution
@@ -272,6 +277,7 @@ class BNN():
 
         # get all the architecture settings needed to build model
         number_of_neurons_per_layer = self.architecture["layers"]
+        dropout                     = self.architecture["Dropout"]
         activation_function         = self.architecture["activation_function"]
         output_activation           = self.architecture["output_activation"]
 
@@ -298,7 +304,7 @@ class BNN():
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
                 layers.VariableLayer(n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[:n], scale=0.1), reinterpreted_batch_ndims=1)), #1e-5 + tf.math.softplus(c + t[n:])
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=0.1), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
                 ])
 
         # define input layer
@@ -319,11 +325,15 @@ class BNN():
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
                 kl_weight           = 1. / n_train_samples,
-                kl_use_exact        = True,
+                kl_use_exact        = False,
                 use_bias            = self.use_bias,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
                 )(X)
+
+            # add dropout percentage to layer if activated
+            if not dropout == 0:
+                X = layer.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
         X = DenseVariational(
@@ -331,7 +341,7 @@ class BNN():
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
             kl_weight           = 1. / n_train_samples,
-            kl_use_exact        = True,
+            kl_use_exact        = False,
             use_bias            = self.use_bias,
             activation          = output_activation.lower(),
             name                = self.outputName
@@ -366,7 +376,7 @@ class BNN():
     def neg_log_likelihood(self, y_true, y_pred):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        return -tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+        return -dist.log_prob(y_true)#tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -436,7 +446,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=20)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -548,10 +558,10 @@ class BNN():
             weights_std  = weights[len(weights)/2:]
             weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables))
 
-        print "layer 1 post: ",self.model.layers[1].get_weights()[0][:10]
-        print "layer 1 pri: ",self.model.layers[1].get_weights()[1][:10]
-        print "layer 2 post: ",self.model.layers[2].get_weights()[0][:10]
-        print "layer 2 pri: ",self.model.layers[2].get_weights()[1][:10]
+        # print "layer 1 post: ",self.model.layers[1].get_weights()[0][:10]
+        # print "layer 1 pri: ",self.model.layers[1].get_weights()[1][:10]
+        # print "layer 2 post: ",self.model.layers[2].get_weights()[0][:10]
+        # print "layer 2 pri: ",self.model.layers[2].get_weights()[1][:10]
         # print "layer 3 post: ",self.model.layers[3].get_weights()[0][:10]
         # print "layer 3 pri: ",self.model.layers[3].get_weights()[1][:10]
         #print self.model.layers[4].get_weights()
@@ -612,6 +622,7 @@ class BNN():
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
+        self.plot_varied_histogram()
 
     def plot_2D_hist_std_over_mean(self, bin_range=[40,40]):
         from matplotlib.colors import LogNorm
@@ -625,6 +636,30 @@ class BNN():
         print "sigma_over_mu.pdf was created"
         plt.close()
 
+    def plot_varied_histogram(self):
+        sig_preds, sig_preds_std, bkg_preds, bkg_preds_std = [], [], [], []
+        for i in range(len(self.data.get_test_labels())):
+            if self.data.get_test_labels()[i]==1:
+                sig_preds.append(self.model_prediction_vector[i])
+                sig_preds_std.append(self.model_prediction_vector_std[i])
+            elif self.data.get_test_labels()[i]==0:
+                bkg_preds.append(self.model_prediction_vector[i])
+                bkg_preds_std.append(self.model_prediction_vector_std[i])
+            else:
+                print "--wrong event--"
+        plt.hist(sig_preds, bins=15, range=(0,1), histtype='step', density=True, label="ttH", color="b")
+        plt.hist(np.array(sig_preds)+1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="b")
+        plt.hist(np.array(sig_preds)-1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="b")
+        plt.hist(bkg_preds, bins=15, range=(0,1), histtype='step', density=True, label="bkg", color="r")
+        plt.hist(np.array(bkg_preds)+1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="r")
+        plt.hist(np.array(bkg_preds)-1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="r")
+        plt.xlabel("$\mu$", fontsize = 16)
+        plt.legend()
+        plt.savefig(self.save_path+"/varied_discr.png")
+        print "varied_discr.png was created"
+        plt.savefig(self.save_path+"/varied_discr.pdf")
+        print "varied_discr.pdf was created"
+        plt.close()
 
     def plot_metrics(self, privateWork = False):
         plt.rc('text', usetex=True)

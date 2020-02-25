@@ -247,7 +247,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector
+        return self.model_prediction_vector#, self.data.get_test_labels()
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -467,7 +467,7 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
-        print self.model_prediction_vector
+        
         #figure out ranges
         self.get_ranges()
 
