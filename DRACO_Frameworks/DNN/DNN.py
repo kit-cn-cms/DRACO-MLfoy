@@ -237,7 +237,7 @@ class DNN():
         # save predictions  with keras model
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
-
+        print self.model_prediction_vector
         # save predicted classes with argmax  with keras model
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -250,7 +250,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-
+        return self.model_prediction_vector
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -282,7 +282,7 @@ class DNN():
         if activation_function == "leakyrelu":
             activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
-        l1_regularization_beta      = self.architecture["L1_Norm"]
+        #l1_regularization_beta      = self.architecture["L1_Norm"]
         output_activation           = self.architecture["output_activation"]
 
         # define input layer
@@ -473,7 +473,7 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
-
+        print self.model_prediction_vector
         #figure out ranges
         self.get_ranges()
 
@@ -899,7 +899,7 @@ class DNN():
                         sigScale = -1):
 
         if not nbins:
-            nbins = int(50*(1.-bin_range[0]))
+            nbins = 15#int(50*(1.-bin_range[0]))
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
@@ -927,7 +927,9 @@ class DNN():
 
     def binned_likelihood(self, bkg_bins, sig_bins, mu):
         '''Calculates sigma1 and sigma2 for asimov data set and makes a plot'''
+
         save_path = self.save_path + "/plots/"
+
         obs_bins = bkg_bins + mu * sig_bins
         #remove bins with no bkg events -> they will couse problems due to log
         indices = [i for i, x in enumerate(bkg_bins) if x <= 0]

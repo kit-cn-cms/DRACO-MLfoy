@@ -220,8 +220,8 @@ class DataFrame(object):
             
             sig_df = df.query("index_label == 1")
 
-            sig_weight = sum(sig_df["train_weight"].values)
-            bkg_weight = sum(bkg_df["train_weight"].values)
+            #sig_weight = sum(sig_df["train_weight"].values)
+            #bkg_weight = sum(bkg_df["train_weight"].values)
 
             signal_weight = sum( sig_df["train_weight"].values )
             bkg_weight = sum( bkg_df["train_weight"].values )
@@ -330,8 +330,11 @@ class DataFrame(object):
             if self.binary_classification: class_label = '1' if class_label in self.input_samples.signal_classes else '0'
 
             events = self.df_train.query("(index_label == '{}')".format(class_label))
+            #print events
 
             # get multiplication factor
+            print "maxEvents: ", maxEvents
+            print "sample.nevents: ", sample.nevents
             factor = int(maxEvents/sample.nevents)
 
             print("multiplying {} Events by factor {}".format(sample.label, factor))

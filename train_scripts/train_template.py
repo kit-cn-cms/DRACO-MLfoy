@@ -52,6 +52,7 @@ if options.isAdversary():
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
+
 if not options.isAdversary():
     # initializing DNN training class
     dnn = DNN.DNN(
