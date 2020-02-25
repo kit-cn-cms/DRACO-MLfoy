@@ -237,7 +237,7 @@ class DNN():
         # save predictions  with keras model
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
-        print self.model_prediction_vector
+        
         # save predicted classes with argmax  with keras model
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -250,7 +250,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector#, self.data.get_test_labels()
+        #return self.model_prediction_vector
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -899,7 +899,7 @@ class DNN():
                         sigScale = -1):
 
         if not nbins:
-            nbins = 15#int(50*(1.-bin_range[0]))
+            nbins = int(50*(1.-bin_range[0]))
 
         binaryOutput = plottingScripts.plotBinaryOutput(
             data                = self.data,
