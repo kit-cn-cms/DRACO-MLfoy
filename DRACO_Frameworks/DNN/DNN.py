@@ -22,11 +22,11 @@ import data_frame
 import Derivatives
 from Derivatives import Inputs, Outputs, Derivatives
 
-import keras
-import keras.optimizers as optimizers
-import keras.models as models
-import keras.layers as layer
-from keras import backend as K
+import tensorflow.keras as keras
+import tensorflow.keras.optimizers as optimizers
+import tensorflow.keras.models as models
+import tensorflow.keras.layers as layer
+from tensorflow.keras import backend as K
 import pandas as pd
 
 # Limit gpu usage
@@ -34,9 +34,9 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 
-config = tf.ConfigProto()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(tf.Session(config=config))
+tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
 
 class EarlyStopping(keras.callbacks.Callback):
     ''' custom implementation of early stopping
@@ -386,7 +386,7 @@ class DNN():
 
         # save model as h5py file
         out_file = self.cp_path + "/trained_model.h5py"
-        self.model.save(out_file)
+        self.model.save(out_file, save_format='h5')
         print("saved trained model at "+str(out_file))
 
         # save config of model
@@ -410,9 +410,9 @@ class DNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Saver()
-        sess = K.get_session()
-        save_path = saver.save(sess, out_file)
+        saver = tf.train.Checkpoint(model=self.model)#compat.v1.train.Saver(var_list=None)
+        #sess = tf.compat.v1.keras.backend.get_session()
+        save_path = saver.save(out_file)
         print("saved checkpoint files to "+str(out_file))
 
         # produce json file with configs
@@ -913,8 +913,8 @@ class DNN():
             sigScale            = sigScale)
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
-        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+        #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
     def calc_LL(self,n_obs, n_exp):
         if n_obs > 0 and n_exp >= 0:

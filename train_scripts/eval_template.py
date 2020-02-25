@@ -47,7 +47,7 @@ parser.add_option("--printroc", dest="printROC", action = "store_true", default=
 parser.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 
-parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = -1.,
+parser.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0.,
         help="target value for training of background samples (default is 0, signal is always 1)")
 
 parser.add_option("--total-weight-expr", dest="total_weight_expr",default="x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom",
