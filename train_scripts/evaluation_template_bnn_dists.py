@@ -5,7 +5,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import statistics as stats
+from scipy import stats
 
 
 # option handler
@@ -138,8 +138,8 @@ if options.isBinary():
 
 
 # calculating the statistical uncertainty dependence
-prior = ["0p001", "0p0025", "0p01"]#, "0p025", "0p1", "0p25", "1", "2p5","10", "25", "100", "250", "1000"]
-prior_ = [0.001, 0.0025, 0.01]#, 0.025, 0.1, 0.25, 1., 2.5, 10., 25., 100., 250., 1000.]
+prior = ["0p001", "0p0025", "0p01", "0p025", "0p1", "0p25", "1", "2p5","10", "25", "100", "250", "1000"]
+prior_ = [0.001, 0.0025, 0.01, 0.025, 0.1, 0.25, 1., 2.5, 10., 25., 100., 250., 1000.]
 stds = []
 stds_std = []
 
@@ -164,9 +164,10 @@ for i in prior:
 
     bnn_pred, bnn_pred_std, labels = bnn.load_trained_model("/home/nshadskiy/Documents/draco-bnns/workdir/bnn_prior_{}_nomCSV_ge4j_ge3t".format(i))
     #std_hist, bin_edges = np.histogram(bnn_pred_std, bins=100, range=(0.,0.25), density=False)
-    #std_mode = stats.mode(bnn_preds_std)
-    stds.append(stats.mode(bnn_preds_std))
-    stds_std.append(stats.stdev(bnn_pred_std))
+    #std_mode = stats.mode(std_hist)
+    #print stats.mode(bnn_pred_std)
+    stds.append(stats.mode(bnn_pred_std)[0])
+    stds_std.append(stats.tstd(bnn_pred_std))
 
 
 plt.errorbar(prior_, stds, yerr=stds_std, fmt='o')
