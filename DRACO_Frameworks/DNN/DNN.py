@@ -34,6 +34,8 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 
+tf.compat.v1.disable_eager_execution()
+
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
 tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
@@ -410,9 +412,9 @@ class DNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Checkpoint(model=self.model) # compat.v1.train.Saver(var_list=None)
-        #sess = tf.compat.v1.keras.backend.get_session()
-        save_path = saver.save(out_file)
+        saver = tf.compat.v1.train.Saver()
+        sess = tf.compat.v1.keras.backend.get_session()
+        save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
         # produce json file with configs

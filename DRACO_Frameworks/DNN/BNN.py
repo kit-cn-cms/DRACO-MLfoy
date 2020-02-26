@@ -40,6 +40,8 @@ import tensorflow_probability.python.distributions as tfd
 import matplotlib.pyplot as plt
 from BNN_layer import DenseVariational
 
+tf.compat.v1.disable_eager_execution()
+
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
 tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
@@ -232,7 +234,7 @@ class BNN():
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
         # save predictions
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=20)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=200)
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
 
         # print evaluations  with keras model
@@ -478,9 +480,8 @@ class BNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Checkpoint(model=self.model)
-        #saver = tf.train.Saver()
-        #sess = K.get_session()
+        saver = tf.compat.v1.train.Saver()
+        sess = tf.compat.v1.keras.backend.get_session()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
