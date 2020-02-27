@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import tqdm
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
@@ -21,6 +21,7 @@ class Sample:
         self.addSampleSuffix = addSampleSuffix
 
     def load_dataframe(self, event_category, lumi, evenSel = "", sys_variation=False):
+        # loading samples from one .h5 file or mix it with one uncertainty variation (default is without mixing)
         if not sys_variation:
             print("-"*50)
             print("loading sample file "+str(self.path))
@@ -61,6 +62,8 @@ class Sample:
         self.data = df
         print("-"*50)
 
+    # mix nominal sample with uncertainty varied samples 
+    ### hard coded for JES and 2017 data -> needs to be updated ###
     def get_mixed_df(self):
         abs_path = self.path.split("2017")[0]
         path_nominal = self.path.split("/")[-2]
@@ -317,11 +320,11 @@ class DataFrame(object):
                 norm_csv["mu"][v] = 0.
                 norm_csv["std"][v] = 1.
 
+        # if activated normal variables will be replaced with there Generator information (default is deactivated)
         gen_dict={'Jet_GenJet_Eta[0]':'Jet_Eta[0]','Jet_GenJet_Eta[1]':'Jet_Eta[1]','Jet_GenJet_Eta[2]':'Jet_Eta[2]','Jet_GenJet_Eta[3]':'Jet_Eta[3]',
                   'Jet_GenJet_Pt[0]':'Jet_Pt[0]','Jet_GenJet_Pt[1]':'Jet_Pt[1]','Jet_GenJet_Pt[2]':'Jet_Pt[2]','Jet_GenJet_Pt[3]':'Jet_Pt[3]',
                   'GenTopLep_Lep_Phi[0]':'LooseLepton_Phi[0]','GenTopLep_Lep_Pt[0]':'LooseLepton_Pt[0]','GenTopLep_Lep_E[0]':'LooseLepton_E[0]',
                   'GenTopLep_Lep_Eta[0]':'LooseLepton_Eta[0]','Gen_MET_Pt':'Evt_MET_Pt', 'Gen_Ht_Jets':'Evt_HT_jets'}
-        
         if gen_vars:
             for i in gen_dict:
                 df[gen_dict[i]]=df[i]

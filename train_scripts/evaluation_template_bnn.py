@@ -62,6 +62,9 @@ if options.isBinary():
     # input_samples_up.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
     # input_samples_down.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
+
+###### code for NN output comparison ######   
+
 def anns_calc_mean_std(n_NNs, input_dir):
     pred_list = []
     for i in range(n_NNs):
@@ -233,6 +236,8 @@ plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "ANNs",
 plot_correlation_two_NNs(nn1_sig_pred, nn2_sig_pred, nn1_sig_pred_std, nn2_sig_pred_std, "ANNs signal", "BNN signal", out_dir_2, "sig_anns_bnn_l2_{}_prior_{}".format(l2, bnn_prior_2))
 plot_correlation_two_NNs(nn1_bkg_pred, nn2_bkg_pred, nn1_bkg_pred_std, nn2_bkg_pred_std, "ANNs background", "BNN background", out_dir_2, "bkg_anns_bnn_l2_{}_prior_{}".format(l2, bnn_prior_2))
 
+
+###### code for evaluation of systematic uncertainties ######
 
 # make plots of the output distribution for one single event
 def plot_event_distribution(save_dir, n_events=20000):
@@ -526,3 +531,47 @@ def plot_uncert(save_dir, tag, uncert1, uncert2, uncert3):
 
 #plot_2_uncert_diff(out_dir_1)
 #plot_1_uncert_diff(out_dir_1)
+
+
+###### evaliation code for BNN uncertainty dependency ######
+
+# calculating the statistical uncertainty dependence
+# prior = ["0p001", "0p0025", "0p01", "0p025", "0p1", "0p25", "1", "2p5","10", "25", "100", "250", "1000"]
+# prior_ = [0.001, 0.0025, 0.01, 0.025, 0.1, 0.25, 1., 2.5, 10., 25., 100., 250., 1000.]
+prior = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
+prior_ = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+stds = []
+stds_std = []
+
+for i in prior:
+    # initializing BNN training class
+    bnn = BNN.BNN(
+        save_path       = options.getOutputDir(),
+        input_samples   = input_samples,
+        category_name   = options.getCategory(),
+        train_variables = options.getTrainVariables(),
+        # number of epochs
+        train_epochs    = options.getTrainEpochs(),
+        # metrics for evaluation (c.f. KERAS metrics)
+        eval_metrics    = ["acc"],
+        # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+        test_percentage = options.getTestPercentage(),
+        # balance samples per epoch such that there amount of samples per category is roughly equal
+        balanceSamples  = options.doBalanceSamples(),
+        shuffle_seed    = 42,
+        evenSel         = options.doEvenSelection(),
+        norm_variables  = options.doNormVariables())
+
+    # bnn_pred, bnn_pred_std, labels = bnn.load_trained_model("/home/nshadskiy/Documents/draco-bnns/workdir/bnn_prior_{}_nomCSV_ge4j_ge3t".format(i))
+    bnn_pred, bnn_pred_std, labels = bnn.load_trained_model("/home/nshadskiy/Documents/DRACO-MLfoy/workdir/bnn{}_prior_1_nomCSV_ge4j_ge3t".format(i))
+    stds.append(stats.mode(bnn_pred_std)[0])
+    stds_std.append(stats.tstd(bnn_pred_std))
+
+
+plt.errorbar(prior_, stds, yerr=stds_std, fmt='o')
+#plt.xlabel("prior width", fontsize = 16)
+plt.xlabel("trained on sample size in %", fontsize = 16) # ~ 830 000 events
+#plt.xscale("log")
+plt.ylabel("mean of event $\sigma$", fontsize = 16)
+plt.savefig("/home/nshadskiy/Documents/draco-bnns/workdir/bnn_stats_std.pdf")
+print "bnns_std.pdf was created"

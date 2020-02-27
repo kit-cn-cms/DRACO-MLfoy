@@ -306,7 +306,7 @@ class BNN():
             c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
                 layers.VariableLayer(n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=0.1), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
                 ])
 
         # define input layer
@@ -429,7 +429,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=20)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
