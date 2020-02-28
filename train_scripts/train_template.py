@@ -84,7 +84,7 @@ else:
 
 #get input directory path
 if not os.path.isabs(options.inputDir):
-    inPath = basedir+"/workdir/"+options.inputDir
+    inPath = basedir+"/workdir/"+options.signal_class+"_h5s/"+options.inputDir
 elif os.path.exists(options.inputDir):
     inPath=options.inputDir
 else:
@@ -92,7 +92,7 @@ else:
 
 #get output directory path
 if not os.path.isabs(options.outputDir):
-    outputdir = basedir+"/workdir/"+options.outputDir
+    outputdir = basedir+"/workdir/"+options.signal_class+"_DNNs/"+options.outputDir
 elif os.path.exists(options.outputDir):
     outputdir = options.outputDir
 elif os.path.exists(os.path.dirname(options.outputDir)):
@@ -100,8 +100,12 @@ elif os.path.exists(os.path.dirname(options.outputDir)):
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
+#give name for binary plot
+
+background_name = options.activateSamples.split("{},".format(options.signal_class))
+run_name = "{} signal with {}".format(options.signal_class,background_name[1])
+
 #add nJets and nTags to output directory
-run_name = outputdir.split("/")[-1]
 outputdir += "_"+options.category
 
 # the input variables are loaded from the variable_set file
@@ -131,6 +135,8 @@ naming = options.naming
 
 input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.)
 input_samples.addSample("ttZ"+naming,   label = "ttZ", normalization_weight = 2.)
+input_samples.addSample("all-wrong-bkg"+naming,  label = "all-wrong-bkg")
+input_samples.addSample("1-right-bkg"+naming,  label = "1-right-bkg")
 input_samples.addSample("bkg"+naming,  label = "bkg")
 input_samples.addSample("ttbb"+naming,  label = "ttbb")
 input_samples.addSample("tt2b"+naming,  label = "tt2b")
