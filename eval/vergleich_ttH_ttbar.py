@@ -13,6 +13,7 @@ import copy
 import math
 import matplotlib.pyplot as plt
 import scipy.special
+from sklearn.metrics import roc_auc_score
 # import class for DNN training
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -292,6 +293,9 @@ def plotBinary(predictions,valids, ratio = False, printROC = False, privateWork 
 #	# add ROC score if activated
 #	if self.printROCScore:
 #		setup.printROCScore(canvas, roc, plotOptions["ratio"])
+        roc = roc_auc_score(valids,predictions)
+        print("ROC: {}".format(roc))
+	setup.printROCScore(canvas, roc, plotOptions["ratio"])
 
 	#private work label
 	setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
