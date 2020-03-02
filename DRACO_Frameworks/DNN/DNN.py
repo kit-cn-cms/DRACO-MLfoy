@@ -26,9 +26,10 @@ import pandas as pd
 # Limit gpu usage
 import tensorflow as tf
 
-config = tf.ConfigProto()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(tf.Session(config=config))
+K.tensorflow_backend.set_session(tf.compat.v1.Session(config=config))
+
 
 
 
@@ -96,7 +97,8 @@ class DNN():
             eval_metrics    = None,
             shuffle_seed    = None,
             balanceSamples  = False,
-            evenSel         = None):
+            evenSel         = None,
+            evaluate_py     = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -134,22 +136,24 @@ class DNN():
         # additional metrics for evaluation of the training process
         self.eval_metrics = eval_metrics
 
-        # load data set
-        self.data = self._load_datasets(shuffle_seed, balanceSamples)
-        self.event_classes = self.data.output_classes
-        
-        # save variable norm
-        self.cp_path = self.save_path+"/checkpoints/"
-        if not os.path.exists(self.cp_path):
-            os.makedirs(self.cp_path)
-        out_file = self.cp_path + "/variable_norm.csv"
-        self.data.norm_csv.to_csv(out_file)
-        print("saved variabe norms at "+str(out_file))
-        
-        # # make plotdir
-        # self.plot_path = self.save_path+"/plots/"
-        # if not os.path.exists(self.plot_path):
-        #     os.makedirs(self.plot_path)
+        #dont needed for eval/evaluate.py
+        if not evaluate_py:
+            #load data set
+            self.data = self._load_datasets(shuffle_seed, balanceSamples)
+            self.event_classes = self.data.output_classes
+            
+            #save variable norm
+            self.cp_path = self.save_path+"/checkpoints/"
+            if not os.path.exists(self.cp_path):
+               os.makedirs(self.cp_path)
+            out_file = self.cp_path + "/variable_norm.csv"
+            self.data.norm_csv.to_csv(out_file)
+            print("saved variabe norms at "+str(out_file))
+            
+            #make plotdir
+            self.plot_path = self.save_path+"/plots/"
+            if not os.path.exists(self.plot_path):
+               os.makedirs(self.plot_path)
 
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
