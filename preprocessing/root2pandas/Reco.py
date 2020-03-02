@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import ROOT
 import copy
+from collections import Counter
 
 # temporary hard coded bullshit
 csvWP = 0.277
@@ -103,16 +104,51 @@ def findbestZorH(df, additionalVariables, ZorH):
 		assignments = []
 		assignments.append(np.array(bestIndices))
 
-#		generate random wrong assignments
+		# #generate random wrong assignments without a right jet
+		# for iWrong in range(nWrongAssignments):
+		# 	foundNew = False
+		# 	while not foundNew:
+		# 		verywrong = np.random.permutation(nJets)[:2]
+		# 		foundNew = True
+		# 		for p in bestIndices:
+		# 			if (p == verywrong[0] or p == verywrong[1]):
+		# 				foundNew = False
+		# 	assignments.append(verywrong)
+
+		# #generate random bkg
+		# for iWrong in range(nWrongAssignments):
+		# 	foundNew = False
+		# 	while not foundNew:
+		# 		wrong = np.random.permutation(nJets)[:2]
+		# 		foundNew = True
+		# 		if is_permutation(bestIndices, wrong):
+		# 			foundNew = False
+		# 	assignments.append(wrong)
+
+	#Generate bkg with 1 right jet, b tagged
 		for iWrong in range(nWrongAssignments):
 			foundNew = False
-			while not foundNew:
-				wrong = np.random.permutation(nJets)[:2]
-				foundNew = True
-				for p in bestIndices:
-					if (p == wrong[0] or p == wrong[1]):
-						foundNew = False
-			assignments.append(wrong)
+			maxloop=0
+			while  not foundNew:
+				maxloop+=1
+				if maxloop > 200: 
+					print "geskippt"
+					foundNew = True		#if 10 Jets without 3 tags
+				bitwrong = np.zeros(2,dtype=int)
+				btag = False
+				while not btag:
+					bitwrong[0] = np.random.choice(nJets)
+ 					if event["Jet_CSV[{}]".format(bitwrong[0])] > csvWP:
+						 btag=True
+
+				bitwrong[1] = np.random.choice(bestIndices)
+				if (not is_permutation(bestIndices, bitwrong)) and not bitwrong[0] == bitwrong[1]:
+						foundNew = True
+			if maxloop > 200:
+				continue
+			else:
+				bwrong = np.random.permutation(bitwrong)[:2]			
+				assignments.append(bwrong)
 
 	#Generate all bkg
 #		for ih1 in range(nJets):
@@ -132,29 +168,16 @@ def findbestZorH(df, additionalVariables, ZorH):
 #			if foundNew == True:
 #				assignments.append(wrong)
 
-	#Generate bkg with 1 right jet
-		#foundNew = False
-		#while foundNew == False:
-		##for iWrong in range(nWrongAssignments):
-			#wrong = np.random.permutation(nJets)[:2]
-			#foundNew = True
-			#if (bestIndices[0] != wrong[0] and bestIndices[0] != wrong[1] and bestIndices[1] != wrong[0] and bestIndices[1] != wrong[1]):
-				#foundNew = False
-			#elif (bestIndices[0] == wrong[0] and bestIndices[1] == wrong[1]) or (bestIndices[0] == wrong[1] and bestIndices[1] == wrong[0]):
-				#foundNew = False
-			#if foundNew == True:
-				#assignments.append(wrong)
 
 		# fill assignments
 		for idx, ass in enumerate(assignments):
 			# fill variables
+
 			entry = {v: None for v in dataframe_columns}
 			for v in additionalVariables:
 				entry[v] = event[v]
-			if idx == 0:
-				entry["is_"+recoParticles[0]] = 1
-			else:
-				entry["is_"+recoParticles[0]] = 0
+
+			entry["is_"+recoParticles[0]] = idx
 
 			# fill assigned jets
 			# DANGERZONE: make sure the order of entries in assignedJets list is the same as in the assignments list
@@ -199,153 +222,16 @@ def findbestZorH(df, additionalVariables, ZorH):
 			entry["Reco_"+recoParticles[0]+"_Delta_R3D"] = np.sqrt((entry["Reco_"+recoParticles[0]+"_Delta_Eta"]/5)**2 + (entry["Reco_"+recoParticles[0]+"_Delta_Phi"]/(2*np.pi))**2 + (abs(entry["Reco_"+recoParticles[0]+"_B1_Pt"]- entry["Reco_"+recoParticles[0]+"_B2_Pt"])/1000)**2)
 
 			new_df = new_df.append(entry, ignore_index = True)
-			
+
 			del ttZorHSystem
 			del entry
 
 	print("added {}/{} events".format(valid_events, nevents))
 	return new_df
-
-##########################
-def findbestTopBs(df, additionalVariables, ZorH):
-	nevents = df.shape[0]
-
-	# required information
-	assignedJets	= [recoParticles[0]+"_B1",recoParticles[0]+"_B2"]
-	recoParticles   = [ZorH]
-
-	jetVars		 	= ["Pt", "Eta", "Phi", "E", "CSV"]
-	particleVars	= ["Pt", "Eta", "Phi", "M", "logM","E","logE","logPt"]
-	boostVars		= ["Pt","Eta","logPt"]
-
-	# initialize list with columns to be written into dataframe
-	dataframe_columns = copy.deepcopy(additionalVariables)
-
-	for j in assignedJets:
-		for v in jetVars:
-			dataframe_columns.append("Reco_"+j+"_"+v)
-		dataframe_columns.append("Reco_"+j+"_logE")
-		dataframe_columns.append("Reco_"+j+"_logPt")
-
-	for p in recoParticles:
-		for v in particleVars:
-			dataframe_columns.append("Reco_"+p+"_"+v)
-
-	dataframe_columns.append("is_"+recoParticles[0])
-
-	# define some variables to be calculated later on
-	dataframe_columns.append("Reco_"+recoParticles[0]+"_Delta_Eta")
-	dataframe_columns.append("Reco_"+recoParticles[0]+"_Delta_Phi")
-	dataframe_columns.append("Reco_"+recoParticles[0]+"_Delta_R")
-	dataframe_columns.append("Reco_"+recoParticles[0]+"_Delta_R3D")
-	dataframe_columns.append("Reco_"+recoParticles[0]+"_Angle")
 	
-	for v in boostVars:
-		dataframe_columns.append("Reco_"+recoParticles[0]+"_Boosted1_"+v)
-		dataframe_columns.append("Reco_"+recoParticles[0]+"_Boosted2_"+v)
 
-	new_df = pd.DataFrame(columns = dataframe_columns)
 
-	# event loop
-	valid_events = 0
-	n = 0
-	for iEvt in df.index:
-		# get number of jets (max 10)
-		event = df.loc[iEvt]
-		nJets = int(min(event["N_Jets"], 10))
 
-		# best deltaR
-		bestDeltaR1 = 10000.
-		bestDeltaR2 = 10000.
-		foundComb   = False
-		bestIndices = np.full(2,int(1))
-
-		for i1 in range(nJets):
-			if event["Jet_CSV[{}]".format(i1)] < csvWP: continue
-			deltaR_B1 = getDeltaR(event, "GenTopHad_B", i1)
-			if deltaR_B1 < bestDeltaR1:
-				bestDeltaR1 = deltaR_B1
-				bestIndices[0] = i1
-
-		for i2 in range(nJets):
-			if event["Jet_CSV[{}]".format(i2)] < csvWP: continue
-			deltaR_B2 = getDeltaR(event, "GenTopLep_B", i2)
-			if deltaR_B2 < bestDeltaR2:
-				bestDeltaR2 = deltaR_B2
-				bestIndices[1] = i2
-
-		if bestDeltaR1 < dRCut and bestDeltaR2 < dRCut and bestIndices[0] != bestIndices[1]:
-			foundComb  = True
-
-		#quick printouts
-		if n%1000 == 0:
-			print "Event",n,"Delta r1:",bestDeltaR1,"Delta r2:", bestDeltaR2
-		n += 1
-
-		# if no valid combination was found at the end of the loop, continue to next event
-		if not foundComb: continue
-		valid_events += 1
-
-		assignments = []
-		assignments.append(np.array(bestIndices))
-
-		# fill assignments
-		for idx, ass in enumerate(assignments):
-			# fill variables
-			entry = {v: None for v in dataframe_columns}
-			for v in additionalVariables:
-				entry[v] = event[v]
-			entry["is_"+recoParticles[0]] = 0
-
-			# fill assigned jets
-			# DANGERZONE: make sure the order of entries in assignedJets list is the same as in the assignments list
-			for it, j in enumerate(assignedJets):
-				for v in jetVars:
-					entry["Reco_"+j+"_"+v] = event["Jet_{}[{}]".format(v, ass[it])]
-				entry["Reco_"+j+"_logE"]  = log(event["Jet_E[{}]".format(ass[it])])
-				entry["Reco_"+j+"_logPt"] = log(event["Jet_Pt[{}]".format(ass[it])])
-
-			# calculate ttZorH system and write variables
-			ttZorHSystem = reconstruct_ttZorH(entry, assignedJets, ZorH)
-			for p in recoParticles:
-				for v in particleVars:
-					entry["Reco_"+p+"_"+v] = ttZorHSystem.get(p,v)
-
-			#Boost in GenZorH Richtung
-			boost1 	   	  = ROOT.TLorentzVector()
-			boost2 		  = ROOT.TLorentzVector()
-			Reco4vec = ROOT.TLorentzVector()
-
-			Reco4vec.SetPtEtaPhiE(float(entry["Reco_"+recoParticles[0]+"_Pt"]),float(entry["Reco_"+recoParticles[0]+"_Eta"]),float(entry["Reco_"+recoParticles[0]+"_Phi"]),float(entry["Reco_"+recoParticles[0]+"_E"]))
-
-			boost1.SetPtEtaPhiE(float(event["Jet_Pt[{}]".format(ass[0])]),float(event["Jet_Eta[{}]".format(ass[0])]),float(event["Jet_Phi[{}]".format(ass[0])]),float(event["Jet_E[{}]".format(ass[0])]))
-			boost2.SetPtEtaPhiE(float(event["Jet_Pt[{}]".format(ass[1])]),float(event["Jet_Eta[{}]".format(ass[1])]),float(event["Jet_Phi[{}]".format(ass[1])]),float(event["Jet_E[{}]".format(ass[1])]))
-
-			#angle before boost
-			entry["Reco_"+recoParticles[0]+"_Angle"] = boost1.Angle(boost2.Vect())
-
-			boost1.Boost(-Reco4vec.BoostVector())
-			boost2.Boost(-Reco4vec.BoostVector())
-
-			for var in boostVars:
-				entry["Reco_"+recoParticles[0]+"_Boosted1_"+var] = Get(boost1,var)
-				entry["Reco_"+recoParticles[0]+"_Boosted2_"+var] = Get(boost2,var)
-
-			# add special variables
-			entry["Reco_"+recoParticles[0]+"_Delta_Phi"] = PhiDiff(entry["Reco_"+recoParticles[0]+"_B1_Phi"], entry["Reco_"+recoParticles[0]+"_B2_Phi"])
-			entry["Reco_"+recoParticles[0]+"_Delta_Eta"] = abs(entry["Reco_"+recoParticles[0]+"_B1_Eta"]- entry["Reco_"+recoParticles[0]+"_B2_Eta"])
-			entry["Reco_"+recoParticles[0]+"_Delta_R"] = np.sqrt(entry["Reco_"+recoParticles[0]+"_Delta_Eta"]**2 + entry["Reco_"+recoParticles[0]+"_Delta_Phi"]**2)
-			entry["Reco_"+recoParticles[0]+"_Delta_R3D"] = np.sqrt((entry["Reco_"+recoParticles[0]+"_Delta_Eta"]/5)**2 + (entry["Reco_"+recoParticles[0]+"_Delta_Phi"]/(2*np.pi))**2 + (abs(entry["Reco_"+recoParticles[0]+"_B1_Pt"]- entry["Reco_"+recoParticles[0]+"_B2_Pt"])/1000)**2)
-
-			new_df = new_df.append(entry, ignore_index = True)
-			
-			del ttZorHSystem
-			del entry
-
-	print("added {}/{} events".format(valid_events, nevents))
-	return new_df
-
-################################################
 
 def getDeltaR(event, genVar, jetIndex):
 	return np.sqrt(
@@ -414,3 +300,6 @@ def Get(vec, variable):
 		return log(vec.Pt())
 	else:
 		exit("error in get reco var")
+
+def is_permutation(a, b):
+	return Counter(a) == Counter(b)

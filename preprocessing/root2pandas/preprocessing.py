@@ -53,14 +53,13 @@ else:
     sys.exit("ERROR: Variable Selection File does not exist!")
 
 if not os.path.isabs(options.outputDir):
-    outputdir = basedir+"/workdir/"+options.outputDir
+    outputdir = basedir+"/workdir/"+options.variableSelection+"_h5s/"+options.outputDir
 elif os.path.exists(options.outputDir) or os.path.exists(os.path.dirname(options.outputDir)):
     outputdir=options.outputDir
 else:
     sys.exit("ERROR: Output Directory does not exist!")
 
 #activate preprocessing for Higgs or for Z
-
 if options.ZReco == options.HiggsReco:
 	sys.exit("Choose preprocessing for Z or for Higgs reconstruction")
 
@@ -96,8 +95,10 @@ if options.ZReco:
 	ttZ_selection = "(Evt_Odd == 1)"
 
 	ttZ_categories = root2pandas.EventCategories()
-	ttZ_categories.addCategory("ttZ")
-	ttZ_categories.addCategory("bkg")
+	# ttZ_categories.addCategory("ttZ")
+	# ttZ_categories.addCategory("bkg")
+	# ttZ_categories.addCategory("all-wrong-bkg")
+	ttZ_categories.addCategory("1-right-bkg")
 	#ttZ_categories.addCategory("TopBkg")
 	#ttbar_categories.addCategory("ttbar", selection = "Evt_Odd==1")
 
@@ -114,8 +115,10 @@ elif options.HiggsReco:
 	ttH_selection = "(Evt_Odd == 1)"
 
 	ttH_categories = root2pandas.EventCategories()
-	ttH_categories.addCategory("ttH")
-	ttH_categories.addCategory("bkg")
+	# ttH_categories.addCategory("ttH")
+	# ttH_categories.addCategory("bkg")
+	# ttH_categories.addCategory("all-wrong-bkg")
+	ttH_categories.addCategory("1-right-bkg")
 	#ttH_categories.addCategory("TopBkg")
 
 	ntuplesPath = "/nfs/dust/cms/user/swieland/ttH_legacy/ntupleHadded_2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root"

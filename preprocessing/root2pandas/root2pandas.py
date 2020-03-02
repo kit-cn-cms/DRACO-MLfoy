@@ -329,23 +329,25 @@ class Dataset:
 			if self.ZReco:
 				df = Reco.findbestZorH(df, self.variables, "Z")
 
-				sample.categories.categories["ttZ"] = "(is_Z == 1)"
-				sample.categories.categories["bkg"] = "(is_Z == 0)"
+				#sample.categories.categories["ttZ"] = "(is_Z == 0)"
+				# sample.categories.categories["all-wrong-bkg"] = "(is_Z == 1)"
+				# sample.categories.categories["bkg"] = "(is_Z == 2)"
+				sample.categories.categories["1-right-bkg"] = "(is_Z == 1)"
+
 			elif self.HiggsReco:
 				df = Reco.findbestZorH(df, self.variables, "Higgs")
 
-				sample.categories.categories["ttH"] = "(is_Higgs == 1)"
-				sample.categories.categories["bkg"] = "(is_Higgs == 0)"
+				#sample.categories.categories["ttH"] = "(is_Higgs == 0)"
+				# sample.categories.categories["all-wrong-bkg"] = "(is_Higgs == 1)"
+				# sample.categories.categories["bkg"] = "(is_Higgs == 2)"
+				sample.categories.categories["1-right-bkg"] = "(is_Higgs == 1)"
 
 #			 Top Bkg:
 
 			#	df = HiggsReco.findbestTopBs(df, self.variables)
  			#	sample.categories.categories["TopBkg"] = "(is_Higgs == 0)"
 
-#			all Bkg:
 
-#				df = HiggsReco.findallbkg(df, self.variables)
-#				sample.categories.categories["half"] = "(is_Higgs == 0)"
 
 
 
