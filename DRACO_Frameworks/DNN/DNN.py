@@ -16,11 +16,11 @@ from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
 import utils.generateJTcut as JTcut
 import data_frame
 
-import keras
-import keras.optimizers as optimizers
-import keras.models as models
-import keras.layers as layer
-from keras import backend as K
+from tensorflow import keras
+import tensorflow.keras.optimizers as optimizers
+import tensorflow.keras.models as models
+import tensorflow.keras.layers as layer
+from tensorflow.keras import backend as K
 import pandas as pd
 
 # Limit gpu usage
@@ -28,7 +28,7 @@ import tensorflow as tf
 
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(tf.compat.v1.Session(config=config))
+tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
 
 
 
