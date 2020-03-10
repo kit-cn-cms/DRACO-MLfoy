@@ -11,17 +11,23 @@ variables["4j_ge3t"] = [
     "Evt_blr_ETH",
     # "memDBp",
     "Evt_Dr_MinDeltaRTaggedJets",
-    "BDT_common5_input_transverse_sphericity_jets",
+    # "BDT_common5_input_transverse_sphericity_jets",
     "Evt_CSV_Min_Tagged",
-    "Evt_CSV_Average_Tagged",
-    "Evt_CSV_Average",
-    "Evt_blr_ETH_transformed",
-    "Evt_CSV_Min",
+    # "Evt_CSV_Average_Tagged",
+    # "Evt_CSV_Average",
+    # "Evt_blr_ETH_transformed",
+    # "Evt_CSV_Min",
     "BDT_common5_input_HT_tag",
     "Evt_M_JetsAverage",
     "Evt_M2_TaggedJetsAverage",
+
+    #"CSV[2]",
+    #"Evt_Dr_minDrTaggedJets",
+    #"Evt_CSV_min_tagged",
+    #"Evt_HT_tags",
     ]
 
+variables["ge4j_ge3t"] = variables["4j_ge3t"]
 
 
 variables["5j_ge3t"] = [

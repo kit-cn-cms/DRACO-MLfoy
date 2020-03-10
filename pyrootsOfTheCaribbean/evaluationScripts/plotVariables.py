@@ -1,7 +1,7 @@
 import ROOT
 import os
 import sys
-import pandas 
+import pandas
 import numpy as np
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -63,8 +63,8 @@ class Sample:
 
         # add weight entry for scaling
         self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
-            
-        
+
+
 
 class variablePlotter:
     def __init__(self, output_dir, variable_set, add_vars = [], ignored_vars = [], max_entries = None, plotOptions = {}):
@@ -97,7 +97,7 @@ class variablePlotter:
         if self.options["privateWork"]:
             self.options["scaleSignal"]=-1
             self.options["lumiScale"]=1
-        
+
 
     def addSample(self, **kwargs):
         print("adding sample: "+str(kwargs["sampleName"]))
@@ -125,7 +125,7 @@ class variablePlotter:
             cat_dir = self.output_dir+"/"+cat+"/"
             if not os.path.exists(cat_dir):
                 os.makedirs(cat_dir)
-        
+
             if saveKSValues:
                 ks_file = self.output_dir+"/"+cat+"_KSvalues.csv"
                 ks_dict = {}
@@ -187,7 +187,7 @@ class variablePlotter:
             config_string = "{},{},{},{},{},{}\n".format(variable, minValue, maxValue, bins, logoption, displayname)
             with open("new_variable_configs.csv", "a") as f:
                 f.write(config_string)
-        
+
         bin_range = [minValue, maxValue]
         if logoption=="x" or logoption=="X":
             logoption=True
@@ -230,10 +230,10 @@ class variablePlotter:
         sigHists = []
         sigLabels = []
         sigScales = []
-        
+
         # if not background was added, the weight integral is equal to 0
         if weightIntegral == 0:
-            self.options["scaleSignal"] = 0   
+            self.options["scaleSignal"] = 0
         histInfo["bkgYield"] = weightIntegral
 
         # scale stack to one if lumiScale is set to zero
@@ -276,7 +276,7 @@ class variablePlotter:
 
         # init canvas
         canvas = setup.drawHistsOnCanvas(
-            sigHists, bkgHists, self.options,   
+            sigHists, bkgHists, self.options,
             canvasName = variable, displayname=displayname,
             logoption = logoption)
 
@@ -284,7 +284,7 @@ class variablePlotter:
         legend = setup.getLegend()
         # add signal entriesa
         for iSig in range(len(sigHists)):
-            labelstring = sigLabels[iSig]       
+            labelstring = sigLabels[iSig]
             if not self.options["lumiScale"] == 0.:
                 labelstring = sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig])
 
@@ -293,7 +293,7 @@ class variablePlotter:
                 KSscore = setup.calculateKSscore(bkgHists[0],sigHists[iSig])
                 labelstring="#splitline{"+labelstring+"}{KSscore = %.3f}"%(KSscore)
                 histInfo["KSScore"] = KSscore
-                
+
             legend.AddEntry(sigHists[iSig], labelstring, "L")
 
         # add background entries
@@ -306,12 +306,10 @@ class variablePlotter:
         # add lumi and category to plot
         setup.printLumi(canvas, lumi = self.options["lumiScale"], ratio = self.options["ratio"])
         setup.printCategoryLabel(canvas, JTcut.getJTlabel(cat), ratio = self.options["ratio"])
-        if self.options["privateWork"]: 
+        if self.options["privateWork"]:
             setup.printPrivateWork(canvas, ratio = self.options["ratio"])
 
         # save canvas
         setup.saveCanvas(canvas, plot_name)
-    
+
         return histInfo
-
-

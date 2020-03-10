@@ -2,7 +2,8 @@ import pandas as pd
 import os
 import sys
 import numpy as np
-from keras.utils import to_categorical
+import tqdm
+from tensorflow.keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
@@ -19,11 +20,18 @@ class Sample:
         self.total_weight_expr = total_weight_expr
         self.addSampleSuffix = addSampleSuffix
 
-    def load_dataframe(self, event_category, lumi, evenSel = ""):
-        print("-"*50)
-        print("loading sample file "+str(self.path))
-        with pd.HDFStore( self.path, mode = "r" ) as store:
-            df = store.select("data")
+    def load_dataframe(self, event_category, lumi, evenSel = "", sys_variation=False):
+        # loading samples from one .h5 file or mix it with one uncertainty variation (default is without mixing)
+        if not sys_variation:
+            print("-"*50)
+            print("loading sample file "+str(self.path))
+            with pd.HDFStore( self.path, mode = "r" ) as store:
+                df = store.select("data")
+                samp = int(df.shape[0]*1.0)
+                df = df.head(samp)
+                print("number of events before selections: "+str(df.shape[0]))
+        else:
+            df = self.get_mixed_df()
             print("number of events before selections: "+str(df.shape[0]))
 
         # apply event category cut
@@ -53,6 +61,52 @@ class Sample:
         print("sum of lumi weights: {}".format(sum(df["lumi_weight"].values)))
         self.data = df
         print("-"*50)
+
+    # mix nominal sample with uncertainty varied samples 
+    ### hard coded for JES and 2017 data -> needs to be updated ###
+    def get_mixed_df(self):
+        abs_path = self.path.split("2017")[0]
+        path_nominal = self.path.split("/")[-2]
+        path_h5 = self.path.split("/")[-1]
+        print("-"*50)
+        print("loading sample file "+str(path_nominal))
+        with pd.HDFStore( abs_path+path_nominal+"/"+path_h5, mode = "r" ) as store:
+            df_nominal = store.select("data")
+            print("number of nominal events before mixing: "+str(df_nominal.shape[0]))
+
+        path_up = path_nominal.split("_gen")[0] + "_gen_JESup"
+        print("-"*50)
+        print("loading sample file "+str(path_up))
+        with pd.HDFStore( abs_path+path_up+"/"+path_h5, mode = "r" ) as store:
+            df_up = store.select("data")
+            print("number of JES up events before mixing: "+str(df_up.shape[0]))
+
+        path_down = path_nominal.split("_gen")[0] + "_gen_JESdown"
+        print("-"*50)
+        print("loading sample file "+str(path_down))
+        with pd.HDFStore( abs_path+path_down+"/"+path_h5, mode = "r" ) as store:
+            df_down = store.select("data")
+            print("number of JES down events before mixing: "+str(df_down.shape[0]))
+
+        df_mix = pd.DataFrame(columns=df_nominal.columns)
+        evt_ids_nominal, evt_ids_up, evt_ids_down = [], [], []
+        print "----- event mixing -----"
+        #print df_nominal
+        for i in tqdm.tqdm(range(df_down.shape[0])):
+            evt_id = df_down.index[i]
+            if evt_id in df_up.index:
+                if evt_id in df_nominal.index:
+                    if ((i+1) % 3 == 0):
+                        evt_ids_nominal.append(evt_id)
+                    elif ((i+1) % 3 == 1):
+                        evt_ids_up.append(evt_id)
+                    elif ((i+1) % 3 == 2):
+                        evt_ids_down.append(evt_id)
+        df_mix = df_mix.append(df_nominal.loc[evt_ids_nominal])
+        df_mix = df_mix.append(df_up.loc[evt_ids_up])
+        df_mix = df_mix.append(df_down.loc[evt_ids_down])
+        return df_mix
+
 
     def getConfig(self):
         config = {}
@@ -94,6 +148,7 @@ class InputSamples:
             return
         if not os.path.isabs(sample_path):
             sample_path = self.input_path + "/" + sample_path
+
         self.samples.append(Sample(sample_path, label, normalization_weight, train_weight, self.test_percentage, total_weight_expr=total_weight_expr, addSampleSuffix = self.addSampleSuffix))
 
         if bool(self.addSampleSuffix) and label.endswith(self.addSampleSuffix):
@@ -135,11 +190,14 @@ class DataFrame(object):
                 shuffleSeed = None,
                 balanceSamples = True,
                 evenSel = "",
-                addSampleSuffix = ""):
+                addSampleSuffix = "",
+                sys_variation = False,
+                gen_vars = False):
 
         self.event_category = event_category
         self.lumi = lumi
         self.evenSel = evenSel
+        self.sys_variation = sys_variation
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
@@ -151,7 +209,7 @@ class DataFrame(object):
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
-            sample.load_dataframe(self.event_category, self.lumi, self.evenSel)
+            sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.sys_variation)
             train_samples.append(sample.data)
 
         # concatenating all dataframes
@@ -220,9 +278,6 @@ class DataFrame(object):
             
             sig_df = df.query("index_label == 1")
 
-            sig_weight = sum(sig_df["train_weight"].values)
-            bkg_weight = sum(bkg_df["train_weight"].values)
-
             signal_weight = sum( sig_df["train_weight"].values )
             bkg_weight = sum( bkg_df["train_weight"].values )
             sig_df["train_weight"] = sig_df["train_weight"]/(2*signal_weight)*df.shape[0]
@@ -264,6 +319,16 @@ class DataFrame(object):
             for v in train_variables:
                 norm_csv["mu"][v] = 0.
                 norm_csv["std"][v] = 1.
+
+        # if activated normal variables will be replaced with there Generator information (default is deactivated)
+        gen_dict={'Jet_GenJet_Eta[0]':'Jet_Eta[0]','Jet_GenJet_Eta[1]':'Jet_Eta[1]','Jet_GenJet_Eta[2]':'Jet_Eta[2]','Jet_GenJet_Eta[3]':'Jet_Eta[3]',
+                  'Jet_GenJet_Pt[0]':'Jet_Pt[0]','Jet_GenJet_Pt[1]':'Jet_Pt[1]','Jet_GenJet_Pt[2]':'Jet_Pt[2]','Jet_GenJet_Pt[3]':'Jet_Pt[3]',
+                  'GenTopLep_Lep_Phi[0]':'LooseLepton_Phi[0]','GenTopLep_Lep_Pt[0]':'LooseLepton_Pt[0]','GenTopLep_Lep_E[0]':'LooseLepton_E[0]',
+                  'GenTopLep_Lep_Eta[0]':'LooseLepton_Eta[0]','Gen_MET_Pt':'Evt_MET_Pt', 'Gen_Ht_Jets':'Evt_HT_jets'}
+        if gen_vars:
+            for i in gen_dict:
+                df[gen_dict[i]]=df[i]
+
         df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
         self.norm_csv = norm_csv
 
@@ -366,6 +431,10 @@ class DataFrame(object):
         if not normed: return self.df_test_unnormed[ self.train_variables ]
         if as_matrix:  return self.df_test[ self.train_variables ].values
         else:          return self.df_test[ self.train_variables ]
+
+    def get_all_test_data(self, unnormed=True):
+        if unnormed:  return self.df_test_unnormed
+        else:         return self.df_test
 
     def get_test_weights(self):
         return self.df_test["total_weight"].values
