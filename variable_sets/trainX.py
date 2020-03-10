@@ -1,0 +1,42 @@
+variables = {}
+variables["ge4j_ge3t"] = [
+	"Reco_Particle_B1_Eta",
+	"Reco_Particle_B1_E",
+	"Reco_Particle_B1_CSV",
+	"Reco_Particle_B1_logPt",
+	"Reco_Particle_B1_logE",
+	"Reco_Particle_B2_Eta",
+	"Reco_Particle_B2_E",
+	"Reco_Particle_B2_CSV",
+	"Reco_Particle_B1_Pt",
+	"Reco_Particle_B2_Pt",
+	"Reco_Particle_B2_logPt",
+	"Reco_Particle_B2_logE",
+	"Reco_Particle_Pt",
+	"Reco_Particle_Eta",
+	"Reco_Particle_M",
+	"Reco_Particle_logM",
+	"Reco_Particle_E",
+	"Reco_Particle_logE",
+	"Reco_Particle_logPt",
+	"Reco_Particle_Delta_R",
+	"Reco_Particle_Delta_Phi",
+	"Reco_Particle_Delta_Eta",
+	"Reco_Particle_Delta_R3D",
+	"Reco_Particle_Boosted1_Pt",
+	"Reco_Particle_Boosted1_Eta",
+	"Reco_Particle_Boosted1_logPt",
+	"Reco_Particle_Boosted2_Pt",
+	"Reco_Particle_Boosted2_Eta",
+	"Reco_Particle_Boosted2_logPt",
+	"Reco_Particle_Angle"
+	# "JetsToParticle_dR",
+	# "max_JetsToParticle_dR",
+	# "min_JetsToParticle_dR",
+	# "NonParticleJets_Pt",
+	# "NonParticleJets_E",
+	# "Reco_Particle_Pt_ratio",
+	]
+
+
+all_variables = list(set( [v for key in variables for v in variables[key] ] ))
