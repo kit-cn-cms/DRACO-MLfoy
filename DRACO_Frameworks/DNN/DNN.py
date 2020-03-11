@@ -22,11 +22,11 @@ import data_frame
 import Derivatives
 from Derivatives import Inputs, Outputs, Derivatives
 
-import keras
-import keras.optimizers as optimizers
-import keras.models as models
-import keras.layers as layer
-from keras import backend as K
+import tensorflow.keras as keras
+import tensorflow.keras.optimizers as optimizers
+import tensorflow.keras.models as models
+import tensorflow.keras.layers as layer
+from tensorflow.keras import backend as K
 import pandas as pd
 
 # Limit gpu usage
@@ -34,9 +34,11 @@ import tensorflow as tf
 
 import matplotlib.pyplot as plt
 
-config = tf.ConfigProto()
+tf.compat.v1.disable_eager_execution()
+
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(tf.Session(config=config))
+tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
 
 class EarlyStopping(keras.callbacks.Callback):
     ''' custom implementation of early stopping
@@ -237,7 +239,7 @@ class DNN():
         # save predictions  with keras model
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
-
+        
         # save predicted classes with argmax  with keras model
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
@@ -250,7 +252,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-
+        #return self.model_prediction_vector
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -282,7 +284,7 @@ class DNN():
         if activation_function == "leakyrelu":
             activation_function = "linear"
         l2_regularization_beta      = self.architecture["L2_Norm"]
-        l1_regularization_beta      = self.architecture["L1_Norm"]
+        #l1_regularization_beta      = self.architecture["L1_Norm"]
         output_activation           = self.architecture["output_activation"]
 
         # define input layer
@@ -386,7 +388,7 @@ class DNN():
 
         # save model as h5py file
         out_file = self.cp_path + "/trained_model.h5py"
-        self.model.save(out_file)
+        self.model.save(out_file, save_format='h5')
         print("saved trained model at "+str(out_file))
 
         # save config of model
@@ -410,8 +412,8 @@ class DNN():
 
         # save checkpoint files (needed for c++ implementation)
         out_file = self.cp_path + "/trained_model"
-        saver = tf.train.Saver()
-        sess = K.get_session()
+        saver = tf.compat.v1.train.Saver()
+        sess = tf.compat.v1.keras.backend.get_session()
         save_path = saver.save(sess, out_file)
         print("saved checkpoint files to "+str(out_file))
 
@@ -473,7 +475,7 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
-
+        
         #figure out ranges
         self.get_ranges()
 
@@ -913,8 +915,8 @@ class DNN():
             sigScale            = sigScale)
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-        print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
-        print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+        #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
 
     def calc_LL(self,n_obs, n_exp):
         if n_obs > 0 and n_exp >= 0:
@@ -927,7 +929,9 @@ class DNN():
 
     def binned_likelihood(self, bkg_bins, sig_bins, mu):
         '''Calculates sigma1 and sigma2 for asimov data set and makes a plot'''
+
         save_path = self.save_path + "/plots/"
+
         obs_bins = bkg_bins + mu * sig_bins
         #remove bins with no bkg events -> they will couse problems due to log
         indices = [i for i, x in enumerate(bkg_bins) if x <= 0]

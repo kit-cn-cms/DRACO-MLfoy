@@ -123,6 +123,7 @@ if options.doPlots():
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
+            nbins       = 15,
             bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
