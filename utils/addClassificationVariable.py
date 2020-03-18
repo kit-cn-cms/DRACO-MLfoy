@@ -6,6 +6,7 @@ import optparse
 import json
 import pandas as pd
 import keras
+import tensorflow as tf
 import glob
 
 # local imports
@@ -24,6 +25,9 @@ parser.add_option("-v", "--variableName", dest = "variableName",
 
 parser.add_option("-s", "--sample", dest = "sample",
     help = "sample to add variable or folder of all samples to add the variable to")
+
+parser.add_option("--index", dest = "multiclassIndex", default = 0,
+    help = "index of node when evaluating multiclassification DNN.")
 
 parser.add_option("--overwrite", dest = "overwrite", default = False, action = "store_true",
     help = "overwrite existing h5 files with added variables, otherwise create _new.h5")
@@ -57,11 +61,11 @@ normCSV = pd.read_csv(normFile, index_col = 0)
 variables = config["trainVariables"]
 
 # build DNN from checkpoints
-model = keras.models.load_model(modelFile)
+model = tf.keras.models.load_model(modelFile)
 model.summary()
 
 # load sample
-def evaluate_sample(sample, model, variables, normCSV, varName, overwrite = False):
+def evaluate_sample(sample, model, variables, normCSV, varName, multiclassIndex = 0, overwrite = False):
     # load sample
     print("="*30)
     print("handling sample {}".format(sample))
@@ -78,18 +82,19 @@ def evaluate_sample(sample, model, variables, normCSV, varName, overwrite = Fals
     # calculate binary output value
     prediction_vector = model.predict(
         variable_df[variables].values)
-    df[varName] = pd.Series(prediction_vector[:,0], index = df.index)
-
+    print(prediction_vector[:,multiclassIndex])
+    df[varName] = pd.Series(prediction_vector[:,multiclassIndex], index = df.index)
     # save signal/bkg like events into directories
     if overwrite:
         sample_name = sample
     else:
         sample_name = sample.replace(".h5", "_new.h5")
-    df.to_hdf(sample_name, key = "data", mode = "w")
+    with pd.HDFStore(sample_name, "w") as store:
+        store.append("data", df, index = False)
     print("wrote new sample at {}".format(sample_name))
 
 for sample in samples:
-    evaluate_sample(sample, model, variables, normCSV, options.variableName, overwrite = options.overwrite)
+    evaluate_sample(sample, model, variables, normCSV, options.variableName, multiclassIndex = int(options.multiclassIndex), overwrite = options.overwrite)
 
 
 
