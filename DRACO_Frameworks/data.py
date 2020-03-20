@@ -152,37 +152,23 @@ class DataFrame(object):
         '''
         df = self.get_Samples()
 
-
-         '''save some meta data about network'''
-        self.n_input_neurons = len(self.train_variables)
-        if self.binary_classification:
-            self.n_output_neurons = 1
-        else:
-            self.n_output_neurons = len(self.class_translation)-input_samples.additional_samples
-        # save class labels advancing with index
-        self.output_classes = sorted(self.class_translation, key=lambda x: self.class_translation[])
+        '''save some meta data about network'''
+        self.save_metaData()
 
 
-        # shuffle dataframe
-        if not self.shuffleSeed:
-           self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
-
-        print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
-
-        df = shuffle(df, random_state = self.shuffleSeed)
+        '''shuffle dataframe'''
+        df = self.shuffle_dataframe(df)
 
         '''
         norm variables
         '''
         df = self.norm_variables(df)
 
-        self.unsplit_df = df.copy()
-
-        # split test sample
-        n_test_samples = int( df.shape[0]*test_percentage)
-        self.df_test = df.head(n_test_samples)
-        self.df_train = df.tail(df.shape[0] - n_test_samples)
-        self.df_test_unnormed = unnormed_df.head(n_test_samples)
+        '''
+        save data set,
+        split test and train sample
+        '''
+        self.save_allSamples(df)
 
 
         # sample balancing if activated
@@ -217,10 +203,10 @@ class DataFrame(object):
                 if sample in self.signal:
                     temp_sample_data["index_label"]=1
                     
-                    temp_sample_data["train_weight"] = temp_sample_data["train_weight"]*df.shape[0]/len(self.signal)
+                    temp_sample_data["train_weight"] = temp_sample_data["train_weight"]/len(self.signal)
                 else:
                     temp_sample_data["index_label"]=self.bkg_target
-                    temp_sample_data["train_weight"] = temp_sample_data["train_weight"]*df.shape[0]/(len(self.signal)-len(input_samples.samples))
+                    temp_sample_data["train_weight"] = temp_sample_data["train_weight"]/(len(self.signal)-len(self.input_samples.samples))
             else:
                 if combine:
                     for combined_class in combine:
@@ -229,7 +215,7 @@ class DataFrame(object):
                                 self.class_translation[combined_class] = index
                                 index += 1
                             temp_sample_data["index_label"]  = self.class_translation[combined_class]
-                            temp_sample_data["train_weight"] = temp_sample_data["train_weight"]*df.shape[0]/len(combine[combined_class])
+                            temp_sample_data["train_weight"] = temp_sample_data["train_weight"]/len(combine[combined_class])
                         else:
                             self.class_translation[sample.label] = index
                             temp_sample_data["index_label"] = index
@@ -243,6 +229,24 @@ class DataFrame(object):
         # concatenating all dataframes
         df = pd.concat(train_samples, sort=True)
         df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.class_translation)
+        return df
+
+    def safe_metaData(self):
+        self.n_input_neurons = len(self.train_variables)
+        if self.binary_classification:
+            self.n_output_neurons = 1
+        else:
+            self.n_output_neurons = len(self.class_translation)-self.input_samples.additional_samples
+        # save class labels advancing with index
+        self.output_classes = sorted(self.class_translation, key=lambda x: self.class_translation[])
+
+    def shuffle_dataframe(self,df):
+        if not self.shuffleSeed:
+           self.shuffleSeed = np.random.randint(low = 0, high = 2**16)
+
+        print("using shuffle seed {} to shuffle input data".format(self.shuffleSeed))
+
+        df = shuffle(df, random_state = self.shuffleSeed)
         return df
 
     def norm_variables(self, df):
@@ -262,6 +266,15 @@ class DataFrame(object):
         df[self.train_variables] = (df[self.train_variables] - df[self.train_variables].mean())/df[self.train_variables].std()
         self.norm_csv = norm_csv
         return df
+
+    def save_allSamples(self,df):
+        self.unsplit_df = df.copy()
+        n_test_samples = int( df.shape[0]*test_percentage)
+        self.df_test = df.head(n_test_samples)
+        self.df_train = df.tail(df.shape[0] - n_test_samples)
+        self.df_test_unnormed = unnormed_df.head(n_test_samples)
+
+
 
     def balanceTrainSample(self):
         # get max number of events per sample
