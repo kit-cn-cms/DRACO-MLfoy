@@ -13,7 +13,6 @@ class Sample:
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
-        self.isSignal = None
         self.train_weight = train_weight
         self.test_percentage = test_percentage
         self.min=0.0
@@ -73,7 +72,6 @@ class Sample:
 '''wrapper for samples'''
 class InputSamples:
     def __init__(self, input_path, activateSamples = None, test_percentage = 0.2, addSampleSuffix = ""):
-        self.binary_classification = False
         self.input_path = input_path
         self.samples = []
         self.activate_samples = activateSamples
@@ -97,6 +95,12 @@ class InputSamples:
 
         if bool(self.addSampleSuffix) and label.endswith(self.addSampleSuffix):
             self.additional_samples +=1
+
+    def getClassConfig(self):
+        configs = []
+        for sample in self.samples:
+            configs.append( sample.getConfig() )
+        return configs
 
 
 class DataFrame(object):
@@ -179,11 +183,6 @@ class DataFrame(object):
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples)
         self.df_test_unnormed = unnormed_df.head(n_test_samples)
-
-        # split ttbb test samples into nominal and add sample according to ttbb generator
-        if addSampleSuffix:
-            self.df_test_nominal = self.df_test[ self.df_test.class_label != "ttbb"+self.addSampleSuffix ]
-            self.df_test_additional = self.df_test[ self.df_test.class_label != "ttbb" ]
 
 
         # sample balancing if activated
