@@ -85,7 +85,7 @@ config_dict["ttZ_2018_v2"] = {
         "Dropout":                  0.4,
         "L2_Norm":                  1e-5,
         "batch_size":               5000,
-        "optimizer":                optimizers.Adadelta(),
+        "optimizer":                optimizers.Adadelta(learning_rate=1),
         "activation_function":      "elu",
         "output_activation":        "Softmax",
         "earlystopping_percentage": 0.05,

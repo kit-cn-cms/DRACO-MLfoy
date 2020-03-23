@@ -35,21 +35,24 @@ usage+="OR: python preprocessing.py -o DIR -v FILE -e INT -m BOOL -n STR"
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="trainHiggs",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="trainX",
 		help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="variableSelection")
 
 parser.add_option("-c", "--category", dest="category",default="ge4j_ge3t",
 		help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="category")
 
+parser.add_option("--Reco", dest="Reco",default= "None",
+		help="Kanal to evaluate, ttH or ttZ", metavar="Reco")
+
 (options, args) = parser.parse_args()
-if options.variableSelection == "trainHiggs":
+if options.Reco == "Higgs":
 	particle = "Higgs"
 	process = "ttH"
 	particle_M = 116.3
 	particle_dR= 1.7 #geraten
 	sigma_M  = 13.5
 	sigma_dR = 5
-elif options.variableSelection == "trainZ":
+elif options.Reco == "Z":
 	particle = "Z"
 	process = "ttZ"
 	particle_M = 86.8
@@ -114,6 +117,9 @@ dataframe_columns = copy.deepcopy(variables)
 #create df for event
 eval_df = pd.DataFrame(columns = dataframe_columns)
 df = pd.read_hdf(basedir+"/workdir/eval_dataframe/{}_eval/all/eval_allCombs_dnn.h5".format(process)) 
+if options.Reco == "Z":
+	df = df[df["GenEvt_I_TTZ"]==1]
+
 df = df.reset_index(drop=True)
 
 BestIndex = [0]

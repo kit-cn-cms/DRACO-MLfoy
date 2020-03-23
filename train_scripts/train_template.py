@@ -14,7 +14,7 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
-import tensorflow.keras.optimizers as optimizers
+import keras.optimizers as optimizers
 """
 USE: python train_template.py -o DIR -v FILE -n STR -c STR -e INT -s INT -p -l --privatework --netconfig=STR --signalclass=STR --printroc
 """
@@ -137,12 +137,20 @@ input_samples.addSample("ttH"+naming,   label = "ttH", normalization_weight = 2.
 input_samples.addSample("ttZ"+naming,   label = "ttZ", normalization_weight = 2.)
 input_samples.addSample("all-wrong-bkg"+naming,  label = "all-wrong-bkg")
 input_samples.addSample("1-right-bkg"+naming,  label = "1-right-bkg")
-#input_samples.addSample("bkg"+naming,  label = "bkg")
-input_samples.addSample("ttbb"+naming,  label = "ttbb")
-input_samples.addSample("tt2b"+naming,  label = "tt2b")
-input_samples.addSample("ttb"+naming,   label = "ttb")
-input_samples.addSample("ttcc"+naming,  label = "ttcc")
-input_samples.addSample("ttlf"+naming,  label = "ttlf")
+input_samples.addSample("Z_allwrong-bkg"+naming,  label = "Z_allwrong-bkg")
+input_samples.addSample("Z_1right-bkg"+naming,  label = "Z_1right-bkg")
+input_samples.addSample("Z_1rcsv-bkg"+naming,  label = "Z_1rcsv-bkg")
+input_samples.addSample("H_allwrong-bkg"+naming,  label = "H_allwrong-bkg")
+input_samples.addSample("H_1right-bkg"+naming,  label = "H_1right-bkg")
+input_samples.addSample("H_1rcsv-bkg"+naming,  label = "H_1rcsv-bkg")
+input_samples.addSample("ttbar_bkg"+naming, label = "ttbar_bkg")
+input_samples.addSample("ttbar_csv-bkg"+naming, label = "ttbar_csv-bkg")
+# input_samples.addSample("bkg"+naming,  label = "bkg")
+# input_samples.addSample("ttbb"+naming,  label = "ttbb")
+# input_samples.addSample("tt2b"+naming,  label = "tt2b")
+# input_samples.addSample("ttb"+naming,   label = "ttb")
+# input_samples.addSample("ttcc"+naming,  label = "ttcc")
+# input_samples.addSample("ttlf"+naming,  label = "ttlf")
 
 if options.binary:
     input_samples.addBinaryLabel(signal, options.binary_bkg_target)

@@ -658,3 +658,13 @@ Reco_Higgs_Boosted2_Pt,0,1000,30,-,Pt of second boosted Higgs B-Jet
 Reco_Higgs_Delta_Eta,0,4.5,20,-,#Delta #eta of Higgs
 Reco_Higgs_Delta_Phi,0,3.14,20,-,#Delta #phi of Higgs
 Reco_Higgs_Delta_R3D,0,1.2,20,-,#Delta R 3D of Higgs
+Reco_Particle_B1_CSV,0,1,30,x,CSV value of first B-Jet
+Reco_Particle_B2_CSV,0,1,30,x,CSV value of second B-Jet
+Reco_Particle_logM,0,10,30,-,logarithmic reconstructed particle mass
+Reco_Particle_Delta_R,0,5,30,-,#DeltaR of reconstructed particle to B-Jets
+JetsToParticle_dR,0,4,30,-,<#DeltaR> of reconstructed particle to other Jets
+max_JetsToParticle_dR,0,5,30,-,max. #DeltaR of reconstructed particle to other Jet
+min_JetsToParticle_dR,0,4,30,-,min. #DeltaR of reconstructed particle to other Jet
+NonParticleJets_Pt,0,5,30,-,<#DeltaPt> of other Jets
+NonParticleJets_E,20,1000,30,-,<E> of other Jets
+Reco_Particle_Pt_ratio,0.4,1,30,-,Ratio of Pt in reconstructed particle

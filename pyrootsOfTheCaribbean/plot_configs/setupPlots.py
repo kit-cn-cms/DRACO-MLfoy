@@ -21,6 +21,14 @@ def GetPlotColor( cls ):
         "bkg":   ROOT.kOrange,
         "all-wrong-bkg":   ROOT.kOrange+1,
         "1-right-bkg":   ROOT.kOrange+2,
+        "H_allwrong-bkg":   ROOT.kOrange+1,
+        "H_1right-bkg":   ROOT.kOrange+2,
+        "H_1rcsv-bkg":   ROOT.kOrange+3,
+        "Z_allwrong-bkg":   ROOT.kGreen-1,
+        "Z_1right-bkg":   ROOT.kGreen-2,
+        "Z_1rcsv-bkg":  ROOT.kGreen-3,
+        "ttbar_bkg":   ROOT.kMagenta-2,
+        "ttbar_csv-bkg":   ROOT.kMagenta-3,
         }
 
     if "ttZ" in cls: cls = "ttZ"
