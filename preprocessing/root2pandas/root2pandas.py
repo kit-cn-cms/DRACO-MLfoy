@@ -9,8 +9,6 @@ import math
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 
-import ttbarReco
-
 # multi processing magic
 def processChunk(info):
     info["self"].processChunk(info["sample"], info["chunk"], info["chunkNumber"], info["mem_df"])
@@ -374,13 +372,6 @@ class Dataset:
 
                 # apply event selection
                 df = self.applySelections(df, sample.selections)
-
-                # perform ttbar reconstruction
-                if self.ttbarReco:
-                    df = ttbarReco.findbest(df, self.variables)
-
-                    sample.categories.categories["ttbar"] = "(is_ttbar==1)"
-                    sample.categories.categories["bkg"]   = "(is_ttbar==0)"
 
                 if concat_df.empty: concat_df = df
                 else: concat_df = concat_df.append(df)            
