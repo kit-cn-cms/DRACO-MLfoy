@@ -29,17 +29,17 @@ config_dict["test_config"] = {
         }
 
 config_dict["ttH_SL_legacy"] = {
-        "layers":                   [50,50],
+        "layers":                   [100,100],
         "loss_function":            "categorical_crossentropy",
-        "Dropout":                  0.5,
-        "L2_Norm":                  1e-5,
-        "L1_Norm":                  1e-5,
-        "batch_size":               1000,
+        "Dropout":                  0.4,
+        "L2_Norm":                  1e-4,
+        "L1_Norm":                  1e-4,
+        "batch_size":               500,
         "optimizer":                optimizers.Adagrad(),
-        "activation_function":      "leakyrelu",
+        "activation_function":      "elu",
         "output_activation":        "Softmax",
-        "earlystopping_percentage": 0.05,
-        "earlystopping_epochs":     50,
+        "earlystopping_percentage": 0.04,
+        "earlystopping_epochs":     20,
         }
 
 config_dict["ttZ_2018_final"] = {
@@ -151,18 +151,32 @@ config_dict["binary_crossentropy_Adam"] = {
         "earlystopping_epochs":      150,
 }
 
-config_dict["ttbb_reco_v2"] = {
-        "layers":                   [100,100],
+config_dict["reco_single_boson"] = {
+        "layers":                   [50,50],
         "loss_function":            "binary_crossentropy",
         "Dropout":                  0.2,
-        "L1_Norm":                  1e-3,
-        "L2_Norm":                  1e-3,
+        "L1_Norm":                  1e-4,
+        "L2_Norm":                  1e-4,
         "batch_size":               128,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "leakyrelu",
         "output_activation":        "Sigmoid",
-        "earlystopping_percentage":  0.1,
-        "earlystopping_epochs":      100,
+        "earlystopping_percentage":  0.05,
+        "earlystopping_epochs":      20,
+}
+
+config_dict["dnn_ttZ"] = {
+        "layers":                   [150,100,50],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.2,
+        "L1_Norm":                  1e-4,
+        "L2_Norm":                  1e-4,
+        "batch_size":               128,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage":  0.05,
+        "earlystopping_epochs":      20,
 }
 
 config_dict["ttbb_reco"] = {

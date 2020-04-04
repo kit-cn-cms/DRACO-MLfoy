@@ -6,32 +6,25 @@ import numpy as np
 # dictionary for colors
 def GetPlotColor( cls ):
     color_dict = {
-        "ttZ":          ROOT.kCyan,
-        "ttH":          ROOT.kBlue+1,
-        "ttlf":         ROOT.kRed-7,
-        "ttcc":         ROOT.kRed+1,
-        "ttbb":         ROOT.kRed+3,
-        "tt2b":         ROOT.kRed+2,
-        "ttb":          ROOT.kRed-2,
-        "tthf":         ROOT.kRed-3,
-        "ttbar":        ROOT.kOrange,
-        "ttmb":         ROOT.kRed-1,
-        "ttb_bb":       ROOT.kRed-1,
-        "ST":           ROOT.kRed-8,
-        "tHq":          ROOT.kBlue+6,
-        "tHW":          ROOT.kBlue+3,
+        "ttZ":          ROOT.kMagenta+1,
+        "ttZbb":        ROOT.kMagenta+1,
+        "ttZnonbb":     ROOT.kSpring+-6,
+
+        "ttH":          ROOT.kRed+1,
+        "ttHbb":        ROOT.kRed+1,
+        "ttHnonbb":     ROOT.kYellow-7,
+
+        "ttlf":         ROOT.kAzure-9,
+        "ttcc":         ROOT.kAzure+8,
+        "ttbb":         ROOT.kAzure+3,
+        "ttbb5FS":      ROOT.kAzure+3,
+        "ttbar":        ROOT.kAzure+3,
         "sig":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
-
-        "ttH_HTXS_0":          ROOT.kAzure,
-        "ttH_HTXS_1":          ROOT.kBlue-1,
-        "ttH_HTXS_2":          ROOT.kBlue-2,
-        "ttH_HTXS_3":          ROOT.kBlue-3,
-        "ttH_HTXS_4":          ROOT.kBlue-4,
         }
 
-    if "ttZ" in cls: cls = "ttZ"
-    if "ttH" and not "HTXS" in cls: cls = "ttH"
+    #if "ttZ" in cls: cls = "ttZ"
+    #if "ttH" and not "HTXS" in cls: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):

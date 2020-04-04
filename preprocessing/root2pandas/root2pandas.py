@@ -315,7 +315,7 @@ class Dataset:
 
 
                 # convert to dataframe
-                df = tree.pandas.df([v for v in self.variables if not "." in v])
+                df = tree.pandas.df([v for v in self.variables if not "_ft_" in v])
 
                 if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
                     df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
@@ -328,7 +328,6 @@ class Dataset:
                 # delete subentry index
                 try: df = df.reset_index(1, drop = True)
                 except: None
-                print(df)
 
                 # add friend trees 
                 samplepath, filename = os.path.split(f)
@@ -337,14 +336,14 @@ class Dataset:
                     # get path to friend tree file
                     friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
                     # collect all variables that belong to this friend tree
-                    friendtreevars = [v.replace(ftName+".","") for v in self.variables if v.startswith(ftName+".")]
+                    friendtreevars = [v.replace(ftName+"_ft_","") for v in self.variables if v.startswith(ftName+"_ft_")]
                     # open friend tree root file
                     with root.open(friendtreepath) as ftfile:
                         # get tree
                         fTree = ftfile[tr]
                         ft_df = fTree.pandas.df(friendtreevars)
                         # rename columns
-                        renameDict = {v: ".".join([ftName, v]) for v in friendtreevars}
+                        renameDict = {v: "_ft_".join([ftName, v]) for v in friendtreevars}
                         ft_df = ft_df.rename(columns=renameDict)
                         
                         # concatenate dataframes
@@ -456,16 +455,17 @@ class Dataset:
         return df
 
     def addClassLabels(self, df, categories):
-        print("adding class labels to df ...")
         split_dfs = []
         for key in categories:
             if categories[key]:
                 tmp_df = df.query(categories[key])
             else:
                 tmp_df = df
+
+            
             tmp_df.loc[:,"class_label"] = key
             split_dfs.append(tmp_df)
-
+        
         # concatenate the split dataframes again
         df = pd.concat(split_dfs)
         return df
