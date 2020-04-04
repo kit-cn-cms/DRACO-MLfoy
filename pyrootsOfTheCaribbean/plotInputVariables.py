@@ -18,16 +18,16 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_InputFeatures",
         help="DIR for output", metavar="outputDir")
 
-parser.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
+parser.add_option("-i", "--inputdirectory", dest="inputDir",default="/local/scratch/ssd/nshadskiy/2017_nominal", ##me
         help="DIR for input", metavar="inputDir")
 
 parser.add_option("-n", "--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in preprocessing", metavar="naming")
 
-parser.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+parser.add_option("-v", "--variableselection", dest="variableSelection",default="allVariables_2017_bnn", ##me
         help="FILE for variables used to train DNNs", metavar="variableSelection")
 
-parser.add_option("-l", "--log", dest="log", action = "store_true", default=False,
+parser.add_option("-l", "--log", dest="log", action = "store_true", default=False, # can leave out
         help="activate for logarithmic plots", metavar="log")
 
 parser.add_option("-p", "--privatework", dest="privateWork", action = "store_true", default=False,
@@ -46,7 +46,7 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
         help="-1 to scale Signal to background Integral, FLOAT to scale Signal with float value, False to not scale Signal",
         metavar="scaleSignal")
 
-parser.add_option("--lumiscale", dest="lumiScale", default=41.5,
+parser.add_option("--lumiscale", dest="lumiScale", default=41.5, ##value is year depended (here: year 2017)
         help="FLOAT to scale Luminosity", metavar="lumiScale")
 
 
@@ -125,18 +125,20 @@ plotter.addSample(
     XSscaling       = 1.,
     signalSample    = True)
 
+
 # add background samples
 plotter.addSample(
-    sampleName      = "tt+b",
-    sampleFile      = data_dir+"/ttmb"+naming,
+    sampleName      = "tt+bb", ##me
+    sampleFile      = data_dir+"/ttbb"+naming, ##me
     XSscaling       = 2.*35.9*0.44,
     plotColor       = ROOT.kRed+3)
 
-plotter.addSample(
-    sampleName      = "tt+2b",
-    sampleFile      = data_dir+"/tt2b"+naming,
-    XSscaling       = 2.*35.9*0.44,
-    plotColor       = ROOT.kRed+2)
+
+# plotter.addSample(
+#     sampleName      = "tt+2b",
+#     sampleFile      = data_dir+"/tt2b"+naming,
+#     XSscaling       = 2.*35.9*0.44,
+#     plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
     sampleName      = "tt+cc",
@@ -145,7 +147,7 @@ plotter.addSample(
     plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
-    sampleName      = "tt+lf",
+    sampleName      = "tt+lf", ##light flavor (u, d, s = zusammengefasst, da alle sehr leicht --> schwer zu differenzieren)
     XSscaling       = 2.,
     sampleFile      = data_dir+"/ttlf"+naming,
     plotColor       = ROOT.kRed-7)
@@ -153,8 +155,9 @@ plotter.addSample(
 
 
 # add JT categories
-plotter.addCategory("ge4j_ge4t")
-plotter.addCategory("ge4j_3t")
+#plotter.addCategory("ge4j_ge4t")
+#plotter.addCategory("ge4j_3t")
+plotter.addCategory("ge4j_ge3t") ##me
 
 
 # perform plotting routine

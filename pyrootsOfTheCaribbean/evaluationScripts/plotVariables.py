@@ -4,6 +4,10 @@ import sys
 import pandas
 import numpy as np
 # local imports
+
+from sklearn.preprocessing import QuantileTransformer ## me
+
+
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(os.path.dirname(filedir))
 sys.path.append(basedir)
@@ -38,6 +42,10 @@ class Sample:
     def load(self):
         with pandas.HDFStore(self.sampleFile, mode = "r") as store:
             self.data = store.select("data", stop = self.stop)
+        
+        ## DEBUG
+        print "********************Debug data*****************************"
+        print self.data
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
         self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
@@ -152,6 +160,9 @@ class variablePlotter:
                 plot_name = cat_dir + "/{}.pdf".format(variable)
                 plot_name = plot_name.replace("[","_").replace("]","")
 
+                plot_name_transformed = cat_dir + "/{}".format(variable) + "_transformed.pdf"
+                plot_name_transformed = plot_name_transformed.replace("[","_").replace("]","")
+
                 # generate plot
                 histInfo = self.histVariable(
                     variable    = variable,
@@ -161,6 +172,17 @@ class variablePlotter:
                 if saveKSValues:
                     ks_dict[variable] = histInfo["KSScore"]
 
+                ## me
+                # generate transformed plot
+                histInfo_transformed = self.histVariable_transformed(
+                    variable    = variable,
+                    plot_name   = plot_name_transformed,
+                    cat         = cat)
+
+                if saveKSValues:
+                    ks_dict[variable] = histInfo_transformed["KSScore"]
+
+                
             if saveKSValues:
                 with open(ks_file, "w") as f:
                     for key, value in sorted(ks_dict.iteritems(), key = lambda (k,v): (v,k)):
@@ -313,3 +335,166 @@ class variablePlotter:
         setup.saveCanvas(canvas, plot_name)
 
         return histInfo
+
+    def histVariable_transformed(self, variable, plot_name, cat):
+            histInfo = {}
+
+            print("************************MY DEBUG***************************")
+            X = {sample_name: [[j] for j in self.samples[sample_name].cut_data[cat][variable].values] for sample_name in self.samples}
+                #print self.samples[sample].cut_data[cat][variable].values[0]
+            transformed_X = {}
+            reshaped_transformed_X = {}
+            qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+
+            for sample_name in X.keys():
+                transformed_X[sample_name] = qt.fit_transform(X[sample_name])
+                #debug
+                # print "***Transformed: " +sample_name + "****"
+                # print transformed_X[sample_name]
+
+            for sample_name in transformed_X.keys():
+                reshaped_transformed_X[sample_name] = []
+                for j in transformed_X[sample_name]:
+                    reshaped_transformed_X[sample_name].append(j[0])
+            
+            #save transformed values with pandas
+            df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in reshaped_transformed_X.iteritems() ]))
+
+            print df
+                
+
+            bins = 50
+            maxValue = max([max(reshaped_transformed_X[key]) for key in reshaped_transformed_X.keys()])
+            minValue = min([min(reshaped_transformed_X[key]) for key in reshaped_transformed_X.keys()])
+            displayname = variable
+            logoption = "-"
+
+            config_string = "{},{},{},{},{},{}\n".format(variable, minValue, maxValue, bins, logoption, displayname)
+            with open("new_variable_configs.csv", "a") as f:
+                f.write(config_string)
+
+            bin_range = [minValue, maxValue]
+            if logoption=="x" or logoption=="X":
+                logoption=True
+            else:
+                logoption=False
+
+            histInfo["nbins"] = bins
+            histInfo["range"] = bin_range
+
+            bkgHists = []
+            bkgLabels = []
+            weightIntegral = 0
+
+            # loop over backgrounds and fill hists
+            for sampleName in self.ordered_stack:
+                sample = self.samples[sampleName]
+
+                # get weights
+                weights = sample.cut_data[cat]["weight"].values
+                # get values
+                values = reshaped_transformed_X[sampleName]
+
+                #weights = [weights[i] for i in range(len(weights)) if not np.isnan(values[i])]
+                #values =  [values[i]  for i in range(len(values))  if not np.isnan(values[i])]
+
+                weightIntegral += sum(weights)
+                # setup histogram
+                hist = setup.setupHistogram(
+                    values      = values,
+                    weights     = weights,
+                    nbins       = bins,
+                    bin_range   = bin_range,
+                    color       = sample.plotColor,
+                    xtitle      = cat+"_"+sample.sampleName+"_"+variable+"_TRANSFORMED_",
+                    ytitle      = setup.GetyTitle(self.options["privateWork"]),
+                    filled      = sample.filled)
+                bkgHists.append(hist)
+                bkgLabels.append(sample.sampleName)
+
+            sigHists = []
+            sigLabels = []
+            sigScales = []
+
+            # if not background was added, the weight integral is equal to 0
+            if weightIntegral == 0:
+                self.options["scaleSignal"] = 0
+            histInfo["bkgYield"] = weightIntegral
+
+            # scale stack to one if lumiScale is set to zero
+            if self.options["lumiScale"] == 0:
+                for hist in bkgHists:
+                    hist.Scale(1./weightIntegral)
+                weightIntegral = 1.
+
+            # loop over signals and fill hists
+            for key in self.samples:
+                sample = self.samples[key]
+                if not sample.isSignal: continue
+
+                # get weights
+                weights = sample.cut_data[cat]["weight"].values
+                # determine scale factor
+                if self.options["scaleSignal"] == -1:
+                    scaleFactor = weightIntegral/(sum(weights)+1e-9)
+                elif self.options["scaleSignal"] == 0:
+                    scaleFactor = (1./(sum(weights)+1e-9))
+                else:
+                    scaleFactor = float(self.options["scaleSignal"])
+
+                # setup histogram
+                hist = setup.setupHistogram(
+                    values      = reshaped_transformed_X[sampleName],
+                    weights     = weights,
+                    nbins       = bins,
+                    bin_range   = bin_range,
+                    color       = sample.plotColor,
+                    xtitle      = cat+"_"+sample.sampleName+"_"+variable+"_TRANSFORMED_",
+                    ytitle      = setup.GetyTitle(),
+                    filled      = sample.filled)
+
+                hist.Scale(scaleFactor)
+
+                sigHists.append(hist)
+                sigLabels.append(sample.sampleName)
+                sigScales.append(scaleFactor)
+
+            # init canvas
+            canvas = setup.drawHistsOnCanvas(
+                sigHists, bkgHists, self.options,
+                canvasName = variable, displayname=displayname,
+                logoption = logoption)
+
+            # setup legend
+            legend = setup.getLegend()
+            # add signal entriesa
+            for iSig in range(len(sigHists)):
+                labelstring = sigLabels[iSig]
+                if not self.options["lumiScale"] == 0.:
+                    labelstring = sigLabels[iSig]+" x {:4.0f}".format(sigScales[iSig])
+
+                # add KS score to label if activated
+                if self.options["KSscore"]:
+                    KSscore = setup.calculateKSscore(bkgHists[0],sigHists[iSig])
+                    labelstring="#splitline{"+labelstring+"}{KSscore = %.3f}"%(KSscore)
+                    histInfo["KSScore"] = KSscore
+
+                legend.AddEntry(sigHists[iSig], labelstring, "L")
+
+            # add background entries
+            for iBkg in range(len(bkgHists)):
+                legend.AddEntry(bkgHists[iBkg], bkgLabels[iBkg], "F")
+
+            # draw loegend
+            legend.Draw("same")
+
+            # add lumi and category to plot
+            setup.printLumi(canvas, lumi = self.options["lumiScale"], ratio = self.options["ratio"])
+            setup.printCategoryLabel(canvas, JTcut.getJTlabel(cat), ratio = self.options["ratio"])
+            if self.options["privateWork"]:
+                setup.printPrivateWork(canvas, ratio = self.options["ratio"])
+
+            # save canvas
+            setup.saveCanvas(canvas, plot_name)
+
+            return histInfo
