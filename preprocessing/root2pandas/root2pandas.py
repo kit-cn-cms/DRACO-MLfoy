@@ -73,19 +73,21 @@ class ImageConfig():
 
 
         # generates a list of the form [["Jet_Eta", "Jet_Phi", "Jet_Pt"], ["Electron_Eta", "Electron_Phi", "Electron_Pt"]]
+       
         self.images = []
         for channel in channels:
             m=re.match("(\w+)\[(\d+)\-(\d+)\]", channel)
             if m==None:
+                print("m is none")
                 ch=re.split("_", channel)
                 if len(ch)!=2:
-                    print("The string '"+channel+"' has more then one _ symbol. Exit.")
+                    print("The string '"+channel+"' has more than one _ symbol. Exit.")
                     exit()
                 self.images.append([ch[0]+"_"+x,ch[0]+"_"+y,channel])
             else:
                 ch=re.split("_", m.group(1))
                 if len(ch)!=2:
-                    print("The string '"+channel+"' has more then one _ symbol. Exit.")
+                    print("The string '"+channel+"' has more than one _ symbol. Exit.")
                     exit()
                 indexstart=m.group(2)
                 indexend=m.group(3)
@@ -94,6 +96,7 @@ class ImageConfig():
                 for i in range(int(indexstart),int(indexend)+1):
                     self.images[j].append([ch[0]+"_"+x+"["+str(i)+"]",ch[0]+"_"+y+"["+str(i)+"]",m.group(1)+"["+str(i)+"]"])
 
+      
         # flattens a list of lists of lists
         self.variables = []
         for image in self.images:
@@ -103,6 +106,8 @@ class ImageConfig():
                         self.variables.append(v2)
                 else:
                     self.variables.append(v)
+	print('self.variables = ', self.variables)
+     
 
         if self.rotation == "ttbar_toplep":
             self.variables.append("Reco_ttbar_toplep_phi")
@@ -128,12 +133,6 @@ class Dataset:
         self.varName_LumiBlock = varName_LumiBlock
         self.varName_Event = varName_Event
         
-        #optimizing timers
-        #self.timer_general=r00t.TStopwatch()
-        #self.timer_yan=r00t.TStopwatch()
-        #self.timer_hist=r00t.TStopwatch()
-        #self.timer_update=r00t.TStopwatch()
-
 
 
         # generating output dir
@@ -283,10 +282,6 @@ class Dataset:
         varname_y      = image[1]
         varname_weight = image[2]
 
-        #print("Within 2dhist(): Bins: "+str(ImageConfig.imageSize))
-        #print("Range: "+str([ImageConfig.xRange, ImageConfig.yRange]))
-        #print(df[varname_weight])
-        #print("processing "+varname_weight+"-layer to become a 2d histogram")
 
         H, _, _ = np.histogram2d(
             x       = np.array(df[varname_x]),
@@ -295,7 +290,6 @@ class Dataset:
             range   = [ImageConfig.xRange, ImageConfig.yRange],
             weights = np.array(df[varname_weight]))
         
-        #print(H.shape, H.size)
 
         if ImageConfig.logNorm:
             H = np.where(H > 1, np.log(H), 0)
@@ -309,24 +303,11 @@ class Dataset:
             plt.ylabel(varname_y)
             plt.title(varname_weight)
             plt.tight_layout()
-            #plt.savefig(self.outputdir+"/"+varname_weight+"_100nominal_tree_Blues.pdf")
 
-            #plt.figure(figsize=(8,10))
-            #h,_,_,_=plt.hist2d(
-            #    x       = df[varname_x],
-            #    y       = df[varname_y],
-            #    weights = df[varname_weight],
-            #    range   = [Image_Config.xRange, Image_Config.yRange],
-            #    bins    = Image_Config.imageSize)
-            #plt.xlabel(varname_x)
-            #plt.ylabel(varname_y)
-            #print(h)
-            #print(h.size)
-            #print(h.shape)
-            
-            #plt.show()
             exit()
-        #print(H)
+        
+	#print(image)
+	#print(H)
         return H
 
     def phi_rotation(self, phi_array, phi0):
@@ -409,24 +390,14 @@ class Dataset:
         aplanarity  = 3.0*eigenval(2)/2.0
         tsphericity = 2.0*eigenval(1)/(eigenval(1)+eigenval(0))
         
-        #tensor.Print()
-        #eigenval.Print()
-        #eigenvec.Print()
         ev31=eigenvec[0][2]
         ev32=eigenvec[1][2]
         ev33=eigenvec[2][2]
-        #print(ev31,ev32,ev33)
-        
-        #print(aplanarity)
-        #print(np.float(df["Evt_aplanarity"]))
-        #exit()
 
         ev1_phi=calc_phi(eigenvec[0][0], eigenvec[1][0])
         ev2_phi=calc_phi(eigenvec[0][1], eigenvec[1][1])
         ev3_phi=calc_phi(eigenvec[0][2], eigenvec[1][2])
 
-        #print(ev1_phi, ev2_phi, ev3_phi)
-        #exit()
         return([ev1_phi, ev2_phi, ev3_phi])
 
         
@@ -445,8 +416,6 @@ class Dataset:
         self.searchVectorVariables()
 
         print("LOADING {} VARIABLES IN TOTAL.".format(len(self.variables)))
-        # remove old files
-        #self.removeOldFiles()
         self.renameOldFiles()
 
         if self.addMEM:
@@ -489,8 +458,7 @@ class Dataset:
     def processSample(self, sample, varName_Run, varName_LumiBlock, varName_Event, Image_Config=None):
         # print sample info
         sample.printInfo()
-        #timer=r00t.TStopwatch()
-        #timer.Start(False)
+
 
         # collect ntuple files
         ntuple_files = sorted(glob.glob(sample.ntuples))
@@ -504,12 +472,11 @@ class Dataset:
         n_entries = 0
         concat_df = pd.DataFrame()
         n_files = len(ntuple_files)
-        #self.timer_general.Start(False)
+
         # loop over files
         for iFile, f in enumerate(ntuple_files):
             print("({}/{}) loading file {}".format(iFile+1,n_files,f))
-            #if(iFile+1==4):#yan makefast testing
-            #    break
+
 
             # open root file
             with root.open(f) as rf:
@@ -555,8 +522,7 @@ class Dataset:
             # apply event selection
             df = self.applySelections(df, sample.selections)
             
-            #self.timer_general.Stop()
-            #self.timer_yan.Start(False)
+
             # generate 2d histogram if ImageConfig was passed
             # ===============================================
             if Image_Config is not None:
@@ -567,18 +533,13 @@ class Dataset:
                 evtids=df["Evt_ID"]
 
                 H_List_Dict={z:pd.Series() for z in Image_Config.z}
-                #print(Image_Config.images)
+
 
                 for ievt, evt in enumerate(evtids):
-                    #if ievt>5:
-                    #    break
-                    #print(ievt)
+		
 
                     df_tmp=df.loc[df["Evt_ID"]==evt]
                     entry=df_tmp.index[0]
-                    #for x in df_tmp.columns: print x
-                    #print(df_tmp)
-                    #exit()
 
                     #calculate phi0, which is used to shift every entry in histogramm
                     phi0=0
@@ -600,37 +561,35 @@ class Dataset:
                     #loop over the differet "color" channels of the image
                     for image in Image_Config.images:
 
-                        #self.timer_hist.Start(False)
                         # for sth like "Jet_Pt[0-8]" this if-statement is true, while its not for "Jet_Pt"
                         if isinstance(image[0], list):
                             H=np.zeros(Image_Config.imageSize)
-                            #df_tmp2=pd.DataFrame(columns=["x","y","z"])
+
                             for img in image:
-                                #df_tmp2=df_tmp2.append({'x':float(df_tmp[img[0]]) , 'y':float(df_tmp[img[1]]), 'z':float(df_tmp[img[2]])} , ignore_index=True)
+
                                 H+=self.yan_2dhist(Image_Config, img, df_tmp, phi0=phi0)
-                            #H=self.yan_2dhist(Image_Config, ["x","y","z"], df_tmp2, phi0=phi0)   
+            			
+				   
                         else: 
                             H=self.yan_2dhist(Image_Config, image, df_tmp, phi0=phi0)
                         
-                        #self.timer_hist.Stop()
-
+			#print(H)
                         H=base64.b64encode(np.ascontiguousarray(H))
-                        #self.timer_update.Start(False)
+             		#print(H)
                         z=Image_Config.z[Image_Config.images.index(image)]
                         H=pd.Series(H,index=[entry])
                         H_List_Dict[z]=H_List_Dict[z].append(H)
-                        #self.timer_update.Stop()
+             		
                     #break #for debugging, eg to see if saving to file works
                 
-                #self.timer_update.Start(False)
+
                 for key in H_List_Dict:
                     df[key+"_Hist"]=H_List_Dict[key]
-                #self.timer_update.Stop()
+        	    	   
                     
                 df=df.drop(columns=Image_Config.variables)
+		
 
-            #self.timer_yan.Stop()
-            #self.timer_general.Start(False) 
 
             # add to list of dataframes
             if concat_df.empty: concat_df = df
@@ -638,7 +597,7 @@ class Dataset:
 
             # count entries so far
             n_entries += df.shape[0]
-            #print("n_entries: "+str(n_entries))
+       
 
             # if number of entries exceeds max threshold, add labels and mem and save dataframe
             if (n_entries > self.maxEntries or f == ntuple_files[-1]):
@@ -658,11 +617,6 @@ class Dataset:
                 # remove trigger variables
                 concat_df = self.removeTriggerVariables(concat_df)
 
-                # write data to file
-                #print("Lets Save...")
-                #for x in df.columns: print x
-                #print(df)
-                #print(df["Jet_Pt[0-2]_Hist"])
                 self.createDatasets(concat_df, sample.categories.categories, Image_Config)
                 print("*"*50)
 
@@ -670,19 +624,11 @@ class Dataset:
                 n_entries = 0
                 concat_df = pd.DataFrame()
 
-            #yan debugging
-            #print(df)
-            
-            #self.timer_general.Stop()
-            #print("time spent in general processing: "+str(np.round(self.timer_general.RealTime(),2)))
-            #print("time spent in picture processing: "+str(np.round(self.timer_yan.RealTime(),2)))
-            #print("        -> in 2D hist processing: "+str(np.round(self.timer_hist.RealTime(),2)))
-            #print("        -> in updating processing: "+str(np.round(self.timer_update.RealTime(),2)))
+
 
             #break #only run for one file
             
-            
-        #print("time processing sample "+str(round(timer.RealTime(),4)))
+
 
     # ====================================================================
 
