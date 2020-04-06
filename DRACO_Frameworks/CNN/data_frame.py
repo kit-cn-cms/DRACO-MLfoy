@@ -22,6 +22,8 @@ class Sample:
         self.shape=[1,1]
 
     def load_dataframe(self, event_category, lumi, evenSel = "", phi_padding=0):
+        
+
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
@@ -45,8 +47,8 @@ class Sample:
         for col in df.columns:
             m=re.match("(.*_Hist)", col)
             if m!=None:
-               columns_to_decode.append(m.group(1)) 
-
+                columns_to_decode.append(m.group(1)) 
+               
         H_List_Dict={col:list() for col in columns_to_decode}
 
         for column_name in columns_to_decode:
@@ -65,11 +67,39 @@ class Sample:
                     u=np.concatenate((u[:,-npixel_topad:],u,u[:,:npixel_topad]), axis=1)
 
                 H_List_Dict[column_name].append(u)
+            #-----------------------------------------------------------------------------------------------------------
+            '''
+            #norm all Pt entries with quantile at 90%
+            #print(column_name)
+            #print(H_List_Dict[column_name])
+            if not column_name == 'Jet_CSV[0-16]_Hist':
+                value_list = []
+                for element in np.asarray(H_List_Dict[column_name]).flatten():
+                    if not element == 0:
+                        value_list.append(element)
 
-            df[column_name]=H_List_Dict[column_name]
-            #print(str(len(empty_imgs_evtids))+" empty images found at evtids "+str(empty_imgs_evtids))
+                quantile = np.quantile(value_list, 0.9)
+                print('quantile:')
+                print(quantile)
+
+                H_List_Dict[column_name] = np.asarray(H_List_Dict[column_name])/quantile
+
+                for image in H_List_Dict[column_name]:
+                    for i in range(self.shape[0]):
+                        for j in range(self.shape[1]):
+                            if image[i][j] > 1.:
+                                image[i][j] = 1.
+
+                #print(H_List_Dict[column_name])
+            '''
+            #----------------------------------------------------------------------------------------------------------    
+            try:
+                df[column_name]=H_List_Dict[column_name].tolist()
+            except AttributeError:
+                df[column_name]=H_List_Dict[column_name]
+            
             print("====> "+str(len(empty_imgs_evtids))+" empty images found in channel "+column_name)
-        
+                
         #event_list=np.array(H_List_Dict[columns_to_decode[0]])
 
         if phi_padding!=0:
@@ -123,8 +153,7 @@ class Sample:
         # adjust weights via 1/test_percentage such that yields in plots correspond to complete dataset
 
         df = df.assign(lumi_weight = lambda x: x.total_weight * lumi * self.normalization_weight / self.test_percentage)
-
-        
+	   
 
         self.data = df
         print("-"*50)
@@ -219,6 +248,7 @@ class DataFrame(object):
         # loop over all input samples and load dataframe
         train_samples = []
         self.input_shape = None
+
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.phi_padding)
             train_samples.append(sample.data)
@@ -226,11 +256,17 @@ class DataFrame(object):
                 if not self.input_shape == sample.shape:
                     sys.exit("input shapes do not match")
             self.input_shape = sample.shape
+        #print('#'*300)
+        #print('input shape:')
+        #print(self.input_shape)
+        #print(train_variables)
 
         # concatenating all dataframes
+
         df = pd.concat(train_samples, sort=True)
         del train_samples
-
+	
+         
         # multiclassification labelling
         if not self.binary_classification:
             # add class_label translation
@@ -317,7 +353,7 @@ class DataFrame(object):
         self.output_classes = self.classes
         self.input_samples = input_samples
 
-
+    
 
         # print some counts
         print("total events after cuts:  "+str(df.shape[0]))
@@ -361,13 +397,13 @@ class DataFrame(object):
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
-        if as_matrix: 
+        if as_matrix:
             if len(self.train_variables)==1:
                 traindata=np.expand_dims(np.stack(self.df_train[ self.train_variables[0] ].values),axis=3)
             else:
                 df_variables_tmp=[np.expand_dims(np.stack(self.df_train[ channel ].values), axis=3) for channel in self.train_variables]
                 traindata=np.concatenate(df_variables_tmp,axis=3)
-            #print(traindata)
+            
             return traindata
         else:     
             return self.df_train[ self.train_variables ]#not adjusted for cnn yet
@@ -387,7 +423,7 @@ class DataFrame(object):
     def get_test_data(self, as_matrix=True, normed=True):
         if not normed: 
             return self.df_test_unnormed[ self.train_variables ]#not adjusted for cnn yet
-        if as_matrix:  
+        if as_matrix: 
             if len(self.train_variables)==1:
                 testdata=np.expand_dims(np.stack(self.df_test[ self.train_variables[0] ].values),axis=3)
             else:

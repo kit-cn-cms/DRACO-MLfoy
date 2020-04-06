@@ -16,19 +16,19 @@ from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
 import utils.generateJTcut as JTcut
 import data_frame
 
-import keras
-import keras.optimizers as optimizers
-import keras.models as models
-import keras.layers as layer
-from keras import backend as K
+import tensorflow.keras as keras
+import tensorflow.keras.optimizers as optimizers
+import tensorflow.keras.models as models
+import tensorflow.keras.layers as layer
+from tensorflow.keras import backend as K
 import pandas as pd
 
 # Limit gpu usage
 import tensorflow as tf
 
-config = tf.ConfigProto()
+config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-K.tensorflow_backend.set_session(tf.Session(config=config))
+tf.compat.v1.keras.backend.set_session(tf.compat.v1.Session(config=config))
 
 class EarlyStopping(keras.callbacks.Callback):
     ''' custom implementation of early stopping
@@ -185,7 +185,7 @@ class CNN():
 
     def _load_architecture(self, config):
         ''' load the architecture configs '''
-
+    
         # define default network configuration
         self.architecture = {
           "layers":                   [200],
@@ -302,7 +302,7 @@ class CNN():
     def build_model(self, config = None, model = None):
         ''' build a CNN model
             use options defined in 'config' dictionary '''
-
+            
         if config:
             self._load_architecture(config)
             print("loading non default net configs")
@@ -349,7 +349,8 @@ class CNN():
             shuffle             = True,
             callbacks           = callbacks,
             validation_split    = 0.25,
-            sample_weight       = self.data.get_train_weights())
+            sample_weight       = self.data.get_train_weights()
+            )
 
     def save_model(self, argv, execute_dir):
         ''' save the trained model '''
@@ -510,6 +511,7 @@ class CNN():
 
         # loop over metrics and generate matplotlib plot
         for metric in metrics:
+            
             plt.clf()
             # get history of train and validation scores
             train_history = self.model_history[metric]
