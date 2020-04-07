@@ -44,8 +44,8 @@ class Sample:
             self.data = store.select("data", stop = self.stop)
         
         ## DEBUG
-        print "********************Debug data*****************************"
-        print self.data
+        # print "********************Debug data*****************************"
+        # print self.data
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
         self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
@@ -71,7 +71,6 @@ class Sample:
 
         # add weight entry for scaling
         self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
-
 
 
 class variablePlotter:
@@ -111,6 +110,7 @@ class variablePlotter:
         print("adding sample: "+str(kwargs["sampleName"]))
         kwargs["maxEntries"] = self.max_entries
         self.samples[kwargs["sampleName"]] = Sample(**kwargs)
+
         if not self.samples[kwargs["sampleName"]].isSignal:
             self.ordered_stack.append(kwargs["sampleName"])
 
@@ -150,6 +150,7 @@ class variablePlotter:
             # filter events according to JT category
             for key in self.samples:
                 self.samples[key].cutData(cat, variables, self.options["lumiScale"])
+                
 
             # loop over all variables and perform plot each time
             for variable in variables:
@@ -339,33 +340,39 @@ class variablePlotter:
     def histVariable_transformed(self, variable, plot_name, cat):
             histInfo = {}
 
-            print("************************MY DEBUG***************************")
-            X = {sample_name: [[j] for j in self.samples[sample_name].cut_data[cat][variable].values] for sample_name in self.samples}
-                #print self.samples[sample].cut_data[cat][variable].values[0]
-            transformed_X = {}
-            reshaped_transformed_X = {}
+            nevents = {}
+            X = []
+
+            print("************************DEBUG***************************")
+            # append values for the particular variable of all samples to X
+            for sample_name in self.samples:
+                nevents[sample_name] = len(self.samples[sample_name].cut_data[cat][variable].values)
+
+                for j in self.samples[sample_name].cut_data[cat][variable].values:
+                   X.append([j])
+
             qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
 
-            for sample_name in X.keys():
-                transformed_X[sample_name] = qt.fit_transform(X[sample_name])
-                #debug
-                # print "***Transformed: " +sample_name + "****"
-                # print transformed_X[sample_name]
+            transformed_X = qt.fit_transform(X)
+            del X
 
-            for sample_name in transformed_X.keys():
-                reshaped_transformed_X[sample_name] = []
-                for j in transformed_X[sample_name]:
-                    reshaped_transformed_X[sample_name].append(j[0])
+            # reshape the data [[x], [y], ...] --> [x, y, ...] and assign them to their sample names
+            X = {}
+            for sample_name in nevents.keys():
+                X[sample_name] = []
+                for j in transformed_X:
+                    if (len(X[sample_name]) > nevents[sample_name]-1):
+                        break
+                    X[sample_name].append(j[0])
             
-            #save transformed values with pandas
-            df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in reshaped_transformed_X.iteritems() ]))
-
-            print df
+            #save transformed values in a pandas dataframe
+            df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in X.iteritems() ]), columns = X.keys())
+            #print df
                 
 
             bins = 50
-            maxValue = max([max(reshaped_transformed_X[key]) for key in reshaped_transformed_X.keys()])
-            minValue = min([min(reshaped_transformed_X[key]) for key in reshaped_transformed_X.keys()])
+            maxValue = max([max(X[key]) for key in X.keys()])
+            minValue = min([min(X[key]) for key in X.keys()])
             displayname = variable
             logoption = "-"
 
@@ -393,7 +400,7 @@ class variablePlotter:
                 # get weights
                 weights = sample.cut_data[cat]["weight"].values
                 # get values
-                values = reshaped_transformed_X[sampleName]
+                values = X[sampleName]
 
                 #weights = [weights[i] for i in range(len(weights)) if not np.isnan(values[i])]
                 #values =  [values[i]  for i in range(len(values))  if not np.isnan(values[i])]
@@ -444,7 +451,7 @@ class variablePlotter:
 
                 # setup histogram
                 hist = setup.setupHistogram(
-                    values      = reshaped_transformed_X[sampleName],
+                    values      = X[sampleName],
                     weights     = weights,
                     nbins       = bins,
                     bin_range   = bin_range,
