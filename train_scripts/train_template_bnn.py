@@ -1,4 +1,8 @@
 # global imports
+# so that matplotlib can be used over ssh
+import matplotlib #me
+matplotlib.use('Agg') #me
+
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
@@ -26,7 +30,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight()) #me
 #input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
@@ -50,7 +54,9 @@ bnn = BNN.BNN(
     balanceSamples  = options.doBalanceSamples(),
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
+    #norm_variables  = options.doNormVariables(),#me
+    norm_variables  = False,#me
+    qt_norm_variables = True,
     sys_variation   = False,
     gen_vars        = False)
 

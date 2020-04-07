@@ -14,15 +14,15 @@ sys.path.append(basedir)
 usage = ""
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_training",
+parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_training", #me
         help="DIR for output (allows relative path to workdir or absolute path)", metavar="outputDir")
 
 sampleopts = optparse.OptionGroup(parser, "Sample Settings")
-sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
+sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="/local/scratch/ssd/nshadskiy/2017_nominal",
         help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="INPUTDIR")
 sampleopts.add_option("--naming", dest="naming",default="_dnn.h5",
         help="file ending for the samples in input directory (default _dnn.h5)", metavar="SAMPLENAMING")
-sampleopts.add_option("-c", "--category", dest="category",default="4j_ge3t",
+sampleopts.add_option("-c", "--category", dest="category",default="ge4j_ge3t",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
 sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
@@ -33,7 +33,7 @@ sampleopts.add_option("--odd",dest="even_sel",action="store_false",default=None,
 parser.add_option_group(sampleopts)
 
 trainopts = optparse.OptionGroup(parser, "Train Configurations")
-trainopts.add_option("-v", "--variableselection", dest="variableSelection",default="example_variables",
+trainopts.add_option("-v", "--variableselection", dest="variableSelection",default="allVariables_2017_bnn",
         help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="VARIABLESET")
 trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttH_2017",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="NETCONFIG")
@@ -48,7 +48,7 @@ trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "stor
 parser.add_option_group(trainopts)
 
 plotopts = optparse.OptionGroup(parser, "Plotting Options")
-plotopts.add_option("-p", "--plot", dest="plot", action = "store_true", default=False,
+plotopts.add_option("-p", "--plot", dest="plot", action = "store_true", default=True, #me
         help="activate to create plots")
 plotopts.add_option("-s", "--sigScale", dest="sigScale", default = -1, type = float, metavar = "SIGSCALE",
         help="scale of signal histograms in output plots. -1 scales to background integral")
@@ -68,11 +68,11 @@ parser.add_option_group(plotopts)
 
 binaryOptions = optparse.OptionGroup(parser, "Binary Options",
     "settings for binary DNN training")
-binaryOptions.add_option("--binary", dest="binary", action = "store_true", default=False,
+binaryOptions.add_option("--binary", dest="binary", action = "store_true", default=True, #me
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 binaryOptions.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0., metavar="BKGTARGET",
         help="target value for training of background samples (default is 0, signal is always 1)")
-binaryOptions.add_option("--signal", dest="signal_class", default=None, metavar="SIGNALCLASS",
+binaryOptions.add_option("--signal", dest="signal_class", default="ttH", metavar="SIGNALCLASS", #me
         help="STR of signal class for binary classification (allows comma separated list) (same as --signalclass)")
 parser.add_option_group(binaryOptions)
 

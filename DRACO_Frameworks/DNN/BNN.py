@@ -106,6 +106,7 @@ class BNN():
             category_cutString = None,
             category_label     = None,
             norm_variables     = True,
+            qt_norm_variables  = False,
             train_epochs       = 500,
             test_percentage    = 0.2,
             eval_metrics       = None,
@@ -433,7 +434,7 @@ class BNN():
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector.reshape(-1,1)) #me
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
@@ -718,3 +719,96 @@ class BNN():
         plt.savefig(out_path)
         print("saved plot of "+"KLD"+" at "+str(out_path))
         plt.close()
+
+
+    #copied from DNN.py in dev-bnn branch
+    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
+        ''' plot confusion matrix '''
+        plotCM = plottingScripts.plotConfusionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            plotdir             = self.save_path)
+
+        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
+
+    def plot_discriminators(self, log = False, printROC = False, privateWork = False,
+                            signal_class = None, nbins = None, bin_range = None,
+                            sigScale = -1):
+
+        ''' plot all events classified as one category '''
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(25*(1.-bin_range[0]))
+
+        plotDiscrs = plottingScripts.plotDiscriminators(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log,
+            sigScale            = sigScale)
+
+        bkg_hist, sig_hist = plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
+                            privateWork = False, nbins = 30, bin_range = [0.,1.],
+                            sigScale = -1):
+
+        ''' plot distribution in outputNodes '''
+        plotNodes = plottingScripts.plotOutputNodes(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log,
+            sigScale            = sigScale)
+
+        plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+
+    def plot_eventYields(self, log = False, privateWork = False, signal_class = None, sigScale = -1):
+        eventYields = plottingScripts.plotEventYields(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            signal_class        = signal_class,
+            plotdir             = self.save_path,
+            logscale            = log)
+
+        eventYields.plot(privateWork = privateWork)
+
+    def plot_closureTest(self, log = False, privateWork = False,
+                            signal_class = None, nbins = None, bin_range = None):
+        ''' plot comparison between train and test samples '''
+
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(20*(1.-bin_range[0]))
+
+        closureTest = plottingScripts.plotClosureTest(
+            data                = self.data,
+            test_prediction     = self.model_prediction_vector,
+            train_prediction    = self.model_train_prediction,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log)
+
+        closureTest.plot(ratio = False, privateWork = privateWork)

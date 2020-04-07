@@ -6,6 +6,14 @@ import tqdm
 from tensorflow.keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import QuantileTransformer
+
+# option handler
+import optionHandler
+options = optionHandler.optionHandler(sys.argv)
+options.initArguments()
+
+output_dir = options.getOutputDir()
 
 class Sample:
     def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2, total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', addSampleSuffix = ""):
@@ -184,7 +192,8 @@ class DataFrame(object):
                 train_variables,
                 category_cutString = None,
                 category_label     = None,
-                norm_variables = True,
+                norm_variables = False, #me
+                qt_norm_variables = True,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
@@ -308,19 +317,49 @@ class DataFrame(object):
 
         # norm variables if activated
         unnormed_df = df.copy()
+
+        #DEBUG
+        # print "********************************DEBUG****************************************"
+        # print "unnormed_df"
+        # print unnormed_df
+        
+        #####################################################################################################################
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
+
         if norm_variables:
             for v in train_variables:
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
                 if norm_csv["std"][v] == 0.:
                     sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
+       
+        #transform variables with quantile transformation
+        if qt_norm_variables:
+            qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
+            data = unnormed_df
+
+            for v in train_variables:
+                transformed_data = qt.fit_transform(np.reshape(data[v].values, (-1,1)))
+                data[v] = np.reshape(transformed_data, len(transformed_data))
+                del transformed_data
+
+            #save transformed data in a .h5 file
+            out_file = output_dir+'/qt_transformed_values.h5'
+            data.to_hdf(out_file, key='data', mode='w')
+            print("saved qt_transformed_values at "+str(out_file))
+
+            for v in train_variables:
+                norm_csv["mu"][v] = data[v].mean()
+                norm_csv["std"][v] = data[v].std()
+                if norm_csv["std"][v] == 0.:
+                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
+
         else:
             for v in train_variables:
                 norm_csv["mu"][v] = 0.
                 norm_csv["std"][v] = 1.
 
-        # if activated normal variables will be replaced with there Generator information (default is deactivated)
+        # if activated normal variables will be replaced with there Generator information (default is deactivated) ##me: UNIMPORTANT because default = false
         gen_dict={'Jet_GenJet_Eta[0]':'Jet_Eta[0]','Jet_GenJet_Eta[1]':'Jet_Eta[1]','Jet_GenJet_Eta[2]':'Jet_Eta[2]','Jet_GenJet_Eta[3]':'Jet_Eta[3]',
                   'Jet_GenJet_Pt[0]':'Jet_Pt[0]','Jet_GenJet_Pt[1]':'Jet_Pt[1]','Jet_GenJet_Pt[2]':'Jet_Pt[2]','Jet_GenJet_Pt[3]':'Jet_Pt[3]',
                   'GenTopLep_Lep_Phi[0]':'LooseLepton_Phi[0]','GenTopLep_Lep_Pt[0]':'LooseLepton_Pt[0]','GenTopLep_Lep_E[0]':'LooseLepton_E[0]',
@@ -329,7 +368,7 @@ class DataFrame(object):
             for i in gen_dict:
                 df[gen_dict[i]]=df[i]
 
-        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std() #staucht Verteilung so, dass Breite = 1 und Mittelwert = 0 # ERSEZEN --> add additional function for doing that --> chooseable which function one uses 
         self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
@@ -371,8 +410,6 @@ class DataFrame(object):
     #         sample.data[self.train_variables] = (sample.data[self.train_variables] - self.norm_csv["mu"])/(self.norm_csv["std"])
     #         samples.append(sample)
     #     self.non_train_samples = samples
-
-
 
     def balanceTrainSample(self):
         # get max number of events per sample
