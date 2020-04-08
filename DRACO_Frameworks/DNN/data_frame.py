@@ -192,7 +192,7 @@ class DataFrame(object):
                 train_variables,
                 category_cutString = None,
                 category_label     = None,
-                norm_variables = False, #me
+                norm_variables = True, 
                 qt_norm_variables = True,
                 test_percentage = 0.2,
                 lumi = 41.5,
@@ -318,21 +318,8 @@ class DataFrame(object):
         # norm variables if activated
         unnormed_df = df.copy()
 
-        #DEBUG
-        # print "********************************DEBUG****************************************"
-        # print "unnormed_df"
-        # print unnormed_df
-        
-        #####################################################################################################################
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
 
-        if norm_variables:
-            for v in train_variables:
-                norm_csv["mu"][v] = unnormed_df[v].mean()
-                norm_csv["std"][v] = unnormed_df[v].std()
-                if norm_csv["std"][v] == 0.:
-                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
-       
         #transform variables with quantile transformation
         if qt_norm_variables:
             qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
@@ -354,6 +341,13 @@ class DataFrame(object):
                 if norm_csv["std"][v] == 0.:
                     sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
 
+        elif norm_variables:
+            for v in train_variables:
+                norm_csv["mu"][v] = unnormed_df[v].mean()
+                norm_csv["std"][v] = unnormed_df[v].std()
+                if norm_csv["std"][v] == 0.:
+                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
+       
         else:
             for v in train_variables:
                 norm_csv["mu"][v] = 0.

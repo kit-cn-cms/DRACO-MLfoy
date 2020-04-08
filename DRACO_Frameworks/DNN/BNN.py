@@ -106,7 +106,7 @@ class BNN():
             category_cutString = None,
             category_label     = None,
             norm_variables     = True,
-            qt_norm_variables  = False,
+            qt_norm_variables  = True,
             train_epochs       = 500,
             test_percentage    = 0.2,
             eval_metrics       = None,
@@ -116,6 +116,7 @@ class BNN():
             sys_variation      = False,
             gen_vars           = False):
 
+        
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
@@ -160,6 +161,7 @@ class BNN():
 
         # normalize variables in DataFrame
         self.norm_variables = norm_variables
+        self.qt_norm_variables = qt_norm_variables
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples, sys_variation, gen_vars)
@@ -170,7 +172,7 @@ class BNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables:
+        if self.norm_variables or self.qt_norm_variables :
            out_file = self.cp_path + "/variable_norm.csv"
            self.data.norm_csv.to_csv(out_file)
            print("saved variabe norms at "+str(out_file))
@@ -197,6 +199,7 @@ class BNN():
             train_variables  = self.train_variables,
             test_percentage  = self.test_percentage,
             norm_variables   = self.norm_variables,
+            qt_norm_variables = self.qt_norm_variables,
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,

@@ -54,9 +54,8 @@ bnn = BNN.BNN(
     balanceSamples  = options.doBalanceSamples(),
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
-    #norm_variables  = options.doNormVariables(),#me
-    norm_variables  = False,#me
-    qt_norm_variables = True,
+    norm_variables  = options.doNormVariables(),
+    qt_norm_variables = (options.doNormVariables() and options.doQTNormVariables()) ,
     sys_variation   = False,
     gen_vars        = False)
 
@@ -91,7 +90,7 @@ if options.doPlots():
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
-            nbins       = 15,
+            nbins       = 45, #me
             bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
