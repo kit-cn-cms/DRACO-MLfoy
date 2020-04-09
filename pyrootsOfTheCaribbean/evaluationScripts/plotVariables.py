@@ -3,6 +3,7 @@ import os
 import sys
 import pandas
 import numpy as np
+import pickle
 # local imports
 
 from sklearn.preprocessing import QuantileTransformer ## me
@@ -352,23 +353,41 @@ class variablePlotter:
                    X.append([j])
 
             qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+            
+            #DEBUG
+            work_dir = os.getcwd()
 
-            transformed_X = qt.fit_transform(X)
-            del X
+            ## a) load previous fit data OR
+            # fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
+            # with open(fit_file, 'r') as f2:
+            #     fit_values = pickle.load(f2)
+
+            ## b) peform a new fit on the data
+            fit_values = qt.fit(X)
+            
+            transformed_X = fit_values.transform(X)
+
+            # save fit information in a .csv file
+            # with open(fit_file, "w") as f:
+            #     pickle.dump(qt, f)
 
             # reshape the data [[x], [y], ...] --> [x, y, ...] and assign them to their sample names
+            del X
             X = {}
+            start_index = 0
+
             for sample_name in nevents.keys():
                 X[sample_name] = []
-                for j in transformed_X:
-                    if (len(X[sample_name]) > nevents[sample_name]-1):
-                        break
+                for j in transformed_X[start_index:start_index + nevents[sample_name]]:
                     X[sample_name].append(j[0])
+                start_index = start_index + nevents[sample_name]
+
             
-            #save transformed values in a pandas dataframe
-            df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in X.iteritems() ]), columns = X.keys())
-            #print df
-                
+            #save transformed data in a .h5 file
+            # out_file = '/home/ycung/2_qt_transformed_values.h5'
+            # df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in X.iteritems() ]), columns = X.keys())
+            # df.to_hdf(out_file, key='data', mode='w')
+            
 
             bins = 50
             maxValue = max([max(X[key]) for key in X.keys()])
