@@ -44,9 +44,11 @@ trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.2,
 trainopts.add_option("--balanceSamples", dest="balanceSamples", action = "store_true", default=False,
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.")
 trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
-        help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.")
+        help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.If using -q then the input features are automatically normed!") #me
 trainopts.add_option("-q", "--quantile", dest = "qt_norm_variables", action = "store_true", default = False,
         help = "activate to perform a quantile transformation on the input features") #me
+trainopts.add_option("--restorefitdir", dest = "restore_fit_dir", default = None,
+        help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me
 parser.add_option_group(trainopts)
 
 plotopts = optparse.OptionGroup(parser, "Plotting Options")
@@ -238,6 +240,9 @@ class optionHandler:
     
     def doQTNormVariables(self):
         return self.__options.qt_norm_variables
+    
+    def getRestoreFitDir(self):
+        return self.__options.restore_fit_dir
 
     def getNetConfig(self):
         return self.__config

@@ -55,7 +55,8 @@ bnn = BNN.BNN(
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables(),
-    qt_norm_variables = (options.doNormVariables() and options.doQTNormVariables()) ,
+    qt_transformed_variables = options.doQTNormVariables(),
+    restore_fit_dir = options.getRestoreFitDir(),
     sys_variation   = False,
     gen_vars        = False)
 

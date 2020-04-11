@@ -106,7 +106,8 @@ class BNN():
             category_cutString = None,
             category_label     = None,
             norm_variables     = True,
-            qt_norm_variables  = True,
+            qt_transformed_variables  = True,
+            restore_fit_dir    = None,
             train_epochs       = 500,
             test_percentage    = 0.2,
             eval_metrics       = None,
@@ -161,7 +162,8 @@ class BNN():
 
         # normalize variables in DataFrame
         self.norm_variables = norm_variables
-        self.qt_norm_variables = qt_norm_variables
+        self.qt_transformed_variables = qt_transformed_variables
+        self.restore_fit_dir = restore_fit_dir
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples, sys_variation, gen_vars)
@@ -172,10 +174,10 @@ class BNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables or self.qt_norm_variables :
+        if self.norm_variables or self.qt_transformed_variables :
            out_file = self.cp_path + "/variable_norm.csv"
            self.data.norm_csv.to_csv(out_file)
-           print("saved variabe norms at "+str(out_file))
+           print("saved variable norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -199,7 +201,8 @@ class BNN():
             train_variables  = self.train_variables,
             test_percentage  = self.test_percentage,
             norm_variables   = self.norm_variables,
-            qt_norm_variables = self.qt_norm_variables,
+            qt_transformed_variables = self.qt_transformed_variables,
+            restore_fit_dir  = self.restore_fit_dir,
             shuffleSeed      = shuffle_seed,
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
@@ -528,7 +531,7 @@ class BNN():
         print("wrote config of input variables to {}".format(plot_file))
 
         # Serialize the test inputs for the analysis of the gradients
-        pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
+        ##pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb")) #me as it needs much space
 
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''

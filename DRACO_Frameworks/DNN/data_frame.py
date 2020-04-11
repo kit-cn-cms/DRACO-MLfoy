@@ -3,6 +3,9 @@ import os
 import sys
 import numpy as np
 import tqdm
+import pickle
+import warnings
+
 from tensorflow.keras.utils import to_categorical
 from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
@@ -193,7 +196,8 @@ class DataFrame(object):
                 category_cutString = None,
                 category_label     = None,
                 norm_variables = True, 
-                qt_norm_variables = True,
+                qt_transformed_variables = True,
+                restore_fit_dir = None,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
@@ -317,38 +321,16 @@ class DataFrame(object):
 
         # norm variables if activated
         unnormed_df = df.copy()
-
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
 
-        #transform variables with quantile transformation
-        if qt_norm_variables:
-            qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
-            data = unnormed_df
-
-            for v in train_variables:
-                transformed_data = qt.fit_transform(np.reshape(data[v].values, (-1,1)))
-                data[v] = np.reshape(transformed_data, len(transformed_data))
-                del transformed_data
-
-            #save transformed data in a .h5 file
-            out_file = output_dir+'/qt_transformed_values.h5'
-            data.to_hdf(out_file, key='data', mode='w')
-            print("saved qt_transformed_values at "+str(out_file))
-
-            for v in train_variables:
-                norm_csv["mu"][v] = data[v].mean()
-                norm_csv["std"][v] = data[v].std()
-                if norm_csv["std"][v] == 0.:
-                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
-
-        elif norm_variables:
+        if (not qt_transformed_variables) and norm_variables:
             for v in train_variables:
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
                 if norm_csv["std"][v] == 0.:
                     sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
        
-        else:
+        elif (not qt_transformed_variables) and (not norm_variables):
             for v in train_variables:
                 norm_csv["mu"][v] = 0.
                 norm_csv["std"][v] = 1.
@@ -362,7 +344,41 @@ class DataFrame(object):
             for i in gen_dict:
                 df[gen_dict[i]]=df[i]
 
-        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std() #staucht Verteilung so, dass Breite = 1 und Mittelwert = 0 # ERSEZEN --> add additional function for doing that --> chooseable which function one uses 
+        # transform variables with quantile transformation
+        if qt_transformed_variables:
+            fit_file = os.path.join(output_dir, 'fit_data.csv')
+
+            ## a) peform a new fit on the data OR
+            if restore_fit_dir is None:
+                qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
+                fit_values = qt.fit(df[train_variables])
+
+            ## b) load previous fit data OR
+            else:
+                with open(fit_file, 'r') as f2:
+                    fit_values = pickle.load(f2)
+            
+            # save fit information in a .csv file
+            with open(fit_file, "w") as f:
+                pickle.dump(qt, f)
+
+            df[train_variables] = fit_values.transform(df[train_variables])
+
+            #save transformed data in a .h5 file
+            # out_file = output_dir+'/NEW_qt_transformed_values.h5'
+            # df.to_hdf(out_file, key='data', mode='w')
+            # print("saved qt_transformed_values at "+str(out_file))
+
+            for v in train_variables:
+                norm_csv["mu"][v] = df[v].mean()
+                norm_csv["std"][v] = df[v].std()
+                if norm_csv["std"][v] == 0.:
+                    sys.exit("std deviation of variable {} is zero -- this cannot be used for training".format(v))
+        
+        #staucht Verteilung so, dass Breite = 1 und Mittelwert = 0 
+        else:
+            df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std() 
+        
         self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()
@@ -371,7 +387,10 @@ class DataFrame(object):
         n_test_samples = int( df.shape[0]*test_percentage)
         self.df_test = df.head(n_test_samples)
         self.df_train = df.tail(df.shape[0] - n_test_samples)
-        self.df_test_unnormed = unnormed_df.head(n_test_samples)
+        if not qt_transformed_variables:
+            self.df_test_unnormed = unnormed_df.head(n_test_samples)
+        else:
+            self.df_test_unnormed = None
 
         # split ttbb test samples into nominal and add sample according to ttbb generator
         if addSampleSuffix:
@@ -459,12 +478,20 @@ class DataFrame(object):
 
     # test data ------------------------------------
     def get_test_data(self, as_matrix=True, normed=True):
-        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if not normed:
+            if self.df_test_unnnormed is None:
+                warnings.warn("************************************************************WARNING************************************************************:")
+                warnings.warn("unnormed test data is empty as using the QuantileTransformer via -q always norm the data automatically")
+            return self.df_test_unnormed[ self.train_variables ]
         if as_matrix:  return self.df_test[ self.train_variables ].values
         else:          return self.df_test[ self.train_variables ]
 
     def get_all_test_data(self, unnormed=True):
-        if unnormed:  return self.df_test_unnormed
+        if unnormed:
+            if self.df_test_unnnormed is None:
+                warnings.warn("************************************************************WARNING************************************************************:")
+                warnings.warn("unnormed test data is empty as using the QuantileTransformer via -q always norm the data automatically")  
+            return self.df_test_unnormed
         else:         return self.df_test
 
     def get_test_weights(self):
@@ -499,12 +526,20 @@ class DataFrame(object):
         return pd.Series([c if self.df_train["is_ttBB"].values[i]==1 else 0 for i, c in enumerate(self.df_train["train_weight"].values)],index = self.df_train.index).values
 
     def get_test_data_nominal(self, as_matrix=True, normed=True):
-        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if not normed: 
+            if self.df_test_unnnormed is None:
+                warnings.warn("************************************************************WARNING************************************************************:")
+                warnings.warn("unnormed test data is empty as using the QuantileTransformer via -q always norm the data automatically")
+            return self.df_test_unnormed[ self.train_variables ]
         if as_matrix:  return self.df_test_nominal[ self.train_variables ].values
         else:          return self.df_test_nominal[ self.train_variables ]
 
     def get_test_data_additional(self, as_matrix=True, normed=True):
-        if not normed: return self.df_test_unnormed[ self.train_variables ]
+        if not normed: 
+            if self.df_test_unnnormed is None:
+                warnings.warn("************************************************************WARNING************************************************************:")
+                warnings.warn("unnormed test data is empty as using the QuantileTransformer via -q always norm the data automatically")
+            return self.df_test_unnormed[ self.train_variables ]
         if as_matrix:  return self.df_test_additional[ self.train_variables ].values
         else:          return self.df_test_additional[ self.train_variables ]
 
