@@ -103,19 +103,19 @@ class BNN():
             input_samples,
             category_name,
             train_variables,
-            category_cutString = None,
-            category_label     = None,
-            norm_variables     = True,
+            category_cutString        = None,
+            category_label            = None,
+            norm_variables            = True,
             qt_transformed_variables  = True,
-            restore_fit_dir    = None,
-            train_epochs       = 500,
-            test_percentage    = 0.2,
-            eval_metrics       = None,
-            shuffle_seed       = None,
-            balanceSamples     = False,
-            evenSel            = None,
-            sys_variation      = False,
-            gen_vars           = False):
+            restore_fit_dir           = None,
+            train_epochs              = 500,
+            test_percentage           = 0.2,
+            eval_metrics              = None,
+            shuffle_seed              = None,
+            balanceSamples            = False,
+            evenSel                   = None,
+            sys_variation             = False,
+            gen_vars                  = False):
 
         
         # save some information
@@ -174,7 +174,7 @@ class BNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables or self.qt_transformed_variables :
+        if self.norm_variables or self.qt_transformed_variables:
            out_file = self.cp_path + "/variable_norm.csv"
            self.data.norm_csv.to_csv(out_file)
            print("saved variable norms at "+str(out_file))
@@ -196,18 +196,18 @@ class BNN():
     def _load_datasets(self, shuffle_seed, balanceSamples, sys_variation, gen_vars):
         ''' load data set '''
         return data_frame.DataFrame(
-            input_samples    = self.input_samples,
-            event_category   = self.category_cutString,
-            train_variables  = self.train_variables,
-            test_percentage  = self.test_percentage,
-            norm_variables   = self.norm_variables,
+            input_samples            = self.input_samples,
+            event_category           = self.category_cutString,
+            train_variables          = self.train_variables,
+            test_percentage          = self.test_percentage,
+            norm_variables           = self.norm_variables,
             qt_transformed_variables = self.qt_transformed_variables,
-            restore_fit_dir  = self.restore_fit_dir,
-            shuffleSeed      = shuffle_seed,
-            balanceSamples   = balanceSamples,
-            evenSel          = self.evenSel,
-            sys_variation    = sys_variation,
-            gen_vars         = gen_vars,
+            restore_fit_dir          = self.restore_fit_dir,
+            shuffleSeed              = shuffle_seed,
+            balanceSamples           = balanceSamples,
+            evenSel                  = self.evenSel,
+            sys_variation            = sys_variation,
+            gen_vars                 = gen_vars,
         )
 
     def _load_architecture(self, config):
@@ -726,6 +726,18 @@ class BNN():
         print("saved plot of "+"KLD"+" at "+str(out_path))
         plt.close()
 
+    # me
+    def plot_binaryConfusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
+        ''' plot confusion matrix '''
+        plotCM = plottingScripts.plotConfusionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            plotdir             = self.save_path,
+            argmax_axis         = 0) #me
+        
+        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
 
     #copied from DNN.py in dev-bnn branch
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
