@@ -97,16 +97,18 @@ class DNN():
             input_samples,
             category_name,
             train_variables,
-            category_cutString = None,
-            category_label     = None,
-            norm_variables     = True,
-            train_epochs       = 500,
-            test_percentage    = 0.2,
-            eval_metrics       = None,
-            shuffle_seed       = None,
-            balanceSamples     = False,
-            evenSel            = None,
-            addSampleSuffix    = ""):
+            category_cutString        = None,
+            category_label            = None,
+            norm_variables            = True,
+            qt_transformed_variables  = True,
+            restore_fit_dir           = None,
+            train_epochs              = 500,
+            test_percentage           = 0.2,
+            eval_metrics              = None,
+            shuffle_seed              = None,
+            balanceSamples            = False,
+            evenSel                   = None,
+            addSampleSuffix            = ""):
 
         # save some information
         # list of samples to load into dataframe
@@ -157,6 +159,8 @@ class DNN():
 
         # normalize variables in DataFrame
         self.norm_variables = norm_variables
+        self.qt_transformed_variables = qt_transformed_variables
+        self.restore_fit_dir = restore_fit_dir
 
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
@@ -167,7 +171,7 @@ class DNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables:
+        if self.norm_variables or self.qt_transformed_variables:
            out_file = self.cp_path + "/variable_norm.csv"
            self.data.norm_csv.to_csv(out_file)
            print("saved variabe norms at "+str(out_file))
@@ -193,15 +197,17 @@ class DNN():
     def _load_datasets(self, shuffle_seed, balanceSamples):
         ''' load data set '''
         return data_frame.DataFrame(
-            input_samples    = self.input_samples,
-            event_category   = self.category_cutString,
-            train_variables  = self.train_variables,
-            test_percentage  = self.test_percentage,
-            norm_variables   = self.norm_variables,
-            shuffleSeed      = shuffle_seed,
-            balanceSamples   = balanceSamples,
-            evenSel          = self.evenSel,
-            addSampleSuffix  = self.addSampleSuffix
+            input_samples            = self.input_samples,
+            event_category           = self.category_cutString,
+            train_variables          = self.train_variables,
+            test_percentage          = self.test_percentage,
+            norm_variables           = self.norm_variables,
+            qt_transformed_variables = self.qt_transformed_variables,
+            restore_fit_dir          = self.restore_fit_dir,
+            shuffleSeed              = shuffle_seed,
+            balanceSamples           = balanceSamples,
+            evenSel                  = self.evenSel,
+            addSampleSuffix          = self.addSampleSuffix
         )
 
     def _load_architecture(self, config):
@@ -252,7 +258,7 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        #return self.model_prediction_vector
+        return self.model_prediction_vector #me
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )

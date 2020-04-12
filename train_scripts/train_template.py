@@ -1,4 +1,8 @@
 # global imports
+# so that matplotlib can be used over ssh
+import matplotlib #me
+matplotlib.use('Agg') #me
+
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
@@ -25,22 +29,22 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me 
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me 
+# input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 
-input_samples.addSample(options.getDefaultName("ttH_HTXS_0") ,  label = "ttH_HTXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_HTXS_1") ,  label = "ttH_HTXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_HTXS_2") ,  label = "ttH_HTXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_HTXS_3") ,  label = "ttH_HTXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_HTXS_4") ,  label = "ttH_HTXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("ttH_HTXS_0") ,  label = "ttH_HTXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_HTXS_1") ,  label = "ttH_HTXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_HTXS_2") ,  label = "ttH_HTXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_HTXS_3") ,  label = "ttH_HTXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_HTXS_4") ,  label = "ttH_HTXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 
 # additional samples for adversary training
 if options.isAdversary():
@@ -68,7 +72,9 @@ if not options.isAdversary():
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.doBalanceSamples(),
         evenSel         = options.doEvenSelection(),
-        norm_variables  = options.doNormVariables())
+        norm_variables  = options.doNormVariables(),
+        qt_transformed_variables = options.doQTNormVariables(), #me
+        restore_fit_dir = options.getRestoreFitDir(),) #me
 else:
     import DRACO_Frameworks.DNN.CAN as CAN
     # initializing CAN training class
@@ -123,10 +129,11 @@ if options.doPlots():
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
-            nbins       = 15,
+            nbins       = 45, #me
             bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
+
         if options.isAdversary():
             dnn.plot_ttbbKS_binary(
                 log                 = options.doLogPlots(),
