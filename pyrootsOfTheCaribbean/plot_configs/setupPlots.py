@@ -31,7 +31,7 @@ def GetPlotColor( cls ):
         }
 
     if "ttZ" in cls: cls = "ttZ"
-    if "ttH" and not "HTXS" in cls: cls = "ttH"
+    #if "ttH" and not "HTXS" in cls: cls = "ttH" #semantic error? as condition is always true if cls is not "HTXS"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
