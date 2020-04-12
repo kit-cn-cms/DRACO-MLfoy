@@ -60,7 +60,7 @@ bnn = BNN.BNN(
     sys_variation   = False,
     gen_vars        = False)
 
-# build DNN model
+# build BNN model
 bnn.build_model(options.getNetConfig())
 
 # perform the training
@@ -95,6 +95,8 @@ if options.doPlots():
             bin_range   = bin_range,
             name        = options.getName(),
             sigScale    = options.getSignalScale())
+        
+       
     else:
         # plot the confusion matrix
         bnn.plot_confusionMatrix(
