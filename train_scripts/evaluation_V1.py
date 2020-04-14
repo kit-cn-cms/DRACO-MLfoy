@@ -1,6 +1,6 @@
 #cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_v1 -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
 #TODO: -q angeben ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
-# TODO: change restore_fit_dir in THIS script
+# TODO: change restore_fit_dir, n_cycles and in THIS script, 
 
 # global imports
 # so that matplotlib can be used over ssh
@@ -60,17 +60,36 @@ if options.isBinary():
 
 
 ###### code for NN output comparison ######   
+def get_column(array, i):
+    return [row[i] for row in array]
 
-#me modified
-def anns_calc_mean_std(model, input_dir, n_NNs=1):
+#me modified TODO: fix bug axis for nn3
+def ann_calc_mean_std(model, input_dir, n_NNs=1):
     pred_list = []
-    for i in range(n_NNs):
-        print "Iteration: {}".format(i)
+    for j in range(n_NNs):
         preds = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
         pred_list.append(preds)
     test_preds = np.concatenate(pred_list, axis=1)
     return np.mean(test_preds, axis=1), np.std(test_preds, axis=1)
 
+def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
+    pred_list = {}
+    test_preds_mean = []
+    test_preds_std = []
+    for j in range(n_NNs):
+        preds, event_class = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
+        for sample_name in range(len(preds[0])):
+            if event_class[sample_name] not in pred_list.keys():
+                pred_list[event_class[sample_name]] = get_column(preds, sample_name)
+                pred_list[event_class[sample_name]] = np.reshape(pred_list[event_class[sample_name]],(-1,1))
+            else:
+                pred_list[event_class[sample_name]]  = np.concatenate((pred_list[event_class[sample_name]], np.reshape(get_column(preds,sample_name),(-1,1))), axis=1)
+    for i in range(len(pred_list.keys())):
+        print pred_list[event_class[i]]
+        test_preds_mean.append(np.mean(pred_list[event_class[i]], axis = 1))
+        test_preds_std.append(np.std(pred_list[event_class[i]], axis = 1))
+
+    return test_preds_mean, test_preds_std, event_class
 
 def plot_correlation_two_NNs(NN_pred1, NN_pred2, NN_pred1_std, NN_pred2_std, x_lab, y_lab, save_dir, save_name):
     from matplotlib.colors import LogNorm
@@ -232,16 +251,16 @@ input_dir_2 = work_dir+"QT_training_bnn_ge4j_ge3t"
 nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2)
 
 input_dir_3 = work_dir+"ANN_training_ge4j_ge3t"
-nn3_pred, nn3_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn, input_dir=input_dir_3)
+nn3_pred, nn3_pred_std = ann_calc_mean_std(model=dnn, input_dir=input_dir_3)
 
 input_dir_4 = work_dir+"QT_ANN_training_ge4j_ge3t"
-nn4_pred, nn4_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_qt, input_dir=input_dir_4)
+nn4_pred, nn4_pred_std = ann_calc_mean_std(model=dnn_qt, input_dir=input_dir_4)
 
 input_dir_5 = work_dir+"MultiANN_training_ge4j_ge3t"
-nn5_pred, nn5_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_multi, input_dir=input_dir_5)
+nn5_pred, nn5_pred_std, event_class5 = multi_ann_calc_mean_std(model=dnn_multi, input_dir=input_dir_5)
 
 input_dir_6 = work_dir+"QT_MultiANN_training_ge4j_ge3t"
-nn6_pred, nn6_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_multi_qt, input_dir=input_dir_6)
+nn6_pred, nn6_pred_std, event_class6 = multi_ann_calc_mean_std(model=dnn_multi_qt, input_dir=input_dir_6)
 
 
 # plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN 1", "BNN 2", out_dir_2, "bnn1_bnn2_prior_{}_{}".format(bnn_prior_1, bnn_prior_2))
@@ -251,11 +270,12 @@ nn6_pred, nn6_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_multi_qt, input_d
 # compare BNN with and without quantile transformation
 plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN", "BNN_QT", output_dir, "BNN_comparison")
 
-#compare ANN with and without quantile transformation
+# #compare ANN with and without quantile transformation
 plot_correlation_two_NNs(nn3_pred, nn4_pred, nn3_pred_std, nn4_pred_std, "ANN", "ANN_QT", output_dir, "ANN_comparison")
 
-#compare multiclassification with and without quantile transformation
-plot_correlation_two_NNs(nn5_pred, nn6_pred, nn5_pred_std, nn6_pred_std, "MultiANN", "MultiANN_QT", output_dir, "MultiANN_comparison")
+# #compare multiclassification with and without quantile transformation
+for i in range(event_class5):
+    plot_correlation_two_NNs(nn5_pred[i], nn6_pred[i], nn5_pred_std[i], nn6_pred_std[i], "MultiANN", "MultiANN_QT", output_dir, "MultiANN_comparison_"+str(i))
 
 
 
