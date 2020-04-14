@@ -1,11 +1,13 @@
-#-i and and -o and -c and train_variables and --binary
-
-#TODO: -q ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
+#cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_v1 -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
+#TODO: -q angeben ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
+# TODO: change restore_fit_dir in THIS script
 
 # global imports
 # so that matplotlib can be used over ssh
 import matplotlib #me
 matplotlib.use('Agg') #me
+
+from copy import deepcopy #me
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -48,7 +50,8 @@ input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normal
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
 
-input_samples_binary = input_samples.copy()
+input_samples_binary = deepcopy(input_samples)
+
 
 if options.isBinary():
     input_samples_binary.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
@@ -58,12 +61,12 @@ if options.isBinary():
 
 ###### code for NN output comparison ######   
 
-def anns_calc_mean_std(n_NNs, input_dir):
+#me modified
+def anns_calc_mean_std(model, input_dir, n_NNs=1):
     pred_list = []
     for i in range(n_NNs):
-        i+=1
         print "Iteration: {}".format(i)
-        preds = dnn.load_trained_model(input_dir + "/ann_{}_ge4j_ge3t".format(i)) #TODO: rewatch code and compare with bnn_calc_mean
+        preds = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
         pred_list.append(preds)
     test_preds = np.concatenate(pred_list, axis=1)
     return np.mean(test_preds, axis=1), np.std(test_preds, axis=1)
@@ -94,10 +97,16 @@ def plot_correlation_two_NNs(NN_pred1, NN_pred2, NN_pred1_std, NN_pred2_std, x_l
     print "std_{}.pdf was created".format(save_name)
     plt.close()
 
+
+
+output_dir = options.getOutputDir()
+work_dir = "/home/ycung/Desktop/DRACO-MLfoy/workdir/"
+
+
 ######################################################### initializing BNN/DNN training class ##################################################################
 bnn = BNN.BNN(
     save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary,
+    input_samples   = input_samples_binary, #changed
     category_name   = options.getCategory(),
     train_variables = options.getTrainVariables(),
     # number of epochs
@@ -111,14 +120,14 @@ bnn = BNN.BNN(
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = not options.doQTNormVariables(),
-    restore_fit_dir = options.getRestoreFitDir(),
+    qt_transformed_variables = not options.doQTNormVariables(), #changed
+    restore_fit_dir = None, #changed
     sys_variation   = False,
     gen_vars        = False)
 
 bnn_qt = BNN.BNN(
     save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary,
+    input_samples   = input_samples_binary, #changed
     category_name   = options.getCategory(),
     train_variables = options.getTrainVariables(),
     # number of epochs
@@ -133,15 +142,14 @@ bnn_qt = BNN.BNN(
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables(),
     qt_transformed_variables = options.doQTNormVariables(),
-    restore_fit_dir = options.getRestoreFitDir(),
+    restore_fit_dir = work_dir+"QT_training_bnn_ge4j_ge3t/fit_data.csv",
     sys_variation   = False,
     gen_vars        = False)
 
 # initializing DNN training class 
-# TODO: ADD missing options e.g. -q
 dnn = DNN.DNN(
     save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary,
+    input_samples   = input_samples_binary, #changed
     category_name   = options.getCategory(),
     train_variables = options.getTrainVariables(),
     # number of epochs
@@ -154,7 +162,28 @@ dnn = DNN.DNN(
     balanceSamples  = options.doBalanceSamples(),
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables())
+    norm_variables  = options.doNormVariables(),
+    qt_transformed_variables = not options.doQTNormVariables(), #changed
+    restore_fit_dir = None) #changed
+
+dnn_qt = DNN.DNN(
+    save_path       = options.getOutputDir(),
+    input_samples   = input_samples_binary, #changed
+    category_name   = options.getCategory(),
+    train_variables = options.getTrainVariables(),
+    # number of epochs
+    train_epochs    = options.getTrainEpochs(),
+    # metrics for evaluation (c.f. KERAS metrics)
+    eval_metrics    = ["acc"],
+    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+    test_percentage = options.getTestPercentage(),
+    # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.doBalanceSamples(),
+    shuffle_seed    = 42,
+    evenSel         = options.doEvenSelection(),
+    norm_variables  = options.doNormVariables(),
+    qt_transformed_variables = options.doQTNormVariables(), #changed
+    restore_fit_dir = work_dir+"QT_ANN_training_ge4j_ge3t/fit_data.csv") #changed
 
 dnn_multi = DNN.DNN(
     save_path       = options.getOutputDir(),
@@ -171,32 +200,48 @@ dnn_multi = DNN.DNN(
     balanceSamples  = options.doBalanceSamples(),
     shuffle_seed    = 42,
     evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables())
+    norm_variables  = options.doNormVariables(),
+    qt_transformed_variables = not options.doQTNormVariables(), #changed
+    restore_fit_dir = None) #changed
+
+dnn_multi_qt = DNN.DNN(
+    save_path       = options.getOutputDir(),
+    input_samples   = input_samples,
+    category_name   = options.getCategory(),
+    train_variables = options.getTrainVariables(),
+    # number of epochs
+    train_epochs    = options.getTrainEpochs(),
+    # metrics for evaluation (c.f. KERAS metrics)
+    eval_metrics    = ["acc"],
+    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+    test_percentage = options.getTestPercentage(),
+    # balance samples per epoch such that there amount of samples per category is roughly equal
+    balanceSamples  = options.doBalanceSamples(),
+    shuffle_seed    = 42,
+    evenSel         = options.doEvenSelection(),
+    norm_variables  = options.doNormVariables(),
+    qt_transformed_variables = options.doQTNormVariables(), #changed
+    restore_fit_dir = work_dir+"QT_MultiANN_training_ge4j_ge3t/fit_data.csv") #changed
 
 
-output_dir = options.getOutputDir()
 
-input_dir_1 = "/home/ycung/Desktop/DRACO-MLfoy/workdir/BNN_training_ge4j_ge3t"
+input_dir_1 = work_dir+"BNN_training_ge4j_ge3t"
 nn1_pred, nn1_pred_std, labels1 = bnn.load_trained_model(input_dir_1)
 
-input_dir_2 = "/home/ycung/Desktop/DRACO-MLfoy/workdir/QT_training_bnn_ge4j_ge3t"
+input_dir_2 = work_dir+"QT_training_bnn_ge4j_ge3t"
 nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2)
 
+input_dir_3 = work_dir+"ANN_training_ge4j_ge3t"
+nn3_pred, nn3_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn, input_dir=input_dir_3)
 
-nn2_sig_pred, nn2_sig_pred_std, nn1_sig_pred, nn1_sig_pred_std, nn2_bkg_pred, nn2_bkg_pred_std, nn1_bkg_pred, nn1_bkg_pred_std = [],[],[],[],[],[],[],[]
-for i in range(len(labels2)):
-    if labels2[i]==1:
-        nn1_sig_pred.append(nn1_pred[i])
-        nn1_sig_pred_std.append(nn1_pred_std[i])
-        nn2_sig_pred.append(nn2_pred[i])
-        nn2_sig_pred_std.append(nn2_pred_std[i])
-    elif labels2[i]==0:
-        nn1_bkg_pred.append(nn1_pred[i])
-        nn1_bkg_pred_std.append(nn1_pred_std[i])
-        nn2_bkg_pred.append(nn2_pred[i])
-        nn2_bkg_pred_std.append(nn2_pred_std[i])
-    else:
-        print "--wrong event--"
+input_dir_4 = work_dir+"QT_ANN_training_ge4j_ge3t"
+nn4_pred, nn4_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_qt, input_dir=input_dir_4)
+
+input_dir_5 = work_dir+"MultiANN_training_ge4j_ge3t"
+nn5_pred, nn5_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_multi, input_dir=input_dir_5)
+
+input_dir_6 = work_dir+"QT_MultiANN_training_ge4j_ge3t"
+nn6_pred, nn6_pred_std = anns_calc_mean_std(n_NNs=1, model=dnn_multi_qt, input_dir=input_dir_6)
 
 
 # plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN 1", "BNN 2", out_dir_2, "bnn1_bnn2_prior_{}_{}".format(bnn_prior_1, bnn_prior_2))
@@ -206,13 +251,15 @@ for i in range(len(labels2)):
 # compare BNN with and without quantile transformation
 plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN", "BNN_QT", output_dir, "BNN_comparison")
 
+#compare ANN with and without quantile transformation
+plot_correlation_two_NNs(nn3_pred, nn4_pred, nn3_pred_std, nn4_pred_std, "ANN", "ANN_QT", output_dir, "ANN_comparison")
+
+#compare multiclassification with and without quantile transformation
+plot_correlation_two_NNs(nn5_pred, nn6_pred, nn5_pred_std, nn6_pred_std, "MultiANN", "MultiANN_QT", output_dir, "MultiANN_comparison")
 
 
 
-# ME
-# out_dir_1 = "/local/scratch/hdd/nshadskiy/ANNs_l2-{}_dout{}".format(l2, dout)
-# nn1_pred, nn1_pred_std = anns_calc_mean_std(n_NNs=100, input_dir=out_dir_1)
-
+###########################################################################################################################################################################################################################
 
 ###### code for evaluation of systematic uncertainties ######
 
