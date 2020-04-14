@@ -356,9 +356,9 @@ class variablePlotter:
             
             #DEBUG
             work_dir = os.getcwd()
+            fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
 
             ## a) load previous fit data OR
-            # fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
             # with open(fit_file, 'r') as f2:
             #     fit_values = pickle.load(f2)
 

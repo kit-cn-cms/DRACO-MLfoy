@@ -353,15 +353,15 @@ class DataFrame(object):
                 qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
                 fit_values = qt.fit(df[train_variables])
 
+                # save fit information in a .csv file
+                with open(fit_file, "w") as f:
+                    pickle.dump(qt, f)
+
             ## b) load previous fit data OR
             else:
-                with open(fit_file, 'r') as f2:
+                with open(restore_fit_dir, 'r') as f2:
                     fit_values = pickle.load(f2)
             
-            # save fit information in a .csv file
-            with open(fit_file, "w") as f:
-                pickle.dump(qt, f)
-
             df[train_variables] = fit_values.transform(df[train_variables])
 
             #save transformed data in a .h5 file
