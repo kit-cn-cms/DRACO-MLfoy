@@ -90,13 +90,14 @@ class variablePlotter:
 
         # handle options
         defaultOptions = {
-            "ratio":        False,
-            "ratioTitle":   None,
-            "logscale":     False,
-            "scaleSignal":  -1,
-            "lumiScale":    1,
-            "privateWork":  False,
-            "KSscore":      False}
+            "ratio":                    False,
+            "ratioTitle":               None,
+            "logscale":                 False,
+            "scaleSignal":              -1,
+            "lumiScale":                1,
+            "privateWork":              False,
+            "KSscore":                  False,
+            "qt_transformed_variables": True}
 
         for key in plotOptions:
             defaultOptions[key] = plotOptions[key]
@@ -175,14 +176,16 @@ class variablePlotter:
                     ks_dict[variable] = histInfo["KSScore"]
 
                 ## me
-                # generate transformed plot
-                histInfo_transformed = self.histVariable_transformed(
+                # generate transformed plot with quantile transformation
+                histInfo_transformed_qt = self.histVariable_transformed_qt(
                     variable    = variable,
                     plot_name   = plot_name_transformed,
                     cat         = cat)
 
                 if saveKSValues:
-                    ks_dict[variable] = histInfo_transformed["KSScore"]
+                    ks_dict[variable] = histInfo_transformed_qt["KSScore"]
+                
+                
 
                 
             if saveKSValues:
@@ -338,39 +341,42 @@ class variablePlotter:
 
         return histInfo
 
-    def histVariable_transformed(self, variable, plot_name, cat):
+    def histVariable_transformed_qt(self, variable, plot_name, cat):
             histInfo = {}
 
             nevents = {}
             X = []
-
-            print("************************DEBUG***************************")
+            
             # append values for the particular variable of all samples to X
             for sample_name in self.samples:
                 nevents[sample_name] = len(self.samples[sample_name].cut_data[cat][variable].values)
 
                 for j in self.samples[sample_name].cut_data[cat][variable].values:
-                   X.append([j])
-
-            qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+                    X.append([j])
             
-            #DEBUG
-            work_dir = os.getcwd()
-            fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
+            if not self.options["qt_transformed_variables"]:
+                transformed_X = (X - np.mean(X))/np.std(X)
 
-            ## a) load previous fit data OR
-            # with open(fit_file, 'r') as f2:
-            #     fit_values = pickle.load(f2)
+            else:
+                qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+        
+                work_dir = os.getcwd()
+                fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
 
-            ## b) peform a new fit on the data
-            fit_values = qt.fit(X)
+                ## a) load previous fit data OR
+                # with open(fit_file, 'r') as f2:
+                #     fit_values = pickle.load(f2)
+
+                ## b) peform a new fit on the data
+                fit_values = qt.fit(X)
+
+                # save fit information in a .csv file
+                # with open(fit_file, "w") as f:
+                #     pickle.dump(qt, f)
+                
+                transformed_X = fit_values.transform(X)
+
             
-            transformed_X = fit_values.transform(X)
-
-            # save fit information in a .csv file
-            # with open(fit_file, "w") as f:
-            #     pickle.dump(qt, f)
-
             # reshape the data [[x], [y], ...] --> [x, y, ...] and assign them to their sample names
             del X
             X = {}

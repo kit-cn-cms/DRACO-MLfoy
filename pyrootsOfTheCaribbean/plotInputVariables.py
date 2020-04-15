@@ -15,7 +15,7 @@ usage+="USE: python plotInputVariables.py -i DIR -o DIR -v FILE  --ksscore --sca
 
 parser = optparse.OptionParser(usage=usage)
 
-parser.add_option("-o", "--outputdirectory", dest="outputDir",default="plots_InputFeatures",
+parser.add_option("-o", "--outputdirectory", dest="outputDir",default="TEST_plots_InputFeatures",
         help="DIR for output", metavar="outputDir")
 
 parser.add_option("-i", "--inputdirectory", dest="inputDir",default="/local/scratch/ssd/nshadskiy/2017_nominal", ##me
@@ -48,6 +48,9 @@ parser.add_option("-s", "--scalesignal", dest="scaleSignal", default=-1,
 
 parser.add_option("--lumiscale", dest="lumiScale", default=41.5, ##value is year depended (here: year 2017)
         help="FLOAT to scale Luminosity", metavar="lumiScale")
+
+parser.add_option("-q", "--quantile", dest = "qt_transformed_variables", action = "store_true", default = False,
+        help = "activate to perform a quantile transformation on the input features") #me
 
 
 (options, args) = parser.parse_args()
@@ -82,13 +85,14 @@ else:
 
 # plotting options
 plotOptions = {
-    "ratio":        options.ratio,
-    "ratioTitle":   options.ratioTitle,
-    "logscale":     options.log,
-    "scaleSignal":  float(options.scaleSignal),
-    "lumiScale":    float(options.lumiScale),
-    "KSscore":      options.KSscore,
-    "privateWork":  options.privateWork,
+    "ratio":                    options.ratio,
+    "ratioTitle":               options.ratioTitle,
+    "logscale":                 options.log,
+    "scaleSignal":              float(options.scaleSignal),
+    "lumiScale":                float(options.lumiScale),
+    "KSscore":                  options.KSscore,
+    "privateWork":              options.privateWork,
+    "qt_transformed_variables": options.qt_transformed_variables,
     }
 """
    scaleSignal:
