@@ -1,6 +1,6 @@
-#cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_v1 -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
-#TODO: -q angeben ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
-# TODO: change restore_fit_dir, n_cycles and in THIS script, 
+#cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_v3 -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
+#-q angeben ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
+# TODO: change restore_fit_dir, n_NNs and in THIS script, 
 
 # global imports
 # so that matplotlib can be used over ssh
@@ -66,8 +66,8 @@ def get_column(array, i):
 #me modified TODO: fix bug axis for nn3
 def ann_calc_mean_std(model, input_dir, n_NNs=1):
     pred_list = []
-    for j in range(n_NNs):
-        preds = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
+    for i in range(n_NNs):
+        preds, event_class = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
         pred_list.append(preds)
     test_preds = np.concatenate(pred_list, axis=1)
     return np.mean(test_preds, axis=1), np.std(test_preds, axis=1)
@@ -85,7 +85,6 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
             else:
                 pred_list[event_class[sample_name]]  = np.concatenate((pred_list[event_class[sample_name]], np.reshape(get_column(preds,sample_name),(-1,1))), axis=1)
     for i in range(len(pred_list.keys())):
-        print pred_list[event_class[i]]
         test_preds_mean.append(np.mean(pred_list[event_class[i]], axis = 1))
         test_preds_std.append(np.std(pred_list[event_class[i]], axis = 1))
 
@@ -161,7 +160,7 @@ bnn_qt = BNN.BNN(
     evenSel         = options.doEvenSelection(),
     norm_variables  = options.doNormVariables(),
     qt_transformed_variables = options.doQTNormVariables(),
-    restore_fit_dir = work_dir+"QT_training_bnn_ge4j_ge3t/fit_data.csv",
+    restore_fit_dir = work_dir+"QT_BNN_training_ge4j_ge3t/fit_data.csv",
     sys_variation   = False,
     gen_vars        = False)
 
@@ -247,7 +246,7 @@ dnn_multi_qt = DNN.DNN(
 input_dir_1 = work_dir+"BNN_training_ge4j_ge3t"
 nn1_pred, nn1_pred_std, labels1 = bnn.load_trained_model(input_dir_1)
 
-input_dir_2 = work_dir+"QT_training_bnn_ge4j_ge3t"
+input_dir_2 = work_dir+"QT_BNN_training_ge4j_ge3t"
 nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2)
 
 input_dir_3 = work_dir+"ANN_training_ge4j_ge3t"
@@ -263,19 +262,15 @@ input_dir_6 = work_dir+"QT_MultiANN_training_ge4j_ge3t"
 nn6_pred, nn6_pred_std, event_class6 = multi_ann_calc_mean_std(model=dnn_multi_qt, input_dir=input_dir_6)
 
 
-# plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN 1", "BNN 2", out_dir_2, "bnn1_bnn2_prior_{}_{}".format(bnn_prior_1, bnn_prior_2))
-# plot_correlation_two_NNs(nn1_sig_pred, nn2_sig_pred, nn1_sig_pred_std, nn2_sig_pred_std, "BNN 1 signal", "BNN 2 signal", out_dir_2, "sig_bnn1_bnn2_prior_{}_{}".format(bnn_prior_1, bnn_prior_2))
-# plot_correlation_two_NNs(nn1_bkg_pred, nn2_bkg_pred, nn1_bkg_pred_std, nn2_bkg_pred_std, "BNN 1 background", "BNN 2 background", out_dir_2, "bkg_bnn1_bnn2_prior_{}_{}".format(bnn_prior_1, bnn_prior_2))
-
 # compare BNN with and without quantile transformation
 plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN", "BNN_QT", output_dir, "BNN_comparison")
 
 # #compare ANN with and without quantile transformation
 plot_correlation_two_NNs(nn3_pred, nn4_pred, nn3_pred_std, nn4_pred_std, "ANN", "ANN_QT", output_dir, "ANN_comparison")
 
-# #compare multiclassification with and without quantile transformation
-for i in range(event_class5):
-    plot_correlation_two_NNs(nn5_pred[i], nn6_pred[i], nn5_pred_std[i], nn6_pred_std[i], "MultiANN", "MultiANN_QT", output_dir, "MultiANN_comparison_"+str(i))
+#compare multiclassification with and without quantile transformation
+for i in event_class5:
+    plot_correlation_two_NNs(nn5_pred[event_class5.index(i)], nn6_pred[event_class5.index(i)], nn5_pred_std[event_class5.index(i)], nn6_pred_std[event_class5.index(i)], "MultiANN_"+i, "MultiANN_QT_"+i, output_dir, "MultiANN_comparison_"+i)
 
 
 
