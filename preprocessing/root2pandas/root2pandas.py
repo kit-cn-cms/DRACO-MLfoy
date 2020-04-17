@@ -328,7 +328,7 @@ class Dataset:
                 # delete subentry index
                 try: df = df.reset_index(1, drop = True)
                 except: None
-                print(df)
+                # print(df)
 
                 # add friend trees 
                 samplepath, filename = os.path.split(f)
@@ -432,9 +432,14 @@ class Dataset:
 
                 # convert tree to df but only extract the variables needed
                 df = tree.pandas.df(memVariables)
-
+                n = df.shape[0]
+                # drop duplicate events, which actually should not happen!!
+                df.drop_duplicates(inplace=True)
+                x = abs(df.shape[0] - n)
+                if x !=0:
+                    print("Warning: Found {n} duplicate MEM entries in {file}".format(n = x, file = f)) 
                 # set index
-                df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
+                # df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
 
                 # save data
                 with pd.HDFStore(outputFile, "a") as store:
@@ -444,6 +449,10 @@ class Dataset:
         # load the generated MEM file
         with pd.HDFStore(outputFile, "r") as store:
             df = store.select("MEM_data")
+
+        df.drop_duplicates(inplace=True, subset=["event","lumi","run"])
+        df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
+        
         print("-"*50)
 
         return df
@@ -475,7 +484,7 @@ class Dataset:
         # create variable with default value
         df.loc[:, "memDBp"] = -1
 
-        # add mem variable
+        # update df with mem column, matching is done via multiindex
         df.update( memdf["mem_p"].rename("memDBp") )
 
         # check if some mems could not be set
@@ -485,6 +494,7 @@ class Dataset:
             df_tmp = df.query("memDBp != -1")
             entries_after = df_tmp.shape[0]
             print("{}/{} events without mem, setting to -1".format(entries_before-entries_after, entries_before))
+        # print(df)
         return df
 
     def removeTriggerVariables(self, df):
