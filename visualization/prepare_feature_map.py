@@ -11,6 +11,17 @@ from keras.models import Sequential
 from keras.layers import Conv2D
 
 
+def readOutFilters(l, path, position, name):
+    # reads out filter data and saves it to textfile
+    
+    print('#'*60)
+    print('read out filters '+ position + ' training')
+    text_file = open(path + '/filterOutputs_' + position + '_training' + name + '.txt', "w")
+    text_file.write(str(l.tolist()))
+    text_file.close()
+    print('#'*60)
+
+
 def get_filters(string): 
 	# takes filter data as string and converts it into an array 
 
@@ -57,49 +68,76 @@ def get_image_inputs(path, train_variables):
 
 	    df[column_name]=H_List_Dict[column_name]
 	    
-	#prepare image matrices
+	# prepare image matrices
 	df_variables_tmp=[np.expand_dims(np.stack(df[ channel ].values), axis=3) for channel in train_variables]
 	image_data = np.concatenate(df_variables_tmp, axis = 3)
 	
 	return image_data
 
 
-#set paths
-path_to_filter_data = 'trainCNN/visualizeTraining/Tagged_channel/basic_settings/'
-path_to_image_data = '/ceph/jvautz/NN/CNNInputs/testCNN/Tagged_channel/basic/ttH_cnn.h5'
-filename = '_cnn'
+def prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels, image_index = None):
+    # prepare and save feature map data
+    
+    # choose random image to analyse with filters
+    image_inputs = get_image_inputs(path_to_image_data, channels)
+    if image_index == None:
+        image_index = np.random.randint(image_inputs.shape[0])
+    input_image=image_inputs[image_index].reshape(1, 11, 15, 2)
 
-#set channels
-channels = ['Jet_Pt[0-16]_Hist', 'TaggedJet_Pt[0-9]_Hist']
+    # predict for two channels
+    # create model
+    model_2ch = Sequential()
+    model_2ch.add(Conv2D(1, (4,4), input_shape=image_inputs[0].shape))
 
-#choose random image to analyse with filters
-image_inputs = get_image_inputs(path_to_image_data, channels)
-random_image_index = np.random.randint(image_inputs.shape[0])
-input_image=image_inputs[random_image_index].reshape(1, 11, 15, 2)
+    # prepare stored filters
+    filters = get_filters(open(path_to_filter_data + 'filterOutputs_after_training' + filename + '.txt', 'r').read())
+    weights_2ch = [filters, np.zeros(8)]
 
-# create model
-model = Sequential()
-model.add(Conv2D(1, (4,4), input_shape=image_inputs[0].shape))
+    # store weights in the model
+    model_2ch.set_weights(weights_2ch)
 
-#prepare stored filters
-filters = get_filters(open(path_to_filter_data + 'filterOutputs_after_training' + filename + '.txt', 'r').read())
-weights = [filters, np.zeros(8)]
+    # apply filter to input data
+    output_image_2ch = model_2ch.predict(input_image)
 
-# store weights in the model
-model.set_weights(weights)
+    # repeat with one channel each
+    output_images = []
+    for i in range(len(channels)):
 
-# apply filter to input data
-output_image = model.predict(input_image)
+        # create model
+        model_1ch = Sequential()
+        model_1ch.add(Conv2D(1, (4,4), input_shape=input_image[:,:,:,i].reshape(11,15,1).shape))
 
-# save data
-text_file = open(path_to_filter_data + "input_image" + filename + ".txt", "w")
-text_file.write(str(input_image.tolist()))
-text_file.close()
+        # prepare stored filters
+        weights_1ch = [filters[:,:,i,:].reshape(4,4,1,8), np.zeros(8)]
 
-text_file = open(path_to_filter_data + "output_image" + filename + ".txt", "w")
-text_file.write(str(output_image.tolist()))
-text_file.close()
+        # store weights in the model
+        model_1ch.set_weights(weights_1ch)
+
+        # apply filter to input data
+        output_images.append(model_1ch.predict(input_image[:,:,:,i].reshape(1,11,15,1)))
+
+    # save data
+    text_file = open(path_to_filter_data + "input_image" + filename + ".txt", "w")
+    text_file.write(str(input_image.tolist()))
+    text_file.close()
+
+    text_file = open(path_to_filter_data + "output_image_2ch" + filename + ".txt", "w")
+    text_file.write(str(output_image_2ch.tolist()))
+    text_file.close()
+
+    for i in range(len(channels)):
+        text_file = open(path_to_filter_data + "output_image_" + channels[i][0:channels[i].find('[')]  + filename + ".txt", "w")
+        text_file.write(str(output_images[i].tolist()))
+        text_file.close()
 
 
+# for manual use
+# set paths
+# path_to_filter_data = '../workdir/trainCNN/untrainable_Dense_no_rot_CSV_qu_95/_ge6j_ge3t/'
+# path_to_image_data = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttH_CSV_no_rot.h5'
+# filename = '_CSV_no_rot_fs_1'
 
+# set channels
+# channels = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist']
 
+# prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels)

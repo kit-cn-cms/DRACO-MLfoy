@@ -20,8 +20,8 @@ parser.add_option("-o", "--outputdirectory", dest="outputDir",default="test_trai
 sampleopts = optparse.OptionGroup(parser, "Sample Settings")
 sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFeatures",
         help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="INPUTDIR")
-sampleopts.add_option("--naming", dest="naming",default="_cnn.h5",
-        help="file ending for the samples in input directory (default _cnn.h5)", metavar="SAMPLENAMING")
+sampleopts.add_option("--sampleNaming", dest="sampleNaming",default="_cnn",
+        help="file ending for the samples in input directory (default _cnn)", metavar="SAMPLENAMING")
 sampleopts.add_option("-c", "--category", dest="category",default="4j_ge3t",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
 sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
@@ -60,10 +60,12 @@ plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", 
         help="activate to print ROC value for confusion matrix")
 plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
+plotopts.add_option("--plotNaming", dest="plotNaming", default="", 
+        help="name for plot data")
 parser.add_option_group(plotopts)
 
 binaryOptions = optparse.OptionGroup(parser, "Binary Options",
-    "settings for binary DNN training")
+    "settings for binary CNN training")
 binaryOptions.add_option("--binary", dest="binary", action = "store_true", default=False,
         help="activate to perform binary classification instead of multiclassification. Takes the classes passed to 'signal_class' as signals, all others as backgrounds.")
 binaryOptions.add_option("-t", "--binaryBkgTarget", dest="binary_bkg_target", default = 0., metavar="BKGTARGET",
@@ -76,8 +78,12 @@ parser.add_option_group(binaryOptions)
 #CNN Options
 
 cnnOptions = optparse.OptionGroup(parser, "CNN Options", "Settings for convolutional layer")
-cnnOptions.add_option("--filterNum", dest="filterNum", default=8, help='number of filters in convolutional layer')
-cnnOptions.add_option("--filterSize", dest="filterSize", default=4, help='size of filters in convolutional layer')
+cnnOptions.add_option("--filterNum", dest="filterNum", default=8, 
+        help='number of filters in convolutional layer')
+cnnOptions.add_option("--filterSize", dest="filterSize", default=4, 
+        help='size of filters in convolutional layer')
+cnnOptions.add_option("-m", "--model", dest="model", default="basic", 
+        help='STR of desired model to use')
 parser.add_option_group(cnnOptions)
 
 #===============================================================
@@ -131,7 +137,6 @@ class optionHandler_cnn:
 
         #add nJets and nTags to output directory
         self.__run_name = self.__outputdir.split("/")[-1]
-        self.__outputdir += "_"+self.__options.category
 
     def __setNomWeight(self):
         # handle even odd selection
@@ -178,7 +183,7 @@ class optionHandler_cnn:
 
     # getters
 
-    def getInputDirectory(self):
+    def getInputDir(self):
         return self.__inPath
 
     def getActivatedSamples(self):
@@ -187,11 +192,14 @@ class optionHandler_cnn:
     def getTestPercentage(self):
         return self.__options.test_percentage
 
-    def getDefaultName(self, sample):
-        return sample+self.__options.naming
+    def getSampleName(self, sample):
+        return sample+self.__options.sampleNaming+'.h5'
 
-    def getNaming(self):
-        return self.__options.naming
+    def getRotationName(self):
+        return self.__options.sampleNaming
+
+    def getPlotName(self):
+        return self.__options.plotNaming
 
     def getNomWeight(self):
         return self.__nom_weight
@@ -258,3 +266,6 @@ class optionHandler_cnn:
 
     def getFilterSize(self):
         return int(self.__options.filterSize)
+
+    def getModel(self):
+        return self.__options.model

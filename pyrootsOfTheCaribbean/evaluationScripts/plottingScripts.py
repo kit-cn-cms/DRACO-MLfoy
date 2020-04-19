@@ -735,10 +735,26 @@ class plotBinaryOutput:
         self.printROCScore = False
         self.privateWork = False
 
-    def plot(self, ratio = False, printROC = False, privateWork = False, name = "binary discriminator"):
+    def plot(self, ratio = False, printROC = False, privateWork = False, name = "", rotationMode = ""):
         self.printROCScore = printROC
         self.privateWork = privateWork
-
+        
+        # name of canvas
+        if rotationMode.find('rot') >0:
+	    if rotationMode[rotationMode.find('no_rot'):] == 'no_rot':
+	        rotation = 'no rotation'
+            elif rotationMode[rotationMode.find('rot_MaxJetPt'):] == 'rot_MaxJetPt':
+                rotation = 'rotation MaxJetPt'
+            elif rotationMode[rotationMode.find('rot_sph1'):] == 'rot_sph1':
+                rotation = 'rotation sphericity EV1'
+            elif rotationMode[rotationMode.find('rot_sph2'):] == 'rot_sph2':
+                rotation = 'rotation sphericity EV2'
+            elif rotationMode[rotationMode.find('rot_sph3'):] == 'rot_sph3':
+                rotation = 'rotation sphericity EV3'
+            else:
+	        rotation = 'rotation TopLep'
+        else:
+	    rotation = ''
 
         if self.printROCScore:
             roc = roc_auc_score(self.data.get_test_labels(), self.test_predictions)
@@ -753,7 +769,7 @@ class plotBinaryOutput:
             weights     = sig_weights,
             nbins       = self.nbins,
             bin_range   = self.bin_range,
-            color       = ROOT.kCyan,
+            color       = ROOT.kAzure+7,
             xtitle      = "signal",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = False)
@@ -768,7 +784,7 @@ class plotBinaryOutput:
             weights     = bkg_weights,
             nbins       = self.nbins,
             bin_range   = self.bin_range,
-            color       = ROOT.kOrange,
+            color       = ROOT.kRed-7,
             xtitle      = "background",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = True)
@@ -792,7 +808,7 @@ class plotBinaryOutput:
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
             sig_hist, bkg_hist, plotOptions,
-            canvasName = name)
+            canvasName = rotation)
 
         # setup legend
         legend = setup.getLegend()
@@ -819,7 +835,7 @@ class plotBinaryOutput:
         # add category label
         setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
-        out_path = self.plotdir + "/binaryDiscriminator.pdf"
+        out_path = self.plotdir + "binaryDiscriminator" + name + ".pdf"
         setup.saveCanvas(canvas, out_path)
 
 

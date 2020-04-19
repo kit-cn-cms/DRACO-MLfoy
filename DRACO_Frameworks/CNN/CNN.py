@@ -96,7 +96,8 @@ class CNN():
             shuffle_seed       = None,
             balanceSamples     = False,
             evenSel            = None,
-            phi_padding        = 0):
+            phi_padding        = 0,
+            normed_to 	       = 1.):
 
         # save some information
         # list of samples to load into dataframe
@@ -134,6 +135,9 @@ class CNN():
 
         #phi_padding
         self.phi_padding = phi_padding
+	
+	#normalisation for input data
+	self.normed_to = normed_to
 
         # list of input variables
         self.train_variables = train_variables
@@ -181,6 +185,7 @@ class CNN():
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
             phi_padding      = self.phi_padding,
+    	    normed_to 	     = self.normed_to
         )
 
     def _load_architecture(self, config):
@@ -636,7 +641,7 @@ class CNN():
         eventYields.plot(privateWork = privateWork)
 
     def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
-                        nbins = None, bin_range = [0.,1.], name = "binary_discriminator",
+                        nbins = None, bin_range = [0.,1.], name = "", rotationMode = "",
                         sigScale = -1):
 
         if not nbins:
@@ -653,7 +658,7 @@ class CNN():
             logscale            = log,
             sigScale            = sigScale)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name, rotationMode = rotationMode)
 
 
 def loadCNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):
