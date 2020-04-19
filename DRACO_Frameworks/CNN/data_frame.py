@@ -20,14 +20,15 @@ class Sample:
         self.max=1.0
         self.total_weight_expr = total_weight_expr
         self.shape=[1,1]
+	self.hist_data = []
 
     def load_dataframe(self, event_category, lumi, evenSel = "", phi_padding=0):
         
-
+	#read h5 file
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
-            df = store.select("data")
+            df = store.select("data")#, stop=100) # for debbuging
             print("number of events before selections: "+str(df.shape[0]))
             mi = store.select("meta_info")
             self.shape=list(mi["input_shape"])
@@ -43,63 +44,47 @@ class Sample:
         #transform base64 back and phi-padding
         #=====================================
         
+	#find channels used for training
         columns_to_decode=[]
         for col in df.columns:
             m=re.match("(.*_Hist)", col)
             if m!=None:
                 columns_to_decode.append(m.group(1)) 
-               
+              
+	#decode and save maximum value for later 
         H_List_Dict={col:list() for col in columns_to_decode}
-
-        for column_name in columns_to_decode:
+	self.hist_data = []
+        
+        for i in range(len(columns_to_decode)):
+            counter = 0
+	    column_name = columns_to_decode[i]
             empty_imgs_evtids=[]
+            gr_0 = []
+            print column_name
             for index, row in df.iterrows():
+                counter += 1
+                if counter%100000 == 0: 
+                   print counter,"events decoded in channel", column_name
+
                 r=base64.b64decode(row[column_name])
                 u=np.frombuffer(r,dtype=np.float64)
-                maxjetinevt=np.max(u)
-                if(maxjetinevt!=0):
-                    u=u/maxjetinevt
-                else:
-                    empty_imgs_evtids.append(index[2])
-                
                 u=np.reshape(u,self.shape)
+		
+                for line in u:
+                    for element in line:
+                        if element > 0.:
+                            gr_0.append(element)
+
                 if phi_padding != 0:
                     u=np.concatenate((u[:,-npixel_topad:],u,u[:,:npixel_topad]), axis=1)
-
                 H_List_Dict[column_name].append(u)
-            #-----------------------------------------------------------------------------------------------------------
-            '''
-            #norm all Pt entries with quantile at 90%
-            #print(column_name)
-            #print(H_List_Dict[column_name])
-            if not column_name == 'Jet_CSV[0-16]_Hist':
-                value_list = []
-                for element in np.asarray(H_List_Dict[column_name]).flatten():
-                    if not element == 0:
-                        value_list.append(element)
+	    df[column_name]=H_List_Dict[column_name]
+	    
+            self.hist_data.append(gr_0)
 
-                quantile = np.quantile(value_list, 0.9)
-                print('quantile:')
-                print(quantile)
-
-                H_List_Dict[column_name] = np.asarray(H_List_Dict[column_name])/quantile
-
-                for image in H_List_Dict[column_name]:
-                    for i in range(self.shape[0]):
-                        for j in range(self.shape[1]):
-                            if image[i][j] > 1.:
-                                image[i][j] = 1.
-
-                #print(H_List_Dict[column_name])
-            '''
-            #----------------------------------------------------------------------------------------------------------    
-            try:
-                df[column_name]=H_List_Dict[column_name].tolist()
-            except AttributeError:
-                df[column_name]=H_List_Dict[column_name]
-            
             print("====> "+str(len(empty_imgs_evtids))+" empty images found in channel "+column_name)
-                
+            
+
         #event_list=np.array(H_List_Dict[columns_to_decode[0]])
 
         if phi_padding!=0:
@@ -232,7 +217,8 @@ class DataFrame(object):
                 shuffleSeed = None,
                 balanceSamples = True,
                 evenSel = "",
-                phi_padding=0):
+                phi_padding = 0,
+		normed_to = 1.):
 
         self.event_category = event_category
         self.lumi = lumi
@@ -241,32 +227,73 @@ class DataFrame(object):
 
         self.shuffleSeed = shuffleSeed
         self.balanceSamples = balanceSamples
+	
+	self.normed_to = normed_to		
 
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification: self.bkg_target = input_samples.bkg_target
 
         # loop over all input samples and load dataframe
         train_samples = []
+	entries = []
         self.input_shape = None
-
+	
         for sample in input_samples.samples:
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.phi_padding)
             train_samples.append(sample.data)
+	    entries.append(sample.hist_data)
             if not self.input_shape is None:
                 if not self.input_shape == sample.shape:
                     sys.exit("input shapes do not match")
-            self.input_shape = sample.shape
-        #print('#'*300)
-        #print('input shape:')
-        #print(self.input_shape)
-        #print(train_variables)
+            self.input_shape = sample.shape 
 
         # concatenating all dataframes
-
         df = pd.concat(train_samples, sort=True)
         del train_samples
+
+	#####################################################################################	
 	
-         
+        #normalise data
+	
+	hist_data = []
+	
+	for i in range(len(train_variables)):
+	        hist_data.append(entries[0][i]+entries[1][i])
+                
+        #print(hist_data)
+
+        print('quantile set to ' + str(self.normed_to * 100) +'%')
+	quantile = [np.quantile(data, normed_to) for data in hist_data]
+	
+	#print(df['Jet_Pt[0-16]_Hist'].values)
+	#print(df['TaggedJet_Pt[0-9]_Hist'].values)
+	#print('\n')
+	#print(quantile)
+        #print(train_variables)
+	for i in range(len(train_variables)):
+           counter = 0
+           var = train_variables[i]     
+	   normalisedData = []
+	   for index, row in df.iterrows():
+               counter += 1
+               if counter%100000 == 0: 
+                   print counter,"events normalised in channel", var
+               if not var == 'Jet_CSV[0-16]_Hist':
+	   	   values = row[var]/quantile[i]
+	       else:
+                   values = row[var]/1.
+
+	       for line in values:
+	      	   for j in range(len(line)):
+		      if line[j] > 1.: line[j] = 1.
+	     	   
+	       normalisedData.append(values)
+	   df[var] = normalisedData
+	#print(df['Jet_Pt[0-16]_Hist'].values)
+        #print(df['TaggedJet_Pt[0-9]_Hist'].values)
+
+        #####################################################################################         
+        
         # multiclassification labelling
         if not self.binary_classification:
             # add class_label translation
