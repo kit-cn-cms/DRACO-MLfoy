@@ -17,8 +17,8 @@ sys.path.append(basedir)
 import DRACO_Frameworks.CNN.CNN as CNN
 import DRACO_Frameworks.CNN.data_frame as df
 
-import keras.models as models
-import keras.layers as layer
+import tensorflow.keras.models as models
+import tensorflow.keras.layers as layer
 
 options.initArguments()
 
