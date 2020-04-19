@@ -1,6 +1,7 @@
 
 '''
 visualizes the filter weights of the convolutional layer's filter after being read out before and after training
+manual visualization
 '''
 
 # imports
@@ -11,7 +12,7 @@ import matplotlib.cm as cm
 import matplotlib.gridspec as gridspec
 
 
-def prepare_plot_data(string, channels): 
+def prepare_filter_data(string, channels): 
 	# takes filter data as string and converts it into an array of 2D-arrays (one for each filter)
 
 	filter_output = string.replace(' ', '').replace('[', '').replace(']', '').split(',')
@@ -24,7 +25,7 @@ def prepare_plot_data(string, channels):
 	labels = []
 	for i in range(2):
 		for j in range(8):
-			labels.append("ch.: " + channels[i] +", f. {}:".format(j+1))
+			labels.append(channels[i] +",\nfilter {}".format(j+1))
 			plot_data.append(filter_output[:,:,i,j])
 
 	return plot_data, labels
@@ -62,7 +63,7 @@ def do_plot(mylist, labels, path, name, title):
 
 	# fill outer grid with 4x4 inner grid for 16 filters
 	for k in range(2):
-		innerGrid = gridspec.GridSpecFromSubplotSpec(4, 4, subplot_spec=outerGrid[k], wspace=0.3, hspace=0.3)
+		innerGrid = gridspec.GridSpecFromSubplotSpec(4, 4, subplot_spec=outerGrid[k], wspace=0.4, hspace=0.4)
 		for i in range(4):
 			for j in range(4):
 				ax=f.add_subplot(innerGrid[i:i+1,j:j+1])
@@ -76,7 +77,7 @@ def do_plot(mylist, labels, path, name, title):
 	mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm)
 
 	# save figure
-	plt.suptitle('Visualization of CNN Filters before (left) and after (right) Training' + title)
+	plt.suptitle('Visualization of CNN Filters before and after Training' + title)
 	plt.savefig(path+'filter_visualization'+name+'.png')
 	plt.show()
 
@@ -110,18 +111,18 @@ def do_plot_diff(mylist, labels, path, name, title):
 	mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm)
 
 	# save figure
-	plt.suptitle('Filter Difference before and after Training' + title)
+	plt.suptitle('Filter Difference' + title)
 	plt.savefig(path+'filter_visualization_diff'+name+'.png')
 	plt.show()
 
 
 # set paths
-path = 'switch_test/_ge6j_ge3t/'
-filename = '_CSV_rot_MaxJetPt'
-title = ' (test)'
+path = 'test/'
+filename = '_test'
+title = ' (only Conv2d Layer)'
 
 # set channels
-channels = ['Jet_CSV', 'Jet_Pt']
+channels = ['Jet_Pt', 'Jet_CSV']
 
 # read filter data from textfile
 string_before = open(path+'filterOutputs_before_training'+filename+'.txt', 'r').read() 

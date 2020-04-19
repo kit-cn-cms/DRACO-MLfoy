@@ -7,87 +7,104 @@ import pandas as pd
 import re
 import base64
 
-# path to data
-path = '/ceph/jvautz/NN/CNNInputs/testCNN/test_CSV/CSV_rotation_3ch/ttbar_CSV_rot_MaxJetPt.h5'
+def decode_Samples(path):
+    # reads h5 files and decodes channels, saves entrys for histogram
 
-# read input data out of h5 file
-with pd.HDFStore(path, mode = "r" ) as store:
-    df = store.select("data", stop = 3) #stop is arbitrary
-    mi = store.select("meta_info")
-    shape=list(mi["input_shape"])
+    # read input data out of h5 file
+    with pd.HDFStore(path, mode = "r" ) as store:
+        df = store.select("data", stop = 5) #stop is arbitrary
+        mi = store.select("meta_info")
+        shape=list(mi["input_shape"])
 
-# set channels to decode
-columns_to_decode=[]
-for col in df.columns:
-    m=re.match("(.*_Hist)", col)
-    if m!=None:
-       columns_to_decode.append(m.group(1))
+    # set channels to decode
+    columns_to_decode=[]
+    for col in df.columns:
+        m=re.match("(.*_Hist)", col)
+        if m!=None:
+            columns_to_decode.append(m.group(1))
 
-H_List_Dict={col:list() for col in columns_to_decode}
+    H_List_Dict={col:list() for col in columns_to_decode} 
+    hist_data = []
 
-# decoding and normalisation
-for column_name in columns_to_decode:
-    empty_imgs_evtids=[]
-    for index, row in df.iterrows():
-        r=base64.b64decode(row[column_name])
-        u=np.frombuffer(r,dtype=np.float64)
+    # decoding
+    for i in range(len(columns_to_decode)):
+        column_name = columns_to_decode[i]
+        empty_imgs_evtids=[]
+        gr_0 = []
 
-	# own normalisation for each image -> rework
-        #maxjetinevt=np.max(u)
-        #if(maxjetinevt!=0):
-        #    u=u/maxjetinevt
-        #else:
-        #    empty_imgs_evtids.append(index[2])
+        for index, row in df.iterrows():
+            r=base64.b64decode(row[column_name])
+            u=np.frombuffer(r,dtype=np.float64)
+            u=np.reshape(u,shape)
+            
+            for line in u:
+                for element in line:
+                    if element > 0.:
+                        gr_0.append(element)
 
-        u=np.reshape(u,shape)
-
-        H_List_Dict[column_name].append(u)
-    print(column_name)    
-    print(H_List_Dict[column_name])
-
-    # test new normalisation
-    if not column_name == 'Jet_CSV[0-16]_Hist':
-        value_list = []
-        for element in np.asarray(H_List_Dict[column_name]).flatten():
-            if not element == 0:
-                value_list.append(element)
-    
-        quantile = np.quantile(value_list, 0.9)
-        print(quantile)
-
-        H_List_Dict[column_name] = np.asarray(H_List_Dict[column_name])/quantile
-
-        for image in H_List_Dict[column_name]:
-            for i in range(shape[0]):
-                for j in range(shape[1]):
-                    if image[i][j] > 1.:
-                        image[i][j] = 1.
-
-        print(H_List_Dict[column_name])
-    try:
-        df[column_name]=H_List_Dict[column_name].tolist()
-    except AttributeError:
+            H_List_Dict[column_name].append(u)
         df[column_name]=H_List_Dict[column_name]
+        hist_data.append(gr_0)
 
-# set channels
-train_variables = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist', 'TaggedJet_Pt[0-9]_Hist']
+    return df, hist_data
 
-#prepare image matrices
-df_variables_tmp=[np.expand_dims(np.stack(df[ channel].values), axis=3) for channel in train_variables]
-#print(df_variables_tmp)
-image_data = np.concatenate(df_variables_tmp, axis = 3)
 
-#choose random image out of h5 file
-random_image_index = np.random.randint(image_data.shape[0])
-input_image=image_data[random_image_index]
+def normalisation(data, quantile, var):
+    # normalises data
 
-# print outs
-#for channel in df:
-#    print(channel)
-#print(input_image)
-#print('\n')
+    normalisedData = []
 
-# show channels separate
-#for i in range(2):
-#	print(train_variables[i])
-#	print(input_image[:,:,i])
+    for index, row in data.iterrows():
+        
+        if not var == 'Jet_CSV[0-16]_Hist': 
+            values = row[var]/quantile
+        else:
+            values = row[var]
+
+        for line in values:
+            for i in range(len(line)):
+                if line[i] > 1.: line[i] = 1.
+
+        normalisedData.append(values)
+    data[var]=normalisedData
+
+    return data
+
+
+# paths
+ttbar_path = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttbar_CSV_wo_rot.h5'
+ttH_path = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttH_CSV_wo_rot.h5'
+
+# prepare data for normalization 
+train_samples = []
+bkg_data, bkg_hist_data = decode_Samples(ttbar_path)
+sig_data, sig_hist_data = decode_Samples(ttH_path)
+train_samples.append(sig_data)
+train_samples.append(bkg_data)
+df = pd.concat(train_samples)
+
+train_variables = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist']
+
+# set quantile
+hist_data = []
+for i in range(len(train_variables)):
+    hist_data.append(bkg_hist_data[i] + sig_hist_data[i])
+print 'hist_data: ', hist_data
+
+quantile =[np.quantile(data, 0.5) for data in hist_data]
+
+
+print df['Jet_Pt[0-16]_Hist'].values
+print df['Jet_CSV[0-16]_Hist'].values
+print '\n'
+print quantile
+
+# normalise
+for i in range(len(train_variables)):
+    df = normalisation(df, quantile[i], train_variables[i])
+
+print df['Jet_Pt[0-16]_Hist'].values
+print df['Jet_CSV[0-16]_Hist'].values
+
+
+
