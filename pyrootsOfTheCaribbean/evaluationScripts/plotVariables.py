@@ -97,7 +97,8 @@ class variablePlotter:
             "lumiScale":                1,
             "privateWork":              False,
             "KSscore":                  False,
-            "qt_transformed_variables": True}
+            "qt_transformed_variables": True,
+            "restore_fit_dir":          None}
 
         for key in plotOptions:
             defaultOptions[key] = plotOptions[key]
@@ -176,17 +177,15 @@ class variablePlotter:
                     ks_dict[variable] = histInfo["KSScore"]
 
                 ## me
-                # generate transformed plot with quantile transformation
-                histInfo_transformed_qt = self.histVariable_transformed_qt(
+                # generate transformed plot (old transformation or quantile transformation)
+                histInfo_transformed = self.histVariable_transformed(
                     variable    = variable,
                     plot_name   = plot_name_transformed,
                     cat         = cat)
 
                 if saveKSValues:
-                    ks_dict[variable] = histInfo_transformed_qt["KSScore"]
+                    ks_dict[variable] = histInfo_transformed["KSScore"]
                 
-                
-
                 
             if saveKSValues:
                 with open(ks_file, "w") as f:
@@ -341,7 +340,7 @@ class variablePlotter:
 
         return histInfo
 
-    def histVariable_transformed_qt(self, variable, plot_name, cat):
+    def histVariable_transformed(self, variable, plot_name, cat):
             histInfo = {}
 
             nevents = {}
@@ -358,25 +357,23 @@ class variablePlotter:
                 transformed_X = (X - np.mean(X))/np.std(X)
 
             else:
-                qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
-        
-                work_dir = os.getcwd()
-                fit_file = os.path.join(work_dir, 'seperate_fit_file.csv')
+                ## a) peform a new fit on the data OR
+                if self.options["restore_fit_dir"] is None:
+                    qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
+                    fit_values = qt.fit(X)
+                    
+                    # save fit information in a .pck file
+                    fit_file = os.path.join(self.output_dir, 'fit_file.pck')
+                    with open(fit_file, "w") as f:
+                         pickle.dump(qt, f)
 
-                ## a) load previous fit data OR
-                # with open(fit_file, 'r') as f2:
-                #     fit_values = pickle.load(f2)
-
-                ## b) peform a new fit on the data
-                fit_values = qt.fit(X)
-
-                # save fit information in a .csv file
-                # with open(fit_file, "w") as f:
-                #     pickle.dump(qt, f)
+                ## b) load previous fit data
+                else: 
+                    with open(self.options["restorefitdir"], 'r') as f2:
+                        fit_values = pickle.load(f2)
                 
                 transformed_X = fit_values.transform(X)
 
-            
             # reshape the data [[x], [y], ...] --> [x, y, ...] and assign them to their sample names
             del X
             X = {}
@@ -388,12 +385,10 @@ class variablePlotter:
                     X[sample_name].append(j[0])
                 start_index = start_index + nevents[sample_name]
 
-            
             #save transformed data in a .h5 file
-            # out_file = '/home/ycung/2_qt_transformed_values.h5'
+            # out_file = '/home/ycung/qt_transformed_values.h5'
             # df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in X.iteritems() ]), columns = X.keys())
             # df.to_hdf(out_file, key='data', mode='w')
-            
 
             bins = 50
             maxValue = max([max(X[key]) for key in X.keys()])
@@ -476,7 +471,7 @@ class variablePlotter:
 
                 # setup histogram
                 hist = setup.setupHistogram(
-                    values      = X[sampleName],
+                    values      = X[key],
                     weights     = weights,
                     nbins       = bins,
                     bin_range   = bin_range,

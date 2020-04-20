@@ -52,6 +52,9 @@ parser.add_option("--lumiscale", dest="lumiScale", default=41.5, ##value is year
 parser.add_option("-q", "--quantile", dest = "qt_transformed_variables", action = "store_true", default = False,
         help = "activate to perform a quantile transformation on the input features") #me
 
+parser.add_option("--restorefitdir", dest = "restore_fit_dir", default = None ,
+        help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me
+
 
 (options, args) = parser.parse_args()
 
@@ -93,6 +96,7 @@ plotOptions = {
     "KSscore":                  options.KSscore,
     "privateWork":              options.privateWork,
     "qt_transformed_variables": options.qt_transformed_variables,
+    "restore_fit_dir":          options.restore_fit_dir
     }
 """
    scaleSignal:
