@@ -9,6 +9,7 @@ import ROOT
 import tqdm
 import matplotlib.pyplot as plt
 from functools import partial, update_wrapper
+import csv
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -241,9 +242,9 @@ class BNN():
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
         # save predictions
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=200)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=200) #for DEBUG 5 instead of 200
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
-
+        
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
@@ -510,6 +511,7 @@ class BNN():
         configs["trainSelection"] = self.evenSel
         configs["evalSelection"] = self.oddSel
         configs["netConfig"] = self.netConfig
+        configs["bestEpoch"] = len(self.model_history["acc"])
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -529,6 +531,18 @@ class BNN():
         variables = variable_configs.loc[self.train_variables]
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
+
+        ''' save best epoch to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/best_epoch.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "best_epoch"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "best_epoch": len(self.model_history["acc"])})
+            print("saved best_epoch to "+str(filename))
+
 
         # Serialize the test inputs for the analysis of the gradients
         ##pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb")) #me as it needs much space
@@ -669,6 +683,11 @@ class BNN():
             plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
             if privateWork:
                 plt.title("CMS private work", loc = "left", fontsize = 16)
+                plt.title("best epoch: "+str(n_epochs), loc="center", fontsize = 16)
+            else:
+                plt.title("best epoch: "+str(n_epochs), loc="left", fontsize = 16)
+
+
 
             # add title
             title = self.category_label
@@ -725,19 +744,6 @@ class BNN():
         plt.savefig(out_path)
         print("saved plot of "+"KLD"+" at "+str(out_path))
         plt.close()
-
-    # me
-    def plot_binaryConfusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
-        ''' plot confusion matrix '''
-        plotCM = plottingScripts.plotConfusionMatrix(
-            data                = self.data,
-            prediction_vector   = self.model_prediction_vector,
-            event_classes       = self.event_classes,
-            event_category      = self.category_label,
-            plotdir             = self.save_path,
-            argmax_axis         = 0) #me
-        
-        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
 
     #copied from DNN.py in dev-bnn branch
     def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):

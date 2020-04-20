@@ -6,6 +6,7 @@ import pickle
 import math
 from array import array
 import ROOT
+import csv
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -240,25 +241,25 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset with keras model
-        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels()) #me DEACTIVATED for evaluation_V1.py
 
         # save predictions  with keras model
-        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True) )
-        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True) )
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True)) #me DEACTIVATED for evaluation_V1.py
         
         # save predicted classes with argmax  with keras model
-        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+        self.predicted_classes = np.argmax(self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes) #me DEACTIVATED for evaluation_V1.py
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector #me
+        return self.model_prediction_vector, self.event_classes #me
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -442,6 +443,7 @@ class DNN():
         configs["evalSelection"] = self.oddSel
         configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
+        configs["bestEpoch"] = len(self.model_history["acc"])
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -462,6 +464,17 @@ class DNN():
         variables.to_csv(plot_file, sep = ",")
         print("wrote config of input variables to {}".format(plot_file))
 
+        ''' save best epoch to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/best_epoch.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "best_epoch"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "best_epoch": len(self.model_history["acc"])})
+            print("saved best_epoch to "+str(filename))
+            
         # Serialize the test inputs for the analysis of the gradients
         if get_gradients:
             pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
@@ -790,6 +803,10 @@ class DNN():
             plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
             if privateWork:
                 plt.title("CMS private work", loc = "left", fontsize = 16)
+                plt.title("best epoch: "+str(n_epochs), loc="center", fontsize = 16)
+            else:
+                plt.title("best epoch: "+str(n_epochs), loc="left", fontsize = 16)
+
 
             # add title
             title = self.category_label
