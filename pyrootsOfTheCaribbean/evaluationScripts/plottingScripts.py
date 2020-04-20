@@ -3,6 +3,8 @@ import sys
 import numpy as np
 import ROOT
 import copy
+import datetime #me
+import csv #me
 from array import array
 
 from sklearn.metrics import roc_auc_score
@@ -593,6 +595,64 @@ class plotConfusionMatrix:
                     new_matrix[yit,xit] = self.confusion_matrix[yit,xit]/(evt_sum+1e-9)
 
             self.confusion_matrix = new_matrix
+
+            ''' save confusion_matrix values to csv file'''
+            filename = "confusion_matrix.csv"
+            filepath = self.plotdir.replace(self.plotdir.split("/")[-1], "")
+            file_exists = os.path.isfile(filepath+filename)
+            headers = ["project_name"]
+            for i in self.event_classes:
+                headers.append("true_class_"+str(i))
+            
+            content = {}
+            #check whether existing confusion_matrix.csv file includes the same samples"
+            if file_exists:
+                with open(filepath+filename, "r") as f1:
+                    reader = csv.reader(f1)
+                    header_existing = reader.next()
+                    if headers == header_existing:
+                        with open(filepath+filename, "a") as f:
+                            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                            
+                            #write content in a row 
+                            for i in self.event_classes:
+                                content["project_name"] = self.plotdir.split("/")[-1]+"_"+i
+                                for j in self.event_classes:
+                                    content["true_class_"+str(j)] = self.confusion_matrix[self.event_classes.index(i)][self.event_classes.index(j)]
+                                csv_writer.writerow(content)
+                                content = {}
+
+                    else:    
+                        filename = "confusion_matrix_"+"_".join(self.event_classes)+".csv"   
+                        file_exists = os.path.isfile(filepath+filename)
+           
+                        with open(filepath+filename, "a+") as f:
+                            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                            if not file_exists:
+                                csv_writer.writeheader()
+
+                            #write content in a row 
+                            for i in self.event_classes:
+                                content["project_name"] = self.plotdir.split("/")[-1]+"_"+i
+                                for j in self.event_classes:
+                                    content["true_class_"+str(j)] = self.confusion_matrix[self.event_classes.index(i)][self.event_classes.index(j)]
+                                csv_writer.writerow(content)
+                                content = {}
+            
+            else:
+                with open(filepath+filename, "w") as f:
+                            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                            csv_writer.writeheader()
+
+                            #write content in a row 
+                            for i in self.event_classes:
+                                content["project_name"] = self.plotdir.split("/")[-1]
+                                for j in self.event_classes:
+                                    content["true_class_"+str(j)] = self.confusion_matrix[self.event_classes.index(i)][self.event_classes.index(j)]
+                                csv_writer.writerow(content)
+                                content = {}
+
+            print "saved" + filename + "to "+filepath+filename
 
 
         # initialize Histogram
