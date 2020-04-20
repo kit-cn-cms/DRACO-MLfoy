@@ -8,6 +8,7 @@ import matplotlib #me
 matplotlib.use('Agg') #me
 
 from copy import deepcopy #me
+import csv #me
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -63,7 +64,6 @@ if options.isBinary():
 def get_column(array, i):
     return [row[i] for row in array]
 
-#me modified TODO: fix bug axis for nn3
 def ann_calc_mean_std(model, input_dir, n_NNs=1):
     pred_list = []
     for i in range(n_NNs):
@@ -114,6 +114,56 @@ def plot_correlation_two_NNs(NN_pred1, NN_pred2, NN_pred1_std, NN_pred2_std, x_l
     plt.savefig(save_dir+"/std_{}.pdf".format(save_name))
     print "std_{}.pdf was created".format(save_name)
     plt.close()
+
+def plot_confusion_matrix_correlation(input_dir, output_dir):
+    data_with_qt, data = {}, {}
+    with open(input_dir, "r") as f:
+        csv_reader = csv.DictReader(f, delimiter=",")
+        column_names = csv_reader.fieldnames
+        for row in csv_reader:    
+            for i in column_names[1:]:
+                key = row[column_names[0]].split("_")[-1]+"-"+i.split("_")[-1]
+                if "QT" in row[column_names[0]]:
+                    if key not in data_with_qt.keys():
+                       data_with_qt[key] = []
+                    data_with_qt[key].append(float(row[i]))
+                                
+                elif "QT" not in row[column_names[0]]:
+                    if key not in data.keys():
+                       data[key] = []
+                    data[key].append(float(row[i]))
+
+        for key in data_with_qt.keys():
+            min_value = min(np.amin(data_with_qt[key]), np.amin(data[key]))
+            max_value = max(np.amax(data_with_qt[key]), np.amax(data[key]))
+            d = max_value - min_value
+            interested_decimal_place = 1./10. #hier Histogramm auf Zentelstelle 
+            nbins= round((max_value-min_value)/interested_decimal_place+1.)
+            width_bins = d/nbins
+            bins = np.linspace(min_value - width_bins/2., max_value + width_bins/2., nbins+1)
+
+            plt.hist(data[key], bins=bins, label='without QT',histtype='step', linestyle='dashed')
+            plt.hist(data_with_qt[key], bins=bins, label="with QT",histtype='step')
+            plt.xlabel("confusion matrix value",  fontsize = 16)
+            plt.ylabel("events",  fontsize = 16)
+            plt.legend(loc="upper right")
+            plt.title(key, loc="center",  fontsize = 16)
+            plt.savefig(output_dir+"/"+key+".pdf")
+            plt.show()
+            plt.close()
+
+
+    # plt.hist2d(NN_pred1, NN_pred2, bins=[50,50], cmin=1, norm=LogNorm())
+    # plt.plot([0,1],[0,1],'k')
+    # plt.colorbar()
+    # plt.xlabel("$\mu$ "+x_lab, fontsize = 16)
+    # plt.ylabel("$\mu$ "+y_lab, fontsize = 16)
+    # plt.savefig(save_dir+"/mu_{}.png".format(save_name))
+    # print "mu_{}.png was created".format(save_name)
+    # plt.savefig(save_dir+"/mu_{}.pdf".format(save_name))
+    # print "mu_{}.pdf was created".format(save_name)
+    # plt.close()
+    
 
 
 
@@ -241,36 +291,37 @@ dnn_multi_qt = DNN.DNN(
     qt_transformed_variables = options.doQTNormVariables(), #changed
     restore_fit_dir = work_dir+"QT_MultiANN_training_ge4j_ge3t/fit_data.csv") #changed
 
+confusion_matrix_path = work_dir+"confusion_matrix.csv"
+plot_confusion_matrix_correlation(confusion_matrix_path, output_dir)
+
+# input_dir_1 = work_dir+"BNN_training_ge4j_ge3t"
+# nn1_pred, nn1_pred_std, labels1 = bnn.load_trained_model(input_dir_1)
+
+# input_dir_2 = work_dir+"QT_BNN_training_ge4j_ge3t"
+# nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2)
+
+# input_dir_3 = work_dir+"ANN_training_ge4j_ge3t"
+# nn3_pred, nn3_pred_std = ann_calc_mean_std(model=dnn, input_dir=input_dir_3)
+
+# input_dir_4 = work_dir+"QT_ANN_training_ge4j_ge3t"
+# nn4_pred, nn4_pred_std = ann_calc_mean_std(model=dnn_qt, input_dir=input_dir_4)
+
+# input_dir_5 = work_dir+"MultiANN_training_ge4j_ge3t"
+# nn5_pred, nn5_pred_std, event_class5 = multi_ann_calc_mean_std(model=dnn_multi, input_dir=input_dir_5)
+
+# input_dir_6 = work_dir+"QT_MultiANN_training_ge4j_ge3t"
+# nn6_pred, nn6_pred_std, event_class6 = multi_ann_calc_mean_std(model=dnn_multi_qt, input_dir=input_dir_6)
 
 
-input_dir_1 = work_dir+"BNN_training_ge4j_ge3t"
-nn1_pred, nn1_pred_std, labels1 = bnn.load_trained_model(input_dir_1)
+# # compare BNN with and without quantile transformation
+# plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN", "BNN_QT", output_dir, "BNN_comparison")
 
-input_dir_2 = work_dir+"QT_BNN_training_ge4j_ge3t"
-nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2)
+# # #compare ANN with and without quantile transformation
+# plot_correlation_two_NNs(nn3_pred, nn4_pred, nn3_pred_std, nn4_pred_std, "ANN", "ANN_QT", output_dir, "ANN_comparison")
 
-input_dir_3 = work_dir+"ANN_training_ge4j_ge3t"
-nn3_pred, nn3_pred_std = ann_calc_mean_std(model=dnn, input_dir=input_dir_3)
-
-input_dir_4 = work_dir+"QT_ANN_training_ge4j_ge3t"
-nn4_pred, nn4_pred_std = ann_calc_mean_std(model=dnn_qt, input_dir=input_dir_4)
-
-input_dir_5 = work_dir+"MultiANN_training_ge4j_ge3t"
-nn5_pred, nn5_pred_std, event_class5 = multi_ann_calc_mean_std(model=dnn_multi, input_dir=input_dir_5)
-
-input_dir_6 = work_dir+"QT_MultiANN_training_ge4j_ge3t"
-nn6_pred, nn6_pred_std, event_class6 = multi_ann_calc_mean_std(model=dnn_multi_qt, input_dir=input_dir_6)
-
-
-# compare BNN with and without quantile transformation
-plot_correlation_two_NNs(nn1_pred, nn2_pred, nn1_pred_std, nn2_pred_std, "BNN", "BNN_QT", output_dir, "BNN_comparison")
-
-# #compare ANN with and without quantile transformation
-plot_correlation_two_NNs(nn3_pred, nn4_pred, nn3_pred_std, nn4_pred_std, "ANN", "ANN_QT", output_dir, "ANN_comparison")
-
-#compare multiclassification with and without quantile transformation
-for i in event_class5:
-    plot_correlation_two_NNs(nn5_pred[event_class5.index(i)], nn6_pred[event_class5.index(i)], nn5_pred_std[event_class5.index(i)], nn6_pred_std[event_class5.index(i)], "MultiANN_"+i, "MultiANN_QT_"+i, output_dir, "MultiANN_comparison_"+i)
+# #compare multiclassification with and without quantile transformation
+# for i in event_class5:
+#     plot_correlation_two_NNs(nn5_pred[event_class5.index(i)], nn6_pred[event_class5.index(i)], nn5_pred_std[event_class5.index(i)], nn6_pred_std[event_class5.index(i)], "MultiANN_"+i, "MultiANN_QT_"+i, output_dir, "MultiANN_comparison_"+i)
 
 
 
