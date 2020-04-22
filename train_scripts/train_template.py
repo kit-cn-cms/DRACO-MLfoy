@@ -71,6 +71,7 @@ if not options.isAdversary():
         test_percentage = options.getTestPercentage(),
         # balance samples per epoch such that there amount of samples per category is roughly equal
         balanceSamples  = options.doBalanceSamples(),
+        shuffle_seed    = 42,
         evenSel         = options.doEvenSelection(),
         norm_variables  = options.doNormVariables(),
         qt_transformed_variables = options.doQTNormVariables(), #me
