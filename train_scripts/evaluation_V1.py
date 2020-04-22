@@ -1,4 +1,4 @@
-#cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_v3 -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
+#cmd: python evaluation_V1.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_TEST -c ge4j_ge3t -v allVariables_2017_bnn --binary -S ttH -q
 #-q angeben ANGEBEN WICHTIG wg. Transformationd der Datensets(?)
 # TODO: change restore_fit_dir, n_NNs and in THIS script, 
 
@@ -67,7 +67,7 @@ def get_column(array, i):
 def ann_calc_mean_std(model, input_dir, n_NNs=1):
     pred_list = []
     for i in range(n_NNs):
-        preds, event_class = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
+        preds, event_class = model.load_trained_model(input_dir+"_"+str(i)+"_"+options.getCategory()) #TODO: compare with bnn_calc_mean
         pred_list.append(preds)
     test_preds = np.concatenate(pred_list, axis=1)
     return np.mean(test_preds, axis=1), np.std(test_preds, axis=1)
@@ -77,7 +77,7 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
     test_preds_mean = []
     test_preds_std = []
     for j in range(n_NNs):
-        preds, event_class = model.load_trained_model(input_dir) #TODO: compare with bnn_calc_mean
+        preds, event_class = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) #TODO: compare with bnn_calc_mean
         for sample_name in range(len(preds[0])):
             if event_class[sample_name] not in pred_list.keys():
                 pred_list[event_class[sample_name]] = get_column(preds, sample_name)
@@ -115,6 +115,12 @@ def plot_correlation_two_NNs(NN_pred1, NN_pred2, NN_pred1_std, NN_pred2_std, x_l
     print "std_{}.pdf was created".format(save_name)
     plt.close()
 
+def count_decimal_place(number):
+    number = str(number)
+    if not '.' in number:
+        return 0
+    return int(len(number) - number.index('.') - 1)
+
 def plot_confusion_matrix_correlation(input_dir, output_dir):
     data_with_qt, data = {}, {}
     with open(input_dir, "r") as f:
@@ -134,22 +140,26 @@ def plot_confusion_matrix_correlation(input_dir, output_dir):
                     data[key].append(float(row[i]))
 
         for key in data_with_qt.keys():
+            interested_decimal_place = 1./1000.  
             min_value = min(np.amin(data_with_qt[key]), np.amin(data[key]))
             max_value = max(np.amax(data_with_qt[key]), np.amax(data[key]))
             d = max_value - min_value
-            interested_decimal_place = 1./10. #hier Histogramm auf Zentelstelle 
-            nbins= round((max_value-min_value)/interested_decimal_place+1.)
+            nbins= round(d/interested_decimal_place+1.)
             width_bins = d/nbins
             bins = np.linspace(min_value - width_bins/2., max_value + width_bins/2., nbins+1)
 
-            plt.hist(data[key], bins=bins, label='without QT',histtype='step', linestyle='dashed')
-            plt.hist(data_with_qt[key], bins=bins, label="with QT",histtype='step')
+            plt.hist(data[key], bins=bins, label='without QT', color="deepskyblue", alpha=0.3)
+            plt.hist(data_with_qt[key], bins=bins, label="with QT", color="orangered", alpha=0.4)
+            
             plt.xlabel("confusion matrix value",  fontsize = 16)
+            plt.xticks(np.arange(round(min_value,count_decimal_place(interested_decimal_place)), round(max_value,count_decimal_place(interested_decimal_place)), step=interested_decimal_place*2), rotation=45)
             plt.ylabel("events",  fontsize = 16)
-            plt.legend(loc="upper right")
+            plt.axvline(np.mean(data[key]), color="deepskyblue", linestyle='dashed', linewidth=1, label="mean: " + str(round(np.mean(data[key]), count_decimal_place(interested_decimal_place))))
+            plt.axvline(np.mean(data_with_qt[key]), color="orangered", linestyle='dashed', linewidth=1, label="mean: " + str(round(np.mean(data_with_qt[key]), count_decimal_place(interested_decimal_place))))
             plt.title(key, loc="center",  fontsize = 16)
-            plt.savefig(output_dir+"/"+key+".pdf")
-            plt.show()
+            plt.legend(loc="upper right")
+            plt.savefig(output_dir+"/"+str(key)+".png")
+            print key+".pdf was created"
             plt.close()
 
 
@@ -172,128 +182,130 @@ work_dir = "/home/ycung/Desktop/DRACO-MLfoy/workdir/"
 
 
 ######################################################### initializing BNN/DNN training class ##################################################################
-bnn = BNN.BNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary, #changed
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = not options.doQTNormVariables(), #changed
-    restore_fit_dir = None, #changed
-    sys_variation   = False,
-    gen_vars        = False)
+# bnn = BNN.BNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples_binary, #changed
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = not options.doQTNormVariables(), #changed
+#     restore_fit_dir = None, #changed
+#     sys_variation   = False,
+#     gen_vars        = False)
 
-bnn_qt = BNN.BNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary, #changed
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = options.doQTNormVariables(),
-    restore_fit_dir = work_dir+"QT_BNN_training_ge4j_ge3t/fit_data.csv",
-    sys_variation   = False,
-    gen_vars        = False)
+# bnn_qt = BNN.BNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples_binary, #changed
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = options.doQTNormVariables(),
+#     restore_fit_dir = work_dir+"QT_BNN_training_ge4j_ge3t/fit_data.csv",
+#     sys_variation   = False,
+#     gen_vars        = False)
 
 # initializing DNN training class 
-dnn = DNN.DNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary, #changed
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = not options.doQTNormVariables(), #changed
-    restore_fit_dir = None) #changed
+# dnn = DNN.DNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples_binary, #changed
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = not options.doQTNormVariables(), #changed
+#     restore_fit_dir = None) #changed
 
-dnn_qt = DNN.DNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples_binary, #changed
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = options.doQTNormVariables(), #changed
-    restore_fit_dir = work_dir+"QT_ANN_training_ge4j_ge3t/fit_data.csv") #changed
+# dnn_qt = DNN.DNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples_binary, #changed
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = options.doQTNormVariables(), #changed
+#     restore_fit_dir = work_dir+"QT_ANN_training_ge4j_ge3t/fit_data.csv") #changed
 
-dnn_multi = DNN.DNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples,
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = not options.doQTNormVariables(), #changed
-    restore_fit_dir = None) #changed
+# dnn_multi = DNN.DNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples,
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = not options.doQTNormVariables(), #changed
+#     restore_fit_dir = None) #changed
 
-dnn_multi_qt = DNN.DNN(
-    save_path       = options.getOutputDir(),
-    input_samples   = input_samples,
-    category_name   = options.getCategory(),
-    train_variables = options.getTrainVariables(),
-    # number of epochs
-    train_epochs    = options.getTrainEpochs(),
-    # metrics for evaluation (c.f. KERAS metrics)
-    eval_metrics    = ["acc"],
-    # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
-    test_percentage = options.getTestPercentage(),
-    # balance samples per epoch such that there amount of samples per category is roughly equal
-    balanceSamples  = options.doBalanceSamples(),
-    shuffle_seed    = 42,
-    evenSel         = options.doEvenSelection(),
-    norm_variables  = options.doNormVariables(),
-    qt_transformed_variables = options.doQTNormVariables(), #changed
-    restore_fit_dir = work_dir+"QT_MultiANN_training_ge4j_ge3t/fit_data.csv") #changed
+# dnn_multi_qt = DNN.DNN(
+#     save_path       = options.getOutputDir(),
+#     input_samples   = input_samples,
+#     category_name   = options.getCategory(),
+#     train_variables = options.getTrainVariables(),
+#     # number of epochs
+#     train_epochs    = options.getTrainEpochs(),
+#     # metrics for evaluation (c.f. KERAS metrics)
+#     eval_metrics    = ["acc"],
+#     # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
+#     test_percentage = options.getTestPercentage(),
+#     # balance samples per epoch such that there amount of samples per category is roughly equal
+#     balanceSamples  = options.doBalanceSamples(),
+#     shuffle_seed    = 42,
+#     evenSel         = options.doEvenSelection(),
+#     norm_variables  = options.doNormVariables(),
+#     qt_transformed_variables = options.doQTNormVariables(), #changed
+#     restore_fit_dir = work_dir+"QT_MultiANN_training_ge4j_ge3t/fit_data.csv") #changed
 
-confusion_matrix_path = work_dir+"confusion_matrix.csv"
+confusion_matrix_path = work_dir+"/confusion_matrix_test.csv"
 plot_confusion_matrix_correlation(confusion_matrix_path, output_dir)
 
+########################################################################################################################
+##Comparison - 16.04.2020
 # input_dir_1 = work_dir+"BNN_training_ge4j_ge3t"
 # nn1_pred, nn1_pred_std, labels1 = bnn.load_trained_model(input_dir_1)
 
