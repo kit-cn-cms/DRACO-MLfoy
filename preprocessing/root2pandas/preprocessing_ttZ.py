@@ -60,7 +60,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"# and matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
@@ -73,14 +73,21 @@ ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH",       selection = None)
 ttH_categories.addCategory("ttHbb",     selection = "(matchH_ft_RecoHiggs_matchable > 0.)")
 ttH_categories.addCategory("ttHnonbb",  selection = "(matchH_ft_RecoHiggs_matchable <= 0.)")
+ttH_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+ttH_categories.addCategory("ttXbb",     selection = "(matchH_ft_RecoHiggs_matchable > 0.)")
+ttH_categories.addCategory("ttXnonbb",  selection = "(matchH_ft_RecoHiggs_matchable <= 0.)")
 
 ttZ_categories = root2pandas.EventCategories()
 ttZ_categories.addCategory("ttZ",       selection = None)
 ttZ_categories.addCategory("ttZbb",     selection = "(matchZ_ft_RecoZ_matchable > 0.)")
 ttZ_categories.addCategory("ttZnonbb",  selection = "(matchZ_ft_RecoZ_matchable <= 0)")
+ttZ_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+ttZ_categories.addCategory("ttXbb",     selection = "(matchZ_ft_RecoZ_matchable > 0.)")
+ttZ_categories.addCategory("ttXnonbb",  selection = "(matchZ_ft_RecoZ_matchable <= 0.)")
 
 ttbar_categories = root2pandas.EventCategories()
 ttbar_categories.addCategory("ttbar",   selection = None)
+ttbar_categories.addCategory("ttnonbb", selection = "(GenEvt_I_TTPlusBB == 0)")
 ttbar_categories.addCategory("ttlf",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttcc",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
 ttbar_categories.addCategory("ttbb5FS", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")

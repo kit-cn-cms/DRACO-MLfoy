@@ -383,7 +383,7 @@ class Dataset:
                     print("max entries reached ...")
 
                     # add class labels
-                    concat_df = self.addClassLabels(concat_df, sample.categories.categories)
+                    #concat_df = self.addClassLabels(concat_df, sample.categories.categories)
     
                     # add lumi weight
                     concat_df.loc[:,"lumiWeight"] = sample.lumiWeight
@@ -490,7 +490,11 @@ class Dataset:
                 outFile = self.outputdir+"/"+key+"_"+self.naming+"_"+str(chunkNumber)+".h5"
 
             # create dataframe for category
-            cat_df = df.query("(class_label == \""+str(key)+"\")")
+            cat_df = df.copy()
+            if not categories[key] is None:
+                cat_df = cat_df.query(categories[key])
+
+            cat_df.loc[:, "class_label"] = key
             print("creating dataset for class label {} with {} entries".format(key, cat_df.shape[0]))
 
             with pd.HDFStore(outFile, "a") as store:
