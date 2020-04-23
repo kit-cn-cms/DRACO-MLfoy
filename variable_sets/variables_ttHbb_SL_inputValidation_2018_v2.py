@@ -27,6 +27,7 @@ variables["ge4j_ge4t"] = [
     "Evt_Deta_TaggedJetsAverage",
     "Evt_Pt_minDrTaggedJets",
     "Evt_blr_transformed",
+    "memdb_ft_memDBp",
     ]
 
 
@@ -59,6 +60,7 @@ variables["ge4j_3t"] = [
     "Reco_JABDT_tHW_log_wb_m",
     "Evt_h1",
     "Evt_blr_transformed",
+    "memdb_ft_memDBp",
     ]
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))

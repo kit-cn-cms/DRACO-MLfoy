@@ -14,9 +14,20 @@ def GetPlotColor( cls ):
         "ttHbb":        ROOT.kRed+1,
         "ttHnonbb":     ROOT.kYellow-7,
 
+        "ttX":          ROOT.kViolet-1,
+        "ttXbb":        ROOT.kViolet-1,
+        "ttXnonbb":     ROOT.kTeal,
+
         "ttlf":         ROOT.kAzure-9,
         "ttcc":         ROOT.kAzure+8,
+        "ttnonbb":      ROOT.kAzure-9,
+
+        "tHq":          ROOT.kSpring,
+        "tHW":          ROOT.kViolet,
+
+        "tt2b":         ROOT.kAzure+5,
         "ttbb":         ROOT.kAzure+3,
+        "ttmb":         ROOT.kAzure+3,
         "ttbb5FS":      ROOT.kAzure+3,
         "ttbar":        ROOT.kAzure+3,
         "sig":   ROOT.kCyan,
