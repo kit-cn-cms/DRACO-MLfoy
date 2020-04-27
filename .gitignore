@@ -7,3 +7,4 @@
 *.nav
 workdir/
 .vscode/
+new_variable_configs.csv
