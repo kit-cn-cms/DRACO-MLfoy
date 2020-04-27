@@ -346,18 +346,17 @@ class DataFrame(object):
 
         # transform variables with quantile transformation
         if qt_transformed_variables:
-            fit_file = os.path.join(output_dir, 'fit_data.csv')
-
             ## a) peform a new fit on the data OR
             if restore_fit_dir is None:
                 qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
                 fit_values = qt.fit(df[train_variables])
 
-                # save fit information in a .csv file
+                # save fit information in a .pck file
+                fit_file = os.path.join(output_dir, 'fit_data.pck')
                 with open(fit_file, "w") as f:
                     pickle.dump(qt, f)
 
-            ## b) load previous fit data OR
+            ## b) load previous fit data
             else:
                 with open(restore_fit_dir, 'r') as f2:
                     fit_values = pickle.load(f2)
@@ -365,7 +364,7 @@ class DataFrame(object):
             df[train_variables] = fit_values.transform(df[train_variables])
 
             #save transformed data in a .h5 file
-            # out_file = output_dir+'/NEW_qt_transformed_values.h5'
+            # out_file = output_dir+'/TEST_qt_transformed_values.h5'
             # df.to_hdf(out_file, key='data', mode='w')
             # print("saved qt_transformed_values at "+str(out_file))
 
