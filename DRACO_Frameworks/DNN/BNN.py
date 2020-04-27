@@ -230,7 +230,7 @@ class BNN():
         for key in config:
             self.architecture[key] = config[key]
 
-    def load_trained_model(self, inputDirectory):
+    def load_trained_model(self, inputDirectory, n_iterations=200):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
@@ -242,7 +242,7 @@ class BNN():
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
         # save predictions
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=200) #for DEBUG 5 instead of 200
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations) #for DEBUG 5 instead of 200
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
         
         # print evaluations  with keras model
