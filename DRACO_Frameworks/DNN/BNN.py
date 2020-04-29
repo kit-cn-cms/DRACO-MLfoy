@@ -441,7 +441,19 @@ class BNN():
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector.reshape(-1,1)) #me
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
+
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
@@ -601,8 +613,39 @@ class BNN():
             bin_range           = bin_range,
             event_category      = self.category_label,
             plotdir             = self.save_path,
-            logscale            = log,
+            logscale            = not log,
             sigScale            = sigScale)
+
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+
+        binaryOutput_std = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            test_predictions    = self.model_prediction_vector_std,
+            train_predictions   = None, # self.model_train_prediction_std,
+            nbins               = 30,
+            bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
+            event_category      = self.category_label,
+            plotdir             = self.save_path,
+            logscale            = not log,
+            sigScale            = sigScale,
+            save_name           = "sigma_discriminator"
+            )
+
+        bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
+
+        #DEBUG
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            test_predictions    = self.model_prediction_vector,
+            train_predictions   = None,#self.model_train_prediction,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.category_label,
+            plotdir             = self.save_path,
+            logscale            = log,
+            sigScale            = sigScale,
+            save_name           = "binary_discriminator_log" #me
+            )
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
@@ -616,10 +659,11 @@ class BNN():
             plotdir             = self.save_path,
             logscale            = log,
             sigScale            = sigScale,
-            save_name           = "sigma_discriminator"
+            save_name           = "sigma_discriminator_log"
             )
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
+
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
         self.plot_varied_histogram()

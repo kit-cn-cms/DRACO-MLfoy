@@ -257,6 +257,18 @@ class DNN():
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+            
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         return self.model_prediction_vector, self.event_classes #me
