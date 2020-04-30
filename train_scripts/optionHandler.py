@@ -37,6 +37,8 @@ trainopts.add_option("-v", "--variableselection", dest="variableSelection",defau
         help="FILE for variables used to train DNNs (allows relative path to variable_sets)", metavar="VARIABLESET")
 trainopts.add_option("-n", "--netconfig", dest="net_config",default="ttH_2017",
         help="STR of name of config (in net_configs.py) for building the network architecture ", metavar="NETCONFIG")
+trainopts.add_option("--layers", dest="layer_config", default=None,
+        help="STR neurons_layer1, neurons_layer2, ... for dynamically changing the layer setting in net_configs.py") #me
 trainopts.add_option("-e", "--epochs", dest="train_epochs",default=1000,
         help="INT number of training epochs (default 1000)", metavar="TRAINEPOCHS")
 trainopts.add_option("-f", "--testfraction", dest="test_percentage",default=0.2,type=float,
@@ -176,6 +178,10 @@ class optionHandler:
         from net_configs import config_dict
         if self.__options.net_config:
             self.__config = config_dict[self.__options.net_config]
+        
+        if self.__options.layer_config:
+            self.__config["layers"] = map(int, self.__options.layer_config.split(",")) 
+            print self.__config
         else:
             self.__config = config_dict["example_config"]
             print("no net config was specified - using 'example_config'")
