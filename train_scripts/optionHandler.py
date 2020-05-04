@@ -179,12 +179,13 @@ class optionHandler:
         if self.__options.net_config:
             self.__config = config_dict[self.__options.net_config]
         
-        if self.__options.layer_config:
-            self.__config["layers"] = map(int, self.__options.layer_config.split(",")) 
-            print self.__config
         else:
             self.__config = config_dict["example_config"]
             print("no net config was specified - using 'example_config'")
+        
+        if  self.__options.net_config and self.__options.layer_config:
+            self.__config["layers"] = map(int, self.__options.layer_config.split(",")) 
+            print self.__config
 
     def __setAdversary(self):
         if self.__options.adversary:
