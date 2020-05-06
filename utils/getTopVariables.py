@@ -5,6 +5,7 @@ import pandas as pd
 import glob
 from collections import Counter
 import operator
+from csv import DictWriter, DictReader #me
 
 # so that matplotlib can be used over ssh
 import matplotlib #me
@@ -48,196 +49,230 @@ parser.add_option("--taylor", dest = "taylor_expansion",default=False,action="st
     help = "evaluate taylor expansion 1D ranking")
 parser.add_option("--nodes", dest = "nodes",default="ttH",
     help = "comma separated list of processes to be considered in taylor ranking")
+parser.add_option("--count", dest = "count", default=False, action="store_true",
+    help = "for only counting the frequency of the variables in top_*.csv")
 
 (opts, args) = parser.parse_args()
-inputdir = opts.workdir+"/"+opts.inputdir
-if not "JTSTRING" in inputdir:
-    inputdir+="_JTSTRING/"
-print("using input directory {}".format(inputdir))
 
-if not os.path.exists(opts.outdir):
-    os.makedirs(opts.outdir)
+if not opts.count:
+    inputdir = opts.workdir+"/"+opts.inputdir
+    if not "JTSTRING" in inputdir:
+        inputdir+="_JTSTRING/"
+    print("using input directory {}".format(inputdir))
 
-
-sorted_variables = {}
-for jtcat in args:
-    print("\n\nhandling category {}\n\n".format(jtcat))
-    jtpath = inputdir.replace("JTSTRING",jtcat)
-    
-    if opts.taylor_expansion:
-        jtpath+= "/checkpoints/keras_taylor_1D.csv"
-    
-    elif "BNN" in opts.inputdir:
-        jtpath+= "/"+opts.weight_type+"_weights.csv"
-
-    else:
-        # collect weight sum files
-        jtpath+= "/"+opts.weight_type+"_weight_sums.csv"
-
-    rankings = glob.glob(jtpath)
-    print("found {} variable ranking files".format(len(rankings)))
-
-    if opts.taylor_expansion:
-        node_dict_means = {}
-        node_dict_stds = {}
-        node_dict_ranking = {}
-        for node in opts.nodes.split(","):
-            print("="*20)
-            print("generating ranking for node {}".format(node))
-            variables = {}
-            for ranking in rankings:
-                csv = pd.read_csv(ranking, sep = ",").set_index("variable")[node]
-                for var, val in csv.items():
-                    if not var in variables: variables[var] = []
-                    variables[var].append(val)
-            mean_dict = {}
-            std_dict = {}
-            for v in variables: mean_dict[v] = np.median(variables[v])
-            for v in variables: std_dict[v] = np.std(variables[v])
-            node_dict_means[node] = mean_dict
-            node_dict_stds[node] = std_dict
-
-            var = []
-            val = []
-            mean = []
-            std = []
-            i = 0
-            maxvalue = 0
-            for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
-                i+=1
-                val.append(i)
-                var.append(v)
-                mean.append(m)
-                std.append( np.std(variables[v]) )
-                print(v,m)
-                if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
-            
-            node_dict_ranking[node] = var[-opts.nvset :]
-        top_variables = []
-        for node in node_dict_ranking:
-            top_variables+= node_dict_ranking[node]
-        top_variables = list(set(top_variables))
-        print("using {} variables for this jt region".format(len(top_variables)))
-
-        sorted_variables[jtcat] = top_variables       
-
-    else:
-        if "BNN" in opts.inputdir:
-            # collect variables and their relative importance
-            variables = {}
-            variables_std = {}
-
-            for ranking in rankings:
-                csv = pd.read_csv(ranking, header = 0, sep = ",", names = ["variable", "weight_mean_sum", "weight_std_sum"])
-                sum_of_weights = csv["weight_mean_sum"].sum()
-
-                for row in csv.iterrows():
-                    if not row[1][0] in variables: 
-                        variables[row[1][0]] = []
-                        variables_std[row[1][0]] = []
-
-                    variables[row[1][0]].append(row[1][1]/sum_of_weights)
-                    variables_std[row[1][0]].append(row[1][2]/sum_of_weights)
+    if not os.path.exists(opts.outdir):
+        os.makedirs(opts.outdir)
 
 
-            # collect mean values of variables
-            mean_dict = {}
-            for v in variables: mean_dict[v] = variables[v][0]
-
-            # generate lists sorted by mean variable importance
-            var = []
-            val = []
-            mean = []
-            std = []
-            i = 0
-            maxvalue = 0
-            for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
-                i += 1
-                val.append(i)
-                var.append(v)
-                mean.append(m)
-                std.append( variables_std[v][0] )
-                print(v,m)
-                if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
-
+    sorted_variables = {}
+    for jtcat in args:
+        print("\n\nhandling category {}\n\n".format(jtcat))
+        jtpath = inputdir.replace("JTSTRING",jtcat)
         
+        if opts.taylor_expansion:
+            jtpath+= "/checkpoints/keras_taylor_1D.csv"
+        
+        elif "BNN" in opts.inputdir:
+            jtpath+= "/"+opts.weight_type+"_weights.csv"
 
-        else:           
-            # collect variables and their relative importance
-            variables = {}
-            for ranking in rankings:
-                csv = pd.read_csv(ranking, header = 0, sep = ",", names = ["variable", "weight_sum"])
-                sum_of_weights = csv["weight_sum"].sum()
-                for row in csv.iterrows():
-                    if not row[1][0] in variables: variables[row[1][0]] = []
-                    variables[row[1][0]].append(row[1][1]/sum_of_weights)
+        else:
+            # collect weight sum files
+            jtpath+= "/"+opts.weight_type+"_weight_sums.csv"
+
+        rankings = glob.glob(jtpath)
+        print("found {} variable ranking files".format(len(rankings)))
+
+        if opts.taylor_expansion:
+            node_dict_means = {}
+            node_dict_stds = {}
+            node_dict_ranking = {}
+            for node in opts.nodes.split(","):
+                print("="*20)
+                print("generating ranking for node {}".format(node))
+                variables = {}
+                for ranking in rankings:
+                    csv = pd.read_csv(ranking, sep = ",").set_index("variable")[node]
+                    for var, val in csv.items():
+                        if not var in variables: variables[var] = []
+                        variables[var].append(val)
+                mean_dict = {}
+                std_dict = {}
+                for v in variables: mean_dict[v] = np.median(variables[v])
+                for v in variables: std_dict[v] = np.std(variables[v])
+                node_dict_means[node] = mean_dict
+                node_dict_stds[node] = std_dict
+
+                var = []
+                val = []
+                mean = []
+                std = []
+                i = 0
+                maxvalue = 0
+                for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
+                    i+=1
+                    val.append(i)
+                    var.append(v)
+                    mean.append(m)
+                    std.append( np.std(variables[v]) )
+                    print(v,m)
+                    if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
+                
+                node_dict_ranking[node] = var[-opts.nvset :]
+            top_variables = []
+            for node in node_dict_ranking:
+                top_variables+= node_dict_ranking[node]
+            top_variables = list(set(top_variables))
+            print("using {} variables for this jt region".format(len(top_variables)))
+
+            sorted_variables[jtcat] = top_variables       
+
+        else:
+            if "BNN" in opts.inputdir:
+                # collect variables and their relative importance
+                variables = {}
+                variables_std = {}
+
+                for ranking in rankings:
+                    csv = pd.read_csv(ranking, header = 0, sep = ",", names = ["variable", "weight_mean_sum", "weight_std_sum"])
+                    sum_of_weights = csv["weight_mean_sum"].sum()
+
+                    for row in csv.iterrows():
+                        if not row[1][0] in variables: 
+                            variables[row[1][0]] = []
+                            if len(rankings) == 1: variables_std[row[1][0]] = []
+
+                        variables[row[1][0]].append(row[1][1]/sum_of_weights)
+                        if len(rankings) == 1: variables_std[row[1][0]].append(row[1][2]/sum_of_weights)
 
 
-            # collect mean values of variables
-            mean_dict = {}
-            for v in variables: mean_dict[v] = np.median(variables[v])
+                # collect mean values of variables
+                mean_dict = {}
+                for v in variables: mean_dict[v] = np.median(variables[v])
 
-            # generate lists sorted by mean variable importance
-            var = []
-            val = []
-            mean = []
-            std = []
-            i = 0
-            maxvalue = 0
-            for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
-                i += 1
-                val.append(i)
-                var.append(v)
-                mean.append(m)
-                std.append( np.std(variables[v]) )
-                print(v,m)
-                if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
+                # generate lists sorted by mean variable importance
+                var = []
+                val = []
+                mean = []
+                std = []
+                i = 0
+                maxvalue = 0
+                for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
+                    i += 1
+                    val.append(i)
+                    var.append(v)
+                    mean.append(m)
+                    if len(rankings) == 1: 
+                        std.append(variables_std[v][0])
+                    else: 
+                        std.append(np.std(variables[v]))
+                    print(v,m)
+                    if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
+
+            else:           
+                # collect variables and their relative importance
+                variables = {}
+                for ranking in rankings:
+                    csv = pd.read_csv(ranking, header = 0, sep = ",", names = ["variable", "weight_sum"])
+                    sum_of_weights = csv["weight_sum"].sum()
+                    for row in csv.iterrows():
+                        if not row[1][0] in variables: variables[row[1][0]] = []
+                        variables[row[1][0]].append(row[1][1]/sum_of_weights)
 
 
-        sorted_variables[jtcat] = var
+                # collect mean values of variables
+                mean_dict = {}
+                for v in variables: mean_dict[v] = np.median(variables[v])
 
-        if opts.plot:
-            if not opts.nplot == -1:
-                mean = mean[-opts.nplot :]
-                val = val[-opts.nplot :]
-                std = std[-opts.nplot :]
-                var = var[-opts.nplot :]
+                # generate lists sorted by mean variable importance
+                var = []
+                val = []
+                mean = []
+                std = []
+                i = 0
+                maxvalue = 0
+                for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
+                    i += 1
+                    val.append(i)
+                    var.append(v)
+                    mean.append(m)
+                    std.append( np.std(variables[v]) )
+                    print(v,m)
+                    if mean[-1]+std[-1] > maxvalue: 
+                        maxvalue = mean[-1]+std[-1]
 
-            nvariables = len(var)
-            plt.figure(figsize = [10,nvariables/4.5])
-            plt.errorbar(mean, val, xerr = std, fmt = "o")
-            plt.xlim([0.,1.1*maxvalue])
-            plt.grid()
-            plt.yticks(val, var)
-            plt.title(jtcat)
-            plt.xlabel("mean of sum of input weights (in percent)")
-            plt.tight_layout()
-            outfile = opts.outdir+"/"+opts.filename+opts.weight_type+"_weight_sums.pdf"
-            plt.savefig(outfile)
-            plt.clf() 
-            print("saved plot to {}".format(outfile))
 
-if opts.generate_variableset:
-    string = "variables = {}\n"
-    for jt in sorted_variables:
-        string += "\nvariables[\"{}\"] = [\n".format(jt)
+            sorted_variables[jtcat] = var
 
-        variables = sorted_variables[jt]
-        if opts.nvset!=-1 and not opts.taylor_expansion:
-            variables = variables[-opts.nvset:]
+            if opts.plot:
+                if not opts.nplot == -1:
+                    mean = mean[-opts.nplot :]
+                    val = val[-opts.nplot :]
+                    std = std[-opts.nplot :]
+                    var = var[-opts.nplot :]
 
-        for v in variables:
-            string += "    \"{}\",\n".format(v)
+                nvariables = len(var)
+                plt.figure(figsize = [10,nvariables/4.5])
+                plt.errorbar(mean, val, xerr = std, fmt = "o")
+                plt.xlim([0.,1.1*maxvalue])
+                plt.grid()
+                plt.yticks(val, var)
+                plt.title(jtcat)
+                plt.xlabel("mean of sum of input weights (in percent)")
+                plt.tight_layout()
+                outfile = opts.outdir+"/"+opts.filename+opts.weight_type+"_weight_sums.pdf"
+                plt.savefig(outfile)
+                plt.clf() 
+                print("saved plot to {}".format(outfile))
 
-        string += "    ]\n\n"
+                # comparison of the top 15 variables
+                filename = opts.outdir+"/top_"+ str(opts.nplot)+ "_variables.csv"
+                file_exists = os.path.isfile(filename)
+                with open(filename, "a+") as f:
+                    headers = ["project_name", "variable_name"]
+                    csv_writer = DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                    if not file_exists: csv_writer.writeheader()
+                    for x in var[-opts.nplot :]:
+                        csv_writer.writerow({"project_name": opts.filename, "variable_name": x})
+                print("saved top_"+ str(opts.nplot)+ "_variables.csv to" + str(filename))
 
-    string += "all_variables = list(set( [v for key in variables for v in variables[key] ] ))\n"
 
-    if opts.taylor_expansion:
-        outfile = opts.outdir+"/autogenerated_taylor_expansion_1D_variableset.py"
-    else:
-        outfile = opts.outdir+"/autogenerated_"+opts.weight_type+"_variableset.py"
+    if opts.generate_variableset:
+        string = "variables = {}\n"
+        for jt in sorted_variables:
+            string += "\nvariables[\"{}\"] = [\n".format(jt)
 
-    with open(outfile,"w") as f:
-        f.write(string)
-    print("wrote variable set to {}".format(outfile))
+            variables = sorted_variables[jt]
+            if opts.nvset!=-1 and not opts.taylor_expansion:
+                variables = variables[-opts.nvset:]
+
+            for v in variables:
+                string += "    \"{}\",\n".format(v)
+
+            string += "    ]\n\n"
+
+        string += "all_variables = list(set( [v for key in variables for v in variables[key] ] ))\n"
+
+        if opts.taylor_expansion:
+            outfile = opts.outdir+"/autogenerated_taylor_expansion_1D_variableset.py"
+        else:
+            outfile = opts.outdir+"/autogenerated_"+opts.weight_type+"_variableset.py"
+
+        with open(outfile,"w") as f:
+            f.write(string)
+        print("wrote variable set to {}".format(outfile))
+
+else:
+    filename =  opts.outdir+"/top_"+ str(opts.nplot)+ "_variables.csv"
+    with open(filename, "r") as f:
+        csv_reader = DictReader(f, delimiter=",")
+        column_names = csv_reader.fieldnames
+        variables = {}
+        for row in csv_reader: 
+            if row[column_names[1]] not in variables.keys():
+                variables[row[column_names[1]]] = 1
+            
+            else:
+                variables[row[column_names[1]]] += 1 
+        
+        for k in sorted(variables, key=variables.get, reverse=True):
+            print k, variables[k]
