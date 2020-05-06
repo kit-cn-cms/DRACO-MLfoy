@@ -7,7 +7,9 @@ import numpy as np
 def GetPlotColor( cls ):
     color_dict = {
         "ttZ":          ROOT.kCyan,
-        "ttH":          ROOT.kBlue+1,
+        "ttH":          ROOT.kRed+1,
+        "ttHbb":        ROOT.kRed+1,
+        "ttHnonbb":     ROOT.kYellow-7,
         "ttlf":         ROOT.kRed-7,
         "ttcc":         ROOT.kRed+1,
         "ttbb":         ROOT.kRed+3,
@@ -20,18 +22,22 @@ def GetPlotColor( cls ):
         "ST":           ROOT.kRed-8,
         "tHq":          ROOT.kBlue+6,
         "tHW":          ROOT.kBlue+3,
-        "sig":   ROOT.kCyan,
-        "bkg":   ROOT.kOrange,
+        "sig":          ROOT.kCyan,
+        "bkg":          ROOT.kOrange,
 
-        "ttH_HTXS_0":          ROOT.kAzure,
-        "ttH_HTXS_1":          ROOT.kBlue-1,
-        "ttH_HTXS_2":          ROOT.kBlue-2,
-        "ttH_HTXS_3":          ROOT.kBlue-3,
-        "ttH_HTXS_4":          ROOT.kBlue-4,
+        "ttH_STXS_0":          ROOT.kAzure,
+        "ttH_STXS_1":          ROOT.kBlue-1,
+        "ttH_STXS_2":          ROOT.kBlue-2,
+        "ttH_STXS_3":          ROOT.kBlue-3,
+        "ttH_STXS_4":          ROOT.kBlue-4,
+
+        "ttHbb_STXS_0":          ROOT.kAzure,
+        "ttHbb_STXS_1":          ROOT.kBlue-1,
+        "ttHbb_STXS_2":          ROOT.kBlue-2,
+        "ttHbb_STXS_3":          ROOT.kBlue-3,
+        "ttHbb_STXS_4":          ROOT.kBlue-4,
         }
 
-    if "ttZ" in cls: cls = "ttZ"
-    if "ttH" and not "HTXS" in cls: cls = "ttH"
     return color_dict[cls]
 
 def GetyTitle(privateWork = False):
