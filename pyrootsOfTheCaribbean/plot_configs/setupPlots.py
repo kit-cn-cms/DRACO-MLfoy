@@ -214,45 +214,48 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
 
     return canvas
 
+
 def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOptions, canvasName):
     canvas = getCanvas(canvasName)
 
     # move over/underflow bins into plotrange
     moveOverUnderFlow(sig_train)
-    moveOverUnderFlow(bkg_train)
+    if not bkg_train is None: moveOverUnderFlow(bkg_train)
     moveOverUnderFlow(sig_test)
-    moveOverUnderFlow(bkg_test)
+    if not bkg_test is None: moveOverUnderFlow(bkg_test)
 
     # figure out plotrange
     canvas.cd(1)
     yMax = 1e-9
     yMinMax = 1000.
     for h in [sig_train, bkg_train, sig_test, bkg_test]:
+        if h is None: continue
         yMax = max(h.GetBinContent(h.GetMaximumBin()), yMax)
         if h.GetBinContent(h.GetMaximumBin()) > 0:
             yMinMax = min(h.GetBinContent(h.GetMaximumBin()), yMinMax)
 
     # draw first hist
     if plotOptions["logscale"]:
-        bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        sig_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
         canvas.SetLogy()
     else:
-        bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
-    bkg_train.GetXaxis().SetTitle(canvasName)
+        sig_train.GetYaxis().SetRangeUser(0, yMax*1.5)
+    sig_train.GetXaxis().SetTitle(canvasName)
 
     option = "histo"
-    bkg_train.DrawCopy(option+"E0")
+    sig_train.DrawCopy(option+"E0")
 
     # draw the other histograms
-    sig_train.DrawCopy(option+"E0 same")
-    bkg_test.DrawCopy("E0 same")
+    if not bkg_train is None: bkg_train.DrawCopy(option+"E0 same")
+    if not bkg_test is None: bkg_test.DrawCopy("E0 same")
     sig_test.DrawCopy("E0 same")
 
     # redraw axis
     canvas.cd(1)
-    bkg_train.DrawCopy("axissame")
+    sig_train.DrawCopy("axissame")
 
     return canvas
+
 
 def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=None,logoption=False):
     if not displayname:
