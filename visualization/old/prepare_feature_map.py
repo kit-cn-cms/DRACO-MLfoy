@@ -22,13 +22,13 @@ def readOutFilters(l, path, position, name):
     print('#'*60)
 
 
-def get_filters(string): 
+def get_filters(string, num_filters, filter_size): 
 	# takes filter data as string and converts it into an array 
 
 	filter_output = string.replace(' ', '').replace('[', '').replace(']', '').split(',')
 	for i in range(len(filter_output)): 
 		filter_output[i] = float(filter_output[i])
-	filter_output = np.array(filter_output).reshape(4,4,2,8)
+	filter_output = np.array(filter_output).reshape(filter_size,filter_size,2,num_filters)
 
 	return filter_output
 
@@ -38,7 +38,7 @@ def get_image_inputs(path, train_variables):
 	
 	# open datafile 
 	with pd.HDFStore(path, mode = "r" ) as store:
-	    df = store.select("data", stop = 100) #stop is arbitrary for less wait time
+	    df = store.select("data", stop = 10) #arbitrary
 	    mi = store.select("meta_info")
     	shape=list(mi["input_shape"])
 
@@ -74,24 +74,22 @@ def get_image_inputs(path, train_variables):
 	
 	return image_data
 
-
-def prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels, image_index = None):
+def prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels, num_filters, filter_size):
     # prepare and save feature map data
     
-    # choose random image to analyse with filters
+    # choose first image to analyse with filters
     image_inputs = get_image_inputs(path_to_image_data, channels)
-    if image_index == None:
-        image_index = np.random.randint(image_inputs.shape[0])
-    input_image=image_inputs[image_index].reshape(1, 11, 15, 2)
+
+    input_image=image_inputs[0].reshape(1, 11, 15, 2)
 
     # predict for two channels
     # create model
     model_2ch = Sequential()
-    model_2ch.add(Conv2D(1, (4,4), input_shape=image_inputs[0].shape))
+    model_2ch.add(Conv2D(1, (filter_size,filter_size), padding='same', input_shape=image_inputs[0].shape))
 
     # prepare stored filters
-    filters = get_filters(open(path_to_filter_data + 'filterOutputs_after_training' + filename + '.txt', 'r').read())
-    weights_2ch = [filters, np.zeros(8)]
+    filters = get_filters(open(path_to_filter_data + 'filterOutputs_after_training' + filename + '.txt', 'r').read(), num_filters, filter_size)
+    weights_2ch = [filters, np.zeros(num_filters)]
 
     # store weights in the model
     model_2ch.set_weights(weights_2ch)
@@ -105,14 +103,14 @@ def prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, chan
 
         # create model
         model_1ch = Sequential()
-        model_1ch.add(Conv2D(1, (4,4), input_shape=input_image[:,:,:,i].reshape(11,15,1).shape))
+        model_1ch.add(Conv2D(1, (filter_size,filter_size), padding = 'same', input_shape=input_image[:,:,:,i].reshape(11,15,1).shape))
 
         # prepare stored filters
-        weights_1ch = [filters[:,:,i,:].reshape(4,4,1,8), np.zeros(8)]
+        weights_1ch = [filters[:,:,i,:].reshape(filter_size,filter_size,1,num_filters), np.zeros(num_filters)]
 
         # store weights in the model
         model_1ch.set_weights(weights_1ch)
-
+        
         # apply filter to input data
         output_images.append(model_1ch.predict(input_image[:,:,:,i].reshape(1,11,15,1)))
 
@@ -130,14 +128,17 @@ def prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, chan
         text_file.write(str(output_images[i].tolist()))
         text_file.close()
 
-
+'''
+filter_size = 4
+num_filters = 4
 # for manual use
 # set paths
-# path_to_filter_data = '../workdir/trainCNN/untrainable_Dense_no_rot_CSV_qu_95/_ge6j_ge3t/'
-# path_to_image_data = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttH_CSV_no_rot.h5'
-# filename = '_CSV_no_rot_fs_1'
+path_to_filter_data = '../workdir/trainCNN/3parallel/'
+path_to_image_data = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/all_rotations/ttH_CSV_rot_MaxJetPt.h5'
+filename = '_3parallel_'+str(filter_size)
 
 # set channels
-# channels = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist']
+channels = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist']
 
-# prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels)
+prepare_feature_maps(path_to_filter_data, path_to_image_data, filename, channels, image_index = 5)
+'''

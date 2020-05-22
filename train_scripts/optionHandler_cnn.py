@@ -22,7 +22,7 @@ sampleopts.add_option("-i", "--inputdirectory", dest="inputDir",default="InputFe
         help="DIR of input h5 files (definition of files to load has to be adjusted in the script itself)", metavar="INPUTDIR")
 sampleopts.add_option("--sampleNaming", dest="sampleNaming",default="_cnn",
         help="file ending for the samples in input directory (default _cnn)", metavar="SAMPLENAMING")
-sampleopts.add_option("-c", "--category", dest="category",default="4j_ge3t",
+sampleopts.add_option("-c", "--category", dest="category",default="ge6j_ge3t",
         help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
 sampleopts.add_option("-a", "--activateSamples", dest = "activateSamples", default = None,
         help="give comma separated list of samples to be used. ignore option if all should be used")
@@ -58,7 +58,7 @@ plotopts.add_option("-P", "--privatework", dest="privateWork", action = "store_t
         help="activate to create private work plot label")
 plotopts.add_option("-R", "--printroc", dest="printROC", action = "store_true", default=False,
         help="activate to print ROC value for confusion matrix")
-plotopts.add_option("-S","--signalclass", dest="signal_class", default=None, metavar="SIGNALCLASS",
+plotopts.add_option("-S","--signalclass", dest="signal_class", default="ttH", metavar="SIGNALCLASS",
         help="STR of signal class for plots (allows comma separated list) (same as --binarySignal)")
 plotopts.add_option("--plotNaming", dest="plotNaming", default="", 
         help="name for plot data")
@@ -78,12 +78,12 @@ parser.add_option_group(binaryOptions)
 #CNN Options
 
 cnnOptions = optparse.OptionGroup(parser, "CNN Options", "Settings for convolutional layer")
-cnnOptions.add_option("--filterNum", dest="filterNum", default=8, 
+cnnOptions.add_option("--filterNum", dest="filterNum", default=2, 
         help='number of filters in convolutional layer')
 cnnOptions.add_option("--filterSize", dest="filterSize", default=4, 
         help='size of filters in convolutional layer')
 cnnOptions.add_option("-m", "--model", dest="model", default="basic", 
-        help='STR of desired model to use')
+        help='STR of desired model to use. supported: basic, reduced, noConv')
 parser.add_option_group(cnnOptions)
 
 #===============================================================
@@ -102,7 +102,7 @@ class optionHandler_cnn:
         self.__setNomWeight()
         self.__loadVariables()
         self.__setSignalClass()
-        self.__setNetConfig()
+        #self.__setNetConfig()
 
 
     # setters
@@ -170,7 +170,8 @@ class optionHandler_cnn:
             if not self.__signal:
                 sys.exit("ERROR: need to specify signal class if binary classification is activated")
 
-
+    '''
+    # no net-configs available in CNN -> add later
     def __setNetConfig(self):
         from net_configs import config_dict
         if self.__options.net_config:
@@ -178,7 +179,7 @@ class optionHandler_cnn:
         else:
             self.__config = config_dict["example_config"]
             print("no net config was specified - using 'example_config'")
-
+    '''
 
 
     # getters
@@ -265,7 +266,17 @@ class optionHandler_cnn:
         return int(self.__options.filterNum)
 
     def getFilterSize(self):
-        return int(self.__options.filterSize)
+         # prepare model shape
+         fs = eval(self.__options.filterSize.split()[0])
+
+         if type(fs) == int:
+         	fs = [[fs]]
+         elif all(isinstance(n, int) for n in fs):
+         	fs = [fs]
+         else:
+         	fs = fs
+
+         return fs
 
     def getModel(self):
         return self.__options.model
