@@ -16,8 +16,6 @@ from matplotlib import gridspec, cm
 import colorsys
 from PIL import Image, ImageDraw, ImageFont
 
-
-
 # option_handler
 import optionHandler_vis
 options = optionHandler_vis.optionHandler_vis(sys.argv)
@@ -160,8 +158,7 @@ class Visualizer():
 			return images
 
 
-########################################################################################################################################################				
-		# data visualization
+########################################################################################################################################################					     # data visualization
 
 		
 		def doPlots(self):
@@ -511,20 +508,7 @@ class Visualizer():
 			plt.close(fig)
 
 
-'''
-TODO
-
-layer Anordnung plotten
-
-laborbuch
-testreihen ueberlegen
-testreihen starten
-
-delta r plots
-jan fragen wegen channel in parallele layer
-gliederung BA ueberlegen
-aufgabenlsite zu rate ziehen
-'''
+##################################################################################################
 
 
 myVis = Visualizer('../../test_multilayer2/visualization_data/', 'test_multilayer2')
