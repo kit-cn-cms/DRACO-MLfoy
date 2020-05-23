@@ -1,18 +1,22 @@
 '''
+visualizes the network architectures scheme
 visualizes the filter weights of the convolutional layer's filter after being read out before and after training as well as their differences
 visualizes feature maps alltogether and for each channel separate after being lead through the filter of convolutional layer
 visualizes overlapping feature maps from ttH and ttbar sample
 '''
 
 # imports
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.gridspec as gridspec
 import os
 import sys
 import math
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib import gridspec, cm
+import colorsys
+from PIL import Image, ImageDraw, ImageFont
+
+
 
 # option_handler
 import optionHandler_vis
@@ -72,7 +76,8 @@ class Visualizer():
 			self.outputImages = self.prepareOutputImages('output_images_')
 
 			# prepare output images in separate channels
-			self.outputImagesSeparate = self.prepareOutputImagesSeparate('output_images_separate_')
+			if len(self.channels) > 1:
+				self.outputImagesSeparate = self.prepareOutputImagesSeparate('output_images_separate_')
 			
 			# prepare overlapping feature maps from different samples
 			self.allImagesTTH = self.prepareOutputImages('all_output_images_ttH_')
@@ -162,6 +167,9 @@ class Visualizer():
 		def doPlots(self):
 			# coordinates visualization data
 
+			# plot the network architecture at first
+			self.plotNetworkArchitecture()
+
 			# loop over all layers in mxn-matrix
 			for i in range(len(self.networkArchitecture)):
 				for j in range(self.maxLayers):
@@ -198,17 +206,152 @@ class Visualizer():
 							self.plotFMaps([], self.channels[0], self.allImagesTTbar[i][j], layerIndex, 'TTbar_')
 
 						# for first layer plot features maps from different channels separate
-						if j == 0:
+						if j == 0 and len(self.channels) > 1:
 							for k in range(len(self.channels)):
 								self.plotFMaps([self.inputImages[k]], [self.channels[k]], self.outputImagesSeparate[i][k], layerIndex, self.channels[k] + '_')
 						
+
+		def drawFrame(self, draw_obj, x_min, y_min, x_max, y_max, width):
+			# draws frame around tiles
+
+			# vertical lines
+			draw_obj.line( (x_min + width/2, y_min,
+				            x_min + width/2, y_max), fill=(0,0,0), width=width)
+			draw_obj.line( (x_max - width/2, y_min,
+				            x_max - width/2, y_max), fill=(0,0,0), width=width)
+
+			# horizontal lines
+			draw_obj.line( (x_min, y_min + width/2,
+				            x_max, y_min + width/2), fill=(0,0,0), width=width)
+			draw_obj.line( (x_min, y_max + width/2,
+				            x_max, y_max + width/2), fill=(0,0,0), width=width)
+
+
+		def plotNetworkArchitecture(self):
+			# draws a scheme of the network architecture
+
+			# set fonttype and fontsize
+			fontPath = "/Users/Amaterasu1/Library/Fonts/Arial Bold.ttf"
+			fontSize = 23
+			lineSpacing = 5
+			titleFontSize = 80
+			titleFont = ImageFont.truetype(fontPath, titleFontSize-30)
+			font = ImageFont.truetype(fontPath, fontSize)
+
+			# set horizontal tile width and spacing
+			n_w = len(self.networkArchitecture)
+			w_fig = 200
+			w_space = w_fig/2
+			w_img = n_w * w_fig + (n_w + 1) * w_space 
+
+			# set vertical tile width and spacing
+			n_h = len(self.networkArchitecture[0])
+			h_fig = 150
+			h_space = h_fig/3
+			h_img = (n_h + 4) * h_fig + (n_h + 1) * h_space + titleFontSize
+
+			# set background
+			model_img = Image.new('RGB', (w_img, h_img), 'white')
+			model_draw = ImageDraw.Draw(model_img)
+
+			# set title
+			model_draw.multiline_text( (w_img/2 - 240, 30), 'Network Architecture', font=titleFont, fill='black', align='center', spacing=lineSpacing)
+
+			# draw connection lines between tiles
+			for x in range(n_w):
+
+				model_draw.line( (w_img/2.                          , h_fig           + h_space        + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space        + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space        + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h  + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h  + titleFontSize,
+								  w_img/2.                          , h_fig * (n_h+3) + h_space * n_h  + titleFontSize), fill=(0,0,0), width=5)
+
+			# draw the first tile with input information
+			# text position in the middle of the tile
+			textPos_i = [17, (h_fig - (4*fontSize + 2*lineSpacing))/2]
+
+			# create text: input shape and input channels
+			inputText = 'Input Shape:\n' + str(self.inputShape[0]) + 'x' + str(self.inputShape[1]) + '\n' 
+			if len(self.channels) > 1:
+				inputText += 'Channels:'
+			else:
+				inputText += 'Channel:'
+			inputText += '\n' + self.channels[0].replace('_', ' ')
+			if len(self.channels) > 1:
+				for i in range(len(self.channels)-1):
+					inputText += ', ' + self.channels[i+1].replace('_', ' ')
+
+			# draw input tile with frame and write text to it
+			model_draw.rectangle(           ((w_img - w_fig)/2.,         		       h_space                + titleFontSize,   
+								             (w_img + w_fig)/2.,                h_fig + h_space                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+			self.drawFrame(model_draw,       (w_img - w_fig)/2.,         			   h_space                + titleFontSize, 
+								             (w_img + w_fig)/2.,                h_fig + h_space                + titleFontSize, 5)
+			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_i[0], 		   h_space + textPos_i[1] + titleFontSize), inputText, font=font, fill='black', align='center', spacing=lineSpacing)
+
+			# draw a tile for each layer with layer information
+			# loop over all layers and only recognize the real layers (not virutal ones with [0,0,0])
+			for x in range(n_w):
+				for y in range(n_h):
+					if not self.networkArchitecture[x][y] == [0,0,0]:
+
+						# text position in the middle of the tile
+						textPos = [25, (h_fig - (3*fontSize + 2*lineSpacing))/2]
+						if self.networkArchitecture[x][y][0] >= 10:
+							textPos[0] = 11
+
+						# create text: filtersize, number of filters and numer of channels
+						filterNum = str(self.networkArchitecture[x][y][1]) + ' Filters' 
+						filterSize = 'Filter Size ' + str(self.networkArchitecture[x][y][0]) + 'x' + str(self.networkArchitecture[x][y][0])
+						channels = str(self.networkArchitecture[x][y][2]) + ' Channel'
+						if self.networkArchitecture[x][y][2] > 1:
+							channels += 's'
+
+						# set color of tile in HSV-mode according to filtersize and convert it to RGB-mode (needed for saving figure)
+						colorHSV = (170. - (190./self.inputShape[0] * self.networkArchitecture[x][y][0]))%255.
+						colorsRGB = []
+						colors = colorsys.hsv_to_rgb(colorHSV/255.,180/255.,230/255.) # takes values from 0 to 1, but draw object needs range 0 to 255
+						for i in range(3):
+							colorsRGB.append(int(round(colors[i]*255.)))
+
+						# draw a tile with frame and write text to it
+						model_draw.rectangle(           (w_fig *  x    + w_space * (x+1),              h_fig * (y+2) + h_space * (y+1)               + titleFontSize, 
+											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+3) + h_space * (y+1)               + titleFontSize), outline=(0,0,0), fill=tuple(colorsRGB))
+
+						self.drawFrame(model_draw,       w_fig *  x    + w_space * (x+1),              h_fig * (y+2) + h_space * (y+1)               + titleFontSize, 
+											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+3) + h_space * (y+1)               + titleFontSize, 5)
+
+						model_draw.multiline_text(      (w_fig *  x    + w_space * (x+1) + textPos[0], h_fig * (y+2) + h_space * (y+1) + textPos[1]  + titleFontSize), filterNum +'\n' + filterSize + '\n' + channels, font=font, fill='black', align='center', spacing=lineSpacing)
+
+			# draw the last tile to signal concatenation and transition to further non convolutional layers
+			# text position in the middle of the tile
+			textPos_o = [30, (h_fig - (fontSize + 2*lineSpacing))/2]
+
+			# create output text: concatenate and flatten
+			outputText = ''
+			if n_w > 1:
+				outputText += 'Concatenate\n& '
+				textPos_o[1] = (h_fig - (2*fontSize + 2*lineSpacing))/2
+			outputText += 'Flatten'
+
+			# draw output tile with frame and write text to it
+			model_draw.rectangle(           ((w_img - w_fig)/2.,                h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
+								             (w_img + w_fig)/2.,                h_fig * (n_h+4) + h_space * n_h                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+			self.drawFrame(model_draw,       (w_img - w_fig)/2.,                h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
+								             (w_img + w_fig)/2.,                h_fig * (n_h+4) + h_space * n_h                + titleFontSize, 5)
+			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0], h_fig * (n_h+3) + h_space * n_h + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
+
+			# save scheme as jpeg
+			model_img.show()
+			model_img.save(self.inputDir + 'network_architecture' + self.fileName + '.jpg')
+
 
 		def getGeometry(self, numImages):
 			# get geometry for compact arrangement of feature maps
 
 			# start with squareroot and search for integers nearby
-			if type(np.sqrt(numImages)) == int:
-				y = np.sqrt(numImages)
+			if int(np.sqrt(numImages)) == np.sqrt(numImages):
+				y = int(np.sqrt(numImages))
 			else:
 				test = int(math.floor(np.sqrt(numImages)))
 				
@@ -238,16 +381,16 @@ class Visualizer():
 			# for filters before and after in comparison
 			if len(filterData) == 2:
 				fig = plt.figure(figsize=(9.*1.5,65/18.*1.5)) # size calculated to get the right symmetry for resulting picture
-				outerGrid = gridspec.GridSpec(1, 3, wspace=.3, width_ratios=[13,13,1]) # equal first and second section for filters, smaller third section for colorbar
+				outerGrid = gridspec.GridSpec(2, 3, wspace=.3, width_ratios=[13,13,1], height_ratios=[1, geom[1]*20]) # upper line stays free to make room for title, lower line sections: equal first and second section for filters, smaller third section for colorbar
 			
 			# for difference between filters before and after
 			else:
 				fig = plt.figure(figsize=(8., 6.63)) # size calculated for right symmetry
-				outerGrid = gridspec.GridSpec(1, 2, wspace=.3, width_ratios=[20,1]) # first section for filters, second section for colorbar
+				outerGrid = gridspec.GridSpec(2, 2, wspace=.3, width_ratios=[20,1], height_ratios=[1, geom[1]*20]) # upper line to make space, lower line first section for filters, second section for colorbar
 			
 			# set inner grid for all filters from all channels 
 			for k in range(len(filterData)):
-				innerGrid = gridspec.GridSpecFromSubplotSpec(geom[1], geom[0], subplot_spec=outerGrid[k], wspace=0.4, hspace=0.4)
+				innerGrid = gridspec.GridSpecFromSubplotSpec(geom[1], geom[0], subplot_spec=outerGrid[1,k], wspace=0.4, hspace=0.4)
 
 				# plot histogram of filter weights with right norm and label
 				for i in range(len(filterData[0])):
@@ -258,14 +401,15 @@ class Visualizer():
 					ax.imshow(filterData[k][i], cmap=cmap, vmin=minElement, vmax=maxElement)
 
 			# create colorbar
-			cbar_ax = fig.add_subplot(outerGrid[0, len(filterData)])
+			cbar_ax = fig.add_subplot(outerGrid[1, len(filterData)])
 			mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm)
 
-			# save figure (two runs for comparison and difference)
-			#plt.suptitle('Visualization of CNN Filters before and after Training' + title)
+			# save figure with title (two runs for comparison and difference)
 			if len(filterData) == 2:
+				plt.suptitle('Visualization of CNN Filters before and after Training\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 				plt.savefig(self.inputDir + layerIndex + 'visualization/filter_visualization_' + layerIndex + self.fileName + '.png')
 			else:
+				plt.suptitle('Filters Difference\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 				plt.savefig(self.inputDir + layerIndex + 'visualization/filter_difference_' + layerIndex + self.fileName + '.png')
 			
 			# close figure to save storage
@@ -312,12 +456,12 @@ class Visualizer():
 			#change font size of axis labels
 			mpl.rcParams.update({'font.size': 5})
 
-			# outer arrangement: 2x2 grid for input images and resulting feature maps and their two colorbars
-			outerGrid = gridspec.GridSpec(1, 2, wspace=.3, width_ratios=[50, 1])
+			# outer arrangement: first line stays empty to make room for the figure title, second line for input images and resulting feature maps and their two colorbars
+			outerGrid = gridspec.GridSpec(2, 2, wspace=.3, width_ratios=[geom[0]*15, 1], height_ratios=[1, (geom[0]+height)*10])
 
 			# set inner grids for better proportions between images (need to have same height and regular order)
-			innerGrid = gridspec.GridSpecFromSubplotSpec(geom[1]+height, max(geom[0], 2)*2, subplot_spec=outerGrid[0,0], hspace = 0.4)
-			innerGrid_bar = gridspec.GridSpecFromSubplotSpec(geom[1]+height, 1, subplot_spec=outerGrid[0,1])
+			innerGrid = gridspec.GridSpecFromSubplotSpec(geom[1]+height, max(geom[0], 2)*2, subplot_spec=outerGrid[1,0], hspace = 0.4)
+			innerGrid_bar = gridspec.GridSpecFromSubplotSpec(geom[1]+height, 1, subplot_spec=outerGrid[1,1])
 			
 			# plot histograms of input images in upper left section central in comparison to feature maps
 			for i in range(len(inputData)):
@@ -334,7 +478,10 @@ class Visualizer():
 			
 			# plot histograms for all feature maps according to geometric arrangement in lower left section
 			for i in range(self.filterNum):
-				ax=fig.add_subplot(innerGrid[height + i//geom[0], (i%geom[0])*2:(i%geom[0])*2+2])
+				if self.filterNum == 1:
+					ax=fig.add_subplot(innerGrid[height + i//geom[0], 1:3])
+				else:
+					ax=fig.add_subplot(innerGrid[height + i//geom[0], (i%geom[0])*2:(i%geom[0])*2+2])
 				ax.set_title(labels_o[i], size=7)
 				ax.set_xlabel('$\\eta$', size=6)
 				ax.set_ylabel('$\\phi$', size=6, rotation=0)
@@ -344,8 +491,20 @@ class Visualizer():
 			cbar_ax = fig.add_subplot(innerGrid_bar[height:,0])
 			mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap_o, norm=norm_o)
 
-			# save figure
-			#plt.suptitle('Image before and after Convolutional Layer' + title, size= 12)
+			# create figure title
+			if tag == str(len(self.channels)) + 'ch_':
+				titleTag = ' of both channels\n'
+			elif tag == 'TTH_':
+				titleTag = ' of overlapping TTH Samples\n'
+			elif tag == 'TTbar_':
+				titleTag = ' of overlapping TTbar Samples\n'
+			else:
+				for channel in self.channels:
+					if tag == channel + '_':
+						titleTag = ' of channel' + channel.replace('_', ' ') + '\n'
+			
+			# save figure with title
+			plt.suptitle('Feature Map Visualization' + titleTag + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 			plt.savefig(self.inputDir + layerIndex + 'visualization/feature_map_visualization_' + tag + layerIndex + self.fileName + '.png')
 			
 			# close figure to save storage
@@ -355,22 +514,20 @@ class Visualizer():
 '''
 TODO
 
-name von ordner in case of genau 1 layer sollte nicht _output sein
-Title bei allen plots hinzufuegen
 layer Anordnung plotten
-ueberpruefen ob filter difference Betrag sinnvoll ist
-Ergebnisse von basic training reproduzieren -> sehen Bilder aus wie vorher?
-anpassen fuer 1ch 
-mit original trainingsdaten testen
-code pushen
-auch den von hier sichern
-1ch pseudodaten testen
+
 laborbuch
+testreihen ueberlegen
 testreihen starten
+
+delta r plots
+jan fragen wegen channel in parallele layer
+gliederung BA ueberlegen
+aufgabenlsite zu rate ziehen
 '''
 
 
-myVis = Visualizer('../test_multilayer2/visualization_data/', 'test_multilayer2')
+myVis = Visualizer('../../test_multilayer2/visualization_data/', 'test_multilayer2')
 myVis.doPlots()
 
 
