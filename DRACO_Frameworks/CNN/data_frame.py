@@ -218,7 +218,8 @@ class DataFrame(object):
                 balanceSamples = True,
                 evenSel = "",
                 phi_padding = 0,
-		normed_to = 1.):
+		normed_to = 1.,
+                pseudoData = False):
 
         self.event_category = event_category
         self.lumi = lumi
@@ -264,12 +265,7 @@ class DataFrame(object):
 
         print('quantile set to ' + str(self.normed_to * 100) +'%')
 	quantile = [np.quantile(data, normed_to) for data in hist_data]
-	
-	#print(df['Jet_Pt[0-16]_Hist'].values)
-	#print(df['TaggedJet_Pt[0-9]_Hist'].values)
-	#print('\n')
-	#print(quantile)
-        #print(train_variables)
+		
 	for i in range(len(train_variables)):
            counter = 0
            var = train_variables[i]     
@@ -278,19 +274,27 @@ class DataFrame(object):
                counter += 1
                if counter%100000 == 0: 
                    print counter,"events normalised in channel", var
+
+                # norm values according to quantile
                if not var == 'Jet_CSV[0-16]_Hist':
 	   	   values = row[var]/quantile[i]
+            
+               # values in CSV channel are already normed
 	       else:
                    values = row[var]/1.
-
+                
+               # set all values greater than 1 to 1 
 	       for line in values:
 	      	   for j in range(len(line)):
 		      if line[j] > 1.: line[j] = 1.
+
+                      # generate pseudo data: every entry is 1
+                      if pseudoData and line[j] != 0.: 
+                          line[j] = 1.
 	     	   
 	       normalisedData.append(values)
 	   df[var] = normalisedData
-	#print(df['Jet_Pt[0-16]_Hist'].values)
-        #print(df['TaggedJet_Pt[0-9]_Hist'].values)
+        
 
         #####################################################################################         
         
@@ -431,7 +435,10 @@ class DataFrame(object):
                 df_variables_tmp=[np.expand_dims(np.stack(self.df_train[ channel ].values), axis=3) for channel in self.train_variables]
                 traindata=np.concatenate(df_variables_tmp,axis=3)
             
+
+
             return traindata
+
         else:     
             return self.df_train[ self.train_variables ]#not adjusted for cnn yet
 

@@ -97,7 +97,8 @@ class CNN():
             balanceSamples     = False,
             evenSel            = None,
             phi_padding        = 0,
-            normed_to 	       = 1.):
+            normed_to 	       = 1.,
+            pseudoData         = False):
 
         # save some information
         # list of samples to load into dataframe
@@ -136,8 +137,11 @@ class CNN():
         #phi_padding
         self.phi_padding = phi_padding
 	
-	#normalisation for input data
+	# normalisation for input data
 	self.normed_to = normed_to
+        
+        # set pseudoData
+        self.pseudoData = pseudoData
 
         # list of input variables
         self.train_variables = train_variables
@@ -157,17 +161,18 @@ class CNN():
         # load data set
         self.data = self._load_datasets(shuffle_seed, balanceSamples)
         self.event_classes = self.data.output_classes
-
+        
+        ''' #no inputs here for CNN
         # save variable norm
         self.cp_path = self.save_path+"/checkpoints/"
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
         if not os.path.exists(self.plot_path):
             os.makedirs(self.plot_path)
+        '''
 
         # layer names for in and output (needed for c++ implementation)
         self.inputName = "inputLayer"
@@ -185,7 +190,8 @@ class CNN():
             balanceSamples   = balanceSamples,
             evenSel          = self.evenSel,
             phi_padding      = self.phi_padding,
-    	    normed_to 	     = self.normed_to
+    	    normed_to 	     = self.normed_to,
+            pseudoData       = self.pseudoData
         )
 
     def _load_architecture(self, config):
@@ -319,7 +325,7 @@ class CNN():
         # compile the model
         model.compile(
             loss        = "binary_crossentropy",
-            optimizer   = keras.optimizers.Adagrad(),
+            optimizer   = 'adagrad',#keras.optimizers.Adagrad(),
             metrics     = self.eval_metrics)
 
         # save the model
@@ -331,7 +337,7 @@ class CNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
-    def train_model(self):
+    def train_model(self, batch_size=100):
         ''' train the model '''
 
         # add early stopping if activated
@@ -349,7 +355,7 @@ class CNN():
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
-            batch_size          = 100,
+            batch_size          = batch_size,
             epochs              = self.train_epochs,
             shuffle             = True,
             callbacks           = callbacks,

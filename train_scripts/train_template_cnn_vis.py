@@ -62,10 +62,11 @@ cnn = CNN.CNN(
     # phi_padding factor: a factor of 0.25 adds the upper quarter of the image to the button and vice versa. default 0 leaves the image unchanged
     phi_padding     = 0,
     # set threshold for normed input data to ...%. Every value greater will be set to 1.
-    normed_to 	    = 0.95)
+    normed_to 	    = 0.95,
+    pseudoData      = options.isPseudo())
 
 # prepare visualization
-visualizer = vis.visualizer(options.getInputDir(), options.getOutputDir(), cnn.data.input_shape[0:2], options.getPlotName(), options.getRotationName(), options.getTrainVariables(), options.getFilterNum(), options.getFilterSize(), 0.95)
+visualizer = vis.visualizer(options.getInputDir(), options.getOutputDir(), cnn.data.input_shape[0:2], options.getPlotName(), options.getRotationName(), options.getTrainVariables(), options.getFilterNum(), options.getFilterSize(), 0.95, options.isPseudo())
 
 
 #================

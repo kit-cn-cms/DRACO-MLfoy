@@ -9,7 +9,7 @@ from keras.layers import Conv2D
 
 class visualizer():
 
-        def __init__(self, inputDir, outputDir, inputShape, plotName, rotName, channels, filterNum, filterSize, quantile = 0.95):
+        def __init__(self, inputDir, outputDir, inputShape, plotName, rotName, channels, filterNum, filterSize, quantile = 0.95, pseudoData = False):
 	        # initiate all variables
 
                 self.inputDir = inputDir
@@ -22,6 +22,7 @@ class visualizer():
                 self.filterSize = filterSize
                 self.filterWeights = []
                 self.quantile = quantile
+                self.pseudoData = pseudoData
 
                 # calculate maximal amount of serial layers
                 l = len(self.filterSize[0])
@@ -59,11 +60,14 @@ class visualizer():
     	 
                 self.ttHImages = self.decodeInputData(ttHSample, channels[0],10000)
                 self.ttbarImages = self.decodeInputData(ttbarSample, channels[0], 10000)
-
+                
+                # prepare input image
                 if len(channels) > 1:
                         secondChImage = self.decodeInputData(ttHSample, channels[1], 1)[0]
                         self.inputImage = np.concatenate((self.ttHImages[0].reshape(self.inputShape + [1]), secondChImage.reshape(self.inputShape + [1])), axis = 2)
-           
+                else:
+                    self.inputImage = self.ttHImages[0].reshape(self.inputShape + [1])
+
 
 	def decodeInputData(self, sample, channel, importStop):
 		# decodes and normalizes data from h5 file
@@ -109,6 +113,9 @@ class visualizer():
 		       for line in image:
 		           for j in range(len(line)):
 		              if line[j] > 1.: line[j] = 1.
+                            
+                              # pseudo data: every event is 1
+                              if self.pseudoData and line[j] != 0.: line[j] = 1.
 
 		       normalisedData.append(image)
 		    return normalisedData
@@ -201,7 +208,7 @@ class visualizer():
                                 self.outputImagesTTH[i][j] = []
                                 self.outputImagesTTbar[i][j] = []
                                 
-				if self.filterWeights[i][j] != []:
+                                if type(self.filterWeights[i][j]) != list: 
                                         
                                         #create new model with j layers every time
                                         model = Sequential()
@@ -214,10 +221,9 @@ class visualizer():
                                         weights.append(self.filterWeights[i][j])
 					weights.append(np.zeros(self.filterNum))
 					model.set_weights(weights)
-
 			    		self.outputImages[i][j] = model.predict(self.inputImage.reshape([1] + self.inputShape + [len(self.channels)])).tolist()
-                                        
-					if len(self.channels) == 1:
+
+                                        if len(self.channels) == 1:
 
 						# if images have only one channel produce overlapping images also for several layers
                                                 self.outputImagesTTH[i][j] = 0.0

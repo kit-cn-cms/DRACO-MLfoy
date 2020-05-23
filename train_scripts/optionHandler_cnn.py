@@ -84,6 +84,8 @@ cnnOptions.add_option("--filterSize", dest="filterSize", default=4,
         help='size of filters in convolutional layer')
 cnnOptions.add_option("-m", "--model", dest="model", default="basic", 
         help='STR of desired model to use. supported: basic, reduced, noConv')
+cnnOptions.add_option("--pseudo", dest="pseudo", action = "store_true",  default=False,
+        help='if set True, input data will be set to 1 for every event')
 parser.add_option_group(cnnOptions)
 
 #===============================================================
@@ -280,3 +282,6 @@ class optionHandler_cnn:
 
     def getModel(self):
         return self.__options.model
+
+    def isPseudo(self):
+        return self.__options.pseudo
