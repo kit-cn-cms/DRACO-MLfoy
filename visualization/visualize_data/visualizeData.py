@@ -20,7 +20,6 @@ from PIL import Image, ImageDraw, ImageFont
 import optionHandler_vis
 options = optionHandler_vis.optionHandler_vis(sys.argv)
 
-
 class Visualizer():
 
 		def __init__(self, inputDir, fileName):
@@ -40,10 +39,21 @@ class Visualizer():
 			# calculate maximal amount of serial layers
 			self.maxLayers = len(self.networkArchitecture[0])
 
-			# get inputshape and channels
+			# get input information
 			channels = eval(networkArchitecture[1])
 			self.channels = [channel[0:channel.index('[')] for channel in channels]
 			self.inputShape = eval(networkArchitecture[2])
+			rotation = networkArchitecture[3].replace('_', ' ').replace('rot', 'Rotation')
+			try:
+				self.rotation = rotation[rotation.index('no'):]
+			except ValueError:
+				self.rotation = rotation[rotation.index('Rotation'):]
+			if len(networkArchitecture) > 5: self.pseudoData = networkArchitecture[5]
+			else: self.pseudoData = None
+
+
+			# get further model information
+			self.model = networkArchitecture[4]
 
 			# prepare visulization data from textfiles
 			self.prepareData()
@@ -158,7 +168,8 @@ class Visualizer():
 			return images
 
 
-########################################################################################################################################################					     # data visualization
+########################################################################################################################################################				
+		# data visualization
 
 		
 		def doPlots(self):
@@ -229,62 +240,75 @@ class Visualizer():
 
 			# set fonttype and fontsize
 			fontPath = "/Users/Amaterasu1/Library/Fonts/Arial Bold.ttf"
-			fontSize = 23
+			fontSize = 20
 			lineSpacing = 5
-			titleFontSize = 80
+			titleFontSize = 60
 			titleFont = ImageFont.truetype(fontPath, titleFontSize-30)
 			font = ImageFont.truetype(fontPath, fontSize)
 
 			# set horizontal tile width and spacing
 			n_w = len(self.networkArchitecture)
-			w_fig = 200
-			w_space = w_fig/2
+			w_fig = 220
+			w_space = w_fig/4
 			w_img = n_w * w_fig + (n_w + 1) * w_space 
 
 			# set vertical tile width and spacing
 			n_h = len(self.networkArchitecture[0])
-			h_fig = 150
+			h_fig = 130
 			h_space = h_fig/3
-			h_img = (n_h + 4) * h_fig + (n_h + 1) * h_space + titleFontSize
+			if self.model == 'basic':
+				h_img = (n_h + 6) * h_fig + (n_h + 3) * h_space + titleFontSize
+			else:
+				h_img = (n_h + 5) * h_fig + (n_h + 2) * h_space + titleFontSize
 
 			# set background
 			model_img = Image.new('RGB', (w_img, h_img), 'white')
 			model_draw = ImageDraw.Draw(model_img)
 
 			# set title
-			model_draw.multiline_text( (w_img/2 - 240, 30), 'Network Architecture', font=titleFont, fill='black', align='center', spacing=lineSpacing)
+			model_draw.multiline_text( (w_img/2 - 155, 30), 'Network Architecture', font=titleFont, fill='black', align='center', spacing=lineSpacing)
 
-			# draw connection lines between tiles
+			# draw connection lines between conv layer tiles
 			for x in range(n_w):
 
-				model_draw.line( (w_img/2.                          , h_fig           + h_space        + titleFontSize, 
-								  w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space        + titleFontSize), fill=(0,0,0), width=5)
-				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space        + titleFontSize, 
-								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h  + titleFontSize), fill=(0,0,0), width=5)
-				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h  + titleFontSize,
-								  w_img/2.                          , h_fig * (n_h+3) + h_space * n_h  + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_img/2.                          , h_fig           + h_space       + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space       + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space       + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h + titleFontSize,
+								  w_img/2.                          , h_fig * (n_h+3) + h_space * n_h + titleFontSize), fill=(0,0,0), width=5)
+
+			# draw connection line to output (different length for basic/reduced)
+			if self.model == 'basic':  
+				model_draw.line( (w_img/2., h_fig * (n_h+4) + h_space *  n_h    + titleFontSize, 
+								  w_img/2., h_fig * (n_h+5) + h_space * (n_h+2) + titleFontSize), fill=(0,0,0), width=5)
+			else:
+				model_draw.line( (w_img/2., h_fig * (n_h+4) + h_space *  n_h    + titleFontSize, 
+								  w_img/2., h_fig * (n_h+4) + h_space * (n_h+1) + titleFontSize), fill=(0,0,0), width=5)
 
 			# draw the first tile with input information
 			# text position in the middle of the tile
-			textPos_i = [17, (h_fig - (4*fontSize + 2*lineSpacing))/2]
+			textPos_i = [25, (h_fig - (4*fontSize + 3*lineSpacing))/2]
 
 			# create text: input shape and input channels
-			inputText = 'Input Shape:\n' + str(self.inputShape[0]) + 'x' + str(self.inputShape[1]) + '\n' 
-			if len(self.channels) > 1:
-				inputText += 'Channels:'
+			inputText = 'Input Shape ' + str(self.inputShape[0]) + 'x' + str(self.inputShape[1]) + '\n' + self.rotation + '\n'
+			if len(self.channels) == 1:
+				inputText += 'Channel ' + self.channels[0].replace('_', '')
+				if self.pseudoData == 'pseudo': inputText += '\n Pseudo Data'
+				else: textPos_i[1] = (h_fig - (3*fontSize + 2*lineSpacing))/2
 			else:
-				inputText += 'Channel:'
-			inputText += '\n' + self.channels[0].replace('_', ' ')
-			if len(self.channels) > 1:
-				for i in range(len(self.channels)-1):
-					inputText += ', ' + self.channels[i+1].replace('_', ' ')
+				inputText += 'Channels:'
+				inputText += '\n' + self.channels[0].replace('_', '')
+				if len(self.channels) > 1:
+					for i in range(len(self.channels)-1):
+						inputText += ', ' + self.channels[i+1].replace('_', '')
 
 			# draw input tile with frame and write text to it
-			model_draw.rectangle(           ((w_img - w_fig)/2.,         		       h_space                + titleFontSize,   
+			model_draw.rectangle(           ((w_img - w_fig)/2.,         		        h_space                + titleFontSize,   
 								             (w_img + w_fig)/2.,                h_fig + h_space                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
-			self.drawFrame(model_draw,       (w_img - w_fig)/2.,         			   h_space                + titleFontSize, 
+			self.drawFrame(model_draw,       (w_img - w_fig)/2.,         			    h_space                + titleFontSize, 
 								             (w_img + w_fig)/2.,                h_fig + h_space                + titleFontSize, 5)
-			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_i[0], 		   h_space + textPos_i[1] + titleFontSize), inputText, font=font, fill='black', align='center', spacing=lineSpacing)
+			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_i[0], 	    h_space + textPos_i[1] + titleFontSize), inputText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# draw a tile for each layer with layer information
 			# loop over all layers and only recognize the real layers (not virutal ones with [0,0,0])
@@ -293,9 +317,8 @@ class Visualizer():
 					if not self.networkArchitecture[x][y] == [0,0,0]:
 
 						# text position in the middle of the tile
-						textPos = [25, (h_fig - (3*fontSize + 2*lineSpacing))/2]
-						if self.networkArchitecture[x][y][0] >= 10:
-							textPos[0] = 11
+						textPos = [45, (h_fig - (3*fontSize + 2*lineSpacing))/2]
+						if self.networkArchitecture[x][y][0] >= 10: textPos[0] = 32
 
 						# create text: filtersize, number of filters and numer of channels
 						filterNum = str(self.networkArchitecture[x][y][1]) + ' Filters' 
@@ -320,27 +343,63 @@ class Visualizer():
 
 						model_draw.multiline_text(      (w_fig *  x    + w_space * (x+1) + textPos[0], h_fig * (y+2) + h_space * (y+1) + textPos[1]  + titleFontSize), filterNum +'\n' + filterSize + '\n' + channels, font=font, fill='black', align='center', spacing=lineSpacing)
 
-			# draw the last tile to signal concatenation and transition to further non convolutional layers
+			# draw the next tile to signal concatenation and transition to further non convolutional layers
 			# text position in the middle of the tile
-			textPos_o = [30, (h_fig - (fontSize + 2*lineSpacing))/2]
+			textPos_ml = [80, (h_fig - fontSize)/2]
 
-			# create output text: concatenate and flatten
-			outputText = ''
+			# create merging layer text: concatenate and flatten
+			mergingLayerText = ''
 			if n_w > 1:
-				outputText += 'Concatenate\n& '
-				textPos_o[1] = (h_fig - (2*fontSize + 2*lineSpacing))/2
-			outputText += 'Flatten'
+				mergingLayerText += 'Concatenate\n& '
+				textPos_ml = [50,(h_fig - (2*fontSize + 2*lineSpacing))/2]
+			mergingLayerText += 'Flatten'
 
-			# draw output tile with frame and write text to it
-			model_draw.rectangle(           ((w_img - w_fig)/2.,                h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
-								             (w_img + w_fig)/2.,                h_fig * (n_h+4) + h_space * n_h                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
-			self.drawFrame(model_draw,       (w_img - w_fig)/2.,                h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
-								             (w_img + w_fig)/2.,                h_fig * (n_h+4) + h_space * n_h                + titleFontSize, 5)
-			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0], h_fig * (n_h+3) + h_space * n_h + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
+			# draw merging layer tile with frame and write text to it
+			model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
+								             (w_img + w_fig)/2.,                 h_fig * (n_h+4) + h_space * n_h                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+			self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
+								             (w_img + w_fig)/2.,                 h_fig * (n_h+4) + h_space * n_h                + titleFontSize, 5)
+			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_ml[0], h_fig * (n_h+3) + h_space * n_h + textPos_ml[1] + titleFontSize), mergingLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
+
+			# draw tile for further layers (only if basic model) and output tile
+			# text position in the middle of the tile
+			textPos_fl = [20, (h_fig - (3*fontSize + 2*lineSpacing))/2]
+			textPos_o =  [40, (h_fig - (2*fontSize +   lineSpacing))/2]
+
+			# create text for further layer tile and output tile
+			furtherLayerText = 'Further Layers\nDense (50 Neurons)\nDropout (Rate 0,5)'
+			outputText = 'Output\nDense (1 Node)'
+			if self.model == 'reduced_untr':
+				outputText += '\nuntrainable'
+				textPos_o[1] = (h_fig - (3*fontSize + 2*lineSpacing))/2
+
+			# if basic model draw further layer tile and output tile
+			if self.model == 'basic':
+
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize), outline=(0,0,0), fill=(240,240,240))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_fl[0], h_fig * (n_h+4) + h_space * (n_h+1) + textPos_fl[1] + titleFontSize), furtherLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
+
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+2)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+6) + h_space * (n_h+2)                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+2)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+6) + h_space * (n_h+2)                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+5) + h_space * (n_h+2) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
+
+			# if reduced model only draw output tile
+			else:
+
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+4) + h_space * (n_h+1) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# save scheme as jpeg
 			model_img.show()
-			model_img.save(self.inputDir + 'network_architecture' + self.fileName + '.jpg')
+			model_img.save(self.inputDir + 'network_architecture_' + self.fileName + '.jpg')
 
 
 		def getGeometry(self, numImages):
@@ -508,10 +567,10 @@ class Visualizer():
 			plt.close(fig)
 
 
-##################################################################################################
+#######################################################################################################################################
 
 
-myVis = Visualizer('../../test_multilayer2/visualization_data/', 'test_multilayer2')
+myVis = Visualizer('../../Series_Multilayer/matrix_descending/visualization_data/', 'matrix_descending')
 myVis.doPlots()
 
 

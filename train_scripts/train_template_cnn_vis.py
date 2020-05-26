@@ -66,7 +66,8 @@ cnn = CNN.CNN(
     pseudoData      = options.isPseudo())
 
 # prepare visualization
-visualizer = vis.visualizer(options.getInputDir(), options.getOutputDir(), cnn.data.input_shape[0:2], options.getPlotName(), options.getRotationName(), options.getTrainVariables(), options.getFilterNum(), options.getFilterSize(), 0.95, options.isPseudo())
+if not options.getModel() == "noConv":
+    visualizer = vis.visualizer(options.getInputDir(), options.getOutputDir(), cnn.data.input_shape[0:2], options.getPlotName(), options.getRotationName(), options.getTrainVariables(), options.getFilterNum(), options.getFilterSize(), options.getModel(), 0.95, options.isPseudo())
 
 
 #================
@@ -118,6 +119,11 @@ else:
 
         # output layer
         out = Dense( cnn.data.n_output_neurons, activation = "sigmoid")(merge)
+
+    elif options.getModel() == 'reduced_untr':
+
+        # output layer
+        out = Dense( cnn.data.n_output_neurons, activation = "sigmoid", trainable = False)(merge)
 
     else:
         print 'model type', options.getModel(), 'is not supported!'

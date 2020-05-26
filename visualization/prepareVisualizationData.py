@@ -9,7 +9,7 @@ from keras.layers import Conv2D
 
 class visualizer():
 
-        def __init__(self, inputDir, outputDir, inputShape, plotName, rotName, channels, filterNum, filterSize, quantile = 0.95, pseudoData = False):
+        def __init__(self, inputDir, outputDir, inputShape, plotName, rotName, channels, filterNum, filterSize, model, quantile = 0.95, pseudoData = False):
 	        # initiate all variables
 
                 self.inputDir = inputDir
@@ -23,6 +23,7 @@ class visualizer():
                 self.filterWeights = []
                 self.quantile = quantile
                 self.pseudoData = pseudoData
+                self.model = model
 
                 # calculate maximal amount of serial layers
                 l = len(self.filterSize[0])
@@ -286,8 +287,14 @@ class visualizer():
 		text_file.write(str(self.networkArchitecture))
                 text_file.write('\n')
                 text_file.write(str(self.channels))
-		text_file.write(str('\n'))
+		text_file.write('\n')
                 text_file.write(str(self.inputShape))
+                text_file.write('\n')
+                text_file.write(str(self.rotName))
+                text_file.write('\n')
+                text_file.write(str(self.model))
+                if self.pseudoData:
+                    text_file.write('\npseudo')
                 text_file.close()
 
 		text_file = open(self.outputDir + "input_image" + self.plotName + ".txt", "w")
