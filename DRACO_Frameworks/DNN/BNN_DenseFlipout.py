@@ -222,20 +222,11 @@ class BNN_Flipout():
           "activation_function":      "relu",
           "output_activation":        "Sigmoid",
           "earlystopping_percentage": None,
-          "earlystoppi# sampling output values from the intern tensorflow output distribution
-    def bnn_calc_mean_std(self, n_samples=50):
-        test_pred  = []
-        print "Calculating the mean and std: "
-        for i in tqdm.tqdm(range(n_samples)):
-            test_pred_vector = self.model.predict(self.data.get_test_data(as_matrix = True))
-            test_pred.append(test_pred_vector)
-            test_preds = np.concatenate(test_pred, axis=1)
-        return np.mean(test_preds, axis=1), np.std(test_preds, axis=1), test_predsng_epochs":     None,
-        }
+          "earlystopping_epochs":     None,
+        } 
 
         for key in config:
             self.architecture[key] = config[key]
-
 
     # sampling output values from the intern tensorflow output distribution
     def bnn_calc_mean_std(self, n_samples=50):
@@ -246,7 +237,6 @@ class BNN_Flipout():
             test_pred.append(test_pred_vector)
             test_preds = np.concatenate(test_pred, axis=1)
         return np.mean(test_preds, axis=1), np.std(test_preds, axis=1), test_preds
-    
 
     def build_default_model(self):
         ''' build default straight forward BNN from architecture dictionary '''
@@ -293,52 +283,48 @@ class BNN_Flipout():
 
         X = Inputs
 
-        n_train_samples = 0.75 * self.data.get_train_data(as_matrix = True).shape[0] #1.0*self.architecture["batch_size"]
+        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
             X = tfp.layers.DenseFlipout(
-            units                       =
+            units                       = nNeurons,
             activation                  = activation_function, 
             activity_regularizer        = None, 
             trainable                   = True,
-            kernel_posterior_fn         = tfp_layers_util.default_mean_field_normal_fn(),
+            kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: kl_lib.kl_divergence(q, p)), 
-            bias_posterior_fn           = tfp_layers_util.default_mean_field_normal_fn(is_singular=True),
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
-            bias_divergence_fn          = (lambda q, p, ignore: kl_lib.kl_divergence(q, p)), 
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
-            name                        = "DenseFlipout_"+str(iLayer))
+            name                        = "DenseFlipout_"+str(iLayer))(X)
+
             
-            tfp.layers.DenseVariational(
-                units               = nNeurons,
-                make_posterior_fn   = posterior,
-                make_prior_fn       = prior,
-                kl_weight           = 1. / n_train_samples,
-                kl_use_exact        = False,
-                use_bias            = self.use_bias,
-                activation          = activation_function,
-                name                = "DenseLayer_"+str(iLayer)
-                )(X)
 
             # add dropout percentage to layer if activated
             if not dropout == 0:
                 X = layer.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = DenseVariational(
-            units               = self.data.n_output_neurons,
-            make_posterior_fn   = posterior,
-            make_prior_fn       = prior,
-            kl_weight           = 1. / n_train_samples,
-            kl_use_exact        = False,
-            use_bias            = self.use_bias,
-            activation          = output_activation.lower(),
-            name                = self.outputName
-            )(X)
+        X = tfp.layers.DenseFlipout(
+            units                       = self.data.n_output_neurons,
+            activation                  = output_activation.lower(), 
+            activity_regularizer        = None, 
+            trainable                   = True,
+            kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
+            kernel_posterior_tensor_fn  = (lambda d: d.sample()),
+            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
+            bias_posterior_tensor_fn    = (lambda d: d.sample()), 
+            bias_prior_fn               = None,
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            seed                        = None,
+            name                        = self.outputName)(X)
 
         # define model
         model = models.Model(inputs = [Inputs], outputs = [X])
@@ -346,14 +332,405 @@ class BNN_Flipout():
 
         return model
 
+    # custom loss definition
+    #DEBUG
+    def neg_log_likelihood(self, y_true, y_pred, kl):
+        sigma = 1.
+        dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        return -dist.log_prob(y_true) +kl #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+    
+    def wrapped_partial(self, func, *args, **kwargs):
+        partial_func = partial(func, *args, **kwargs)
+        update_wrapper(partial_func, func)
+        return partial_func
 
-model = tf.keras.Sequential([
-    tfp.layers.DenseFlipout(512, activation=tf.nn.relu),
-    tfp.layers.DenseFlipout(10),
-])
-logits = model(features)
-neg_log_likelihood = tf.nn.softmax_cross_entropy_with_logits(
-    labels=labels, logits=logits)
-kl = sum(model.losses)
-loss = neg_log_likelihood + kl
-train_op = tf.train.AdamOptimizer().minimize(loss)
+    def build_model(self, config = None, model = None):
+        ''' build a BNN model
+            use options defined in 'config' dictionary '''
+
+        if config:
+            self._load_architecture(config)
+            print("loading non default net configs")
+
+        if model == None:
+            print("building model from config")
+            model = self.build_default_model()
+
+        # compile the model
+        ########################################################################################################################
+        #DEBUG
+        kl = sum(model.losses) # DEBUG
+        ########################################################################################################################
+        model.compile(
+            loss        = self.wrapped_partial(self.neg_log_likelihood,kl=kl), #me
+            optimizer   = self.architecture["optimizer"],
+            metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood, kl=kl)]) #me
+
+        # save the model
+        self.model = model
+
+        # save net information
+        out_file    = self.save_path+"/model_summary.yml"
+        yml_model   = self.model.to_yaml()
+        with open(out_file, "w") as f:
+            f.write(yml_model)
+    
+
+    def train_model(self):
+        ''' train the model '''
+
+        # add early stopping if activated
+        callbacks = None
+        if self.architecture["earlystopping_percentage"] or self.architecture["earlystopping_epochs"]:
+            callbacks = [EarlyStopping(
+                monitor         = "loss",
+                value           = self.architecture["earlystopping_percentage"],
+                min_epochs      = 50,
+                stopping_epochs = self.architecture["earlystopping_epochs"],
+                verbose         = 1)]
+
+        # train main net
+        self.trained_model = self.model.fit(
+            x = self.data.get_train_data(as_matrix = True),
+            y = self.data.get_train_labels(),
+            batch_size          = self.architecture["batch_size"],
+            epochs              = self.train_epochs,
+            shuffle             = True,
+            callbacks           = callbacks,
+            validation_split    = 0.25,
+            sample_weight       = self.data.get_train_weights(),
+            )
+    
+    def eval_model(self):
+
+        # evaluate test dataset
+        self.model_eval = self.model.evaluate(
+            self.data.get_test_data(as_matrix = True),
+            self.data.get_test_labels())
+
+        # save history of eval metrics
+        self.model_history = self.trained_model.history
+
+        # save predicitons
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
+
+        # print evaluations
+        from sklearn.metrics import roc_auc_score
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
+
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
+        if self.eval_metrics:
+            print("model test loss: {}".format(self.model_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("model test {}: {}".format(metric, self.model_eval[im+1]))
+
+        # return self.model_prediction_vector, self.model_prediction_vector_std
+    
+
+    # result plotting functions
+    # --------------------------------------------------------------------
+    def plot_binaryOutput(self, log = False, privateWork = False, printROC = False,
+                        nbins = None, bin_range = [0.,1.], name = "binary_discriminator",
+                        sigScale = -1):
+
+        if not nbins:
+            nbins = int(50*(1.-bin_range[0]))
+
+        binaryOutput = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            test_predictions    = self.model_prediction_vector,
+            train_predictions   = None,#self.model_train_prediction,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            event_category      = self.category_label,
+            plotdir             = self.save_path,
+            logscale            = log,
+            sigScale            = sigScale)
+
+        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+
+        binaryOutput_std = plottingScripts.plotBinaryOutput(
+            data                = self.data,
+            test_predictions    = self.model_prediction_vector_std,
+            train_predictions   = None, # self.model_train_prediction_std,
+            nbins               = 30,
+            bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
+            event_category      = self.category_label,
+            plotdir             = self.save_path,
+            logscale            = log,
+            sigScale            = sigScale,
+            save_name           = "sigma_discriminator"
+            )
+
+        bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
+
+        # #DEBUG
+        # binaryOutput = plottingScripts.plotBinaryOutput(
+        #     data                = self.data,
+        #     test_predictions    = self.model_prediction_vector,
+        #     train_predictions   = None,#self.model_train_prediction,
+        #     nbins               = nbins,
+        #     bin_range           = bin_range,
+        #     event_category      = self.category_label,
+        #     plotdir             = self.save_path,
+        #     logscale            = log,
+        #     sigScale            = sigScale,
+        #     save_name           = "binary_discriminator_log" #me
+        #     )
+
+        # bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+
+        # binaryOutput_std = plottingScripts.plotBinaryOutput(
+        #     data                = self.data,
+        #     test_predictions    = self.model_prediction_vector_std,
+        #     train_predictions   = None, # self.model_train_prediction_std,
+        #     nbins               = 30,
+        #     bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
+        #     event_category      = self.category_label,
+        #     plotdir             = self.save_path,
+        #     logscale            = log,
+        #     sigScale            = sigScale,
+        #     save_name           = "sigma_discriminator_log"
+        #     )
+
+        # bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
+
+
+        self.plot_2D_hist_std_over_mean(bin_range=[50,50])
+        self.plot_varied_histogram()
+
+    def plot_2D_hist_std_over_mean(self, bin_range=[40,40]):
+        from matplotlib.colors import LogNorm
+        plt.hist2d(self.model_prediction_vector, self.model_prediction_vector_std, bins=bin_range, cmin=1, norm=LogNorm())
+        plt.colorbar()
+        plt.xlabel("$\mu$", fontsize = 16)
+        plt.ylabel("$\sigma$", fontsize = 16)
+        plt.savefig(self.save_path+"/sigma_over_mu.png")
+        print "sigma_over_mu.png was created"
+        plt.savefig(self.save_path+"/sigma_over_mu.pdf")
+        print "sigma_over_mu.pdf was created"
+        plt.close()
+
+    def plot_varied_histogram(self):
+        sig_preds, sig_preds_std, bkg_preds, bkg_preds_std = [], [], [], []
+        for i in range(len(self.data.get_test_labels())):
+            if self.data.get_test_labels()[i]==1:
+                sig_preds.append(self.model_prediction_vector[i])
+                sig_preds_std.append(self.model_prediction_vector_std[i])
+            elif self.data.get_test_labels()[i]==0:
+                bkg_preds.append(self.model_prediction_vector[i])
+                bkg_preds_std.append(self.model_prediction_vector_std[i])
+            else:
+                print "--wrong event--"
+        plt.hist(sig_preds, bins=15, range=(0,1), histtype='step', density=True, label="ttH", color="b")
+        plt.hist(np.array(sig_preds)+1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="b")
+        plt.hist(np.array(sig_preds)-1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="b")
+        plt.hist(bkg_preds, bins=15, range=(0,1), histtype='step', density=True, label="bkg", color="r")
+        plt.hist(np.array(bkg_preds)+1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="r")
+        plt.hist(np.array(bkg_preds)-1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="r")
+        plt.xlabel("$\mu$", fontsize = 16)
+        plt.legend()
+        plt.savefig(self.save_path+"/varied_discr.png")
+        print "varied_discr.png was created"
+        plt.savefig(self.save_path+"/varied_discr.pdf")
+        print "varied_discr.pdf was created"
+        plt.close()
+
+    def plot_metrics(self, privateWork = False):
+        plt.rc('text', usetex=True)
+
+        ''' plot history of loss function and evaluation metrics '''
+        metrics = ["loss", "neg_log_likelihood"]
+        if self.eval_metrics: metrics += self.eval_metrics
+
+        # loop over metrics and generate matplotlib plot
+        for metric in metrics:
+            plt.clf()
+            # get history of train and validation scores
+            train_history = self.model_history[metric]
+            val_history = self.model_history["val_"+metric]
+
+            n_epochs = len(train_history)
+            epochs = np.arange(1,n_epochs+1,1)
+
+            # plot histories
+            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
+            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            if privateWork:
+                plt.title("CMS private work", loc = "left", fontsize = 16)
+                plt.title("best epoch: "+str(n_epochs), loc="center", fontsize = 16)
+            else:
+                plt.title("best epoch: "+str(n_epochs), loc="left", fontsize = 16)
+
+
+
+            # add title
+            title = self.category_label
+            title = title.replace("\\geq", "$\geq$")
+            title = title.replace("\\leq", "$\leq$")
+            plt.title(title, loc = "right", fontsize = 16)
+
+            # make it nicer
+            plt.grid()
+            plt.xlabel("epoch", fontsize = 16)
+            plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            #plt.ylim(ymin=0.)
+
+            # add legend
+            plt.legend()
+
+            # save
+            out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
+            plt.savefig(out_path)
+            print("saved plot of "+str(metric)+" at "+str(out_path))
+            plt.close()
+
+        train_history_KLD = np.array(self.model_history["loss"]) - np.array(self.model_history["neg_log_likelihood"])
+        val_history_KLD = np.array(self.model_history["val_loss"]) - np.array(self.model_history["val_neg_log_likelihood"])
+
+        plt.clf()
+
+        n_epochs = len(train_history_KLD)
+        epochs = np.arange(1,n_epochs+1,1)
+
+        # plot histories
+        plt.plot(epochs, train_history_KLD, "b-", label = "train", lw = 2)
+        plt.plot(epochs, val_history_KLD, "r-", label = "validation", lw = 2)
+        if privateWork:
+            plt.title("CMS private work", loc = "left", fontsize = 16)
+
+        # add title
+        title = self.category_label
+        title = title.replace("\\geq", "$\geq$")
+        title = title.replace("\\leq", "$\leq$")
+        plt.title(title, loc = "right", fontsize = 16)
+
+        # make it nicer
+        plt.grid()
+        plt.xlabel("epoch", fontsize = 16)
+        plt.ylabel("KLD", fontsize = 16)
+        #plt.ylim(ymin=0.)
+
+        # add legend
+        plt.legend()
+
+        # save
+        out_path = self.save_path + "/model_history_"+"KLD"+".pdf"
+        plt.savefig(out_path)
+        print("saved plot of "+"KLD"+" at "+str(out_path))
+        plt.close()
+
+    #copied from DNN.py in dev-bnn branch
+    def plot_confusionMatrix(self, norm_matrix = True, privateWork = False, printROC = False):
+        ''' plot confusion matrix '''
+        plotCM = plottingScripts.plotConfusionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            plotdir             = self.save_path)
+
+        plotCM.plot(norm_matrix = norm_matrix, privateWork = privateWork, printROC = printROC)
+
+    def plot_discriminators(self, log = False, printROC = False, privateWork = False,
+                            signal_class = None, nbins = None, bin_range = None,
+                            sigScale = -1):
+
+        ''' plot all events classified as one category '''
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(25*(1.-bin_range[0]))
+
+        plotDiscrs = plottingScripts.plotDiscriminators(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log,
+            sigScale            = sigScale)
+
+        bkg_hist, sig_hist = plotDiscrs.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+        #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
+        #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
+    def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
+                            privateWork = False, nbins = 30, bin_range = [0.,1.],
+                            sigScale = -1):
+
+        ''' plot distribution in outputNodes '''
+        plotNodes = plottingScripts.plotOutputNodes(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log,
+            sigScale            = sigScale)
+
+        plotNodes.plot(ratio = False, printROC = printROC, privateWork = privateWork)
+
+    def plot_eventYields(self, log = False, privateWork = False, signal_class = None, sigScale = -1):
+        eventYields = plottingScripts.plotEventYields(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            signal_class        = signal_class,
+            plotdir             = self.save_path,
+            logscale            = log)
+
+        eventYields.plot(privateWork = privateWork)
+
+    def plot_closureTest(self, log = False, privateWork = False,
+                            signal_class = None, nbins = None, bin_range = None):
+        ''' plot comparison between train and test samples '''
+
+        if not bin_range:
+            bin_range = [round(1./self.data.n_output_neurons,2), 1.]
+        if not nbins:
+            nbins = int(20*(1.-bin_range[0]))
+
+        closureTest = plottingScripts.plotClosureTest(
+            data                = self.data,
+            test_prediction     = self.model_prediction_vector,
+            train_prediction    = self.model_train_prediction, #TODO
+            event_classes       = self.event_classes,
+            nbins               = nbins,
+            bin_range           = bin_range,
+            signal_class        = signal_class,
+            event_category      = self.category_label,
+            plotdir             = self.plot_path,
+            logscale            = log)
+
+        closureTest.plot(ratio = False, privateWork = privateWork)
+
+# model = tf.keras.Sequential([
+#     tfp.layers.DenseFlipout(512, activation=tf.nn.relu),
+#     tfp.layers.DenseFlipout(10),
+# ])
+# logits = model(features)
+# neg_log_likelihood = tf.nn.softmax_cross_entropy_with_logits(
+#     labels=labels, logits=logits)
+# kl = sum(model.losses)
+# loss = neg_log_likelihood + kl
+# train_op = tf.train.AdamOptimizer().minimize(loss)
