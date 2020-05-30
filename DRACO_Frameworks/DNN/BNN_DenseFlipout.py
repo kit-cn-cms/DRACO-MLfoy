@@ -27,6 +27,7 @@ import data_frame
 import Derivatives
 from Derivatives import Inputs, Outputs, Derivatives
 
+from BNN_DenseFlipout_Layer import DenseFlipout
 import tensorflow.keras as keras
 import tensorflow.keras.optimizers as optimizers
 import tensorflow.keras.models as models
@@ -228,6 +229,43 @@ class BNN_Flipout():
         for key in config:
             self.architecture[key] = config[key]
 
+    def load_trained_model(self, netConfig, inputDirectory, n_iterations=200):
+        ''' load an already trained model '''
+        #checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
+
+        # get the keras model
+        #DEBUG
+        #self.model = models.load_model(checkpoint_path, custom_objects={'tf':tf, 'tfp':tfp, 'tfd':tfd, 'DenseFlipout':DenseFlipout, 'neg_log_likelihood':self.neg_log_likelihood})
+        #self.model = models.load_model(checkpoint_path, custom_objects={'DenseFlipout':DenseFlipout})
+        #out_file_2 = inputDirectory+"/checkpoints/trained_model"
+        self.model = self.build_model(netConfig)
+        print self.model.get_weights()
+
+        print self.model.load_weights("/home/ycung/Desktop/DRACO-MLfoy/workdir/TEST_ge4j_ge3t/checkpoints/trained_model_weights_test")
+        load_status = self.model.load_weights("/home/ycung/Desktop/DRACO-MLfoy/workdir/TEST_ge4j_ge3t/checkpoints/trained_model_weights_test")
+        load_status.assert_existing_objects_matched()
+        
+        self.model.summary()
+        print self.model.get_weights()
+
+
+        # evaluate test dataset with keras model
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
+
+        # save predictions
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations) #for DEBUG 5 instead of 200
+        #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
+        
+        #DEBUG
+        print self.model_prediction_vector
+
+        # print evaluations  with keras model
+        from sklearn.metrics import roc_auc_score
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector.reshape(-1,1)) #me
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
+        return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
+
     # sampling output values from the intern tensorflow output distribution
     def bnn_calc_mean_std(self, n_samples=50):
         test_pred  = []
@@ -250,32 +288,6 @@ class BNN_Flipout():
         activation_function         = self.architecture["activation_function"]
         output_activation           = self.architecture["output_activation"]
 
-        # Specify the posterior distributions for kernel and bias
-        def posterior(kernel_size, bias_size=0, dtype=None):
-            from tensorflow_probability import layers
-            from tensorflow_probability import distributions as tfd
-            import numpy as np
-            import tensorflow as tf
-            n = kernel_size + bias_size
-            c = np.log(np.expm1(1.))
-            return tf.keras.Sequential([
-                layers.VariableLayer(2 * n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t[..., :n], scale=1e-5 + tf.math.softplus(c + t[..., n:])), reinterpreted_batch_ndims=1)),
-                ])
-
-        # Specify the prior distributions for kernel and bias
-        def prior(kernel_size, bias_size=0, dtype=None):
-            from tensorflow_probability import layers
-            from tensorflow_probability import distributions as tfd
-            import numpy as np
-            import tensorflow as tf
-            n = kernel_size + bias_size
-            c = np.log(np.expm1(1.))
-            return tf.keras.Sequential([
-                layers.VariableLayer(n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
-                ])
-
         # define input layer
         Inputs = layer.Input(
             shape = (number_of_input_neurons,),
@@ -287,7 +299,7 @@ class BNN_Flipout():
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
-            X = tfp.layers.DenseFlipout(
+            X = DenseFlipout(
             units                       = nNeurons,
             activation                  = activation_function, 
             activity_regularizer        = None, 
@@ -310,7 +322,7 @@ class BNN_Flipout():
                 X = layer.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = tfp.layers.DenseFlipout(
+        X = DenseFlipout(
             units                       = self.data.n_output_neurons,
             activation                  = output_activation.lower(), 
             activity_regularizer        = None, 
@@ -374,6 +386,9 @@ class BNN_Flipout():
         yml_model   = self.model.to_yaml()
         with open(out_file, "w") as f:
             f.write(yml_model)
+        
+        #DEBUG #me
+        return self.model 
     
 
     def train_model(self):
@@ -412,7 +427,7 @@ class BNN_Flipout():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) # DEBUG 2 instead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -438,6 +453,149 @@ class BNN_Flipout():
 
         # return self.model_prediction_vector, self.model_prediction_vector_std
     
+    def save_model(self, argv, execute_dir, netConfigName):
+        ''' save the trained model '''
+
+        # save executed command
+        argv[0] = execute_dir+"/"+argv[0].split("/")[-1]
+        execute_string = "python "+" ".join(argv)
+        out_file = self.cp_path+"/command.sh"
+        with open(out_file, "w") as f:
+            f.write(execute_string)
+        print("saved executed command to {}".format(out_file))
+
+        # save model as h5py file
+        out_file = self.cp_path + "/trained_model.h5py"
+        self.model.save(out_file, save_format='h5')
+        print("saved trained model at "+str(out_file))
+
+        # save config of model
+        model_config = self.model.get_config()
+        out_file = self.cp_path +"/trained_model_config"
+        with open(out_file, "w") as f:
+            f.write( str(model_config))
+        print("saved model config at "+str(out_file))
+
+        # save weights of network
+        out_file = self.cp_path +"/trained_model_weights.h5"
+        self.model.save_weights(out_file)
+        print("wrote trained weights to "+str(out_file))
+        self.model.save_weights(self.cp_path +"/trained_model_weights_test")
+
+        #DEBUG
+        print "WEIGHTS AFTER TRAINING"
+        print self.model.get_weights()
+
+        load_status = self.model.load_weights(self.cp_path +"trained_model_weights_test")
+        print load_status
+        #######################################################
+
+        # set model as non trainable
+        for layer in self.model.layers:
+            layer.trainable = False
+        self.model.trainable = False
+
+        self.netConfig = netConfigName
+
+        # save checkpoint files (needed for c++ implementation)
+        out_file = self.cp_path + "/trained_model"
+        saver = tf.compat.v1.train.Saver()
+        sess = tf.compat.v1.keras.backend.get_session()
+        save_path = saver.save(sess, out_file)
+        print("saved checkpoint files to "+str(out_file))
+
+        # produce json file with configs
+        configs = self.architecture
+        configs["inputName"] = self.inputName
+        configs["outputName"] = self.outputName+"/"+configs["output_activation"]
+        configs = {key: configs[key] for key in configs if not "optimizer" in key}
+
+        # more information saving
+        configs["inputData"] = self.input_samples.input_path
+        configs["eventClasses"] = self.input_samples.getClassConfig()
+        configs["JetTagCategory"] = self.category_name
+        configs["categoryLabel"] = self.category_label
+        configs["Selection"] = self.category_cutString
+        configs["trainEpochs"] = self.train_epochs
+        configs["trainVariables"] = self.train_variables
+        configs["shuffleSeed"] = self.data.shuffleSeed
+        configs["trainSelection"] = self.evenSel
+        configs["evalSelection"] = self.oddSel
+        configs["netConfig"] = self.netConfig
+        configs["bestEpoch"] = len(self.model_history["acc"])
+
+        # save information for binary DNN
+        if self.data.binary_classification:
+            configs["binaryConfig"] = {
+              "minValue": self.input_samples.bkg_target,
+              "maxValue": 1.,
+            }
+
+        json_file = self.cp_path + "/net_config.json"
+        with open(json_file, "w") as jf:
+            json.dump(configs, jf, indent = 2, separators = (",", ": "))
+        print("wrote net configs to "+str(json_file))
+
+        '''  save configurations of variables for plotscript '''
+        plot_file = self.cp_path+"/plot_config.csv"
+        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        variables = variable_configs.loc[self.train_variables]
+        variables.to_csv(plot_file, sep = ",")
+        print("wrote config of input variables to {}".format(plot_file))
+
+        ''' save best epoch to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/best_epoch.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "best_epoch"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "best_epoch": len(self.model_history["acc"])})
+            print("saved best_epoch to "+str(filename))
+
+
+        # Serialize the test inputs for the analysis of the gradients
+        ##pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb")) #me as it needs much space
+    
+    def get_input_weights(self):
+        ''' get the weights of the input layer and sort input variables by weight sum '''
+
+         # get weights
+        first_layer = self.model.layers[1]
+        weights = first_layer.get_weights()[0]
+
+        #DEBUG
+        print first_layer.get_weights()
+        print weights
+        print "*********************************************++"
+        print len(weights[:len(weights)/2])
+        print len(self.train_variables)+1
+
+        weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables))
+        weights_std  = weights[len(weights)/2:]
+        weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables)+1)
+
+        # print "layer 1 post: ",self.model.layers[1].get_weights()[0][:10]
+        # print "layer 1 pri: ",self.model.layers[1].get_weights()[1][:10]
+        # print self.model.layers[4].get_weights()
+
+        self.weight_dict = {}
+        for out_weights_mean, out_weights_std, variable in zip(weights_mean, weights_std, self.train_variables):
+            w_mean_sum = np.sum(np.abs(out_weights_mean))
+            w_std_sum = np.sqrt(np.sum(np.power(out_weights_std,2)))
+            self.weight_dict[variable] = (w_mean_sum, w_std_sum)
+
+        # sort weight dict
+        rank_path = self.save_path + "/first_layer_weights.csv"
+        with open(rank_path, "w") as f:
+            f.write("variable,weight_mean_sum,weight_std_sum\n")
+            for key, val in sorted(self.weight_dict.iteritems(), key = lambda (k,v): (v,k)):
+                f.write("{},{},{}\n".format(key,val[0],val[1]))
+        print("wrote weight ranking to "+str(rank_path))
+
+    def get_model(self):
+        return self.model
 
     # result plotting functions
     # --------------------------------------------------------------------
