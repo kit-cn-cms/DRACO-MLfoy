@@ -27,7 +27,6 @@ import data_frame
 import Derivatives
 from Derivatives import Inputs, Outputs, Derivatives
 
-from BNN_DenseFlipout_Layer import DenseFlipout
 import tensorflow.keras as keras
 import tensorflow.keras.optimizers as optimizers
 import tensorflow.keras.models as models
@@ -232,33 +231,23 @@ class BNN_Flipout():
     def load_trained_model(self, netConfig, inputDirectory, n_iterations=200):
         ''' load an already trained model '''
         #checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
+        checkpoint_path = inputDirectory+"/checkpoints/trained_model_weights"
 
         # get the keras model
         #DEBUG
         #self.model = models.load_model(checkpoint_path, custom_objects={'tf':tf, 'tfp':tfp, 'tfd':tfd, 'DenseFlipout':DenseFlipout, 'neg_log_likelihood':self.neg_log_likelihood})
-        #self.model = models.load_model(checkpoint_path, custom_objects={'DenseFlipout':DenseFlipout})
-        #out_file_2 = inputDirectory+"/checkpoints/trained_model"
         self.model = self.build_model(netConfig)
-        print self.model.get_weights()
-
-        print self.model.load_weights("/home/ycung/Desktop/DRACO-MLfoy/workdir/TEST_ge4j_ge3t/checkpoints/trained_model_weights_test")
-        load_status = self.model.load_weights("/home/ycung/Desktop/DRACO-MLfoy/workdir/TEST_ge4j_ge3t/checkpoints/trained_model_weights_test")
+        load_status = self.model.load_weights(checkpoint_path)
+        # Crosscheck
         load_status.assert_existing_objects_matched()
-        
-        self.model.summary()
-        print self.model.get_weights()
-
 
         # evaluate test dataset with keras model
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
         # save predictions
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations) #for DEBUG 5 instead of 200
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations)
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
         
-        #DEBUG
-        print self.model_prediction_vector
-
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector.reshape(-1,1)) #me
@@ -299,7 +288,7 @@ class BNN_Flipout():
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
-            X = DenseFlipout(
+            X = tfp.layers.DenseFlipout(
             units                       = nNeurons,
             activation                  = activation_function, 
             activity_regularizer        = None, 
@@ -322,7 +311,7 @@ class BNN_Flipout():
                 X = layer.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = DenseFlipout(
+        X = tfp.layers.DenseFlipout(
             units                       = self.data.n_output_neurons,
             activation                  = output_activation.lower(), 
             activity_regularizer        = None, 
@@ -387,8 +376,7 @@ class BNN_Flipout():
         with open(out_file, "w") as f:
             f.write(yml_model)
         
-        #DEBUG #me
-        return self.model 
+        return self.model #me
     
 
     def train_model(self):
@@ -427,7 +415,7 @@ class BNN_Flipout():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) # DEBUG 2 instead of 50
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50) # DEBUG 2 instead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -477,18 +465,17 @@ class BNN_Flipout():
         print("saved model config at "+str(out_file))
 
         # save weights of network
-        out_file = self.cp_path +"/trained_model_weights.h5"
+        #out_file = self.cp_path +"/trained_model_weights.h5"
+        #self.model.save_weights(out_file)
+
+        out_file = self.cp_path +"trained_model_weights" #me removed slash before trained
         self.model.save_weights(out_file)
+
+        #check whether save was correct TODO: throw error if load_status = None
+        load_status = self.model.load_weights(out_file) #DEBUG
+        print load_status #DEBUG
+
         print("wrote trained weights to "+str(out_file))
-        self.model.save_weights(self.cp_path +"/trained_model_weights_test")
-
-        #DEBUG
-        print "WEIGHTS AFTER TRAINING"
-        print self.model.get_weights()
-
-        load_status = self.model.load_weights(self.cp_path +"trained_model_weights_test")
-        print load_status
-        #######################################################
 
         # set model as non trainable
         for layer in self.model.layers:
