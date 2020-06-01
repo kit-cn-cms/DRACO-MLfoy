@@ -339,7 +339,7 @@ class BNN_Flipout():
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
         #return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1) #DEBUG
-        return tf.reduce_mean(dist.log_prob(y_true), axis=-1) 
+        return -tf.reduce_mean(dist.log_prob(y_true), axis=-1) 
 
     # def neg_log_likelihood(self, y_true, y_pred, kl):
         # tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
