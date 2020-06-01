@@ -284,8 +284,7 @@ class BNN_Flipout():
 
         X = Inputs
 
-        #n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
-        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0]/float(self.architecture["batch_size"]) #DEBUG
+        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
@@ -336,10 +335,11 @@ class BNN_Flipout():
 
     # custom loss definition
     #DEBUG
-    def neg_log_likelihood(self, y_true, y_pred, kl):
+    def neg_log_likelihood(self, y_true, y_pred):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        return -dist.log_prob(y_true) +kl #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+        #return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1) #DEBUG
+        return tf.reduce_mean(dist.log_prob(y_true), axis=-1) 
 
     # def neg_log_likelihood(self, y_true, y_pred, kl):
         # tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
