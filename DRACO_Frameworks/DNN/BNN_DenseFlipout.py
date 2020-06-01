@@ -284,7 +284,8 @@ class BNN_Flipout():
 
         X = Inputs
 
-        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
+        #n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
+        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0]/float(self.architecture["batch_size"]) #DEBUG
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
@@ -296,13 +297,11 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), #DEBUG
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), 
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = "DenseFlipout_"+str(iLayer))(X)
 
@@ -321,13 +320,11 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), 
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = self.outputName)(X)
 
@@ -366,16 +363,12 @@ class BNN_Flipout():
 
         # compile the model
         ########################################################################################################################
-        #DEBUG #IMMER AUFGERUFEN??
-        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
-        kl = sum(model.losses)/n_train_samples # DEBUG
-        print ("****************************COMPILE*********************************")
-        print kl
+        #DEBUG 
         ########################################################################################################################
         model.compile(
-            loss        = self.wrapped_partial(self.neg_log_likelihood,kl=kl), #me
+            loss        = self.neg_log_likelihood, 
             optimizer   = self.architecture["optimizer"],
-            metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood, kl=kl)]) #me
+            metrics     = self.eval_metrics+[self.neg_log_likelihood]) #
 
         # save the model
         self.model = model
@@ -878,14 +871,3 @@ class BNN_Flipout():
             logscale            = log)
 
         closureTest.plot(ratio = False, privateWork = privateWork)
-
-# model = tf.keras.Sequential([
-#     tfp.layers.DenseFlipout(512, activation=tf.nn.relu),
-#     tfp.layers.DenseFlipout(10),
-# ])
-# logits = model(features)
-# neg_log_likelihood = tf.nn.softmax_cross_entropy_with_logits(
-#     labels=labels, logits=logits)
-# kl = sum(model.losses)
-# loss = neg_log_likelihood + kl
-# train_op = tf.train.AdamOptimizer().minimize(loss)
