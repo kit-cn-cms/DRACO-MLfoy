@@ -301,8 +301,8 @@ class BNN_Flipout():
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p), #DEBUG 
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = "DenseFlipout_"+str(iLayer))(X)
 
@@ -342,10 +342,11 @@ class BNN_Flipout():
     def neg_log_likelihood(self, y_true, y_pred, kl):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        print ("**************************NEG***********************************")
-        print kl
         return -dist.log_prob(y_true) +kl #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
-    
+
+    # def neg_log_likelihood(self, y_true, y_pred, kl):
+        # tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
+
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
         update_wrapper(partial_func, func)
