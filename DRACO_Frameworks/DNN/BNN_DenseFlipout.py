@@ -296,10 +296,12 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), #DEBUG
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p), #DEBUG 
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = "DenseFlipout_"+str(iLayer))(X)
@@ -319,11 +321,13 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None,
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), #DEBUG
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), 
             seed                        = None,
             name                        = self.outputName)(X)
 
@@ -338,6 +342,8 @@ class BNN_Flipout():
     def neg_log_likelihood(self, y_true, y_pred, kl):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        print ("**************************NEG***********************************")
+        print kl
         return -dist.log_prob(y_true) +kl #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
     
     def wrapped_partial(self, func, *args, **kwargs):
@@ -359,8 +365,11 @@ class BNN_Flipout():
 
         # compile the model
         ########################################################################################################################
-        #DEBUG
-        kl = sum(model.losses) # DEBUG
+        #DEBUG #IMMER AUFGERUFEN??
+        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
+        kl = sum(model.losses)/n_train_samples # DEBUG
+        print ("****************************COMPILE*********************************")
+        print kl
         ########################################################################################################################
         model.compile(
             loss        = self.wrapped_partial(self.neg_log_likelihood,kl=kl), #me
