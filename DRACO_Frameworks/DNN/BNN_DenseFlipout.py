@@ -115,8 +115,11 @@ class BNN_Flipout():
             balanceSamples            = False,
             evenSel                   = None,
             sys_variation             = False,
-            gen_vars                  = False):
+            gen_vars                  = False,
+            debugs = None): #DEBUG
 
+        #DEBUG
+        self.debugs = debugs
         # save some information
         # list of samples to load into dataframe
         self.input_samples = input_samples
@@ -338,11 +341,34 @@ class BNN_Flipout():
     def neg_log_likelihood(self, y_true, y_pred):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        
+        #DEBUG
         #return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1) #DEBUG
-        return -tf.reduce_mean(dist.log_prob(y_true), axis=-1) 
+        result_tf = tf.nn.softmax_cross_entropy_with_logits_v2(labels = y_true, logits = y_pred)
 
-    # def neg_log_likelihood(self, y_true, y_pred, kl):
-        # tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
+        with tf.Session() as sess:    
+            sess.run(result_tf)
+            print(y_pred.eval(session=tf.compat.v1.Session()))
+        #print('y_pred: \n{0}\n'.format(y_true.eval(session=tf.compat.v1.Session())))
+
+        if self.debugs == "without_axis":
+            return -tf.reduce_mean(dist.log_prob(y_true))
+
+        elif self.debugs == "softmaxcrossentropy":
+            return tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
+        
+        elif self.debugs == "log_prob":
+            return -dist.log_prob(y_true)
+
+        elif self.debugs == "axis_one":
+            return -tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+        
+        elif self.debugs == "sparse":
+            return tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_true, logits=y_pred)
+        
+        else:
+            return -dist.log_prob(y_true)
+
 
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -368,7 +394,7 @@ class BNN_Flipout():
         model.compile(
             loss        = self.neg_log_likelihood, 
             optimizer   = self.architecture["optimizer"],
-            metrics     = self.eval_metrics+[self.neg_log_likelihood]) #
+            metrics     = self.eval_metrics+[self.neg_log_likelihood]) 
 
         # save the model
         self.model = model
