@@ -11,27 +11,22 @@
 #_V9 = early_stopping_percentage = 0.02 und learning_rate = 1e-3 und n_train_samples = 0.75*n_train_samples; Korrektur output_activation; loss in model.compile = neg_log_likelihood + kl mit kl = sum(model.losses)/tf.to_float(n_train_samples) und dafuer Skalierung direkt beim Layer entfernt
 #_V10 = early_stopping_percentage = 0.02 und learning_rate = 1e-3 und n_train_samples = Anzahl Batches; Korrektur output_activation; loss in model.compile = neg_log_likelihood (ohne kl) und Skalierung beim Layer wieder hinzugefuegt
 #_V11 = early_stopping_percentage = 0.02 und learning_rate = 1e-3 und n_train_samples = 0.75*n_train_samples; Korrektur output_activation; loss in model.compile = neg_log_likelihood (ohne kl) und Skalierung beim Layer wieder hinzugefuegt. Changed neg_log_likelihood function to return tf.reduce_mean(dist.log_prob(y_true), axis=-1) 
-
-
-
-
-
+#_V12 = alles wie davor, neg_log_likelihood wieder geandert zu -dist.log(...) und bias_posterior_fn is_singular entfernt und fuer bias_ prior_fn Funktion statt None
 
 
 
 name=BNN
-output1=TEST_Flipout_QT_BNN_training_
-output2=TEST_Flipout_BNN_training_
+output1=Flipout_QT_BNN_training_
+output2=Flipout_BNN_training_
 
 epochs=4000
 
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
-layers=("50") #"100" "200" "50,50")
-loss=("without_axis" "softmaxcrossentropy" "log_prob" "axis_one" "binarycross" "sparse")
+layers=("50" "100" "200" "50,50")
 
-for i in "${!loss[@]}"; do
-    python train_template_bnn_denseflipout.py -o $output1"${loss[$i]}" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers 50 --debugs ${loss[$i]}
-    python train_template_bnn_denseflipout.py -o $output2"${loss[$i]}" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers 50 --debugs ${loss[$i]}
+for i in "${!layers[@]}"; do
+    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}"_v12 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}"_v12 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 # #ANN

@@ -300,9 +300,11 @@ class BNN_Flipout():
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
+            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None,
+            #bias_prior_fn               = None, #DEBUG
+            bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = "DenseFlipout_"+str(iLayer))(X)
@@ -323,9 +325,11 @@ class BNN_Flipout():
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True),
+            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None,
+            #bias_prior_fn               = None, #DEBUG
+            bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = self.outputName)(X)
@@ -337,37 +341,10 @@ class BNN_Flipout():
         return model
 
     # custom loss definition
-    #DEBUG
     def neg_log_likelihood(self, y_true, y_pred):
         sigma = 1.
         dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        
-        #DEBUG
-        #return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1) #DEBUG
-        result_tf = tf.nn.softmax_cross_entropy_with_logits_v2(labels = y_true, logits = y_pred)
-
-        with tf.Session() as sess:    
-            sess.run(result_tf)
-            print(y_pred.eval(session=tf.compat.v1.Session()))
-        #print('y_pred: \n{0}\n'.format(y_true.eval(session=tf.compat.v1.Session())))
-
-        if self.debugs == "without_axis":
-            return -tf.reduce_mean(dist.log_prob(y_true))
-
-        elif self.debugs == "softmaxcrossentropy":
-            return tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred)
-        
-        elif self.debugs == "log_prob":
-            return -dist.log_prob(y_true)
-
-        elif self.debugs == "axis_one":
-            return -tf.reduce_mean(dist.log_prob(y_true), axis=-1)
-        
-        elif self.debugs == "sparse":
-            return tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_true, logits=y_pred)
-        
-        else:
-            return -dist.log_prob(y_true)
+        return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
 
     def wrapped_partial(self, func, *args, **kwargs):
@@ -388,9 +365,6 @@ class BNN_Flipout():
             model = self.build_default_model()
 
         # compile the model
-        ########################################################################################################################
-        #DEBUG 
-        ########################################################################################################################
         model.compile(
             loss        = self.neg_log_likelihood, 
             optimizer   = self.architecture["optimizer"],
