@@ -351,14 +351,13 @@ class BNN_Flipout():
         # return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
     #DEBUG
-    from tensorflow.keras.losses import binary_crossentropy
-
-    def neg_log_likelihood(self, y_true, y_pred, alpha = 1):
+    def neg_log_likelihood(self, model, alpha = 1):
+        from tensorflow.keras.losses import binary_crossentropy
         """Defines variational free energy loss. 
        Sum of KL divergence and binary cross-entropy."""
  
         # KL Divergence should be applied once per epoch only.
-        kl = sum(self.model.losses) / ((0.75*self.data.get_train_data(as_matrix = True).shape[0])  / self.architecture["batch_size"])    
+        kl = sum(model.losses) / ((0.75*self.data.get_train_data(as_matrix = True).shape[0])  / self.architecture["batch_size"])    
         def loss(y_true, y_pred):
             bce = binary_crossentropy(y_true, y_pred)
             return alpha * kl + (1. / alpha) * bce    
@@ -382,11 +381,18 @@ class BNN_Flipout():
             print("building model from config")
             model = self.build_default_model()
 
-        # compile the model
+        #DEBUG
+        loss = self.neg_log_likelihood(model)
         model.compile(
-            loss        = self.neg_log_likelihood, 
+            loss        = loss, 
             optimizer   = self.architecture["optimizer"],
-            metrics     = self.eval_metrics+[self.neg_log_likelihood]) 
+            metrics     = self.eval_metrics+[self.wrapped_partial(loss)]) 
+
+        # compile the model
+        # model.compile(
+            # loss        = self.wrapped_partial(self.neg_log_likelihood,model=model), 
+            # optimizer   = self.architecture["optimizer"],
+            # metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood)]) 
 
         # save the model
         self.model = model
