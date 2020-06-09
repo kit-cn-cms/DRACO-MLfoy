@@ -253,7 +253,7 @@ class BNN_Flipout():
         
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector.reshape(-1,1)) #me
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) #me
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
@@ -299,13 +299,15 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
+            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            #bias_prior_fn               = None, #DEBUG
-            bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_prior_fn               = None, #DEBUG
+            #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = "DenseFlipout_"+str(iLayer))(X)
 
@@ -324,13 +326,15 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
+            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            #bias_prior_fn               = None, #DEBUG
-            bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            bias_prior_fn               = None, #DEBUG
+            #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = self.outputName)(X)
 
@@ -341,11 +345,25 @@ class BNN_Flipout():
         return model
 
     # custom loss definition
-    def neg_log_likelihood(self, y_true, y_pred):
-        sigma = 1.
-        dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
+    # def neg_log_likelihood(self, y_true, y_pred):
+        # sigma = 1.
+        # dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        # return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
+    #DEBUG
+    from tensorflow.keras.losses import binary_crossentropy
+
+    def neg_log_likelihood(self, y_true, y_pred, alpha = 1):
+        """Defines variational free energy loss. 
+       Sum of KL divergence and binary cross-entropy."""
+ 
+        # KL Divergence should be applied once per epoch only.
+        kl = sum(self.model.losses) / ((0.75*self.data.get_train_data(as_matrix = True).shape[0])  / self.architecture["batch_size"])    
+        def loss(y_true, y_pred):
+            bce = binary_crossentropy(y_true, y_pred)
+            return alpha * kl + (1. / alpha) * bce    
+        
+        return loss
 
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -551,24 +569,35 @@ class BNN_Flipout():
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-         # get weights
+        sess = tf.compat.v1.keras.backend.get_session()
+
+        # get weights
         first_layer = self.model.layers[1]
-        weights = first_layer.get_weights()[0]
+        
+        weights_mean_kernel_posterior = first_layer.kernel_posterior.mean().eval(session=sess)
+        std_kernel_posterior = first_layer.kernel_posterior.stddev().eval(session=sess)
+        
+        #weights_mean_bias_posterior = first_layer.bias_posterior.mean().eval(session=sess)
+        #std_bias_posterior = first_layer.bias_posterior.stddev().eval(session=sess) #is zero if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen
+        
+        #weights_mean_kernel_prior = first_layer.kernel_prior.mean().eval(session=sess)
+        #std_kernel_prior = first_layer.kernel_prior.stddev().eval(session=sess)
 
-        #DEBUG
-        print first_layer.get_weights()
-        print weights
-        print "*********************************************++"
-        print len(weights[:len(weights)/2])
-        print len(self.train_variables)+1
 
-        weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables))
-        weights_std  = weights[len(weights)/2:]
-        weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables)+1)
+        #std_kernel_posterior = tf.nn.softplus(weights[1]).eval(session=sess)
+        #weights_mean_bias_posterior = weights[2]
+        #bias_post_std = tf.nn.softplus(weights[3]).eval() #not available if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen because std is zero then
 
-        # print "layer 1 post: ",self.model.layers[1].get_weights()[0][:10]
-        # print "layer 1 pri: ",self.model.layers[1].get_weights()[1][:10]
-        # print self.model.layers[4].get_weights()
+        # #alternative
+        # weights = first_layer.get_weights()
+        # weights_mean_kernel_posterior = weights[0]
+        # std_kernel_posterior = np.log(np.exp(weights[1])+1 #softplus transformation
+        # weights_mean_bias_posterior = weights[2]
+        # std_bias_posterior =  np.log(np.exp(weights[3]+1) #softplus transformation
+
+        weights_mean = np.split(weights_mean_kernel_posterior, len(self.train_variables))
+        weights_std  = np.split(std_kernel_posterior, len(self.train_variables))
+
 
         self.weight_dict = {}
         for out_weights_mean, out_weights_std, variable in zip(weights_mean, weights_std, self.train_variables):
