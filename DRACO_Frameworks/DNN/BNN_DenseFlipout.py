@@ -351,18 +351,18 @@ class BNN_Flipout():
         # return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
     #DEBUG
-    def neg_log_likelihood(self, model, alpha = 1):
+    def loss_func(self, model, alpha = 1):
         from tensorflow.keras.losses import binary_crossentropy
         """Defines variational free energy loss. 
        Sum of KL divergence and binary cross-entropy."""
  
         # KL Divergence should be applied once per epoch only.
         kl = sum(model.losses) / ((0.75*self.data.get_train_data(as_matrix = True).shape[0])  / self.architecture["batch_size"])    
-        def loss(y_true, y_pred):
+        def neg_log_likelihood(y_true, y_pred): #TODO change name
             bce = binary_crossentropy(y_true, y_pred)
             return alpha * kl + (1. / alpha) * bce    
         
-        return loss
+        return neg_log_likelihood
 
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -382,7 +382,7 @@ class BNN_Flipout():
             model = self.build_default_model()
 
         #DEBUG
-        loss = self.neg_log_likelihood(model)
+        loss = self.loss_func(model)
         model.compile(
             loss        = loss, 
             optimizer   = self.architecture["optimizer"],
@@ -590,16 +590,12 @@ class BNN_Flipout():
         #std_kernel_prior = first_layer.kernel_prior.stddev().eval(session=sess)
 
 
-        #std_kernel_posterior = tf.nn.softplus(weights[1]).eval(session=sess)
-        #weights_mean_bias_posterior = weights[2]
-        #bias_post_std = tf.nn.softplus(weights[3]).eval() #not available if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen because std is zero then
-
         # #alternative
         # weights = first_layer.get_weights()
         # weights_mean_kernel_posterior = weights[0]
-        # std_kernel_posterior = np.log(np.exp(weights[1])+1 #softplus transformation
+        # std_kernel_posterior = np.log(np.exp(weights[1])+1 #softplus transformation or tf.nn.softplus(weights[1]).eval(session=sess)
         # weights_mean_bias_posterior = weights[2]
-        # std_bias_posterior =  np.log(np.exp(weights[3]+1) #softplus transformation
+        # std_bias_posterior =  np.log(np.exp(weights[3]+1) #softplus transformation or tf.nn.softplus(weights[3]).eval(session=see) #not available if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen because std is zero then
 
         weights_mean = np.split(weights_mean_kernel_posterior, len(self.train_variables))
         weights_std  = np.split(std_kernel_posterior, len(self.train_variables))
