@@ -357,7 +357,7 @@ class BNN_Flipout():
        Sum of KL divergence and binary cross-entropy."""
  
         # KL Divergence should be applied once per epoch only.
-        kl = sum(model.losses) / ((0.75*self.data.get_train_data(as_matrix = True).shape[0])  / self.architecture["batch_size"])    
+        kl = sum(model.losses) / (0.75*self.data.get_train_data(as_matrix = True).shape[0])    
         def neg_log_likelihood(y_true, y_pred): #TODO change name
             bce = binary_crossentropy(y_true, y_pred)
             return alpha * kl + (1. / alpha) * bce    
