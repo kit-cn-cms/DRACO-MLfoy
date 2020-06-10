@@ -769,7 +769,7 @@ class plotBinaryOutput:
             weights     = sig_weights,
             nbins       = self.nbins,
             bin_range   = self.bin_range,
-            color       = ROOT.kAzure+7,
+            color       = ROOT.kMagenta+2,
             xtitle      = "signal",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = False)
@@ -784,7 +784,7 @@ class plotBinaryOutput:
             weights     = bkg_weights,
             nbins       = self.nbins,
             bin_range   = self.bin_range,
-            color       = ROOT.kRed-7,
+            color       = ROOT.kAzure-9,
             xtitle      = "background",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = True)
