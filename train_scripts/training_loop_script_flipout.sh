@@ -21,17 +21,17 @@
 
 
 name=BNN
-output1=TEST_Flipout_QT_BNN_training_
-output2=TEST_Flipout_BNN_training_
+output1=TEST_Reparameterization_QT_BNN_training_
+output2=TEST_Reparameterization_BNN_training_
 
 epochs=4000
 
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
-layers=("50")
+layers=("50" "100" "200" "250" "300" "50,50" "50,50,50")
 
 for i in "${!layers[@]}"; do
-    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}"_v15 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
-    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}"_v15 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 # #ANN
