@@ -502,6 +502,8 @@ class DNN():
     def get_ranges(self):
         if not self.data.binary_classification:
             max_ = [0.]*len(self.input_samples.samples)
+            if self.input_samples.regression:
+                max_ = [0.]*len(self.input_samples.regression_targets)
             for ev in self.model_prediction_vector:
                 for i,node in enumerate(ev):
                     if node>max_[i]:
