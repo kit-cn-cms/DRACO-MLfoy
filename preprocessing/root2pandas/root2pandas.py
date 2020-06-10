@@ -315,7 +315,7 @@ class Dataset:
 
 
                 # convert to dataframe
-                df = tree.pandas.df([v for v in self.variables if not "." in v])
+                df = tree.pandas.df([v for v in self.variables if not "_ft_" in v])
 
                 if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
                     df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
@@ -328,7 +328,6 @@ class Dataset:
                 # delete subentry index
                 try: df = df.reset_index(1, drop = True)
                 except: None
-                print(df)
 
                 # add friend trees 
                 samplepath, filename = os.path.split(f)
@@ -337,29 +336,26 @@ class Dataset:
                     # get path to friend tree file
                     friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
                     # collect all variables that belong to this friend tree
-                    friendtreevars = [v.replace(ftName+".","") for v in self.variables if v.startswith(ftName+".")]
+                    friendtreevars = [v.replace(ftName+"_ft_","") for v in self.variables if v.startswith(ftName+"_ft_")]
                     # open friend tree root file
                     with root.open(friendtreepath) as ftfile:
                         # get tree
                         fTree = ftfile[tr]
                         ft_df = fTree.pandas.df(friendtreevars)
                         # rename columns
-                        renameDict = {v: ".".join([ftName, v]) for v in friendtreevars}
+                        renameDict = {v: "_ft_".join([ftName, v]) for v in friendtreevars}
                         ft_df = ft_df.rename(columns=renameDict)
                         
                         # concatenate dataframes
                         df = pd.concat([df, ft_df], axis = 1)
-
 
                 # handle vector variables, loop over them
                 for vecvar in self.vector_variables:
 
                     # load dataframe with vector variable
                     vec_df = tree.pandas.df(vecvar)
-
                     # loop over inices in vecvar list
                     for idx in self.vector_variables[vecvar]:
-
                         # slice the index
                         idx_df = vec_df.loc[ (slice(None), slice(idx,idx)), :]
                         idx_df = idx_df.reset_index(1, drop = True)
@@ -375,7 +371,6 @@ class Dataset:
 
                 # apply event selection
                 df = self.applySelections(df, sample.selections)
-
                 # perform ttbar reconstruction
                 if self.ttbarReco:
                     df = ttbarReco.findbest(df, self.variables)
@@ -386,7 +381,7 @@ class Dataset:
                 if concat_df.empty: concat_df = df
                 else: concat_df = concat_df.append(df)            
                 n_entries += df.shape[0]
-
+                print(n_entries)
                 # if number of entries exceeds max threshold, add labels and mem and save dataframe
                 if (n_entries > self.maxEntries or f == files[-1]):
                     print("*"*50)

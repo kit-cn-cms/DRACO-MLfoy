@@ -60,7 +60,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0. and dnnRecoZ_ft_RecoZ_matchable>0)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
@@ -69,12 +69,12 @@ single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT
 base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
 # define output classes
-ttH_categories = root2pandas.EventCategories()
-ttH_categories.addCategory("ttH", selection = None)
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZ", selection = None)
 
-ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/ntuples_ttZ/"
+ntuplespath = "/storage/8/vanderlinden/ntuples/2017_ttZ/"
 friendTrees = {
-    "RecoDNN_Z": "/nfs/dust/cms/user/vdlinden/legacyTTH/karim/workdir/ntuples/RecoDNN_Z"
+    "dnnRecoZ": "/portal/ekpbms3/home/vanderlinden/ntuples/ttZ_match/"
     }
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -93,9 +93,9 @@ dataset.addBaseSelection(base_selection)
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "ttH",
-    ntuples     = ntuplespath+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttH_categories,
+    sampleName  = "ttZ",
+    ntuples     = ntuplespath+"/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/*nominal*.root",
+    categories  = ttZ_categories,
     lumiWeight  = 41.5,
     )
 # initialize variable list 
@@ -112,7 +112,8 @@ additional_variables = [
     "Weight_CSV",
     "Weight_GEN_nom",
     "Evt_ID", 
-    "Evt_Run", 
+    "Evt_Run",
+    "dnnRecoZ_ft_RecoZ_matchable",
     "Evt_Lumi"]
 
 # add these variables to the variable list

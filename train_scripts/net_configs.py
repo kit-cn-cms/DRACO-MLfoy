@@ -2,6 +2,21 @@ from tensorflow.keras import optimizers
 
 config_dict = {}
 
+config_dict["regression"] = {
+        "layers":                   [50,50],
+        "loss_function":            "mean_squared_error",
+        "Dropout":                  0.2,
+        "L2_Norm":                  0.,
+        "L1_Norm":                  0.,
+        "batch_size":               16,
+        "optimizer":                optimizers.Adam(1e-5),
+        "activation_function":      "elu",
+        "output_activation":        "Relu",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     20,
+        }
+
+
 config_dict["example_config"] = {
         "layers":                   [200,200],
         "loss_function":            "categorical_crossentropy",

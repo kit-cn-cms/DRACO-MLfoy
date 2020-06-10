@@ -167,10 +167,9 @@ class DNN():
         if not os.path.exists(self.cp_path):
             os.makedirs(self.cp_path)
 
-        if self.norm_variables:
-           out_file = self.cp_path + "/variable_norm.csv"
-           self.data.norm_csv.to_csv(out_file)
-           print("saved variabe norms at "+str(out_file))
+        out_file = self.cp_path + "/variable_norm.csv"
+        self.data.norm_csv.to_csv(out_file)
+        print("saved variabe norms at "+str(out_file))
 
         # make plotdir
         self.plot_path = self.save_path+"/plots/"
@@ -405,6 +404,8 @@ class DNN():
 
         # set model as non trainable
         for layer in self.model.layers:
+            print(layer)
+            print(layer.name)
             layer.trainable = False
         self.model.trainable = False
 
@@ -483,13 +484,15 @@ class DNN():
         self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
-        from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
-
-        # print evaluations
-        from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        if not self.input_samples.regression:
+            print("skip for now")
+            #from sklearn.metrics import confusion_matrix
+            #self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes)
+#
+#            # print evaluations
+#            from sklearn.metrics import roc_auc_score
+#            self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+#            print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
             print("model test loss: {}".format(self.model_eval[0]))
@@ -917,6 +920,20 @@ class DNN():
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
         #print("ASIMOV: mu=0: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 0))
         #print("ASIMOV: mu=1: sigma (-+): ", self.binned_likelihood(bkg_hist, sig_hist, 1))
+
+    def plot_regressionMatrix(self, privateWork = False, printROC = False):
+        ''' plot regression matrix '''
+        print("prediction vector")
+        print(self.model_prediction_vector)
+        print("===========")
+        plotRM = plottingScripts.plotRegressionMatrix(
+            data                = self.data,
+            prediction_vector   = self.model_prediction_vector,
+            event_classes       = self.event_classes,
+            event_category      = self.category_label,
+            plotdir             = self.save_path)
+
+        plotRM.plot(privateWork = privateWork)
 
     def calc_LL(self,n_obs, n_exp):
         if n_obs > 0 and n_exp >= 0:

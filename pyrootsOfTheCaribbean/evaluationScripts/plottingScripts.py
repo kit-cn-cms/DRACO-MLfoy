@@ -1211,7 +1211,31 @@ class plotttbbKS_binary:
         out_path = self.plotdir+"/ttbbKS.pdf"
         setup.saveCanvas(canvas, out_path)
 
+class plotRegressionMatrix:
+    def __init__(self, data, prediction_vector, plotdir, event_classes, event_category, nbins = 100):
+        self.data               = data
+        self.prediction_vector  = prediction_vector
+        self.plotdir            = plotdir
+        self.event_classes      = event_classes
+        self.nbins              = nbins
+        self.event_category     = event_category
+        #print(self.data.get_test_labels().T[0])
 
+    def plot(self, privateWork = False, printCOR = True):
+        # loop over all regression variables
+        for i, regVar in enumerate(self.data.classes):
+            name = regVar+"_regressionMatrix"
+            # initialize Histogram
+            rm, minval, maxval = setup.setupRegressionMatrix(
+                inputVec    = self.data.get_test_labels().T[0],#[:,i],
+                outputVec   = self.prediction_vector[:,i],
+                nbins       = self.nbins,
+                ytitle      = regVar)
+
+            matrixRange = [minval, maxval]
+            #print(self.prediction_vector[:,i])
+            canvas = setup.drawRegressionMatrixOnCanvas(rm, matrixRange, name, self.event_category, printCOR, privateWork = privateWork)
+            setup.saveCanvas(canvas, self.plotdir+"/"+name+".pdf")
 
 # class plotEventYields:
 #     def __init__(self, data, prediction_vector, event_classes, event_category, signal_class, plotdir, logscale):

@@ -25,6 +25,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttZ")  , label = "ttZ"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
@@ -51,6 +52,9 @@ if options.isAdversary():
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
+if options.isRegression():
+    input_samples.addRegressionTarget(options.getRegressionTarget())
+
 
 if not options.isAdversary():
     # initializing DNN training class
@@ -62,7 +66,7 @@ if not options.isAdversary():
         # number of epochs
         train_epochs    = options.getTrainEpochs(),
         # metrics for evaluation (c.f. KERAS metrics)
-        eval_metrics    = ["acc"],
+        eval_metrics    = [],
         # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
         test_percentage = options.getTestPercentage(),
         # balance samples per epoch such that there amount of samples per category is roughly equal
@@ -80,7 +84,7 @@ else:
         # number of epochs
         train_epochs    = options.getTrainEpochs(),
         # metrics for evaluation (c.f. KERAS metrics)
-        eval_metrics    = ["acc"],
+        eval_metrics    = [],
         # percentage of train set to be used for testing (i.e. evaluating/plotting after training)
         test_percentage = options.getTestPercentage(),
         # balance samples per epoch such that there amount of samples per category is roughly equal
@@ -115,8 +119,10 @@ if options.doVariations():
 if options.doPlots():
     # plot the evaluation metrics
     dnn.plot_metrics(privateWork = options.isPrivateWork())
+    if options.isRegression():
+        dnn.plot_regressionMatrix(privateWork = options.isPrivateWork())
 
-    if options.isBinary():
+    elif options.isBinary():
         # plot output node
         bin_range = options.getBinaryBinRange()
         dnn.plot_binaryOutput(

@@ -130,8 +130,10 @@ class Sample:
 class InputSamples:
     def __init__(self, input_path, activateSamples = None, test_percentage = 0.2, addSampleSuffix = ""):
         self.binary_classification = False
+        self.regression = False
         self.input_path = input_path
         self.samples = []
+        self.regression_targets = []
         self.activate_samples = activateSamples
         self.addSampleSuffix = addSampleSuffix
         if self.activate_samples:
@@ -156,8 +158,17 @@ class InputSamples:
 
     def getClassConfig(self):
         configs = []
-        for sample in self.samples:
-            configs.append( sample.getConfig() )
+        if not self.regression:
+            for sample in self.samples:
+                configs.append( sample.getConfig() )
+        if self.regression:
+            for target in self.regression_targets:
+                config = {}
+                config["sampleLabel"] = target
+                config["min"] = 0. # TODO implement
+                config["max"] = 3.
+                configs.append(config)
+
         return configs
 
     def addBinaryLabel(self, signals, bkg_target):
@@ -169,6 +180,12 @@ class InputSamples:
                 sample.isSignal = True
             else:
                 sample.isSignal = False
+
+    def addRegressionTarget(self, targets):
+        self.regression = True
+        self.regression_targets = targets.split(",")
+        print("regression targets:")
+        print("\n".join(self.regression_targets))
 
 
 class DataFrame(object):
@@ -206,18 +223,31 @@ class DataFrame(object):
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification: self.bkg_target = input_samples.bkg_target
 
+        self.regression = input_samples.regression
+        if self.regression: self.regression_targets = input_samples.regression_targets
+
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
+            print("sample", sample.label)
             sample.load_dataframe(self.event_category, self.lumi, self.evenSel, self.sys_variation)
             train_samples.append(sample.data)
+            print(sample.data)
 
         # concatenating all dataframes
         df = pd.concat(train_samples, sort=True)
         del train_samples
 
         # multiclassification labelling
-        if not self.binary_classification:
+        if self.regression:
+            self.classes = self.regression_targets
+
+            df["train_weight"] = df["train_weight"]/sum(df["train_weight"])*df.shape[0]
+
+            self.n_input_neurons = len(train_variables)
+            self.n_output_neurons = len(self.classes)
+
+        elif not self.binary_classification:
             # add class_label translation
             index = 0
             self.class_translation = {}
@@ -419,6 +449,7 @@ class DataFrame(object):
         return self.df_train["train_weight"].values
 
     def get_train_labels(self, as_categorical = True):
+        if self.regression: return self.df_train[self.classes].values
         if self.binary_classification: return self.df_train["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_train["index_label"].values )
         else:              return self.df_train["index_label"].values
@@ -443,6 +474,7 @@ class DataFrame(object):
         return self.df_test["lumi_weight"].values
 
     def get_test_labels(self, as_categorical = True):
+        if self.regression: return self.df_test[self.classes].values
         if self.binary_classification: return self.df_test["binaryTarget"].values
         if as_categorical: return to_categorical( self.df_test["index_label"].values )
         else:              return self.df_test["index_label"].values

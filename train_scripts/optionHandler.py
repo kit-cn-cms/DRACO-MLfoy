@@ -76,6 +76,14 @@ binaryOptions.add_option("--signal", dest="signal_class", default=None, metavar=
         help="STR of signal class for binary classification (allows comma separated list) (same as --signalclass)")
 parser.add_option_group(binaryOptions)
 
+regressionOptions = optparse.OptionGroup(parser, "Regression Options",
+    "settings for regression")
+regressionOptions.add_option("--regression", dest="regression", action = "store_true", default = False,
+        help = "activate to perform regression instead of multi classification. Takes variable passed to 'regression_target' as target.")
+regressionOptions.add_option("--target", dest="regression_target", default = None,
+        help = "target value for regression")
+parser.add_option_group(regressionOptions)
+
 adversaryopts = optparse.OptionGroup(parser, "Adversary Settings")
 adversaryopts.add_option("--adversary", dest="adversary", action = "store_true", default=False,
         help="activate to train a classifying adversarial network")
@@ -266,6 +274,12 @@ class optionHandler:
 
     def doGradients(self):
         return self.__options.gradients
+
+    def isRegression(self):
+        return self.__options.regression
+
+    def getRegressionTarget(self):
+        return self.__options.regression_target
 
     def isAdversary(self):
         return self.__options.adversary
