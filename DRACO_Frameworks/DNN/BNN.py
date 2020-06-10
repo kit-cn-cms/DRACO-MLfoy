@@ -229,7 +229,7 @@ class BNN():
 
         for key in config:
             self.architecture[key] = config[key]
-
+        
     def load_trained_model(self, inputDirectory, n_iterations=200):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
@@ -242,8 +242,10 @@ class BNN():
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
 
         # save predictions
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations) #for DEBUG 5 instead of 200
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations)
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
+        #DEBUG
+        print self.model_prediction_vector
         
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
@@ -311,10 +313,9 @@ class BNN():
             import numpy as np
             import tensorflow as tf
             n = kernel_size + bias_size
-            c = np.log(np.expm1(1.))
             return tf.keras.Sequential([
-                layers.VariableLayer(n, dtype=dtype),
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
+                layers.VariableLayer(n, trainable=False, dtype=dtype),
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) 
                 ])
 
         # define input layer
@@ -395,6 +396,12 @@ class BNN():
         # save the model
         self.model = model
 
+        #DEBUG
+        first_layer = self.model.layers[1]
+        weights = first_layer.get_weights()[1]
+        print("**********************prior vor training***************************")
+        print(weights)
+
         # save net information
         out_file    = self.save_path+"/model_summary.yml"
         yml_model   = self.model.to_yaml()
@@ -437,7 +444,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) #DEBUG 2 isntead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -565,7 +572,13 @@ class BNN():
          # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
-        if self.use_bias:
+
+        #DEBUG
+        print first_layer.get_weights()[1]
+        print "***********************"
+
+        #if self.use_bias:
+        if True:
             weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables)+1)
             weights_std  = weights[len(weights)/2:]
             weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables)+1)
@@ -613,7 +626,7 @@ class BNN():
             bin_range           = bin_range,
             event_category      = self.category_label,
             plotdir             = self.save_path,
-            logscale            = not log,
+            logscale            = log,
             sigScale            = sigScale)
 
         bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
@@ -626,43 +639,43 @@ class BNN():
             bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
             event_category      = self.category_label,
             plotdir             = self.save_path,
-            logscale            = not log,
+            logscale            = log,
             sigScale            = sigScale,
             save_name           = "sigma_discriminator"
             )
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
-        #DEBUG
-        binaryOutput = plottingScripts.plotBinaryOutput(
-            data                = self.data,
-            test_predictions    = self.model_prediction_vector,
-            train_predictions   = None,#self.model_train_prediction,
-            nbins               = nbins,
-            bin_range           = bin_range,
-            event_category      = self.category_label,
-            plotdir             = self.save_path,
-            logscale            = log,
-            sigScale            = sigScale,
-            save_name           = "binary_discriminator_log" #me
-            )
+        # #DEBUG
+        # binaryOutput = plottingScripts.plotBinaryOutput(
+        #     data                = self.data,
+        #     test_predictions    = self.model_prediction_vector,
+        #     train_predictions   = None,#self.model_train_prediction,
+        #     nbins               = nbins,
+        #     bin_range           = bin_range,
+        #     event_category      = self.category_label,
+        #     plotdir             = self.save_path,
+        #     logscale            = log,
+        #     sigScale            = sigScale,
+        #     save_name           = "binary_discriminator_log" #me
+        #     )
 
-        bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
+        # bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
 
-        binaryOutput_std = plottingScripts.plotBinaryOutput(
-            data                = self.data,
-            test_predictions    = self.model_prediction_vector_std,
-            train_predictions   = None, # self.model_train_prediction_std,
-            nbins               = 30,
-            bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
-            event_category      = self.category_label,
-            plotdir             = self.save_path,
-            logscale            = log,
-            sigScale            = sigScale,
-            save_name           = "sigma_discriminator_log"
-            )
+        # binaryOutput_std = plottingScripts.plotBinaryOutput(
+        #     data                = self.data,
+        #     test_predictions    = self.model_prediction_vector_std,
+        #     train_predictions   = None, # self.model_train_prediction_std,
+        #     nbins               = 30,
+        #     bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
+        #     event_category      = self.category_label,
+        #     plotdir             = self.save_path,
+        #     logscale            = log,
+        #     sigScale            = sigScale,
+        #     save_name           = "sigma_discriminator_log"
+        #     )
 
-        bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
+        # bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
