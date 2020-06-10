@@ -299,17 +299,17 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
             #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None, #DEBUG
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
-            name                        = "DenseFlipout_"+str(iLayer))(X)
+            name                        = "DenseReparameterization_"+str(iLayer))(X)
 
             
 
@@ -326,15 +326,15 @@ class BNN_Flipout():
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
             kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
             #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
             bias_prior_fn               = None, #DEBUG
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
+            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             seed                        = None,
             name                        = self.outputName)(X)
 
@@ -345,24 +345,10 @@ class BNN_Flipout():
         return model
 
     # custom loss definition
-    # def neg_log_likelihood(self, y_true, y_pred):
-        # sigma = 1.
-        # dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
-        # return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
-
-    #DEBUG
-    def loss_func(self, model, alpha = 1):
-        from tensorflow.keras.losses import binary_crossentropy
-        """Defines variational free energy loss. 
-       Sum of KL divergence and binary cross-entropy."""
- 
-        # KL Divergence should be applied once per epoch only.
-        kl = sum(model.losses) / (0.75*self.data.get_train_data(as_matrix = True).shape[0])    
-        def neg_log_likelihood(y_true, y_pred): #TODO change name
-            bce = binary_crossentropy(y_true, y_pred)
-            return alpha * kl + (1. / alpha) * bce    
-        
-        return neg_log_likelihood
+    def neg_log_likelihood(self, y_true, y_pred):
+        sigma = 1.
+        dist = tfp.distributions.Normal(loc=y_pred, scale=sigma)
+        return -dist.log_prob(y_true) #tf.reduce_mean(dist.log_prob(y_true), axis=-1)
 
     def wrapped_partial(self, func, *args, **kwargs):
         partial_func = partial(func, *args, **kwargs)
@@ -381,18 +367,11 @@ class BNN_Flipout():
             print("building model from config")
             model = self.build_default_model()
 
-        #DEBUG
-        loss = self.loss_func(model)
-        model.compile(
-            loss        = loss, 
-            optimizer   = self.architecture["optimizer"],
-            metrics     = self.eval_metrics+[self.wrapped_partial(loss)]) 
-
         # compile the model
-        # model.compile(
-            # loss        = self.wrapped_partial(self.neg_log_likelihood,model=model), 
-            # optimizer   = self.architecture["optimizer"],
-            # metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood)]) 
+        model.compile(
+            loss        = self.wrapped_partial(self.neg_log_likelihood,model=model), 
+            optimizer   = self.architecture["optimizer"],
+            metrics     = self.eval_metrics+[self.wrapped_partial(self.neg_log_likelihood)]) 
 
         # save the model
         self.model = model

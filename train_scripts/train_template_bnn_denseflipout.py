@@ -59,7 +59,8 @@ bnn = BNN_DP.BNN_Flipout(
     qt_transformed_variables = options.doQTNormVariables(),
     restore_fit_dir = options.getRestoreFitDir(),
     sys_variation   = False,
-    gen_vars        = False)
+    gen_vars        = False,
+    debugs = options.getDebug()) #debug
 
 # build BNN model
 bnn.build_model(options.getNetConfig())
@@ -70,16 +71,14 @@ bnn.train_model()
 # evalute the trained model
 bnn.eval_model()
 
-bnn.plot_metrics(privateWork = options.isPrivateWork())
+# save information
+bnn.save_model(sys.argv, filedir, options.getNetConfigName())
 
-# # save information
-# bnn.save_model(sys.argv, filedir, options.getNetConfigName())
+# save and print variable ranking according to the input layer weights
+bnn.get_input_weights()
 
-# # save and print variable ranking according to the input layer weights
-# bnn.get_input_weights()
-
-# # # save and print variable ranking according to all layer weights
-# # bnn.get_weights()
+# # save and print variable ranking according to all layer weights
+# bnn.get_weights()
 
 # plotting
 if options.doPlots():
