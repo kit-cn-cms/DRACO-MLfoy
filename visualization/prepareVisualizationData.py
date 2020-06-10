@@ -58,7 +58,8 @@ class visualizer():
                 # prepare input data
                 ttHSample = inputDir + '/ttH' + rotName + '.h5'
                 ttbarSample = inputDir + '/ttbar' + rotName + '.h5'
-    	 
+    	        #ttbarSample = inputDir + '/st' + rotName + '.h5' # test with single top events
+
                 self.ttHImages = self.decodeInputData(ttHSample, channels[0],10000)
                 self.ttbarImages = self.decodeInputData(ttbarSample, channels[0], 10000)
                 

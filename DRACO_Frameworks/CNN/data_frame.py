@@ -28,7 +28,7 @@ class Sample:
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
-            df = store.select("data")#, stop=100) # for debbuging
+            df = store.select("data")#, stop= 50000)# for st sample with less entries #), stop=100) # for debbuging
             print("number of events before selections: "+str(df.shape[0]))
             mi = store.select("meta_info")
             self.shape=list(mi["input_shape"])

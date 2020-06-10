@@ -39,6 +39,7 @@ input_samples = df.InputSamples(options.getInputDir(), options.getActivatedSampl
 # define all samples
 input_samples.addSample(options.getSampleName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getSampleName("ttbar")  , label = "ttbar"  , normalization_weight = options.getNomWeight())
+#input_samples.addSample(options.getSampleName("st")  , label = "st"  , normalization_weight = options.getNomWeight()) # test for better geometric results
 
 if options.isBinary():
     input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
@@ -167,7 +168,7 @@ if not options.getModel() == "noConv":
 
 if options.doPlots():
     # plot the evaluation metrics
-    # cnn.plot_metrics(privateWork = options.isPrivateWork())
+    cnn.plot_metrics(privateWork = options.isPrivateWork(), plotName = options.getPlotName())
 
     if options.isBinary():
         # plot output node
