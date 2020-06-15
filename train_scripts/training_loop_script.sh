@@ -1,17 +1,18 @@
 #!/bin/bash
 #TODO: Check whether necessary to delete best_epoch.csv!
+#_v3 kl_use_exact  = True but no fixed prior
 
 name=BNN
-output1=TEST_Variational_QT_BNN_training_fixed_prior
-output2=TEST_Variational_BNN_training_fixed_prior
+output1=TEST_Variational_QT_BNN_training_exact_kl
+output2=TEST_Variational_BNN_training_exact_kl
 
 epochs=4000
 
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
-layers=("50") "100" "200" "250" "300" "50,50" "50,50,50")
+layers=("50" "100" "200" "250" "300" "50,50" "50,50,50")
 for i in "${!layers[@]}"; do
-    python train_template_bnn.py -o $output1"${layers[$i]}"_v2 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
-    python train_template_bnn.py -o $output2"${layers[$i]}"_v2 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+    python train_template_bnn.py -o $output1"${layers[$i]}"_v3 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn.py -o $output2"${layers[$i]}"_v3 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 # name=BNN

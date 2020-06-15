@@ -315,7 +315,7 @@ class BNN():
             n = kernel_size + bias_size
             return tf.keras.Sequential([
                 layers.VariableLayer(n, dtype=dtype), #trainable = False
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t*0, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) #DEBUG
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) #DEBUG
                 ])
 
         # define input layer
@@ -336,7 +336,7 @@ class BNN():
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
                 kl_weight           = 1. / n_train_samples,
-                kl_use_exact        = False,
+                kl_use_exact        = True, #Debug
                 use_bias            = self.use_bias,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
@@ -352,7 +352,7 @@ class BNN():
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
             kl_weight           = 1. / n_train_samples,
-            kl_use_exact        = False,
+            kl_use_exact        = True, #Debug
             use_bias            = self.use_bias,
             activation          = output_activation.lower(),
             name                = self.outputName
