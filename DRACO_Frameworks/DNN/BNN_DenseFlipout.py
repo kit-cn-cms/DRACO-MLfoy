@@ -291,7 +291,7 @@ class BNN_Flipout():
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
-            X = tfp.layers.DenseReparameterization(
+            X = tfp.layers.DenseFlipout(
             units                       = nNeurons,
             activation                  = activation_function, 
             activity_regularizer        = None, 
@@ -308,8 +308,8 @@ class BNN_Flipout():
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            #seed                        = None, #DEBUG TODO
-            name                        = "DenseReparameterization_"+str(iLayer))(X)
+            seed                        = None, 
+            name                        = "DenseFlipout_"+str(iLayer))(X)
 
             
 
@@ -318,7 +318,7 @@ class BNN_Flipout():
                 X = layer.Dropout(dropout, name = "DropoutLayer_"+str(iLayer))(X)
 
         # generate output layer
-        X = tfp.layers.DenseReparameterization(
+        X = tfp.layers.DenseFlipout(
             units                       = self.data.n_output_neurons,
             activation                  = output_activation.lower(), 
             activity_regularizer        = None, 
@@ -335,7 +335,7 @@ class BNN_Flipout():
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            #seed                        = None,
+            seed                        = None,
             name                        = self.outputName)(X)
 
         # define model
