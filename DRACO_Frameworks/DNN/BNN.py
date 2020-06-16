@@ -314,7 +314,7 @@ class BNN():
             import tensorflow as tf
             n = kernel_size + bias_size
             return tf.keras.Sequential([
-                layers.VariableLayer(n, dtype=dtype), #trainable = False
+                layers.VariableLayer(n, trainable=False, dtype=dtype), #trainable = False
                 layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) #DEBUG
                 ])
 
