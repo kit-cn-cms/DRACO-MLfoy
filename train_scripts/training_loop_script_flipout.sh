@@ -15,6 +15,8 @@
 #_V13 = alles wie davor bias_posterior_fn und bias_ prior_fn  wieder zurueck geaendert; Testen wo Netz ab welcher Groeße das Training nicht mehr funktioniert
 #_V14 = alles wie davor, aber nun loss von dem https://towardsdatascience.com/deep-learning-segmentation-with-uncertainty-via-3d-bayesian-convolutional-neural-networks-6b1c7277b078 benutzt und Skalierung von KL Term aus Layer rausgenommen
 #_V15 = alles wie davor, aber nun kl - Term durch Gesamtzahl trainingssample und nicht durch Anzahl batches geteilt
+#_V16 = wie v13 aber kernel_posterior_fn = tfp.layers.util.default_mean_field_normal_fn()
+
 
 
 
@@ -30,8 +32,8 @@ cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
 layers=("50" "100" "200" "250" "300" "50,50" "50,50,50")
 
 for i in "${!layers[@]}"; do
-    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}"_v13 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
-    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}"_v13 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}"_v16 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}"_v16 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 # #ANN

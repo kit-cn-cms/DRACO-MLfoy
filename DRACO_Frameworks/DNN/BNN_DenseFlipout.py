@@ -298,7 +298,8 @@ class BNN_Flipout():
             trainable                   = True,
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            #kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
             #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
@@ -325,7 +326,8 @@ class BNN_Flipout():
             trainable                   = True,
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            #kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
             #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
