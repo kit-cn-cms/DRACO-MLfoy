@@ -1,4 +1,4 @@
-# python TEST_MODEL_LOAD.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_densevariational_denseflipout -c ge4j_ge3t -v allVariables_2017_bnn -n BNN --binary -S ttH -q --restorefitdir /home/ycung/Desktop/DRACO-MLfoy/workdir/16-04-2020/QT_BNN_training_ge4j_ge3t/fit_data.csv
+# python TEST_MODEL_LOAD.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_17-06-20 -c ge4j_ge3t -v allVariables_2017_bnn -n BNN --binary -S ttH -q --restorefitdir /home/ycung/Desktop/DRACO-MLfoy/workdir/16-04-2020/QT_BNN_training_ge4j_ge3t/fit_data.csv
 # global imports
 # so that matplotlib can be used over ssh
 import matplotlib #me
@@ -32,7 +32,7 @@ sys.path.append(basedir)
 
 # import class for BNN training
 import DRACO_Frameworks.DNN.BNN as BNN
-import DRACO_Frameworks.DNN.BNN_DenseFlipout as BNN_DP
+import DRACO_Frameworks.DNN.BNN_DenseFlipout_Test as BNN_DP #TODO #DEBUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 import DRACO_Frameworks.DNN.data_frame as df
 
 import plot_configs.setupPlots as setup
@@ -178,19 +178,27 @@ bnn = BNN.BNN(
 event_classes = ["ttH", "ttbb", "ttcc", "ttlf"]
 n_iterations = 100
 
-input_dir_1 = work_dir+"Flipout_QT_BNN_training_50_ge4j_ge3t"
-input_dir_2 = work_dir+"16-04-2020/QT_BNN_training_ge4j_ge3t"
-input_dir_3 = work_dir+"Flipout_BNN_training_50_ge4j_ge3t"
-input_dir_4 = work_dir+"16-04-2020/BNN_training_ge4j_ge3t"
+#input_dir_1 = work_dir+"TEST_Flipout_BNN_training_50_v12_ge4j_ge3t"
+input_dir_1 = work_dir+"TEST_Flipout_QT_BNN_training_50_v13_ge4j_ge3t"
+# input_dir_1 = work_dir+"TEST_Flipout_QT_BNN_training_50_v16_ge4j_ge3t"
 
+# bnnDP_qt.load_trained_model(options.getNetConfig(),input_dir_1, n_iterations)
+# bnnDP_qt.get_input_weights()
+
+input_dir_2 = work_dir+"TEST_Variational_QT_BNN_training_exact_kl50_v4_ge4j_ge3t"
+input_dir_3 = work_dir+"TEST_Flipout_BNN_training_50_v13_ge4j_ge3t"
+input_dir_4 = work_dir+"TEST_Variational_BNN_training_exact_kl50_v4_ge4j_ge3t"
 
 
 nn1_pred, nn1_pred_std, labels1 = bnnDP_qt.load_trained_model(options.getNetConfig(),input_dir_1, n_iterations)
 nn2_pred, nn2_pred_std, labels2 = bnn_qt.load_trained_model(input_dir_2, n_iterations)
+# bnn_qt.get_input_weights()
 nn3_pred, nn3_pred_std, labels3 = bnnDP.load_trained_model(options.getNetConfig(),input_dir_3, n_iterations)
 nn4_pred, nn4_pred_std, labels4 = bnn.load_trained_model(input_dir_4, n_iterations)
 
 
-plot_correlation_two_NNs(nn2_pred, nn1_pred, nn2_pred_std, nn1_pred_std, "binary_BNN_QT_DenseVariational", "binary_BNN_QT_DenseFlipout", output_dir, "BNN_QT_BNN_QT_Flipout_comparison")
-plot_correlation_two_NNs(nn4_pred, nn3_pred, nn4_pred_std, nn3_pred_std, "binary_BNN_DenseVariational", "binary_BNN_DenseFlipout", output_dir, "BNN_BNN_Flipout_comparison")
+plot_correlation_two_NNs(nn2_pred, nn1_pred, nn2_pred_std, nn1_pred_std, "binary_BNN_QT_DenseVariational", "binary_BNN_QT_DenseFlipout", output_dir, "BNN_QT_fixed_prior_BNN_QT_Flipout_comparison")
+plot_correlation_two_NNs(nn4_pred, nn3_pred, nn4_pred_std, nn3_pred_std, "binary_BNN_DenseVariational", "binary_BNN_DenseFlipout", output_dir, "BNN_fixed_prior_BNN_Flipout_comparison")
+plot_correlation_two_NNs(nn2_pred, nn4_pred, nn2_pred_std, nn4_pred_std, "binary_BNN_QT_DenseVariational", "binary_BNN_DenseVariational", output_dir, "BNN_QT_fixed_prior_BNN_fixed_prior_comparison")
+plot_correlation_two_NNs(nn1_pred, nn3_pred, nn1_pred_std, nn3_pred_std, "binary_BNN_QT_DenseFlipout", "binary_BNN_DenseFlipout", output_dir, "BNN_QT_Flipout_BNN_Flipout_comparison")
 
