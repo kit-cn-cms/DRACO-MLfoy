@@ -298,14 +298,14 @@ class BNN_Flipout():
             trainable                   = True,
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            #kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            #kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
             #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
             #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None, #DEBUG
+            bias_prior_fn               = None, 
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
@@ -326,14 +326,14 @@ class BNN_Flipout():
             trainable                   = True,
             kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
             kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
-            #kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
+            #kernel_prior_fn             = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
             #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
             bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
             #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
             bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None, #DEBUG
+            bias_prior_fn               = None, 
             #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
             #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
             bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
@@ -635,37 +635,6 @@ class BNN_Flipout():
             )
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
-
-        # #DEBUG
-        # binaryOutput = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector,
-        #     train_predictions   = None,#self.model_train_prediction,
-        #     nbins               = nbins,
-        #     bin_range           = bin_range,
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "binary_discriminator_log" #me
-        #     )
-
-        # bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-
-        # binaryOutput_std = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector_std,
-        #     train_predictions   = None, # self.model_train_prediction_std,
-        #     nbins               = 30,
-        #     bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "sigma_discriminator_log"
-        #     )
-
-        # bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
