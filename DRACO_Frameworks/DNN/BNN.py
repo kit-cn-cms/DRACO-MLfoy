@@ -314,7 +314,7 @@ class BNN():
             import tensorflow as tf
             n = kernel_size + bias_size
             return tf.keras.Sequential([
-                layers.VariableLayer(n, trainable=False, dtype=dtype), #trainable = False
+                layers.VariableLayer(n, dtype=dtype), #trainable = False
                 layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) #DEBUG
                 ])
 
@@ -336,7 +336,7 @@ class BNN():
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
                 kl_weight           = 1. / n_train_samples,
-                kl_use_exact        = True, #Debug
+                kl_use_exact        = False, #Debug
                 use_bias            = self.use_bias,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
@@ -352,7 +352,7 @@ class BNN():
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
             kl_weight           = 1. / n_train_samples,
-            kl_use_exact        = True, #Debug
+            kl_use_exact        = False, #Debug
             use_bias            = self.use_bias,
             activation          = output_activation.lower(),
             name                = self.outputName
@@ -444,7 +444,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) #DEBUG 2 isntead of 50
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50) #DEBUG 2 isntead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
