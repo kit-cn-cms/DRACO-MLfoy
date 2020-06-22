@@ -39,6 +39,6 @@ cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
 layers=("50" "100" "200" "250" "300" "50,50" "100,100" "150,150" "250,250" "50,50,50" "100,100,100" "150,150,150" "250,250,250")
 
 for i in "${!layers[@]}"; do
-    python train_template_bnn_denseflipout.py -o $output1"${layers[$i]}"_v17 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$layers"
-    python train_template_bnn_denseflipout.py -o $output2"${layers[$i]}"_v17 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$layers"
+    python train_template_bnn_denseflipout_test.py -o $output1"${layers[$i]}"_v17 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$layers"
+    python train_template_bnn_denseflipout_test.py -o $output2"${layers[$i]}"_v17 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$layers"
 done
