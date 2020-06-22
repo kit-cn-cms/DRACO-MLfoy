@@ -1,4 +1,7 @@
 from tensorflow.keras import optimizers
+import tensorflow_probability as tfp
+import tensorflow_probability.python.distributions as tfd
+import tensorflow.compat.v1 as tf1
 
 config_dict = {}
 
@@ -151,6 +154,20 @@ config_dict["binary_crossentropy_Adam"] = {
         "earlystopping_epochs":      150,
 }
 
+config_dict["binary_crossentropy_Adam_v2"] = {
+        "layers":                   [100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.4,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-3,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(learning_rate=1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      150,
+}
+
 config_dict["ttbb_reco_v2"] = {
         "layers":                   [100,100],
         "loss_function":            "binary_crossentropy",
@@ -275,4 +292,129 @@ config_dict["BNN"] = {
         "output_activation":        "sigmoid",
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
+}
+
+# ATTENTION: create a new config_dict for ANY changes applied to DenseFlipout otherwise the trained model 
+# cannot be reloaded again since currently only the weights but not the model architecture is savable 
+# config_dict["BNN"] = {
+#         "layers":                   [50],
+#         #"loss_function":            "neg_log_likelihood",
+#         "Dropout":                  0,
+#         #"L1_Norm":                  0,
+#         #"L2_Norm":                  1e-5,
+#         "batch_size":               2000,
+#         "optimizer":                optimizers.Adam(learning_rate=1e-3),
+#         "activation_function":      "relu",
+#         "output_activation":        "sigmoid",
+#         "earlystopping_percentage": 0.02,
+#         "earlystopping_epochs":     100,
+#         "activity_regularizer":        None, 
+#         "trainable":                   True,
+#         "kernel_posterior_fn":         tfp.layers.util.default_mean_field_normal_fn(),
+#         "kernel_prior_fn":             tfp.layers.default_multivariate_normal_fn,
+#         "bias_posterior_fn":           tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
+#         "bias_prior_fn":               None, 
+#         "seed":                        None, 
+# }
+
+
+import types
+# Dependency imports
+import numpy as np
+import tensorflow.compat.v1 as tf1
+import tensorflow.compat.v2 as tf
+
+from tensorflow_probability.python import util as tfp_util
+from tensorflow_probability.python.distributions import deterministic as deterministic_lib
+from tensorflow_probability.python.distributions import independent as independent_lib
+from tensorflow_probability.python.distributions import normal as normal_lib
+from tensorflow.python.keras.utils import generic_utils  # pylint: disable=g-direct-tensorflow-import
+
+def default_loc_scale_fn(
+    is_singular=False,
+    loc_initializer=tf1.initializers.random_normal(stddev=0.1),
+    untransformed_scale_initializer=tf1.initializers.random_normal(
+        mean=-3., stddev=0.1),
+    loc_regularizer=None,
+    untransformed_scale_regularizer=None,
+    loc_constraint=None,
+    untransformed_scale_constraint=None):
+
+  def _fn(dtype, shape, name, trainable, add_variable_fn):
+    """Creates `loc`, `scale` parameters."""
+    loc = add_variable_fn(
+        name=name + '_loc',
+        shape=shape,
+        initializer=loc_initializer,
+        regularizer=loc_regularizer,
+        constraint=loc_constraint,
+        dtype=dtype,
+        trainable=trainable)
+    if is_singular:
+      return loc, 1. #me #TODO
+    untransformed_scale = add_variable_fn(
+        name=name + '_untransformed_scale',
+        shape=shape,
+        initializer=untransformed_scale_initializer,
+        regularizer=untransformed_scale_regularizer,
+        constraint=untransformed_scale_constraint,
+        dtype=dtype,
+        trainable=trainable)
+    scale = tfp_util.DeferredTensor(
+        untransformed_scale,
+        lambda x: (np.finfo(dtype.as_numpy_dtype).eps + tf.nn.softplus(x)))
+    return loc, scale
+  return _fn
+
+def default_mean_field_normal_fn(
+    is_singular=False,
+    loc_initializer=tf1.initializers.random_normal(stddev=0.1),
+    untransformed_scale_initializer=tf1.initializers.random_normal(
+        mean=-3., stddev=0.1),
+    loc_regularizer=None,
+    untransformed_scale_regularizer=None,
+    loc_constraint=None,
+    untransformed_scale_constraint=None):
+
+  loc_scale_fn = default_loc_scale_fn(
+      is_singular=is_singular,
+      loc_initializer=loc_initializer,
+      untransformed_scale_initializer=untransformed_scale_initializer,
+      loc_regularizer=loc_regularizer,
+      untransformed_scale_regularizer=untransformed_scale_regularizer,
+      loc_constraint=loc_constraint,
+      untransformed_scale_constraint=untransformed_scale_constraint)
+
+  def _fn(dtype, shape, name, trainable, add_variable_fn):
+    loc, scale = loc_scale_fn(dtype, shape, name, trainable, add_variable_fn)
+    if scale is None:
+      dist = deterministic_lib.Deterministic(loc=loc)
+    else:
+      scale=1. #me
+      dist = normal_lib.Normal(loc=loc, scale=scale)
+    batch_ndims = tf.size(dist.batch_shape_tensor())
+    return independent_lib.Independent(
+        dist, reinterpreted_batch_ndims=batch_ndims)
+  return _fn
+
+#std_kernel_prior und std_bias_prior = 1 mit der Konfiguration
+config_dict["BNN_v17"] = {
+        "layers":                   [50],
+        #"loss_function":            "neg_log_likelihood",
+        "Dropout":                  0,
+        #"L1_Norm":                  0,
+        #"L2_Norm":                  1e-5,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(learning_rate=1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "sigmoid",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        "activity_regularizer":        None, 
+        "trainable":                   True,
+        "kernel_posterior_fn":         tfp.layers.util.default_mean_field_normal_fn(),
+        "kernel_prior_fn":             default_mean_field_normal_fn(is_singular=True),
+        "bias_posterior_fn":           tfp.layers.util.default_mean_field_normal_fn(), 
+        "bias_prior_fn":               default_mean_field_normal_fn(is_singular=True), 
+        "seed":                        None, 
 }
