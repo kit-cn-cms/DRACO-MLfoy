@@ -16,10 +16,10 @@
 #_V14 = alles wie davor, aber nun loss von dem https://towardsdatascience.com/deep-learning-segmentation-with-uncertainty-via-3d-bayesian-convolutional-neural-networks-6b1c7277b078 benutzt und Skalierung von KL Term aus Layer rausgenommen
 #_V15 = alles wie davor, aber nun kl - Term durch Gesamtzahl trainingssample und nicht durch Anzahl batches geteilt
 #_V16 = wie v13 aber kernel_posterior_fn = tfp.layers.util.default_mean_field_normal_fn()
-#_V17 = BNN_v17 benutzt ("kernel_posterior_fn":         tfp.layers.util.default_mean_field_normal_fn(),
-                      #  "kernel_prior_fn":             tfp.layers.util.default_mean_field_normal_fn(untransformed_scale_initializer=tf1.initializers.random_normal(mean=0., stddev=0.)),
-                      #  "bias_posterior_fn":           tfp.layers.util.default_mean_field_normal_fn(), 
-                      #  "bias_prior_fn":               tfp.layers.util.default_mean_field_normal_fn(untransformed_scale_initializer=tf1.initializers.random_normal(mean=0., stddev=0.)), )
+#_V17 = BNN_v17 benutzt "kernel_posterior_fn":         tfp.layers.util.default_mean_field_normal_fn(),
+                      # "kernel_prior_fn":             default_mean_field_normal_fn(is_singular=True),
+                      # "bias_posterior_fn":           tfp.layers.util.default_mean_field_normal_fn(), 
+                      # "bias_prior_fn":               default_mean_field_normal_fn(is_singular=True), 
 
 
 
