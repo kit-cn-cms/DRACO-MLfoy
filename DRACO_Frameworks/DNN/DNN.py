@@ -241,37 +241,26 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset with keras model
-        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels()) #me DEACTIVATED for evaluation_V1.py
+        self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels()) 
 
         # save predictions  with keras model
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
-        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True)) #me DEACTIVATED for evaluation_V1.py
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True)) 
         
         # save predicted classes with argmax  with keras model
         self.predicted_classes = np.argmax(self.model_prediction_vector, axis = 1)
 
         # save confusion matrix
         from sklearn.metrics import confusion_matrix
-        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes) #me DEACTIVATED for evaluation_V1.py
+        self.confusion_matrix = confusion_matrix(self.data.get_test_labels(as_categorical = False), self.predicted_classes) 
 
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
-
-        ''' save roc_auc_score to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
-        file_exists = os.path.isfile(filename)
-        with open(filename, "a+") as f:
-            headers = ["project_name", "roc_auc_score"]
-            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
-            if not file_exists:
-                csv_writer.writeheader()
-            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "roc_auc_score": self.roc_auc_score})
-            print("saved roc_auc_score to "+str(filename))
             
-        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        #print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector, self.event_classes #me
+        return self.model_prediction_vector, self.event_classes, self.data.get_test_labels() #me
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -520,6 +509,19 @@ class DNN():
         # print evaluations
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+        
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
