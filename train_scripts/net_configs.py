@@ -418,3 +418,24 @@ config_dict["BNN_v17"] = {
         "bias_prior_fn":               default_mean_field_normal_fn(is_singular=True), 
         "seed":                        None, 
 }
+
+config_dict["BNN_v18"] = {
+        "layers":                   [50],
+        #"loss_function":            "neg_log_likelihood",
+        "Dropout":                  0,
+        #"L1_Norm":                  0,
+        #"L2_Norm":                  1e-5,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(learning_rate=1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "sigmoid",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        "activity_regularizer":        None, 
+        "trainable":                   True,
+        "kernel_posterior_fn":         tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=0.541324854612918, stddev=0.)), #mean is 0.541324854612918 so that after softplus transformation scale = 0.9999999
+        "kernel_prior_fn":             default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), is_singular=True),
+        "bias_posterior_fn":           tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=0.541324854612918, stddev=0.)), 
+        "bias_prior_fn":               default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), is_singular=True), 
+        "seed":                        None, 
+}
