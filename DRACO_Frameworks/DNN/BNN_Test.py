@@ -419,18 +419,39 @@ class BNN():
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
 
-        #DEBUG
-        initialize_FL_posterior_weights = np.random.uniform(low=-1., high=1., size=(1,3650))
-        initialize_FL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,3650))
-        initialize_FL_combined = np.append(initialize_FL_posterior_weights, initialize_FL_posterior_std)
-        initialize_FL = [initialize_FL_combined, self.model.layers[1].get_weights()[1]]
-        self.model.layers[1].set_weights(initialize_FL)  #DEBUG
+        #DEBUG TODO
+        first_layer = True
+        for num_layer in range(len(self.architecture["layers"])):
+            if first_layer:
+                num_neurons_previous_layer = self.data.n_input_neurons
+                first_layer = False
+            else: 
+                num_neurons_previous_layer = self.architecture["layers"][num_layer-1]
 
-        initialize_OL_posterior_weights = np.random.uniform(low=-0.2, high=0.2, size=(1,51))
-        initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,51))
+            if self.use_bias:
+                num_param = (num_neurons_previous_layer + 1) * self.architecture["layers"][num_layer]
+            else:
+                num_param = num_neurons_previous_layer * self.architecture["layers"][num_layer]
+
+
+            initialize_posterior_weights = np.random.uniform(low=-1., high=1., size=(1,num_param))
+            initialize_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+            initialize_combined = np.append(initialize_posterior_weights, initialize_posterior_std)
+            #Since Prior is set to untrainable in V5 --> initial weights not changed --> reuse self.model.layers[num_layer+1].get_weights()[1]
+            initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  science in self.model.layers for inputlayer is counted as 0
+            self.model.layers[num_layer+1].set_weights(initialize)  
+
+        #Initialize Output Layer (OL)
+        if self.use_bias:
+            num_param = (self.architecture["layers"][num_layer]+1) * self.data.n_output_neurons
+        else:
+            num_param = self.architecture["layers"][num_layer] * self.data.n_output_neurons
+
+        initialize_OL_posterior_weights = np.random.uniform(low=-0.2, high=0.2, size=(1,num_param))
+        initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
         initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
-        initialize_OL = [initialize_OL_combined, self.model.layers[2].get_weights()[1]]
-        self.model.layers[2].set_weights(initialize_OL)  #DEBUG
+        initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
+        self.model.layers[num_layer+2].set_weights(initialize_OL) 
 
         # train main net
         self.trained_model = self.model.fit(
