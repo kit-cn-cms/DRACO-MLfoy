@@ -6,6 +6,7 @@ import sys
 import tensorflow.keras.models as models
 import tensorflow.keras.layers as layer
 import tensorflow.keras.utils as utils
+import tensorflow.keras.regularizers as regularizers
 from keras.models import Model, Sequential
 from keras.layers import Input, Conv2D, MaxPooling2D, Concatenate, Activation, Dropout, Flatten, Dense
 import numpy as np
@@ -95,9 +96,9 @@ else:
     # filter layers
     towers = []
     for column in options.getFilterSize():
-        tower = Conv2D(options.getFilterNum(), (column[0], column[0]), padding = 'same', activation = 'linear')(input_shape)
+        tower = Conv2D(options.getFilterNum(), (column[0], column[0]), padding = 'same', activation = 'linear', kernel_regularizer=regularizers.l2(1e-4))(input_shape)
         for i in range(len(column)-1):
-            tower = Conv2D(options.getFilterNum(), (column[i+1], column[i+1]), padding = 'same', activation = 'linear')(tower)
+            tower = Conv2D(options.getFilterNum(), (column[i+1], column[i+1]), padding = 'same', activation = 'linear', kernel_regularizer=regularizers.l2(1e-4))(tower)
         towers.append(tower)
         
     # merging layers
@@ -125,13 +126,16 @@ else:
 
         # output layer
         out = Dense( cnn.data.n_output_neurons, activation = "sigmoid", trainable = False)(merge)
-
+        
     else:
         print 'model type', options.getModel(), 'is not supported!'
 
 # create model
 model = Model(input_shape, out)
 
+# untrainable weights with specific value 
+#ones = np.ones(np.asarray(model.get_weights()[2].shape))
+#model.set_weights([model.get_weights()[0], model.get_weights()[1], ones, model.get_weights()[3]])
 print("number of free parameters: "+str(model.count_params()))
 
 
