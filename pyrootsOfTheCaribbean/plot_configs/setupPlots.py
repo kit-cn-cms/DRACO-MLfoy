@@ -29,8 +29,8 @@ def GetPlotColor( cls ):
 def GetyTitle(privateWork = False):
     # if privateWork flag is enabled, normalize plots to unit area
     if privateWork:
-        return "normalized to unit area"
-    return "Events expected"
+        return 'vorhergesagte Events (normiert)'#"normalized to unit area"
+    return "vorhergesagte Events"#"Events expected"
 
 
 # ===============================================
@@ -365,10 +365,10 @@ def getCanvas(name, ratiopad = False):
     return canvas
 
 def getLegend():
-    legend=ROOT.TLegend(0.70,0.6,0.95,0.9)
+    legend=ROOT.TLegend(0.70,0.7,0.88,0.9)
     legend.SetBorderSize(0);
     legend.SetLineStyle(0);
-    legend.SetTextFont(42);
+    legend.SetTextFont(40);
     legend.SetTextSize(0.05);
     legend.SetFillStyle(0);
     return legend
@@ -443,13 +443,14 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
     latex.SetTextColor(ROOT.kBlack)
     latex.SetTextSize(0.04)
 
-    text = "CMS private work"
-
+    text = "CMS privat"#e work"
+    latex.DrawLatex(l+0.66, 1.-t+0.02, text) #if german
+    '''
     if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
     elif ratio:     latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:           latex.DrawLatex(l,1.-t+0.01, text)
-
+    '''
 
 def moveOverUnderFlow(h):
     # move underflow

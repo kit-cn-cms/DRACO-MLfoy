@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import numpy as np
@@ -742,17 +744,17 @@ class plotBinaryOutput:
         # name of canvas
         if rotationMode.find('rot') >0:
 	    if rotationMode[rotationMode.find('no_rot'):] == 'no_rot':
-	        rotation = 'no rotation'
+	        rotation = 'ohne Rotation'
             elif rotationMode[rotationMode.find('rot_MaxJetPt'):] == 'rot_MaxJetPt':
-                rotation = 'rotation MaxJetPt'
+                rotation = 'Rotation MaxJetPt'
             elif rotationMode[rotationMode.find('rot_sph1'):] == 'rot_sph1':
-                rotation = 'rotation sphericity EV1'
+                rotation = 'Rotation Sphärizität EV1'
             elif rotationMode[rotationMode.find('rot_sph2'):] == 'rot_sph2':
-                rotation = 'rotation sphericity EV2'
+                rotation = 'Rotation Sphärizität EV2'
             elif rotationMode[rotationMode.find('rot_sph3'):] == 'rot_sph3':
-                rotation = 'rotation sphericity EV3'
+                rotation = 'Rotation Sphärizität EV3'
             else:
-	        rotation = 'rotation TopLep'
+	        rotation = 'Rotation TopLep'
         else:
 	    rotation = ''
 
@@ -770,7 +772,7 @@ class plotBinaryOutput:
             nbins       = self.nbins,
             bin_range   = self.bin_range,
             color       = ROOT.kMagenta+2,
-            xtitle      = "signal",
+            xtitle      = "Signal",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = False)
         sig_hist.SetLineWidth(3)
@@ -785,7 +787,7 @@ class plotBinaryOutput:
             nbins       = self.nbins,
             bin_range   = self.bin_range,
             color       = ROOT.kAzure-9,
-            xtitle      = "background",
+            xtitle      = "Untergrund",
             ytitle      = setup.GetyTitle(self.privateWork),
             filled      = True)
 
@@ -814,10 +816,10 @@ class plotBinaryOutput:
         legend = setup.getLegend()
 
         # add signal entry
-        legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
+        legend.AddEntry(sig_hist, "Signal x{:4.0f}".format(scaleFactor), "L")
 
         # add background entries
-        legend.AddEntry(bkg_hist, "background", "F")
+        legend.AddEntry(bkg_hist, "Untergrund", "F")
 
         # draw legend
         legend.Draw("same")
@@ -832,8 +834,9 @@ class plotBinaryOutput:
         else:
             setup.printLumi(canvas, ratio = plotOptions["ratio"])
 
+    
         # add category label
-        setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+        setup.printCategoryLabel(canvas, self.event_category.replace('j','J').replace('tags','Jets'), ratio = plotOptions["ratio"])
 
         out_path = self.plotdir + "binaryDiscriminator" + name + ".pdf"
         setup.saveCanvas(canvas, out_path)

@@ -534,11 +534,17 @@ class CNN():
             epochs = np.arange(1,n_epochs+1,1)
 
             # plot histories
-            plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "validation", lw = 1) # same color as fmaps
-            plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "train", lw = 1) # same color as fmaps
-            if privateWork:
-                plt.title("CMS private work", loc = "left", fontsize = 16)
+            #plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "validation", lw = 1) # same color as fmaps
+            #plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "train", lw = 1) # same color as fmaps
+            #if privateWork:
+            #    plt.title("CMS private work", loc = "left", fontsize = 16)
             
+            # german lables:
+            plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "Testsatz", lw = 1) # same color as fmaps
+            plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "Trainingssatz", lw = 1) # same color as fmaps
+            if privateWork:
+                plt.title("CMS privat", loc = "left", fontsize = 16)
+
             # add title
             #title = self.category_label
             #title = title.replace("\\geq", "$\geq$")
@@ -547,15 +553,22 @@ class CNN():
 
             # make it nicer
             plt.grid()
-            plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric.replace("_"," "), fontsize = 16)
-#            plt.ylim(ymin=0.)
+            plt.xlabel("Epoche", fontsize = 16)
+            #plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            
+            if metric == "loss":
+                plt.ylabel("Verlustwert", fontsize = 16)
+            else:
+                plt.ylabel("Genauigkeit", fontsize = 16)
+            
+            #plt.ylim(ymin=0.)
 
             # add legend
             plt.legend()
 
             # save
-            out_path = self.save_path + "model_history_"+str(metric)+plotName+".png"
+            out_path = self.save_path + "model_history_"+str(metric)+plotName+".pdf"
+            #out_path = self.save_path + "model_history_"+str(metric)+plotName+".png"
             plt.savefig(out_path)
             print("saved plot of "+str(metric)+" at "+str(out_path))
 
