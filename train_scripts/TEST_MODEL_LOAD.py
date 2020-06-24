@@ -1,4 +1,4 @@
-# python TEST_MODEL_LOAD.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_24-06-20 -c ge4j_ge3t -v allVariables_2017_bnn --binary -n BNN -S ttH -q --restorefitdir /home/ycung/Desktop/DRACO-MLfoy/workdir/16-04-2020/QT_BNN_training_ge4j_ge3t/fit_data.csv
+# python TEST_MODEL_LOAD.py -i /local/scratch/ssd/nshadskiy/2017_nominal -o comparison_23-06-20 -c ge4j_ge3t -v allVariables_2017_bnn --binary -n BNN -S ttH -q --restorefitdir /home/ycung/Desktop/DRACO-MLfoy/workdir/16-04-2020/QT_BNN_training_ge4j_ge3t/fit_data.csv
 # global imports
 # so that matplotlib can be used over ssh
 import matplotlib #me
@@ -242,7 +242,7 @@ dnn = DNN.DNN(
 ########################################################################################################################
 
 event_classes = ["ttH", "ttbb", "ttcc", "ttlf"]
-n_iterations = 1
+n_iterations = 50
 
 input_dir_1 = work_dir+"Flipout_QT_BNN_training_0_ge4j_ge3t"
 input_dir_2 = work_dir+"Flipout_BNN_training_0_ge4j_ge3t"
