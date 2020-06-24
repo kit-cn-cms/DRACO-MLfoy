@@ -242,8 +242,8 @@ class Visualizer():
 			fontPath = "/Users/Amaterasu1/Library/Fonts/Arial Bold.ttf"
 			fontSize = 20
 			lineSpacing = 5
-			titleFontSize = 60
-			titleFont = ImageFont.truetype(fontPath, titleFontSize-30)
+			titleFontSize = 0#60
+			#titleFont = ImageFont.truetype(fontPath, titleFontSize-30)
 			font = ImageFont.truetype(fontPath, fontSize)
 
 			# set horizontal tile width and spacing
@@ -251,40 +251,46 @@ class Visualizer():
 			w_fig = 220
 			w_space = w_fig/4
 			w_img = n_w * w_fig + (n_w + 1) * w_space 
+			
+			# use other spacing relations for serial models
+			if n_w == 1:
+				spacing = [0,2]
+			else:
+				spacing = [2,0]
 
 			# set vertical tile width and spacing
 			n_h = len(self.networkArchitecture[0])
 			h_fig = 130
 			h_space = h_fig/3
 			if self.model == 'basic':
-				h_img = (n_h + 6) * h_fig + (n_h + 3) * h_space + titleFontSize
+				h_img = (n_h + 4 + spacing[0]) * h_fig + (n_h + 3 + spacing[1]) * h_space + titleFontSize
 			else:
-				h_img = (n_h + 5) * h_fig + (n_h + 2) * h_space + titleFontSize
+				h_img = (n_h + 3 + spacing[0]) * h_fig + (n_h + 2 + spacing[1]) * h_space + titleFontSize
 
 			# set background
 			model_img = Image.new('RGB', (w_img, h_img), 'white')
 			model_draw = ImageDraw.Draw(model_img)
 
 			# set title
-			model_draw.multiline_text( (w_img/2 - 155, 30), 'Network Architecture', font=titleFont, fill='black', align='center', spacing=lineSpacing)
+			#model_draw.multiline_text( (w_img/2 - 155, 30), 'Network Architecture', font=titleFont, fill='black', align='center', spacing=lineSpacing)
 
 			# draw connection lines between conv layer tiles
 			for x in range(n_w):
 
-				model_draw.line( (w_img/2.                          , h_fig           + h_space       + titleFontSize, 
-								  w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space       + titleFontSize), fill=(0,0,0), width=5)
-				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig *      2  + h_space       + titleFontSize, 
-								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h + titleFontSize), fill=(0,0,0), width=5)
-				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+2) + h_space * n_h + titleFontSize,
-								  w_img/2.                          , h_fig * (n_h+3) + h_space * n_h + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_img/2.                          , h_fig                          + h_space                       + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (    1 + spacing[0]/2) + h_space * ( 1 + spacing[1]/2) + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (    1 + spacing[0]/2) + h_space * ( 1 + spacing[1]/2) + titleFontSize, 
+								  w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+1 + spacing[0]/2) + h_space * (n_h+ spacing[1]/2) + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_fig * (x+1/2.) + w_space * (x+1), h_fig * (n_h+1 + spacing[0]/2) + h_space * (n_h+ spacing[1]/2) + titleFontSize,
+								  w_img/2.                          , h_fig * (n_h+1 + spacing[0]  ) + h_space * (n_h+ spacing[1] )  + titleFontSize), fill=(0,0,0), width=5)
 
 			# draw connection line to output (different length for basic/reduced)
 			if self.model == 'basic':  
-				model_draw.line( (w_img/2., h_fig * (n_h+4) + h_space *  n_h    + titleFontSize, 
-								  w_img/2., h_fig * (n_h+5) + h_space * (n_h+2) + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_img/2., h_fig * (n_h+2 + spacing[0]) + h_space * (n_h   + spacing[1]) + titleFontSize, 
+								  w_img/2., h_fig * (n_h+3 + spacing[0]) + h_space * (n_h+2 + spacing[1]) + titleFontSize), fill=(0,0,0), width=5)
 			else:
-				model_draw.line( (w_img/2., h_fig * (n_h+4) + h_space *  n_h    + titleFontSize, 
-								  w_img/2., h_fig * (n_h+4) + h_space * (n_h+1) + titleFontSize), fill=(0,0,0), width=5)
+				model_draw.line( (w_img/2., h_fig * (n_h+2 + spacing[0]) + h_space * (n_h   + spacing[1]) + titleFontSize, 
+								  w_img/2., h_fig * (n_h+2 + spacing[0]) + h_space * (n_h+1 + spacing[1]) + titleFontSize), fill=(0,0,0), width=5)
 
 			# draw the first tile with input information
 			# text position in the middle of the tile
@@ -311,7 +317,7 @@ class Visualizer():
 			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_i[0], 	    h_space + textPos_i[1] + titleFontSize), inputText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# draw a tile for each layer with layer information
-			# loop over all layers and only recognize the real layers (not virutal ones with [0,0,0])
+			# loop over all layers and only recognize the real layers (not virtual ones with [0,0,0])
 			for x in range(n_w):
 				for y in range(n_h):
 					if not self.networkArchitecture[x][y] == [0,0,0]:
@@ -335,13 +341,13 @@ class Visualizer():
 							colorsRGB.append(int(round(colors[i]*255.)))
 
 						# draw a tile with frame and write text to it
-						model_draw.rectangle(           (w_fig *  x    + w_space * (x+1),              h_fig * (y+2) + h_space * (y+1)               + titleFontSize, 
-											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+3) + h_space * (y+1)               + titleFontSize), outline=(0,0,0), fill=tuple(colorsRGB))
+						model_draw.rectangle(           (w_fig *  x    + w_space * (x+1),              h_fig * (y+1 + spacing[0]/2) + h_space * (y+1 + spacing[1]/2)               + titleFontSize, 
+											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+2 + spacing[0]/2) + h_space * (y+1 + spacing[1]/2)               + titleFontSize), outline=(0,0,0), fill=tuple(colorsRGB))
 
-						self.drawFrame(model_draw,       w_fig *  x    + w_space * (x+1),              h_fig * (y+2) + h_space * (y+1)               + titleFontSize, 
-											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+3) + h_space * (y+1)               + titleFontSize, 5)
+						self.drawFrame(model_draw,       w_fig *  x    + w_space * (x+1),              h_fig * (y+1 + spacing[0]/2) + h_space * (y+1 + spacing[1]/2)               + titleFontSize, 
+											             w_fig * (x+1) + w_space * (x+1),              h_fig * (y+2 + spacing[0]/2) + h_space * (y+1 + spacing[1]/2)               + titleFontSize, 5)
 
-						model_draw.multiline_text(      (w_fig *  x    + w_space * (x+1) + textPos[0], h_fig * (y+2) + h_space * (y+1) + textPos[1]  + titleFontSize), filterNum +'\n' + filterSize + '\n' + channels, font=font, fill='black', align='center', spacing=lineSpacing)
+						model_draw.multiline_text(      (w_fig *  x    + w_space * (x+1) + textPos[0], h_fig * (y+1 + spacing[0]/2) + h_space * (y+1 + spacing[1]/2) + textPos[1]  + titleFontSize), filterNum +'\n' + filterSize + '\n' + channels, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# draw the next tile to signal concatenation and transition to further non convolutional layers
 			# text position in the middle of the tile
@@ -355,11 +361,11 @@ class Visualizer():
 			mergingLayerText += 'Flatten'
 
 			# draw merging layer tile with frame and write text to it
-			model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
-								             (w_img + w_fig)/2.,                 h_fig * (n_h+4) + h_space * n_h                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
-			self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+3) + h_space * n_h                + titleFontSize,
-								             (w_img + w_fig)/2.,                 h_fig * (n_h+4) + h_space * n_h                + titleFontSize, 5)
-			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_ml[0], h_fig * (n_h+3) + h_space * n_h + textPos_ml[1] + titleFontSize), mergingLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
+			model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+1 + spacing[0]) + h_space * (n_h + spacing[1])                + titleFontSize,
+								             (w_img + w_fig)/2.,                 h_fig * (n_h+2 + spacing[0]) + h_space * (n_h + spacing[1])                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+			self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+1 + spacing[0]) + h_space * (n_h + spacing[1])                + titleFontSize,
+								             (w_img + w_fig)/2.,                 h_fig * (n_h+2 + spacing[0]) + h_space * (n_h + spacing[1])                + titleFontSize, 5)
+			model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_ml[0], h_fig * (n_h+1 + spacing[0]) + h_space * (n_h + spacing[1]) + textPos_ml[1] + titleFontSize), mergingLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# draw tile for further layers (only if basic model) and output tile
 			# text position in the middle of the tile
@@ -376,26 +382,26 @@ class Visualizer():
 			# if basic model draw further layer tile and output tile
 			if self.model == 'basic':
 
-				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize), outline=(0,0,0), fill=(240,240,240))
-				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize, 5)
-				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_fl[0], h_fig * (n_h+4) + h_space * (n_h+1) + textPos_fl[1] + titleFontSize), furtherLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+2  + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+3  + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize), outline=(0,0,0), fill=(240,240,240))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+2  + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+3  + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_fl[0], h_fig * (n_h+2  + spacing[0]) + h_space * (n_h+1 + spacing[1]) + textPos_fl[1] + titleFontSize), furtherLayerText, font=font, fill='black', align='center', spacing=lineSpacing)
 
-				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+2)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+6) + h_space * (n_h+2)                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
-				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+2)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+6) + h_space * (n_h+2)                + titleFontSize, 5)
-				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+5) + h_space * (n_h+2) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+3  + spacing[0]) + h_space * (n_h+2 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+4  + spacing[0]) + h_space * (n_h+2 + spacing[1])                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+3  + spacing[0]) + h_space * (n_h+2 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+4  + spacing[0]) + h_space * (n_h+2 + spacing[1])                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+3  + spacing[0]) + h_space * (n_h+2 + spacing[1]) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# if reduced model only draw output tile
 			else:
 
-				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
-				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+4) + h_space * (n_h+1)                + titleFontSize,
-									             (w_img + w_fig)/2.,                 h_fig * (n_h+5) + h_space * (n_h+1)                + titleFontSize, 5)
-				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+4) + h_space * (n_h+1) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
+				model_draw.rectangle(           ((w_img - w_fig)/2.,                 h_fig * (n_h+2 + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+3 + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize), outline=(0,0,0), fill=(180,180,180))
+				self.drawFrame(model_draw,       (w_img - w_fig)/2.,                 h_fig * (n_h+2 + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize,
+									             (w_img + w_fig)/2.,                 h_fig * (n_h+3 + spacing[0]) + h_space * (n_h+1 + spacing[1])                + titleFontSize, 5)
+				model_draw.multiline_text(      ((w_img - w_fig)/2. + textPos_o[0],  h_fig * (n_h+2 + spacing[0]) + h_space * (n_h+1 + spacing[1]) + textPos_o[1] + titleFontSize), outputText, font=font, fill='black', align='center', spacing=lineSpacing)
 
 			# save scheme as jpeg
 			model_img.show()
@@ -462,10 +468,10 @@ class Visualizer():
 
 			# save figure with title (two runs for comparison and difference)
 			if len(filterData) == 2:
-				plt.suptitle('Visualization of CNN Filters before and after Training\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
+				#plt.suptitle('Visualization of CNN Filters before and after Training\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 				plt.savefig(self.inputDir + layerIndex + 'visualization/filter_visualization_' + layerIndex + self.fileName + '.png')
 			else:
-				plt.suptitle('Filters Difference\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
+				#plt.suptitle('Filters Difference\n' + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 				plt.savefig(self.inputDir + layerIndex + 'visualization/filter_difference_' + layerIndex + self.fileName + '.png')
 			
 			# close figure to save storage
@@ -560,7 +566,7 @@ class Visualizer():
 						titleTag = ' of channel' + channel.replace('_', ' ') + '\n'
 			
 			# save figure with title
-			plt.suptitle('Feature Map Visualization' + titleTag + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
+			#plt.suptitle('Feature Map Visualization' + titleTag + layerIndex.replace('_',' ') + '(' + self.fileName.replace('_', ' ').replace('rot', 'rotation') + ')', fontsize = 10)
 			plt.savefig(self.inputDir + layerIndex + 'visualization/feature_map_visualization_' + tag + layerIndex + self.fileName + '.png')
 			
 			# close figure to save storage
@@ -570,7 +576,7 @@ class Visualizer():
 #######################################################################################################################################
 
 
-myVis = Visualizer('../../Series_Multilayer/matrix_descending/visualization_data/', 'matrix_descending')
+myVis = Visualizer('../../data/ch5/reduced_untr_MaxJetPt_CSV_qu95/visualization_data/', 'reduced_untr')
 myVis.doPlots()
 
 

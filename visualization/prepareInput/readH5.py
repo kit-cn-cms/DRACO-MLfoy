@@ -72,8 +72,8 @@ def normalisation(data, quantile, var):
 
 
 # paths
-ttbar_path = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttbar_CSV_wo_rot.h5'
-ttH_path = '/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/ttH_CSV_wo_rot.h5'
+ttbar_path = '/ceph/jvautz/NN/CNNInputs/testCNN/3ch/ttbar_3ch_rot_MaxJetPt.h5'
+ttH_path = '/ceph/jvautz/NN/CNNInputs/testCNN/3ch/ttH_3ch_rot_MaxJetPt.h5'
 
 # prepare data for normalization 
 train_samples = []
@@ -83,8 +83,8 @@ train_samples.append(sig_data)
 train_samples.append(bkg_data)
 df = pd.concat(train_samples)
 
-train_variables = ['Jet_Pt[0-16]_Hist', 'Jet_CSV[0-16]_Hist']
-
+train_variables = ['Jet_Pt[0-16]_Hist', 'TaggedJet_Pt[0-9]_Hist','Jet_CSV[0-16]_Hist']
+'''
 # set quantile
 hist_data = []
 for i in range(len(train_variables)):
@@ -92,19 +92,39 @@ for i in range(len(train_variables)):
 print 'hist_data: ', hist_data
 
 quantile =[np.quantile(data, 0.5) for data in hist_data]
+'''
 
+#print df['Jet_Pt[0-16]_Hist'].values
+#print df['TaggedJet_Pt[0-9]_Hist'].values
+#print df['Jet_CSV[0-16]_Hist'].values
 
-print df['Jet_Pt[0-16]_Hist'].values
-print df['Jet_CSV[0-16]_Hist'].values
-print '\n'
-print quantile
+all_img_ttH = []
+all_img_ttbar = []
+for i in range(5):
+    img_ttH = []
+    img_ttbar = []
+    for train_var in train_variables:
+        img_ttH.append(sig_data[train_var].values[i].tolist())
+        img_ttbar.append(bkg_data[train_var].values[i].tolist())
+    #print img
+    all_img_ttH.append(img_ttH)
+    all_img_ttbar.append(img_ttbar)
+#print all_img_ttH
 
+text_file_ttH = open("3ch_img_ttH.txt", "w")
+text_file_ttH.write(str(all_img_ttH))
+text_file_ttH.close()
+text_file_ttbar = open("3ch_img_ttbar.txt", "w")
+text_file_ttbar.write(str(all_img_ttbar))
+text_file_ttbar.close()
+
+'''
 # normalise
 for i in range(len(train_variables)):
     df = normalisation(df, quantile[i], train_variables[i])
 
 print df['Jet_Pt[0-16]_Hist'].values
 print df['Jet_CSV[0-16]_Hist'].values
-
+'''
 
 

@@ -47,7 +47,7 @@ def do_plot(mylist, path, labels):
 	# set norm for histogram
 	maxElement, minElement = get_max_min(mylist)
 	norm = cm.colors.Normalize(vmax=0, vmin=1) 
-	cmap = plt.cm.Reds
+	cmap = plt.cm.Purples
 
 	mylist = np.asarray(mylist)/maxElement
 
@@ -71,7 +71,7 @@ def do_plot(mylist, path, labels):
 	mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm)
 
 	# save figure
-	plt.suptitle('Overlapping Input Images ttH', size= 12)
+	#plt.suptitle('Overlapping Input Images ttH', size= 12)
 	plt.savefig(path+'all_images_ttH.png')
 	plt.show()
 
