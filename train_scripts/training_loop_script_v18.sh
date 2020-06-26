@@ -36,9 +36,21 @@ epochs=4000
 iteration=100
 
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
-layers=("50" "100" "200" "250" "300" "50,50" "100,100" "150,150" "250,250" "50,50,50" "100,100,100" "150,150,150" "250,250,250")
+layers=("300,300" "300,300,300")
 
 for i in "${!layers[@]}"; do
-    python train_template_bnn_denseflipout_test.py -o $output1"${layers[$i]}"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$layers"
-    python train_template_bnn_denseflipout_test.py -o $output2"${layers[$i]}"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$layers"
+    python train_template_bnn_denseflipout_test.py -o $output1"${layers[$i]}"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_denseflipout_test.py -o $output2"${layers[$i]}"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+done
+
+for ((i=350; i<550; i+=50)); do
+    python train_template_bnn_denseflipout_test.py -o $output1"$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$i","$i"
+    python train_template_bnn_denseflipout_test.py -o $output2"$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$i","$i"
+    python train_template_bnn_denseflipout_test.py -o $output1"$i","$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$i","$i","$i"
+    python train_template_bnn_denseflipout_test.py -o $output2"$i","$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$i","$i","$i"
+done
+
+for ((i=550; i<1050; i+=50)); do
+    python train_template_bnn_denseflipout_test.py -o $output1"$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers "$i","$i"
+    python train_template_bnn_denseflipout_test.py -o $output2"$i","$i"_v18 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers "$i","$i"
 done
