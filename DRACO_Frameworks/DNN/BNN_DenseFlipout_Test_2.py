@@ -459,7 +459,7 @@ class BNN_Flipout():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) # DEBUG 2 instead of 50
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50) # DEBUG 2 instead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -599,17 +599,17 @@ class BNN_Flipout():
         weights_mean_kernel_posterior = first_layer.kernel_posterior.mean().eval(session=sess)
         std_kernel_posterior = first_layer.kernel_posterior.stddev().eval(session=sess)
         
-        weights_mean_bias_posterior = first_layer.bias_posterior.mean().eval(session=sess) #DEBUG
-        std_bias_posterior = first_layer.bias_posterior.stddev().eval(session=sess) #is zero if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen #DEBUG
+        # weights_mean_bias_posterior = first_layer.bias_posterior.mean().eval(session=sess) #DEBUG
+        # std_bias_posterior = first_layer.bias_posterior.stddev().eval(session=sess) #is zero if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen #DEBUG
         
-        weights_mean_kernel_prior = first_layer.kernel_prior.mean().eval(session=sess) #DEBUG
-        std_kernel_prior = first_layer.kernel_prior.stddev().eval(session=sess) #DEBUG
+        # weights_mean_kernel_prior = first_layer.kernel_prior.mean().eval(session=sess) #DEBUG
+        # std_kernel_prior = first_layer.kernel_prior.stddev().eval(session=sess) #DEBUG
 
-        weights_mean_bias_prior = first_layer.bias_prior.mean().eval(session=sess) #DEBUG
-        std_bias_prior = first_layer.bias_prior.stddev().eval(session=sess) #DEBUG
+        # weights_mean_bias_prior = first_layer.bias_prior.mean().eval(session=sess) #DEBUG
+        # std_bias_prior = first_layer.bias_prior.stddev().eval(session=sess) #DEBUG
 
         # #alternative
-        weights = first_layer.get_weights() # DEBUG
+        # weights = first_layer.get_weights() # DEBUG
         # weights_mean_kernel_posterior = weights[0]
         # std_kernel_posterior = np.log(np.exp(weights[1])+1 #softplus transformation or tf.nn.softplus(weights[1]).eval(session=sess)
         # weights_mean_bias_posterior = weights[2]
