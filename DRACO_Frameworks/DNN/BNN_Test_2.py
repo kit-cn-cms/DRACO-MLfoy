@@ -481,7 +481,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=2) #TODO DEBUG 2 isntead of 50
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50) #TODO DEBUG 2 isntead of 50
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
