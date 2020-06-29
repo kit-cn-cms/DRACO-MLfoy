@@ -51,6 +51,9 @@ trainopts.add_option("-q", "--quantile", dest = "qt_transformed_variables", acti
         help = "activate to perform a quantile transformation on the input features") #me
 trainopts.add_option("--restorefitdir", dest = "restore_fit_dir", default = None,
         help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me
+trainopts.add_option("--debugs", dest = "debugs", default = None,
+        help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me DEBUG
+
 parser.add_option_group(trainopts)
 
 plotopts = optparse.OptionGroup(parser, "Plotting Options")
@@ -250,6 +253,9 @@ class optionHandler:
     
     def getRestoreFitDir(self):
         return self.__options.restore_fit_dir
+    
+    def getDebug(self):
+        return self.__options.debugs
 
     def getNetConfig(self):
         return self.__config
