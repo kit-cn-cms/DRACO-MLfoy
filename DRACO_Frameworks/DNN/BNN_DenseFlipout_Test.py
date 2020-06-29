@@ -20,6 +20,7 @@ sys.path.append(basedir)
 
 # import with ROOT
 from pyrootsOfTheCaribbean.evaluationScripts import plottingScripts
+from net_configs import config_dict
 
 # imports with keras
 import utils.generateJTcut as JTcut
@@ -212,7 +213,7 @@ class BNN_Flipout():
             gen_vars                 = gen_vars,
         )
     
-    def _load_architecture(self, config):
+    def _load_architecture(self, config, restore_layer):
         ''' load the architecture configs '''
 
         # define default network configuration
@@ -227,19 +228,30 @@ class BNN_Flipout():
           "earlystopping_percentage": None,
           "earlystopping_epochs":     None,
         } 
-
+            
         for key in config:
             self.architecture[key] = config[key]
+            if key == "layers" and (restore_layer is not None):
+                self.architecture[key] = restore_layer
+        
 
-    def load_trained_model(self, netConfig, inputDirectory, n_iterations=200):
+    def load_trained_model(self, inputDirectory, n_iterations=200):
         ''' load an already trained model '''
         #checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
         checkpoint_path = inputDirectory+"/checkpoints/trained_model_weights"
+        netConfig_path = inputDirectory+"/checkpoints/net_config.json"
 
         # get the keras model
         #DEBUG
         #self.model = models.load_model(checkpoint_path, custom_objects={'tf':tf, 'tfp':tfp, 'tfd':tfd, 'DenseFlipout':DenseFlipout, 'neg_log_likelihood':self.neg_log_likelihood})
-        self.model = self.build_model(netConfig)
+        with open(netConfig_path) as json_file:
+            data = json.load(json_file)
+            netConfigName = data["netConfig"]
+            layer = data["layers"]
+
+        config = config_dict[netConfigName]
+
+        self.model = self.build_model(config = config, restore_layer=layer)
         load_status = self.model.load_weights(checkpoint_path)
         # Crosscheck
         load_status.assert_existing_objects_matched()
@@ -253,9 +265,20 @@ class BNN_Flipout():
         
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
-        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) #me
+        self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1], "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+        
         return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
 
     # sampling output values from the intern tensorflow output distribution
@@ -269,16 +292,28 @@ class BNN_Flipout():
         return np.mean(test_preds, axis=1), np.std(test_preds, axis=1), test_preds
 
     def build_default_model(self):
-        ''' build default straight forward BNN from architecture dictionary '''
+        ''' build default straight forward BNN from architecture dictionary'''
+        '''!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ATTENTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!: 
+            Do not forget to save the changes on the arguments for reloading the trained network at a later time
+            since only the trained weights are saved in the end but NOT the architecture!!'''
 
         # infer number of input neurons from number of train variables
         number_of_input_neurons     = self.data.n_input_neurons
-
+        
+        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
+        
         # get all the architecture settings needed to build model
         number_of_neurons_per_layer = self.architecture["layers"]
         dropout                     = self.architecture["Dropout"]
         activation_function         = self.architecture["activation_function"]
         output_activation           = self.architecture["output_activation"]
+        activity_regularizer        = self.architecture["activity_regularizer"]
+        trainable                   = self.architecture["trainable"]
+        kernel_posterior_fn         = self.architecture["kernel_posterior_fn"]
+        kernel_prior_fn             = self.architecture["kernel_prior_fn"]
+        bias_posterior_fn           = self.architecture["bias_posterior_fn"]
+        bias_prior_fn               = self.architecture["bias_prior_fn"]
+        seed                        = self.architecture["seed"]
 
         # define input layer
         Inputs = layer.Input(
@@ -287,28 +322,28 @@ class BNN_Flipout():
 
         X = Inputs
 
-        n_train_samples = 0.75*self.data.get_train_data(as_matrix = True).shape[0] 
 
         # create i dense flipout layers with n neurons as specified in net_config
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
             X = tfp.layers.DenseFlipout(
             units                       = nNeurons,
             activation                  = activation_function, 
-            activity_regularizer        = None, 
-            trainable                   = True,
-            kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
-            kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
-            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
-            bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None, #DEBUG
-            #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            seed                        = None, 
+            activity_regularizer        = activity_regularizer, 
+            trainable                   = trainable,
+            kernel_posterior_fn         = kernel_posterior_fn,
+            kernel_posterior_tensor_fn  = lambda d: d.sample(),
+            kernel_prior_fn             = kernel_prior_fn,
+            #kernel_prior_fn            = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            #kernel_divergence_fn       = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
+            kernel_divergence_fn        = lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples),
+            bias_posterior_fn           = bias_posterior_fn,
+            #bias_posterior_fn          = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            bias_posterior_tensor_fn    = lambda d: d.sample(),
+            bias_prior_fn               = bias_prior_fn,
+            #bias_prior_fn              = tfp.layers.default_multivariate_normal_fn, #DEBUG
+            #bias_divergence_fn         = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            bias_divergence_fn          = None, #lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples), #TODO DEBUG MUST BE REDO!
+            seed                        = seed, 
             name                        = "DenseFlipout_"+str(iLayer))(X)
 
             
@@ -321,21 +356,22 @@ class BNN_Flipout():
         X = tfp.layers.DenseFlipout(
             units                       = self.data.n_output_neurons,
             activation                  = output_activation.lower(), 
-            activity_regularizer        = None, 
-            trainable                   = True,
-            kernel_posterior_fn         = tfp.layers.util.default_mean_field_normal_fn(),
-            kernel_posterior_tensor_fn  = (lambda d: d.sample()),
-            kernel_prior_fn             = tfp.layers.default_multivariate_normal_fn,
-            #kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            kernel_divergence_fn        = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(is_singular=True), #DEBUG
-            #bias_posterior_fn           = tfp.layers.util.default_mean_field_normal_fn(),
-            bias_posterior_tensor_fn    = (lambda d: d.sample()), 
-            bias_prior_fn               = None, #DEBUG
-            #bias_prior_fn               = tfp.layers.default_multivariate_normal_fn, #DEBUG
-            #bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
-            bias_divergence_fn          = (lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples)), 
-            seed                        = None,
+            activity_regularizer        = activity_regularizer, 
+            trainable                   = trainable,
+            kernel_posterior_fn         = kernel_posterior_fn,
+            kernel_posterior_tensor_fn  = lambda d: d.sample(),
+            kernel_prior_fn             = kernel_prior_fn,
+            #kernel_prior_fn            = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            #kernel_divergence_fn       = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG 
+            kernel_divergence_fn        = lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples),
+            bias_posterior_fn           = bias_posterior_fn,
+            #bias_posterior_fn          = tfp.layers.util.default_mean_field_normal_fn(), #DEBUG
+            bias_posterior_tensor_fn    = lambda d: d.sample(),
+            bias_prior_fn               = bias_prior_fn,
+            #bias_prior_fn              = tfp.layers.default_multivariate_normal_fn, #DEBUG
+            #bias_divergence_fn         = (lambda q, p, ignore: tfd.kl_divergence(q, p)), #DEBUG
+            bias_divergence_fn          = None, #lambda q, p, ignore: tfd.kl_divergence(q, p)/tf.to_float(n_train_samples), #TODO DEBUG MUST BE REDO!
+            seed                        = seed, 
             name                        = self.outputName)(X)
 
         # define model
@@ -355,12 +391,12 @@ class BNN_Flipout():
         update_wrapper(partial_func, func)
         return partial_func
 
-    def build_model(self, config = None, model = None):
+    def build_model(self, config = None, model = None, restore_layer = None):
         ''' build a BNN model
             use options defined in 'config' dictionary '''
 
         if config:
-            self._load_architecture(config)
+            self._load_architecture(config, restore_layer)
             print("loading non default net configs")
 
         if model == None:
@@ -397,7 +433,9 @@ class BNN_Flipout():
                 min_epochs      = 50,
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
-
+        
+        self.get_input_weights() #DEBUG
+        
         # train main net
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
@@ -428,7 +466,7 @@ class BNN_Flipout():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
 
         ''' save roc_auc_score to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
         file_exists = os.path.isfile(filename)
         with open(filename, "a+") as f:
             headers = ["project_name", "roc_auc_score"]
@@ -501,7 +539,7 @@ class BNN_Flipout():
         configs = self.architecture
         configs["inputName"] = self.inputName
         configs["outputName"] = self.outputName+"/"+configs["output_activation"]
-        configs = {key: configs[key] for key in configs if not "optimizer" in key}
+        configs = {key: configs[key] for key in configs if key not in ["optimizer", "kernel_posterior_fn", "kernel_prior_fn", "bias_posterior_fn","bias_prior_fn"]}
 
         # more information saving
         configs["inputData"] = self.input_samples.input_path
@@ -547,7 +585,6 @@ class BNN_Flipout():
             csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "best_epoch": len(self.model_history["acc"])})
             print("saved best_epoch to "+str(filename))
 
-
         # Serialize the test inputs for the analysis of the gradients
         ##pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb")) #me as it needs much space
     
@@ -570,11 +607,25 @@ class BNN_Flipout():
 
 
         # #alternative
-        # weights = first_layer.get_weights()
+        weights = self.model.layers[1].get_weights() 
+        print weights #DEBUG
+        print "RANGE"
+        print "mean kernel posterior:" + str(np.amin(weights[0])) + "to"  + str(np.amax(weights[0]))
+        print "std kernel posterior:" + str(np.amin(weights[1])) + "to"  + str(np.amax(weights[1]))
+        print "mean bias posterior:" + str(np.amin(weights[2])) + "to"  + str(np.amax(weights[2]))
+
+        print "*******************************************************"
+        weights = self.model.layers[2].get_weights() 
+        print weights #DEBUG
+        print "RANGE"
+        print "mean kernel posterior:" + str(np.amin(weights[0])) + "to"  + str(np.amax(weights[0]))
+        print "std kernel posterior:" + str(np.amin(weights[1])) + "to"  + str(np.amax(weights[1]))
+        print "mean bias posterior:" + str(np.amin(weights[2])) + "to"  + str(np.amax(weights[2]))
+
         # weights_mean_kernel_posterior = weights[0]
-        # std_kernel_posterior = np.log(np.exp(weights[1])+1 #softplus transformation or tf.nn.softplus(weights[1]).eval(session=sess)
+        # std_kernel_posterior = np.log(np.exp(weights[1])+1) #softplus transformation or tf.nn.softplus(weights[1]).eval(session=sess)
         # weights_mean_bias_posterior = weights[2]
-        # std_bias_posterior =  np.log(np.exp(weights[3]+1) #softplus transformation or tf.nn.softplus(weights[3]).eval(session=see) #not available if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen because std is zero then
+        # std_bias_posterior =  np.log(np.exp(weights[3])+1) #softplus transformation or tf.nn.softplus(weights[3]).eval(session=see) #not available if in Denseflipout bias_posterior_fn=tfp_layers_util.default_mean_field_normal_fn(is_singular=True) chosen because std is zero then
 
         weights_mean = np.split(weights_mean_kernel_posterior, len(self.train_variables))
         weights_std  = np.split(std_kernel_posterior, len(self.train_variables))
@@ -633,37 +684,6 @@ class BNN_Flipout():
             )
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
-
-        # #DEBUG
-        # binaryOutput = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector,
-        #     train_predictions   = None,#self.model_train_prediction,
-        #     nbins               = nbins,
-        #     bin_range           = bin_range,
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "binary_discriminator_log" #me
-        #     )
-
-        # bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-
-        # binaryOutput_std = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector_std,
-        #     train_predictions   = None, # self.model_train_prediction_std,
-        #     nbins               = 30,
-        #     bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "sigma_discriminator_log"
-        #     )
-
-        # bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
 
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
