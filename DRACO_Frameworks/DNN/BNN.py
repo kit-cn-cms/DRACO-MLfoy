@@ -577,8 +577,7 @@ class BNN():
         print first_layer.get_weights()[1]
         print "***********************"
 
-        #if self.use_bias:
-        if True:
+        if self.use_bias:
             weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables)+1)
             weights_std  = weights[len(weights)/2:]
             weights_std  = np.split(np.log(np.exp(np.log(np.expm1(1.))+weights_std)+1), len(self.train_variables)+1)
