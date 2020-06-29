@@ -2,8 +2,8 @@ variables = {}
 variables["ge4j_ge3t"] = [
     'Evt_CSV_avg',
     'Evt_CSV_avg_tagged',
-    # 'Evt_CSV_dev',
-    # 'Evt_CSV_dev_tagged',
+    # 'Evt_CSV_dev', #if uncomment possible
+    # 'Evt_CSV_dev_tagged', #if uncomment possible
     'Evt_CSV_min',
     'Evt_CSV_min_tagged',
     'Evt_Deta_JetsAverage',
@@ -26,16 +26,16 @@ variables["ge4j_ge3t"] = [
     'Evt_HT',
     'Evt_HT_jets',
     'Evt_HT_tags',
-    #'Evt_HT_wo_MET',
+    #'Evt_HT_wo_MET', #if uncomment possible
     'Evt_JetPt_over_JetE',
     'Evt_M2_JetsAverage',
     'Evt_M2_TaggedJetsAverage',
     'Evt_M2_closestTo125TaggedJets',
-    #'Evt_M2_closestTo91TaggedJets',
+    #'Evt_M2_closestTo91TaggedJets', #for Z analysis
     'Evt_M2_minDrJets',
     'Evt_M2_minDrTaggedJets',
     'Evt_M3',
-    #'Evt_M3_oneTagged',
+    #'Evt_M3_oneTagged',#if uncomment possible
     'Evt_MET',
     #'Evt_MET_Phi',
     #'Evt_MET_Pt',
@@ -52,21 +52,21 @@ variables["ge4j_ge3t"] = [
     'Evt_Pt_minDrTaggedJets',
     'Evt_TaggedJetPt_over_TaggedJetE',
 
-    # 'Evt_aplanarity',
-    # 'Evt_aplanarity_jets',
-    # 'Evt_aplanarity_tags',
-    # 'Evt_blr',
-    # 'Evt_blr_transformed',
-    # 'Evt_h0',
-    # 'Evt_h1',
-    # 'Evt_h2',
-    # 'Evt_h3',
-    # 'Evt_sphericity',
-    # 'Evt_sphericity_jets',
-    # 'Evt_sphericity_tags',
-    # 'Evt_transverse_sphericity',
-    # 'Evt_transverse_sphericity_jets',
-    # 'Evt_transverse_sphericity_tags',
+    # 'Evt_aplanarity',                        #if uncomment --> explane calculation
+    # 'Evt_aplanarity_jets', #if uncomment --> explane calculation
+    # 'Evt_aplanarity_tags',#if uncomment --> explane calculation
+    # 'Evt_blr',#if uncomment --> explane calculation
+    # 'Evt_blr_transformed',#if uncomment --> explane calculation
+    # 'Evt_h0',#if uncomment --> explane calculation
+    # 'Evt_h1',#if uncomment --> explane calculation
+    # 'Evt_h2',#if uncomment --> explane calculation
+    # 'Evt_h3',#if uncomment --> explane calculation
+    # 'Evt_sphericity',#if uncomment --> explane calculation
+    # 'Evt_sphericity_jets',#if uncomment --> explane calculation
+    # 'Evt_sphericity_tags',#if uncomment --> explane calculation
+    # 'Evt_transverse_sphericity', #if uncomment --> explane calculation
+    # 'Evt_transverse_sphericity_jets', #if uncomment --> explane calculation
+    # 'Evt_transverse_sphericity_tags',#if uncomment --> explane calculation 
     # 'Reco_JABDT_tHW_Jet_CSV_btop',
     # 'Reco_JABDT_tHW_Jet_CSV_hdau1',
     # 'Reco_JABDT_tHW_Jet_CSV_hdau2',
