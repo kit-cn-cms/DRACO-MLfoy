@@ -396,12 +396,6 @@ class BNN():
         # save the model
         self.model = model
 
-        #DEBUG
-        first_layer = self.model.layers[1]
-        weights = first_layer.get_weights()[1]
-        print("**********************prior vor training***************************")
-        print(weights)
-
         # save net information
         out_file    = self.save_path+"/model_summary.yml"
         yml_model   = self.model.to_yaml()
@@ -420,6 +414,40 @@ class BNN():
                 min_epochs      = 50,
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
+
+        #DEBUG TODO
+        first_layer = True
+        for num_layer in range(len(self.architecture["layers"])):
+            if first_layer:
+                num_neurons_previous_layer = self.data.n_input_neurons
+                first_layer = False
+            else: 
+                num_neurons_previous_layer = self.architecture["layers"][num_layer-1]
+
+            if self.use_bias:
+                num_param = (num_neurons_previous_layer + 1) * self.architecture["layers"][num_layer]
+            else:
+                num_param = num_neurons_previous_layer * self.architecture["layers"][num_layer]
+
+
+            initialize_posterior_weights = np.random.uniform(low=-1., high=1., size=(1,num_param))
+            initialize_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+            initialize_combined = np.append(initialize_posterior_weights, initialize_posterior_std)
+            #Since Prior is set to untrainable in V5 --> initial weights not changed --> reuse self.model.layers[num_layer+1].get_weights()[1]
+            initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  science in self.model.layers for inputlayer is counted as 0
+            self.model.layers[num_layer+1].set_weights(initialize)  
+
+        #Initialize Output Layer (OL)
+        if self.use_bias:
+            num_param = (self.architecture["layers"][num_layer]+1) * self.data.n_output_neurons
+        else:
+            num_param = self.architecture["layers"][num_layer] * self.data.n_output_neurons
+
+        initialize_OL_posterior_weights = np.random.uniform(low=-0.2, high=0.2, size=(1,num_param))
+        initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+        initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
+        initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
+        self.model.layers[num_layer+2].set_weights(initialize_OL) 
 
         # train main net
         self.trained_model = self.model.fit(
@@ -451,7 +479,7 @@ class BNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
 
         ''' save roc_auc_score to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
         file_exists = os.path.isfile(filename)
         with open(filename, "a+") as f:
             headers = ["project_name", "roc_auc_score"]
@@ -572,10 +600,6 @@ class BNN():
          # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
-
-        #DEBUG
-        print first_layer.get_weights()[1]
-        print "***********************"
 
         if self.use_bias:
             weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables)+1)
