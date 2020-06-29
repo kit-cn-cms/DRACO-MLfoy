@@ -490,7 +490,7 @@ class BNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
 
         ''' save roc_auc_score to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/roc_auc_score.csv"
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
         file_exists = os.path.isfile(filename)
         with open(filename, "a+") as f:
             headers = ["project_name", "roc_auc_score"]
@@ -612,8 +612,7 @@ class BNN():
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
-        #if self.use_bias: #DEBUG
-        if True:
+        if self.use_bias: 
             weights_mean = np.split(weights[:len(weights)/2], len(self.train_variables)+1)
             weights_std  = weights[len(weights)/2:]
             print "weight_std"
