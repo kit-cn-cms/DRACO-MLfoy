@@ -450,7 +450,9 @@ class BNN():
             num_param = self.architecture["layers"][num_layer] * self.data.n_output_neurons
 
         initialize_OL_posterior_weights = np.random.uniform(low=-0.2, high=0.2, size=(1,num_param))
-        initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+        #initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+        #test not changing initialization of std posterior
+        initialize_OL_posterior_std = self.model.layers[num_layer+2].get_weights()[0][num_param:]
         initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
         initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
         self.model.layers[num_layer+2].set_weights(initialize_OL) 
