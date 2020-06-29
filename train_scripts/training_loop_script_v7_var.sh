@@ -6,7 +6,7 @@
 #_v5 kl_use_exact  = True AND fixed prior by setting non trainable AND initializing posterior mean (kernel + bias) and posterior std (kernel + bias) not only with zeros
 #_v6 kl_use_exact  = use default settings except initializing posterior mean (kernel + bias) and posterior std (kernel + bias) not only with zeros
 #_v7 kl_use_exact  = use default settings except initializing posterior mean (kernel + bias) not only with zeros but use default initialization of posterior std (kernel + bias) 
-
+#_v7_OL initialization modifications now also applied to OutputLayer (OL)
 
 
 
@@ -19,8 +19,8 @@ epochs=4000
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
 layers=("50" "100" "200" "250" "300" "400" "500" "600" "50,50" "100,100" "150,150" "200,200" "250,250" "50,50,50" "100,100,100" "150,150,150" "250,250,250")
 for i in "${!layers[@]}"; do
-    python train_template_bnn_TEST_2.py -o $output1"${layers[$i]}"_v7 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
-    python train_template_bnn_TEST_2.py -o $output2"${layers[$i]}"_v7 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+    python train_template_bnn_TEST_2.py -o $output1"${layers[$i]}"_v7_OL -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_TEST_2.py -o $output2"${layers[$i]}"_v7_OL -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 
