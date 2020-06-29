@@ -118,7 +118,7 @@ class DenseVariational(tf.keras.layers.Layer):
 
     q = self._posterior(inputs)
     r = self._prior(inputs)
-    self.add_loss(self._kl_divergence_fn(q, r))
+    self.add_loss(self._kl_divergence_fn(q, r)) #hier KL schon hinzugefuegt
 
     w = tf.convert_to_tensor(value=q)
     prev_units = self.input_spec.axes[-1]
