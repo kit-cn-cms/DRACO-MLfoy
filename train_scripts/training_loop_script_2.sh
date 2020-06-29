@@ -13,10 +13,15 @@ output2=TEST_Variational_BNN_training_
 epochs=4000
 
 cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
-layers=("50" "100" "200" "250" "300" "50,50" "100,100" "150,150" "250,250" "50,50,50" "100,100,100" "150,150,150" "250,250,250")
+layers=("200,200")
+python train_template_bnn_TEST.py -o $output2"400"_v5 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers 400
+python train_template_bnn_TEST.py -o $output2"500"_v5 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers 500
+python train_template_bnn_TEST.py -o $output2"600"_v5 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers 600
+
+
 for i in "${!layers[@]}"; do
-    python train_template_bnn_TEST.py -o $output1"${layers[$i]}"_v4 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
-    python train_template_bnn_TEST.py -o $output2"${layers[$i]}"_v4 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
+    python train_template_bnn_TEST.py -o $output1"${layers[$i]}"_v5 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q --layers ${layers[$i]}
+    python train_template_bnn_TEST.py -o $output2"${layers[$i]}"_v5 -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs --layers ${layers[$i]}
 done
 
 
