@@ -32,7 +32,7 @@ class EventCategories:
         return selections
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, lumiWeight = 1.):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, lumiWeight = 1., friendTrees = {}):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
@@ -41,6 +41,8 @@ class Sample:
         self.ownVars    = ownVars
         self.lumiWeight = lumiWeight
         self.even_odd   = even_odd
+        self.friendTrees = friendTrees
+
         self.evenOddSplitting()
 
     def printInfo(self):
@@ -56,7 +58,7 @@ class Sample:
                 self.selections = "(Evt_Odd == 1)"
 
 class Dataset:
-    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID', friendTrees = {}, ttbarReco=False, ncores=1):
+    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID', ttbarReco=False, ncores=1):
         # settings for paths
         self.outputdir = outputdir
         self.naming = naming
@@ -64,8 +66,6 @@ class Dataset:
         self.varName_Run = varName_Run
         self.varName_LumiBlock = varName_LumiBlock
         self.varName_Event = varName_Event
-
-        self.friendTrees = friendTrees
 
         # generating output dir
         if not os.path.exists(self.outputdir):
@@ -315,7 +315,7 @@ class Dataset:
 
 
                 # convert to dataframe
-                df = tree.pandas.df([v for v in self.variables if not "." in v])
+                df = tree.pandas.df([v for v in self.variables if not "_ft_" in v])
 
                 if tr == 'liteTreeTTH_step7_cate7' or tr == 'liteTreeTTH_step7_cate8':
                     df['blr_transformed'] = np.log(df['blr']/(1-df['blr']))
@@ -333,23 +333,24 @@ class Dataset:
                 # add friend trees 
                 samplepath, filename = os.path.split(f)
                 basepath, samplename = os.path.split(samplepath)
-                for ftName in self.friendTrees:
+                
+                for ftName in sample.friendTrees:
                     # get path to friend tree file
-                    friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
+                    friendtreepath = "/".join([sample.friendTrees[ftName], samplename, filename])
+                    print("Adding {} as friendTree".format(friendtreepath))
                     # collect all variables that belong to this friend tree
-                    friendtreevars = [v.replace(ftName+".","") for v in self.variables if v.startswith(ftName+".")]
+                    friendtreevars = [v.replace(ftName+"_ft_","") for v in self.variables if v.startswith(ftName+"_ft_")]
                     # open friend tree root file
                     with root.open(friendtreepath) as ftfile:
                         # get tree
                         fTree = ftfile[tr]
                         ft_df = fTree.pandas.df(friendtreevars)
                         # rename columns
-                        renameDict = {v: ".".join([ftName, v]) for v in friendtreevars}
+                        renameDict = {v: "_ft_".join([ftName, v]) for v in friendtreevars}
                         ft_df = ft_df.rename(columns=renameDict)
                         
                         # concatenate dataframes
                         df = pd.concat([df, ft_df], axis = 1)
-
 
                 # handle vector variables, loop over them
                 for vecvar in self.vector_variables:

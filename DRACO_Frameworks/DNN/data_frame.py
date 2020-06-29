@@ -243,7 +243,7 @@ class DataFrame(object):
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
             # add flag for ttH and ttbb to dataframe
-            df["is_ttH"] = pd.Series( [1 if (c=="ttHbb" or c=="ttH") else 0 for c in df["class_label"].values], index = df.index )
+            df["is_ttH"] = pd.Series( [1 if ("ttH" in c)  else 0 for c in df["class_label"].values], index = df.index )
             df["is_ttBB"] = pd.Series( [1 if ("ttbb" in c) else 0 for c in df["class_label"].values], index = df.index )
 
             # add generator flag for adversary training
@@ -251,10 +251,9 @@ class DataFrame(object):
                 df["generator_flag"] = pd.Series( [1 if (self.addSampleSuffix in c) else 0 for c in df["class_label"].values], index = df.index )
 
                 df["index_label"] = pd.Series( [self.class_translation[c[:-len(self.addSampleSuffix)]] if (c.endswith(self.addSampleSuffix)) 
-                    else self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb", "ttZ")] for c in df["class_label"].values], index = df.index )
+                    else self.class_translation[c] for c in df["class_label"].values], index = df.index )
             else:
-                df["index_label"] = pd.Series( [self.class_translation[c.replace("ttHbb", "ttH").replace("ttZbb","ttZ")] for c in df["class_label"].values], index = df.index )   
-            
+                df["index_label"] = pd.Series( [self.class_translation[c] for c in df["class_label"].values], index = df.index )   
             # norm weights to mean(1) 
             # TODO: adjust train_weights for adversary training (processes with different samples from different generators)
             df["train_weight"] = df["train_weight"]*df.shape[0]/len(self.classes)
@@ -274,7 +273,7 @@ class DataFrame(object):
             self.classes = ["sig", "bkg"]
             self.index_classes = [self.class_translation[c] for c in self.classes]
 
-            df["index_label"] = pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ") in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
+            df["index_label"] = pd.Series( [1 if c in input_samples.signal_classes else 0 for c in df["class_label"].values], index = df.index)
 
             # add_bkg_df = None
             if not input_samples.additional_samples:
@@ -505,7 +504,7 @@ class DataFrame(object):
         else:              return self.df_test["index_label"].values
 
     def get_class_flag(self, class_label):
-        return pd.Series( [1 if c.replace("ttHbb","ttH").replace("ttZbb","ttZ")==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
+        return pd.Series( [1 if c==class_label else 0 for c in self.df_test["class_label"].values], index = self.df_test.index ).values
 
     def get_ttH_flag(self):
         return self.df_test["is_ttH"].values

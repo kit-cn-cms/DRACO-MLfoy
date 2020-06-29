@@ -29,7 +29,9 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-# input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me 
+# input_samples.addSample(options.getDefaultName("ttHbb")  , label = "ttHbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("ttHnonbb")  , label = "ttHnonbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+# input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 # input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 # input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
@@ -40,11 +42,18 @@ input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normal
 # input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 # input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
 
-# input_samples.addSample(options.getDefaultName("ttH_HTXS_0") ,  label = "ttH_HTXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
-# input_samples.addSample(options.getDefaultName("ttH_HTXS_1") ,  label = "ttH_HTXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
-# input_samples.addSample(options.getDefaultName("ttH_HTXS_2") ,  label = "ttH_HTXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
-# input_samples.addSample(options.getDefaultName("ttH_HTXS_3") ,  label = "ttH_HTXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
-# input_samples.addSample(options.getDefaultName("ttH_HTXS_4") ,  label = "ttH_HTXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_STXS_0") ,  label = "ttH_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_STXS_1") ,  label = "ttH_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_STXS_2") ,  label = "ttH_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_STXS_3") ,  label = "ttH_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttH_STXS_4") ,  label = "ttH_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+
+# input_samples.addSample(options.getDefaultName("ttHbb_STXS_0") ,  label = "ttHbb_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttHbb_STXS_1") ,  label = "ttHbb_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttHbb_STXS_2") ,  label = "ttHbb_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttHbb_STXS_3") ,  label = "ttHbb_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+# input_samples.addSample(options.getDefaultName("ttHbb_STXS_4") ,  label = "ttHbb_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr ) #me
+
 
 # additional samples for adversary training
 if options.isAdversary():

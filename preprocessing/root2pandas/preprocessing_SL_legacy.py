@@ -115,6 +115,18 @@ ttbb_categories.addCategory("tthf",        selection = "(GenEvt_I_TTPlusBB >= 1 
 #ST_categories = root2pandas.EventCategories()
 #ST_categories.addCategory("ST", selection = None)
 
+friendTrees_2018 = {
+    "matchH": "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/friendTrees/matchHiggs_2018_v2/",
+    }
+
+friendTrees_2017 = {
+    "matchH": "/nfs/dust/cms/user/swieland/ttH_legacy/friendTrees/matchHiggs/2017/",
+    }
+
+friendTrees_2016 = {
+    "matchH": "/nfs/dust/cms/user/swieland/ttH_legacy/friendTrees/matchHiggs/2016/",
+    }
+
 # initialize dataset class
 dataset = root2pandas.Dataset(
     outputdir   = outputdir,
@@ -122,6 +134,7 @@ dataset = root2pandas.Dataset(
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
     ttbarReco   = options.ttbarReco,
+    # friendTrees = friendTrees,
     ncores      = options.ncores)
 
 # add base event selection
@@ -148,10 +161,10 @@ memPath = "/nfs/dust/cms/user/swieland/ttH_legacy/MEMdatabase/mem_final/"
 
 dataset.addSample(
     sampleName  = "ttH_17",
-    ntuples     = ntuplesPath2017+"/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8/*nominal*.root",
+    ntuples     = ntuplesPath2017+"/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
     categories  = ttH_categories,
     lumiWeight  = 41.5,
-    selections  = trigger_sel_17,
+    selections  = "(Evt_Odd == 1) and " + trigger_sel_17,
     # selections  = "(Evt_Odd == 1)",
     MEMs        = memPath+"2017/ttHTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8.root",
     )
@@ -177,9 +190,9 @@ dataset.addSample(
 #     )
 
 dataset.addSample(
-    sampleName  = "TTToSL_17",
-    ntuples     = ntuplesPath2017+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
-    categories  = ttbar_categories,
+    sampleName  = "ttHnonbb_17",
+    ntuples     = ntuplesPath2017+"/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttHnonbb_categories,
     lumiWeight  = 41.5,
     selections  = trigger_sel_17,
     #selections   = "(Evt_Odd == 1)",
