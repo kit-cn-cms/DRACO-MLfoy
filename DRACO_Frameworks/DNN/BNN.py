@@ -230,7 +230,7 @@ class BNN():
         for key in config:
             self.architecture[key] = config[key]
         
-    def load_trained_model(self, inputDirectory, n_iterations=200):
+    def load_trained_model(self, inputDirectory, n_iterations=100):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
@@ -244,8 +244,6 @@ class BNN():
         # save predictions
         self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations)
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
-        #DEBUG
-        print self.model_prediction_vector
         
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
@@ -272,7 +270,7 @@ class BNN():
 
 
     # sampling output values from the intern tensorflow output distribution
-    def bnn_calc_mean_std(self, n_samples=50):
+    def bnn_calc_mean_std(self, n_samples=100):
         test_pred  = []
         print "Calculating the mean and std: "
         for i in tqdm.tqdm(range(n_samples)):
@@ -315,7 +313,7 @@ class BNN():
             n = kernel_size + bias_size
             return tf.keras.Sequential([
                 layers.VariableLayer(n, dtype=dtype), #trainable = False
-                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:]) #DEBUG
+                layers.DistributionLambda(lambda t: tfd.Independent(tfd.Normal(loc=t, scale=1.), reinterpreted_batch_ndims=1)), #[:n]#1e-5 + tf.math.softplus(c + t[n:])
                 ])
 
         # define input layer
@@ -336,7 +334,7 @@ class BNN():
                 make_posterior_fn   = posterior,
                 make_prior_fn       = prior,
                 kl_weight           = 1. / n_train_samples,
-                kl_use_exact        = False, #Debug
+                kl_use_exact        = False,
                 use_bias            = self.use_bias,
                 activation          = activation_function,
                 name                = "DenseLayer_"+str(iLayer)
@@ -352,7 +350,7 @@ class BNN():
             make_posterior_fn   = posterior,
             make_prior_fn       = prior,
             kl_weight           = 1. / n_train_samples,
-            kl_use_exact        = False, #Debug
+            kl_use_exact        = False,
             use_bias            = self.use_bias,
             activation          = output_activation.lower(),
             name                = self.outputName
@@ -402,20 +400,9 @@ class BNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
-    def train_model(self):
-        ''' train the model '''
-
-        # add early stopping if activated
-        callbacks = None
-        if self.architecture["earlystopping_percentage"] or self.architecture["earlystopping_epochs"]:
-            callbacks = [EarlyStopping(
-                monitor         = "loss",
-                value           = self.architecture["earlystopping_percentage"],
-                min_epochs      = 50,
-                stopping_epochs = self.architecture["earlystopping_epochs"],
-                verbose         = 1)]
-
-        #DEBUG TODO
+    def custom_initialization(self, min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
+                              OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
+                              use_default_post_mean = False, use_default_post_std = False):
         first_layer = True
         for num_layer in range(len(self.architecture["layers"])):
             if first_layer:
@@ -429,9 +416,12 @@ class BNN():
             else:
                 num_param = num_neurons_previous_layer * self.architecture["layers"][num_layer]
 
+            if use_default_post_mean: initialize_posterior_weights = self.model.layers[num_layer+1].get_weights()[0][:num_param]
+            else: initialize_posterior_weights = np.random.uniform(low=min_post_mean, high=max_post_mean, size=(1,num_param))
+            
+            if use_default_post_std: initialize_posterior_std = self.model.layers[num_layer+1].get_weights()[0][num_param:]
+            else: initialize_posterior_std = np.random.uniform(low=untransformed_min_post_std, high=untransformed_max_post_std, size=(1,num_param))
 
-            initialize_posterior_weights = np.random.uniform(low=-1., high=1., size=(1,num_param))
-            initialize_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
             initialize_combined = np.append(initialize_posterior_weights, initialize_posterior_std)
             #Since Prior is set to untrainable in V5 --> initial weights not changed --> reuse self.model.layers[num_layer+1].get_weights()[1]
             initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  science in self.model.layers for inputlayer is counted as 0
@@ -443,11 +433,29 @@ class BNN():
         else:
             num_param = self.architecture["layers"][num_layer] * self.data.n_output_neurons
 
-        initialize_OL_posterior_weights = np.random.uniform(low=-0.2, high=0.2, size=(1,num_param))
-        initialize_OL_posterior_std = np.random.uniform(low=-4, high=-2, size=(1,num_param))
+        if use_default_post_mean: initialize_OL_posterior_weights = self.model.layers[num_layer+2].get_weights()[0][:num_param]
+        
+        else: initialize_OL_posterior_weights = np.random.uniform(low=OL_min_post_mean, high=OL_max_post_mean, size=(1,num_param))
+
+        if use_default_post_std: initialize_OL_posterior_std = self.model.layers[num_layer+2].get_weights()[0][num_param:]
+        else: initialize_OL_posterior_std = np.random.uniform(low=OL_untransformed_min_post_std, high=OL_untransformed_max_post_std, size=(1,num_param))
+        
         initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
         initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
         self.model.layers[num_layer+2].set_weights(initialize_OL) 
+
+    def train_model(self):
+        ''' train the model '''
+
+        # add early stopping if activated
+        callbacks = None
+        if self.architecture["earlystopping_percentage"] or self.architecture["earlystopping_epochs"]:
+            callbacks = [EarlyStopping(
+                monitor         = "loss",
+                value           = self.architecture["earlystopping_percentage"],
+                min_epochs      = 50,
+                stopping_epochs = self.architecture["earlystopping_epochs"],
+                verbose         = 1)]
 
         # train main net
         self.trained_model = self.model.fit(
@@ -472,7 +480,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=50) #DEBUG 2 isntead of 50
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=100)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -658,7 +666,7 @@ class BNN():
             data                = self.data,
             test_predictions    = self.model_prediction_vector_std,
             train_predictions   = None, # self.model_train_prediction_std,
-            nbins               = 30,
+            nbins               = 20,
             bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
             event_category      = self.category_label,
             plotdir             = self.save_path,
@@ -667,39 +675,7 @@ class BNN():
             save_name           = "sigma_discriminator"
             )
 
-        bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
-
-        # #DEBUG
-        # binaryOutput = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector,
-        #     train_predictions   = None,#self.model_train_prediction,
-        #     nbins               = nbins,
-        #     bin_range           = bin_range,
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "binary_discriminator_log" #me
-        #     )
-
-        # bkg_hist, sig_hist = binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name)
-
-        # binaryOutput_std = plottingScripts.plotBinaryOutput(
-        #     data                = self.data,
-        #     test_predictions    = self.model_prediction_vector_std,
-        #     train_predictions   = None, # self.model_train_prediction_std,
-        #     nbins               = 30,
-        #     bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
-        #     event_category      = self.category_label,
-        #     plotdir             = self.save_path,
-        #     logscale            = log,
-        #     sigScale            = sigScale,
-        #     save_name           = "sigma_discriminator_log"
-        #     )
-
-        # bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "\sigma of the Discriminator")
-
+        bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "BNN Standardabweichung #sigma")
 
         self.plot_2D_hist_std_over_mean(bin_range=[50,50])
         self.plot_varied_histogram()
