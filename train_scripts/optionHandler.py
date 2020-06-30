@@ -51,8 +51,8 @@ trainopts.add_option("-q", "--quantile", dest = "qt_transformed_variables", acti
         help = "activate to perform a quantile transformation on the input features") #me
 trainopts.add_option("--restorefitdir", dest = "restore_fit_dir", default = None,
         help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me
-trainopts.add_option("--debugs", dest = "debugs", default = None,
-        help = "activate to restore the fit information from a quantile transformation. Only takes an ABSOLUTE path!") #me DEBUG
+trainopts.add_option("--initialize", dest = "initialize", action = "store_true", default = False,
+        help = "activate to initialize the DenseVariational Layer with random values") #me
 
 parser.add_option_group(trainopts)
 
@@ -250,6 +250,9 @@ class optionHandler:
     
     def doQTNormVariables(self):
         return self.__options.qt_transformed_variables
+    
+    def doCustomInitialization(self):
+        return self.__options.initialize
     
     def getRestoreFitDir(self):
         return self.__options.restore_fit_dir
