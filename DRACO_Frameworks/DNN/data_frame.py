@@ -219,6 +219,8 @@ class DataFrame(object):
         self.binary_classification = input_samples.binary_classification
         if self.binary_classification: self.bkg_target = input_samples.bkg_target
 
+        self.restore_fit_dir = restore_fit_dir
+
         # loop over all input samples and load dataframe
         train_samples = []
         for sample in input_samples.samples:
@@ -346,18 +348,19 @@ class DataFrame(object):
         # transform variables with quantile transformation
         if qt_transformed_variables:
             ## a) peform a new fit on the data OR
-            if restore_fit_dir is None:
+            if self.restore_fit_dir is None:
                 qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
                 fit_values = qt.fit(df[train_variables])
 
                 # save fit information in a .pck file
                 fit_file = os.path.join(output_dir, 'fit_data.pck')
+                self.restore_fit_dir = fit_file
                 with open(fit_file, "w") as f:
                     pickle.dump(qt, f)
 
             ## b) load previous fit data
             else:
-                with open(restore_fit_dir, 'r') as f2:
+                with open(self.restore_fit_dir, 'r') as f2:
                     fit_values = pickle.load(f2)
             
             df[train_variables] = fit_values.transform(df[train_variables])
@@ -457,6 +460,9 @@ class DataFrame(object):
 
         self.df_train = pd.concat(new_train_dfs)
         self.df_train = shuffle(self.df_train)
+
+    def get_fit_dir(self):
+        return self.restore_fit_dir
 
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True):
