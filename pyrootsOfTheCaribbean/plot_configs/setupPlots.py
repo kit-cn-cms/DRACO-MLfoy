@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 import re
@@ -43,7 +45,7 @@ def GetPlotColor( cls ):
 def GetyTitle(privateWork = False):
     # if privateWork flag is enabled, normalize plots to unit area
     if privateWork:
-        return "normalized to unit area"
+        return "normiert auf Fl#ddot{a}cheneinheit" #"normalized to unit area"
     return "Events expected"
 
 
