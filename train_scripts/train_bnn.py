@@ -63,10 +63,11 @@ bnn = BNN.BNN(
 # build BNN model
 bnn.build_model(options.getNetConfig())
 
-# # set custom weight initialization
-# bnn.custom_initialization(min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
-#                           OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
-#                           use_default_post_mean = False, use_default_post_std = False)
+# set custom weight initialization
+if options.doCustomInitialization():
+    bnn.custom_initialization(min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
+                            OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
+                            use_default_post_mean = False, use_default_post_std = False)
 
 # perform the training
 bnn.train_model()
@@ -96,9 +97,9 @@ if options.doPlots():
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
-            nbins       = 45, #me
+            nbins       = 20, #me
             bin_range   = bin_range,
-            name        = options.getName(),
+            name        = "BNN Vorhersage #mu", #me
             sigScale    = options.getSignalScale())
         
        
