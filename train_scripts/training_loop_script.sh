@@ -24,8 +24,9 @@ epochs=4000
 iteration=100
 
 # cd /home/ycung/Desktop/DRACO-MLfoy/train_scripts/
+python train_template_bnn.py -o $output2"51" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs
 
-for ((i=0; i<$iteration; i+=1)); do
+for ((i=52; i<$iteration; i+=1)); do
     python train_template_bnn.py -o $output1"$i" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs -q
     python train_template_bnn.py -o $output2"$i" -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n "$name" -p --printroc --binary --signal ttH -e $epochs
 done
