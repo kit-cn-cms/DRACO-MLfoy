@@ -29,7 +29,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tthf") , label = "tthf" , normalization_weight = options.getNomWeight())
 #input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight()) #me
 #input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
@@ -62,6 +62,11 @@ bnn = BNN.BNN(
 
 # build BNN model
 bnn.build_model(options.getNetConfig())
+
+# # set custom weight initialization
+# bnn.custom_initialization(min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
+#                           OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
+#                           use_default_post_mean = False, use_default_post_std = False)
 
 # perform the training
 bnn.train_model()
