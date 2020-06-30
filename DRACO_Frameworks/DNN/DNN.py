@@ -445,6 +445,7 @@ class DNN():
         configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
         configs["bestEpoch"] = len(self.model_history["acc"])
+        configs["restoreFitDir"] = self.data.get_fit_dir()
 
         # save information for binary DNN
         if self.data.binary_classification:
