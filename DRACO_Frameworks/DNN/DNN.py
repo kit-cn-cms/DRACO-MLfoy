@@ -467,7 +467,7 @@ class DNN():
         print("wrote config of input variables to {}".format(plot_file))
 
         ''' save best epoch to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/best_epoch.csv"
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"best_epoch.csv"
         file_exists = os.path.isfile(filename)
         with open(filename, "a+") as f:
             headers = ["project_name", "best_epoch"]
@@ -814,13 +814,13 @@ class DNN():
             epochs = np.arange(1,n_epochs+1,1)
 
             # plot histories
-            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
-            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            plt.plot(epochs, train_history, "b-", label = "Training", lw = 2)
+            plt.plot(epochs, val_history, "r-", label = "Validierung", lw = 2)
+            plt.legend(fontsize = 'medium')
             if privateWork:
-                plt.title("CMS private work", loc = "left", fontsize = 16)
-                plt.title("best epoch: "+str(n_epochs), loc="center", fontsize = 16)
+                plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
             else:
-                plt.title("best epoch: "+str(n_epochs), loc="left", fontsize = 16)
+                plt.title("Beste Epoche: "+str(n_epochs), loc="left", fontsize = 16)
 
 
             # add title
@@ -830,9 +830,10 @@ class DNN():
             plt.title(title, loc = "right", fontsize = 16)
 
             # make it nicer
+            german = {"acc": "Genauigkeit", "loss": "Verlust"}
             plt.grid()
-            plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            plt.xlabel("Epoche", fontsize = 16)
+            plt.ylabel(german[metric.replace("_"," ")], fontsize = 16)
             # plt.ylim(ymin=0.)
 
             # add legend
