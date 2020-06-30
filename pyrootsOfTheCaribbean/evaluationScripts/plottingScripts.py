@@ -1177,10 +1177,10 @@ class plotBinaryOutput:
         legend = setup.getLegend()
 
         # add signal entry
-        legend.AddEntry(sig_hist, "signal x {:4.0f}".format(scaleFactor), "L")
+        legend.AddEntry(sig_hist, "Signal x {:4.0f}".format(scaleFactor), "L")
 
         # add background entries
-        legend.AddEntry(bkg_hist, "background", "F")
+        legend.AddEntry(bkg_hist, "Untergrund", "F")
 
         # draw legend
         legend.Draw("same")
@@ -1191,7 +1191,8 @@ class plotBinaryOutput:
 
         # add lumi or private work label to plot
         if self.privateWork:
-            setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+            setup.printPrivateWork(canvas, plotOptions["ratio"]) #me
+            setup.printLumi(canvas, ratio = plotOptions["ratio"]) #me
         else:
             setup.printLumi(canvas, ratio = plotOptions["ratio"])
 
