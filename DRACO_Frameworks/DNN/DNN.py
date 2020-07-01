@@ -276,6 +276,17 @@ class DNN():
         number_of_input_neurons     = self.data.n_input_neurons
 
         # get all the architecture settings needed to build model
+
+        if ( 'kernel_initializer' in self.architecture): #  Jakob
+            self.kernel_initializer          = self.architecture["kernel_initializer"] #  Jakob
+        else:
+            self.kernel_initializer = 'glorot_uniform'                # keras default is glorot_uniform
+
+        if ( 'bias_initializer' in self.architecture): #  Jakob
+            self.bias_initializer          = self.architecture["bias_initializer"] #  Jakob
+        else:
+            self.bias_initializer = 'zeros'             # keras default is zeros
+
         number_of_neurons_per_layer = self.architecture["layers"]
         dropout                     = self.architecture["Dropout"]
         activation_function         = self.architecture["activation_function"]
@@ -296,6 +307,8 @@ class DNN():
         for iLayer, nNeurons in enumerate(number_of_neurons_per_layer):
             X = keras.layers.Dense(
                 units               = nNeurons,
+                kernel_initializer  = self.kernel_initializer, #  Jakob
+                bias_initializer    = self.bias_initializer, #  Jakob
                 activation          = activation_function,
                 kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
                 name                = "DenseLayer_"+str(iLayer)
@@ -310,7 +323,10 @@ class DNN():
 
         # generate output layer
         X = keras.layers.Dense(
+
             units               = self.data.n_output_neurons,
+            kernel_initializer  = self.kernel_initializer, #  Jakob
+            bias_initializer    = self.bias_initializer, #  Jakob
             activation          = output_activation.lower(),
             kernel_regularizer  = keras.regularizers.l2(l2_regularization_beta),
             name                = self.outputName
@@ -421,6 +437,8 @@ class DNN():
         configs["outputName"] = self.outputName+"/"+configs["output_activation"]
         configs = {key: configs[key] for key in configs if not "optimizer" in key}
 
+
+
         # more information saving
         configs["inputData"] = self.input_samples.input_path
         configs["eventClasses"] = self.input_samples.getClassConfig()
@@ -458,6 +476,24 @@ class DNN():
         if get_gradients:
             pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
 
+    def get_initial_weights(self):
+
+        # save weights of network
+        out_file = self.cp_path +"/initial_weights.h5"
+        self.model.save_weights(out_file)
+        print("wrote initial weights to "+str(out_file))
+
+    def get_epochs_trained(self):
+        out_file = self.cp_path +"/train_stats.json"
+        data = {'trainedEpochs' : str(len(self.trained_model.history["loss"])),
+                'kernel_initializer'   : self.kernel_initializer,     # Jakob
+                'bias_initializer'   : self.bias_initializer,     # Jakob
+                'roc_auc'               : self.roc_auc_score,            # Jakob
+
+        }
+        with open(out_file, 'w') as jf:
+            json.dump(data, jf, indent = 2, separators = (",", ": "))
+        print('wrote train stats to ' + str(out_file))
 
     def eval_model(self):
         ''' evaluate trained model '''
