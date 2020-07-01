@@ -141,7 +141,7 @@ if options.doPlots():
             printROC    = options.doPrintROC(),
             nbins       = 20, #me
             bin_range   = bin_range,
-            name        = "Ausgabewert #mu", #me
+            name        = "ANN Ausgabewert #mu", #me
             sigScale    = options.getSignalScale())
 
         if options.isAdversary():
