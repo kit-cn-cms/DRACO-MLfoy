@@ -65,9 +65,7 @@ bnn.build_model(options.getNetConfig())
 
 # set custom weight initialization
 if options.doCustomInitialization():
-    bnn.custom_initialization(min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
-                            OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
-                            use_default_post_mean = False, use_default_post_std = False)
+    bnn.custom_initialization(post_mean=0., post_mean_std=0.1, untransformed_post_std_mean=-3., untransformed_post_std_std=0.1, use_default_post_mean = False, use_default_post_std = False)    
 
 # perform the training
 bnn.train_model()
@@ -99,7 +97,7 @@ if options.doPlots():
             printROC    = options.doPrintROC(),
             nbins       = 20, #me
             bin_range   = bin_range,
-            name        = "BNN Vorhersage #mu", #me
+            name        = "BNN Ausgabewert #mu", #me
             sigScale    = options.getSignalScale())
         
        

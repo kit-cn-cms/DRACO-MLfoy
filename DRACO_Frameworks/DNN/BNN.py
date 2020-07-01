@@ -35,6 +35,7 @@ import pandas as pd
 
 # Limit gpu usage
 import tensorflow as tf
+import tensorflow.compat.v1 as tf1
 import tensorflow_probability as tfp
 import tensorflow_probability.python.distributions as tfd
 
@@ -337,7 +338,7 @@ class BNN():
                 kl_use_exact        = False,
                 use_bias            = self.use_bias,
                 activation          = activation_function,
-                name                = "DenseLayer_"+str(iLayer)
+                name                = "DenseVariational_"+str(iLayer)
                 )(X)
 
             # add dropout percentage to layer if activated
@@ -400,9 +401,18 @@ class BNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
-    def custom_initialization(self, min_post_mean=-1., max_post_mean=1., untransformed_min_post_std=-4., untransformed_max_post_std=-2.,
-                              OL_min_post_mean=-0.2, OL_max_post_mean=0.2, OL_untransformed_min_post_std=-4., OL_untransformed_max_post_std=-2., 
-                              use_default_post_mean = False, use_default_post_std = False):
+    def make_variables(self, num_param, initializer):
+        sess = tf.compat.v1.keras.backend.get_session()
+        variables = (tf.Variable(initializer(shape=[1, num_param], dtype=tf.float32)))
+        init_g = tf.compat.v1.global_variables_initializer()
+        init_l = tf.compat.v1.local_variables_initializer()
+        sess.run(init_g)
+        sess.run(init_l)
+        return variables
+
+    def custom_initialization(self, post_mean=0., post_mean_std=0.1, untransformed_post_std_mean=-3., untransformed_post_std_std=0.1, use_default_post_mean = False, use_default_post_std = False):
+        sess = tf.compat.v1.keras.backend.get_session()
+        
         first_layer = True
         for num_layer in range(len(self.architecture["layers"])):
             if first_layer:
@@ -417,16 +427,15 @@ class BNN():
                 num_param = num_neurons_previous_layer * self.architecture["layers"][num_layer]
 
             if use_default_post_mean: initialize_posterior_weights = self.model.layers[num_layer+1].get_weights()[0][:num_param]
-            else: initialize_posterior_weights = np.random.uniform(low=min_post_mean, high=max_post_mean, size=(1,num_param))
+            else: initialize_posterior_weights = self.make_variables(num_param, tf1.initializers.random_normal(mean=post_mean, stddev=post_mean_std)).eval(session=sess)
             
             if use_default_post_std: initialize_posterior_std = self.model.layers[num_layer+1].get_weights()[0][num_param:]
-            else: initialize_posterior_std = np.random.uniform(low=untransformed_min_post_std, high=untransformed_max_post_std, size=(1,num_param))
+            else: initialize_posterior_std =  self.make_variables(num_param, tf1.initializers.random_normal(mean=untransformed_post_std_mean, stddev=untransformed_post_std_std)).eval(session=sess)
 
             initialize_combined = np.append(initialize_posterior_weights, initialize_posterior_std)
-            #Since Prior is set to untrainable in V5 --> initial weights not changed --> reuse self.model.layers[num_layer+1].get_weights()[1]
-            initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  science in self.model.layers for inputlayer is counted as 0
+            initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  since in self.model.layers for inputlayer is counted as 0
             self.model.layers[num_layer+1].set_weights(initialize)  
-
+        
         #Initialize Output Layer (OL)
         if self.use_bias:
             num_param = (self.architecture["layers"][num_layer]+1) * self.data.n_output_neurons
@@ -434,11 +443,10 @@ class BNN():
             num_param = self.architecture["layers"][num_layer] * self.data.n_output_neurons
 
         if use_default_post_mean: initialize_OL_posterior_weights = self.model.layers[num_layer+2].get_weights()[0][:num_param]
-        
-        else: initialize_OL_posterior_weights = np.random.uniform(low=OL_min_post_mean, high=OL_max_post_mean, size=(1,num_param))
+        else: initialize_OL_posterior_weights = self.make_variables(num_param, tf1.initializers.random_normal(mean=post_mean, stddev=post_mean_std)).eval(session=sess)
 
         if use_default_post_std: initialize_OL_posterior_std = self.model.layers[num_layer+2].get_weights()[0][num_param:]
-        else: initialize_OL_posterior_std = np.random.uniform(low=OL_untransformed_min_post_std, high=OL_untransformed_max_post_std, size=(1,num_param))
+        else: initialize_OL_posterior_std =  self.make_variables(num_param, tf1.initializers.random_normal(mean=untransformed_post_std_mean, stddev=untransformed_post_std_std)).eval(session=sess)
         
         initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
         initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
