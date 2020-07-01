@@ -807,6 +807,8 @@ class DNN():
         for metric in metrics:
             plt.clf()
             # get history of train and validation scores
+            plt.rc('xtick',labelsize=14)
+            plt.rc('ytick',labelsize=14)
             train_history = self.model_history[metric]
             val_history = self.model_history["val_"+metric]
 
@@ -816,7 +818,6 @@ class DNN():
             # plot histories
             plt.plot(epochs, train_history, "b-", label = "Training", lw = 2)
             plt.plot(epochs, val_history, "r-", label = "Validierung", lw = 2)
-            plt.legend(fontsize = 'medium')
             if privateWork:
                 plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
             else:
@@ -831,13 +832,14 @@ class DNN():
 
             # make it nicer
             german = {"acc": "Genauigkeit", "loss": "Verlust"}
-            plt.grid()
+            # plt.grid()
             plt.xlabel("Epoche", fontsize = 16)
             plt.ylabel(german[metric.replace("_"," ")], fontsize = 16)
             # plt.ylim(ymin=0.)
 
             # add legend
-            plt.legend()
+            plt.legend(fontsize=14)
+            plt.tight_layout()
 
             # save
             out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
