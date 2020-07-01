@@ -469,7 +469,7 @@ class BNN():
             sample_weight       = self.data.get_train_weights(),
             )
 
-    def eval_model(self):
+    def eval_model(self, iterations=100):
 
         # evaluate test dataset
         self.model_eval = self.model.evaluate(
@@ -480,7 +480,7 @@ class BNN():
         self.model_history = self.trained_model.history
 
         # save predicitons
-        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=100)
+        self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=iterations)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
@@ -567,6 +567,7 @@ class BNN():
         configs["evalSelection"] = self.oddSel
         configs["netConfig"] = self.netConfig
         configs["bestEpoch"] = len(self.model_history["acc"])
+        configs["restoreFitDir"] = self.data.get_fit_dir()
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -588,7 +589,7 @@ class BNN():
         print("wrote config of input variables to {}".format(plot_file))
 
         ''' save best epoch to csv file'''
-        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"/best_epoch.csv"
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"best_epoch.csv"
         file_exists = os.path.isfile(filename)
         with open(filename, "a+") as f:
             headers = ["project_name", "best_epoch"]
@@ -666,7 +667,7 @@ class BNN():
             data                = self.data,
             test_predictions    = self.model_prediction_vector_std,
             train_predictions   = None, # self.model_train_prediction_std,
-            nbins               = 20,
+            nbins               = 20, #me
             bin_range           = [0.,np.amax(self.model_prediction_vector_std)],
             event_category      = self.category_label,
             plotdir             = self.save_path,
@@ -677,22 +678,28 @@ class BNN():
 
         bkg_std_hist, sig_std_hist = binaryOutput_std.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = "BNN Standardabweichung #sigma")
 
-        self.plot_2D_hist_std_over_mean(bin_range=[50,50])
-        self.plot_varied_histogram()
+        self.plot_2D_hist_std_over_mean(privateWork = privateWork, bin_range=[50,50])
+        self.plot_varied_histogram(privateWork = privateWork)
 
-    def plot_2D_hist_std_over_mean(self, bin_range=[40,40]):
+    def plot_2D_hist_std_over_mean(self, privateWork=False, bin_range=[40,40]):
         from matplotlib.colors import LogNorm
+        plt.rc('xtick',labelsize=14)
+        plt.rc('ytick',labelsize=14)
         plt.hist2d(self.model_prediction_vector, self.model_prediction_vector_std, bins=bin_range, cmin=1, norm=LogNorm())
-        plt.colorbar()
-        plt.xlabel("$\mu$", fontsize = 16)
-        plt.ylabel("$\sigma$", fontsize = 16)
+        cb = plt.colorbar()
+        cb.ax.tick_params(labelsize=14)
+        plt.xlabel("BNN Ausgabewert $\mu$", fontsize = 16)
+        plt.ylabel("BNN Standardabweichung $\sigma$", fontsize = 16)
+        if privateWork:
+            plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
+        plt.tight_layout()
         plt.savefig(self.save_path+"/sigma_over_mu.png")
         print "sigma_over_mu.png was created"
         plt.savefig(self.save_path+"/sigma_over_mu.pdf")
         print "sigma_over_mu.pdf was created"
         plt.close()
 
-    def plot_varied_histogram(self):
+    def plot_varied_histogram(self, privateWork=False):
         sig_preds, sig_preds_std, bkg_preds, bkg_preds_std = [], [], [], []
         for i in range(len(self.data.get_test_labels())):
             if self.data.get_test_labels()[i]==1:
@@ -703,14 +710,21 @@ class BNN():
                 bkg_preds_std.append(self.model_prediction_vector_std[i])
             else:
                 print "--wrong event--"
-        plt.hist(sig_preds, bins=15, range=(0,1), histtype='step', density=True, label="ttH", color="b")
-        plt.hist(np.array(sig_preds)+1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="b")
-        plt.hist(np.array(sig_preds)-1.*np.array(sig_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="b")
-        plt.hist(bkg_preds, bins=15, range=(0,1), histtype='step', density=True, label="bkg", color="r")
-        plt.hist(np.array(bkg_preds)+1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=('--'), color="r")
-        plt.hist(np.array(bkg_preds)-1.*np.array(bkg_preds_std), bins=15, range=(0,1), histtype='step', density=True, linestyle=(':'), color="r")
-        plt.xlabel("$\mu$", fontsize = 16)
-        plt.legend()
+
+        plt.rc('xtick',labelsize=14)
+        plt.rc('ytick',labelsize=14)
+        plt.hist(sig_preds, bins=20, range=(0,1), histtype='step', density=True, label="ttH", color="b") #me
+        plt.hist(np.array(sig_preds)+1.*np.array(sig_preds_std), bins=20, range=(0,1), histtype='step', density=True, linestyle=('--'), color="b") #me
+        plt.hist(np.array(sig_preds)-1.*np.array(sig_preds_std), bins=20, range=(0,1), histtype='step', density=True, linestyle=(':'), color="b") #me
+        plt.hist(bkg_preds, bins=20, range=(0,1), histtype='step', density=True, label="bkg", color="r") #me
+        plt.hist(np.array(bkg_preds)+1.*np.array(bkg_preds_std), bins=20, range=(0,1), histtype='step', density=True, linestyle=('--'), color="r") #me
+        plt.hist(np.array(bkg_preds)-1.*np.array(bkg_preds_std), bins=20, range=(0,1), histtype='step', density=True, linestyle=(':'), color="r") #me
+        plt.xlabel("BNN Ausgabewert $\mu$", fontsize = 16)
+        plt.legend(fontsize=14)
+        if privateWork:
+            plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
+        plt.tight_layout()
+
         plt.savefig(self.save_path+"/varied_discr.png")
         print "varied_discr.png was created"
         plt.savefig(self.save_path+"/varied_discr.pdf")
@@ -727,6 +741,9 @@ class BNN():
         # loop over metrics and generate matplotlib plot
         for metric in metrics:
             plt.clf()
+            plt.rc('xtick',labelsize=14)
+            plt.rc('ytick',labelsize=14)
+            
             # get history of train and validation scores
             train_history = self.model_history[metric]
             val_history = self.model_history["val_"+metric]
@@ -735,13 +752,12 @@ class BNN():
             epochs = np.arange(1,n_epochs+1,1)
 
             # plot histories
-            plt.plot(epochs, train_history, "b-", label = "train", lw = 2)
-            plt.plot(epochs, val_history, "r-", label = "validation", lw = 2)
+            plt.plot(epochs, train_history, "b-", label = "Training", lw = 2)
+            plt.plot(epochs, val_history, "r-", label = "Validierung", lw = 2)
             if privateWork:
-                plt.title("CMS private work", loc = "left", fontsize = 16)
-                plt.title("best epoch: "+str(n_epochs), loc="center", fontsize = 16)
+                plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
             else:
-                plt.title("best epoch: "+str(n_epochs), loc="left", fontsize = 16)
+                plt.title("Beste Epoche: "+str(n_epochs), loc="left", fontsize = 16)
 
 
 
@@ -752,13 +768,15 @@ class BNN():
             plt.title(title, loc = "right", fontsize = 16)
 
             # make it nicer
-            plt.grid()
-            plt.xlabel("epoch", fontsize = 16)
-            plt.ylabel(metric.replace("_"," "), fontsize = 16)
+            german = {"acc": "Genauigkeit", "loss": "Verlust", "neg log likelihood": "negative Log-Likelihood"}
+            #plt.grid()
+            plt.xlabel("Epoche", fontsize = 16)
+            plt.ylabel(german[metric.replace("_"," ")], fontsize = 16)
             #plt.ylim(ymin=0.)
 
             # add legend
-            plt.legend()
+            plt.legend(fontsize=14)
+            plt.tight_layout()
 
             # save
             out_path = self.save_path + "/model_history_"+str(metric)+".pdf"
@@ -775,10 +793,12 @@ class BNN():
         epochs = np.arange(1,n_epochs+1,1)
 
         # plot histories
-        plt.plot(epochs, train_history_KLD, "b-", label = "train", lw = 2)
-        plt.plot(epochs, val_history_KLD, "r-", label = "validation", lw = 2)
+        plt.rc('xtick',labelsize=16)
+        plt.rc('ytick',labelsize=16)
+        plt.plot(epochs, train_history_KLD, "b-", label = "Training", lw = 2)
+        plt.plot(epochs, val_history_KLD, "r-", label = "Validierung", lw = 2)
         if privateWork:
-            plt.title("CMS private work", loc = "left", fontsize = 16)
+            plt.title(r"\textbf{CMS private work}", loc = "left", fontsize = 14)
 
         # add title
         title = self.category_label
@@ -787,13 +807,14 @@ class BNN():
         plt.title(title, loc = "right", fontsize = 16)
 
         # make it nicer
-        plt.grid()
-        plt.xlabel("epoch", fontsize = 16)
-        plt.ylabel("KLD", fontsize = 16)
+        #plt.grid()
+        plt.xlabel("Epoche", fontsize = 16)
+        plt.ylabel("KL", fontsize = 16)
         #plt.ylim(ymin=0.)
 
         # add legend
-        plt.legend()
+        plt.legend(fontsize=14)
+        plt.tight_layout()
 
         # save
         out_path = self.save_path + "/model_history_"+"KLD"+".pdf"
