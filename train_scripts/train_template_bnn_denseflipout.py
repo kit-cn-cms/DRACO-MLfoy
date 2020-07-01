@@ -30,7 +30,7 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight())
+input_samples.addSample(options.getDefaultName("tthf") , label = "tthf" , normalization_weight = options.getNomWeight())
 #input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight()) #me
 #input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
@@ -59,8 +59,7 @@ bnn = BNN_DP.BNN_Flipout(
     qt_transformed_variables = options.doQTNormVariables(),
     restore_fit_dir = options.getRestoreFitDir(),
     sys_variation   = False,
-    gen_vars        = False,
-    debugs = options.getDebug()) #debug
+    gen_vars        = False) 
 
 # build BNN model
 bnn.build_model(options.getNetConfig())
@@ -93,9 +92,9 @@ if options.doPlots():
             log         = options.doLogPlots(),
             privateWork = options.isPrivateWork(),
             printROC    = options.doPrintROC(),
-            nbins       = 45, #me
+            nbins       = 20, #me
             bin_range   = bin_range,
-            name        = options.getName(),
+            name        = "BNN Ausgabewert #mu", #me
             sigScale    = options.getSignalScale())
         
        
