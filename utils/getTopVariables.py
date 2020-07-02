@@ -15,14 +15,15 @@ import matplotlib.pyplot as plt #me
 
 import numpy as np
 import optparse
+import pylab
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy/workdir -i training_ANN/QT_ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy/workdir/test_2 -p -t first_layer ge4j_ge3t
-#      python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy/workdir -i 16-04-2020/BNN_training_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy/workdir/variable_ranking_04-05-2020 -p -t first_layer ge4j_ge3t
+#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i training_ANN/ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_ANN -p --std -v -t first_layer ge4j_ge3t
+#      python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i 16-04-2020/BNN_training_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_04-05-2020 -p -t first_layer ge4j_ge3t
 
 usage = "python getTopVariables.py [options] [jtCategories]"
 parser = optparse.OptionParser(usage=usage)
@@ -35,6 +36,8 @@ parser.add_option("-o","--output",dest="outdir",default="./",
     help = "path to output directory e.g. for plots or variable sets")
 parser.add_option("--filename",dest="filename",default="",
     help = "filename") #me
+parser.add_option("--std",dest="no_std",default=True,action="store_false",
+    help = "set for deactivating plot of std") #me
 parser.add_option("-p","--plot",dest="plot",default=False,action="store_true",
     help = "generate plots of variable rankings")
 parser.add_option("--nplot",dest="nplot",default=30,type=int,
@@ -161,12 +164,18 @@ if not opts.count:
                     val.append(i)
                     var.append(v)
                     mean.append(m)
-                    if len(rankings) == 1: 
-                        std.append(variables_std[v][0])
-                    else: 
-                        std.append(np.std(variables[v]))
+                    # if len(rankings) == 1: 
+                    #     std.append(variables_std[v][0])
+                    # else: 
+                    #     std.append(np.std(variables[v]))
                     print(v,m)
-                    if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
+                    if opts.no_std is False:
+                        if mean[-1] > maxvalue: maxvalue = mean[-1]
+                    else:
+                        if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
+                
+                min_value = mean[len(mean)-opts.nplot] 
+                    
 
             else:           
                 # collect variables and their relative importance
@@ -184,6 +193,7 @@ if not opts.count:
                 for v in variables: mean_dict[v] = np.median(variables[v])
 
                 # generate lists sorted by mean variable importance
+                var_latex = []
                 var = []
                 val = []
                 mean = []
@@ -193,12 +203,19 @@ if not opts.count:
                 for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
                     i += 1
                     val.append(i)
+                    var_latex.append("$\mathrm{"+v.replace("_", "\_")+"}$")
                     var.append(v)
                     mean.append(m)
                     std.append( np.std(variables[v]) )
                     print(v,m)
-                    if mean[-1]+std[-1] > maxvalue: 
-                        maxvalue = mean[-1]+std[-1]
+                    if opts.no_std is False:
+                        if mean[-1] > maxvalue: 
+                            maxvalue = mean[-1]
+                        min_value = mean[0] 
+                    else: 
+                        if mean[-1]+std[-1] > maxvalue: 
+                            maxvalue = mean[-1]+std[-1]
+                min_value = mean[len(mean)-opts.nplot] 
 
 
             sorted_variables[jtcat] = var
@@ -208,23 +225,38 @@ if not opts.count:
                     mean = mean[-opts.nplot :]
                     val = val[-opts.nplot :]
                     std = std[-opts.nplot :]
+                    var_latex = var_latex[-opts.nplot :]
                     var = var[-opts.nplot :]
 
-                nvariables = len(var)
-                plt.figure(figsize = [10,nvariables/4.5])
-                plt.errorbar(mean, val, xerr = std, fmt = "o")
-                plt.xlim([0.,1.1*maxvalue])
-                plt.grid()
-                plt.yticks(val, var)
-                plt.title(jtcat)
-                plt.xlabel("mean of sum of input weights (in percent)")
+
+                nvariables = len(var_latex)
+                plt.rc('xtick',labelsize=13)
+                plt.rc('ytick',labelsize=13)
+                pylab.rcParams['ytick.major.pad']='15'
+                plt.figure(figsize = [10,nvariables/3.5])
+                
+                
+                if opts.no_std is False:
+                    plt.plot(mean, val, "o")
+                else:
+                    plt.errorbar(mean, val, xerr = std, fmt = "o")
+
+                
+                plt.xlim([min_value*0.97,1.03*maxvalue])
+                
+                #plt.grid()
+                plt.yticks(val, var_latex)
+                plt.xlabel("mittlere Summe der Eingangsgewichte (in Prozent)", fontsize=14)
+                #plt.xlabel("mean of sum of input weights (in percent)")
+                plt.title(r"$\mathrm{\mathbf{CMS\ private\ work}}$", loc = "left", fontsize=14)
+                plt.title(r"$\geq$ 4 jets, $\geq$ 3b - tags", loc = "right", fontsize=14)
                 plt.tight_layout()
                 outfile = opts.outdir+"/"+opts.filename+opts.weight_type+"_weight_sums.pdf"
-                plt.savefig(outfile)
+                plt.savefig(outfile, bbox_inches='tight')
                 plt.clf() 
                 print("saved plot to {}".format(outfile))
 
-                # comparison of the top 15 variables
+                # comparison of the top nplot variables
                 filename = opts.outdir+"/top_"+ str(opts.nplot)+ "_variables.csv"
                 file_exists = os.path.isfile(filename)
                 with open(filename, "a+") as f:
