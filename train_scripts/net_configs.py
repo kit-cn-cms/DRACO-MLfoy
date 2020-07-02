@@ -66,7 +66,7 @@ def default_mean_field_normal_fn(
 
   loc_scale_fn = default_loc_scale_fn(
       is_singular=is_singular,
-      non_trainable_transformed_std=None,
+      non_trainable_transformed_std=non_trainable_transformed_std,
       loc_initializer=loc_initializer,
       untransformed_scale_initializer=untransformed_scale_initializer,
       loc_regularizer=loc_regularizer,
@@ -84,7 +84,7 @@ def default_mean_field_normal_fn(
     return independent_lib.Independent(
         dist, reinterpreted_batch_ndims=batch_ndims)
   return _fn
-  
+
 config_dict = {}
 
 config_dict["example_config"] = {
