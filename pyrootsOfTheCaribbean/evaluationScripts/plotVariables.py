@@ -164,8 +164,9 @@ class variablePlotter:
                 plot_name = cat_dir + "/{}.pdf".format(variable)
                 plot_name = plot_name.replace("[","_").replace("]","")
 
-                plot_name_transformed = cat_dir + "/{}".format(variable) + "_transformed.pdf"
-                plot_name_transformed = plot_name_transformed.replace("[","_").replace("]","")
+                if self.options["qt_transformed_variables"]:
+                    plot_name_transformed = cat_dir + "/{}".format(variable) + "_transformed.pdf"
+                    plot_name_transformed = plot_name_transformed.replace("[","_").replace("]","")
 
                 # generate plot
                 histInfo = self.histVariable(
@@ -359,7 +360,7 @@ class variablePlotter:
             else:
                 ## a) peform a new fit on the data OR
                 if self.options["restore_fit_dir"] is None:
-                    qt = QuantileTransformer(n_quantiles=1000, output_distribution='normal')
+                    qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
                     fit_values = qt.fit(X)
                     
                     # save fit information in a .pck file
