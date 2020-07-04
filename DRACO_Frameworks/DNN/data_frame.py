@@ -349,7 +349,7 @@ class DataFrame(object):
         if qt_transformed_variables:
             ## a) peform a new fit on the data OR
             if self.restore_fit_dir is None:
-                qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+                qt = QuantileTransformer(n_quantiles=1000, random_state=42, subsample= 10000, output_distribution='normal')
                 fit_values = qt.fit(df[train_variables])
 
                 # save fit information in a .pck file
