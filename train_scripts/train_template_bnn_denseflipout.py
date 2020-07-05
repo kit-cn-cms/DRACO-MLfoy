@@ -18,8 +18,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-# import class for DNN training
-#import DRACO_Frameworks.DNN.DNN as DNN
+# import class for BNN training with DenseFlipout Layer
 import DRACO_Frameworks.DNN.BNN_DenseFlipout as BNN_DP
 import DRACO_Frameworks.DNN.data_frame as df
 
@@ -31,8 +30,6 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH"), label = "ttH", normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("tthf") , label = "tthf" , normalization_weight = options.getNomWeight())
-#input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight()) #me
-#input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight())
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight())
 
