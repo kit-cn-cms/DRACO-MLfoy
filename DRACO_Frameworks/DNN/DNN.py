@@ -7,6 +7,8 @@ import math
 from array import array
 import ROOT
 import csv
+import datetime
+import time
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -241,10 +243,17 @@ class DNN():
         self.model.summary()
 
         # evaluate test dataset with keras model
+        start_eval = time.time()
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels()) 
+        end_eval = time.time()
+        self.eval_duration = round(end_eval-start_eval)
 
         # save predictions  with keras model
+        start_pred = time.time()
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        end_pred = time.time()
+        self.pred_duration = round(end_pred-start_pred)
+
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True)) 
         
         # save predicted classes with argmax  with keras model
@@ -260,7 +269,7 @@ class DNN():
             
         #print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
-        return self.model_prediction_vector, self.event_classes, self.data.get_test_labels() #me
+        return self.model_prediction_vector, self.event_classes, self.data.get_test_labels(), self.eval_duration, self.pred_duration, self.model_eval #me
 
     def predict_event_query(self, query ):
         events = self.data.get_full_df().query( query )
@@ -373,6 +382,7 @@ class DNN():
                 verbose         = 1)]
 
         # train main net
+        start_train = time.time()
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
@@ -382,6 +392,8 @@ class DNN():
             callbacks           = callbacks,
             validation_split    = 0.25,
             sample_weight       = self.data.get_train_weights())
+        end_train = time.time()
+        self.train_duration = round(end_train - start_train)
 
     def save_model(self, argv, execute_dir, netConfigName, get_gradients = True):
         ''' save the trained model '''
@@ -484,17 +496,23 @@ class DNN():
 
     def eval_model(self):
         ''' evaluate trained model '''
-
         # evaluate test dataset
+        start_eval = time.time()
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
+        end_eval = time.time()
+        self.eval_duration = round(end_eval - start_eval)
 
         # save history of eval metrics
         self.model_history = self.trained_model.history
 
         # save predicitons
+        start_pred = time.time()
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        end_pred = time.time()
+        self.pred_duration = round(end_pred - start_pred)
+
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
         
         #figure out ranges
@@ -512,6 +530,18 @@ class DNN():
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
         
+        ''' save duration to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"duration.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "train_duration (hh:mm:ss)", "eval_duration (hh:mm:ss)", "total_pred_duration (hh:mm:ss)", "mean_pred_duration (hh:mm:ss/npreds)"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "train_duration (hh:mm:ss)": datetime.timedelta(seconds = self.train_duration), "eval_duration (hh:mm:ss)": datetime.timedelta(seconds =self.eval_duration), 
+                                 "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/1.)})
+            print("saved duration to "+str(filename))
+
         ''' save roc_auc_score to csv file'''
         filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
         file_exists = os.path.isfile(filename)
@@ -526,9 +556,30 @@ class DNN():
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
+            dict_eval_metrics = {}
             print("model test loss: {}".format(self.model_eval[0]))
+            dict_eval_metrics["model_test_loss"] = self.model_eval[0]
+            
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+                dict_eval_metrics["model_test_"+str(metric)] = self.model_eval[im+1]
+
+            import collections
+            dict_eval_metrics = collections.OrderedDict(sorted(dict_eval_metrics.items()))
+
+            ''' save eval metrics to csv file'''
+            filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"eval_metrics.csv"
+            file_exists = os.path.isfile(filename)
+            with open(filename, "a+") as f:
+                headers = np.concatenate((["project_name"], dict_eval_metrics.keys()))
+                csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                if not file_exists:
+                    csv_writer.writeheader()
+                
+                row = {"project_name": self.save_path.split("/")[-1]}
+                row.update(dict_eval_metrics)
+                csv_writer.writerow(row)
+                print("saved eval metrics to "+str(filename))
 
     def get_ranges(self):
         if not self.data.binary_classification:
