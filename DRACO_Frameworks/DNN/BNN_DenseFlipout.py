@@ -478,8 +478,7 @@ class BNN_Flipout():
         end_train = time.time()
         self.train_duration = round(end_train - start_train)
     
-    #debug
-    def eval_model(self, iterations=5):
+    def eval_model(self, iterations=100):
         # evaluate test dataset
         start_eval = time.time()
         self.model_eval = self.model.evaluate(
@@ -760,6 +759,35 @@ class BNN_Flipout():
 
         self.plot_2D_hist_std_over_mean(privateWork = privateWork, bin_range=[50,50])
         self.plot_varied_histogram(privateWork = privateWork)
+
+        ''' save percentage/number of events with a smaller std than a specific value to csv file'''
+        sorted_std = sorted(self.model_prediction_vector_std) 
+        conditions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+        dict_nevents_with_specific_std = {}
+
+        for condition in conditions:
+            max_index = max([i for i, j in enumerate(sorted_std) if j <= condition] or [-1]) 
+            if max_index is -1:
+                continue
+            dict_nevents_with_specific_std["<=" + str(condition) + " (ratio)"] = float(len(sorted_std[:max_index+1]))/ len(sorted_std)
+            dict_nevents_with_specific_std["<=" + str(condition)] = len(sorted_std[:max_index+1])
+        
+        import collections
+        dict_nevents_with_specific_std = collections.OrderedDict(sorted(dict_nevents_with_specific_std.items()))
+
+
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"std.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = np.concatenate((["project_name"],dict_nevents_with_specific_std.keys()))
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            
+            row = {"project_name": self.save_path.split("/")[-1]}
+            row.update(dict_nevents_with_specific_std)
+            csv_writer.writerow(row)
+            print("saved std to "+str(filename))
 
     def plot_2D_hist_std_over_mean(self, privateWork=False, bin_range=[40,40]):
         from matplotlib.colors import LogNorm
