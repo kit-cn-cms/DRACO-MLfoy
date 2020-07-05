@@ -22,8 +22,8 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i training_ANN/ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_ANN -p --std -v -t first_layer ge4j_ge3t
-#      python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i 16-04-2020/BNN_training_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_04-05-2020 -p -t first_layer ge4j_ge3t
+#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i training_ANN/ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_ANN -p --nplot 25 --nvset 25 --std -v -t first_layer ge4j_ge3t
+#     python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i 16-04-2020/BNN_training_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_04-05-2020 --std -p -t first_layer ge4j_ge3t
 
 usage = "python getTopVariables.py [options] [jtCategories]"
 parser = optparse.OptionParser(usage=usage)
@@ -174,7 +174,10 @@ if not opts.count:
                     else:
                         if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
                 
-                min_value = mean[len(mean)-opts.nplot] 
+                if opts.nplot is not str(-1):
+                    min_value = mean[len(mean)-opts.nplot] 
+                else:
+                    min_value = mean[0] 
                     
 
             else:           
@@ -215,8 +218,11 @@ if not opts.count:
                     else: 
                         if mean[-1]+std[-1] > maxvalue: 
                             maxvalue = mean[-1]+std[-1]
-                min_value = mean[len(mean)-opts.nplot] 
-
+                
+                if opts.nplot != -1:
+                    min_value = mean[len(mean)-opts.nplot] 
+                else:
+                    min_value = mean[0] 
 
             sorted_variables[jtcat] = var
 
@@ -232,7 +238,7 @@ if not opts.count:
                 nvariables = len(var_latex)
                 plt.rc('xtick',labelsize=13)
                 plt.rc('ytick',labelsize=13)
-                pylab.rcParams['ytick.major.pad']='15'
+                pylab.rcParams['ytick.major.pad']='10'
                 plt.figure(figsize = [10,nvariables/3.5])
                 
                 
@@ -241,12 +247,11 @@ if not opts.count:
                 else:
                     plt.errorbar(mean, val, xerr = std, fmt = "o")
 
-                
-                plt.xlim([min_value*0.97,1.03*maxvalue])
+                plt.xlim([min_value/1.03,1.03*maxvalue])
                 
                 #plt.grid()
                 plt.yticks(val, var_latex)
-                plt.xlabel("mittlere Summe der Eingangsgewichte (in Prozent)", fontsize=14)
+                plt.xlabel("Mittelwert der Summe der Eingangsgewichte (in Prozent)", fontsize=14)
                 #plt.xlabel("mean of sum of input weights (in percent)")
                 plt.title(r"$\mathrm{\mathbf{CMS\ private\ work}}$", loc = "left", fontsize=14)
                 plt.title(r"$\geq$ 4 jets, $\geq$ 3b - tags", loc = "right", fontsize=14)
