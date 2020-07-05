@@ -10,6 +10,8 @@ import tqdm
 import matplotlib.pyplot as plt
 from functools import partial, update_wrapper
 import csv
+import datetime
+import time
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -240,17 +242,68 @@ class BNN():
         self.model.summary()
 
         # evaluate test dataset with keras model
+        start_eval = time.time()
         self.model_eval = self.model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
+        end_eval = time.time()
+        self.eval_duration = round(end_eval-start_eval)
 
         # save predictions
+        start_pred = time.time()
         self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=n_iterations)
+        end_pred = time.time()
+        self.pred_duration = round(end_pred-start_pred)
         #self.plot_event_output_distribution(save_dir=inputDirectory, preds=self.test_preds, n_events=len(self.test_preds), n_hist_bins=15)
         
+        dict_eval_metrics = {}
+        dict_eval_metrics["model_test_loss"] = self.model_eval[0]
+        for im, metric in enumerate(self.eval_metrics):
+            dict_eval_metrics["model_test_"+str(metric)] = self.model_eval[im+1]
+        
+        import collections
+        dict_eval_metrics = collections.OrderedDict(sorted(dict_eval_metrics.items()))
+
+        ''' save eval metrics to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"eval_metrics.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = np.concatenate((["project_name"], dict_eval_metrics.keys()))
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            
+            row = {"project_name": inputDirectory.split("workdir/")[-1]+"_loaded"}
+            row.update(dict_eval_metrics)
+            csv_writer.writerow(row)
+            print("saved eval metrics to "+str(filename))
+
+        ''' save eval duration loaded model to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"eval_duration_loaded_model.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "eval_duration (hh:mm:ss)", "total_pred_duration (hh:mm:ss)", "mean_pred_duration (hh:mm:ss/npreds)"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = self.eval_duration),
+                                 "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/float(n_iterations))})
+            print("saved eval duration loaded model to "+str(filename))
+
         # print evaluations  with keras model
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector)
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
+        ''' save roc_auc_score to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "roc_auc_score"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "roc_auc_score": self.roc_auc_score})
+            print("saved roc_auc_score to "+str(filename))
+            
         return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
 
     # make plots of the output distribution for one single event
@@ -466,6 +519,7 @@ class BNN():
                 verbose         = 1)]
 
         # train main net
+        start_train = time.time()
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
@@ -476,23 +530,42 @@ class BNN():
             validation_split    = 0.25,
             sample_weight       = self.data.get_train_weights(),
             )
+        end_train = time.time()
+        self.train_duration = round(end_train - start_train)
 
     def eval_model(self, iterations=100):
-
         # evaluate test dataset
+        start_eval = time.time()
         self.model_eval = self.model.evaluate(
             self.data.get_test_data(as_matrix = True),
             self.data.get_test_labels())
+        end_eval = time.time()
+        self.eval_duration = round(end_eval - start_eval)
 
         # save history of eval metrics
         self.model_history = self.trained_model.history
 
         # save predicitons
+        start_pred = time.time()
         self.model_prediction_vector, self.model_prediction_vector_std, self.test_preds = self.bnn_calc_mean_std(n_samples=iterations)
+        end_pred = time.time()
+        self.pred_duration = round(end_pred - start_pred)
 
         # print evaluations
         from sklearn.metrics import roc_auc_score
         self.roc_auc_score = roc_auc_score(self.data.get_test_labels(), self.model_prediction_vector) 
+
+        ''' save duration to csv file'''
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"duration.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = ["project_name", "train_duration (hh:mm:ss)", "eval_duration (hh:mm:ss)", "total_pred_duration (hh:mm:ss)", "mean_pred_duration (hh:mm:ss/npreds)"]
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            csv_writer.writerow({"project_name": self.save_path.split("/")[-1], "train_duration (hh:mm:ss)": datetime.timedelta(seconds = self.train_duration), "eval_duration (hh:mm:ss)": datetime.timedelta(seconds =self.eval_duration), 
+                                 "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/float(iterations))})
+            print("saved duration to "+str(filename))
 
         ''' save roc_auc_score to csv file'''
         filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"roc_auc_score.csv"
@@ -508,9 +581,29 @@ class BNN():
         print("\nROC-AUC score: {}".format(self.roc_auc_score))
 
         if self.eval_metrics:
+            dict_eval_metrics = {}
             print("model test loss: {}".format(self.model_eval[0]))
+            dict_eval_metrics["model_test_loss"] = self.model_eval[0]
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+                dict_eval_metrics["model_test_"+str(metric)] = self.model_eval[im+1]
+
+            import collections
+            dict_eval_metrics = collections.OrderedDict(sorted(dict_eval_metrics.items()))
+
+            ''' save eval metrics to csv file'''
+            filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"eval_metrics.csv"
+            file_exists = os.path.isfile(filename)
+            with open(filename, "a+") as f:
+                headers = np.concatenate((["project_name"], dict_eval_metrics.keys()))
+                csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+                if not file_exists:
+                    csv_writer.writeheader()
+                
+                row = {"project_name": self.save_path.split("/")[-1]}
+                row.update(dict_eval_metrics)
+                csv_writer.writerow(row)
+                print("saved eval metrics to "+str(filename))
 
         # return self.model_prediction_vector, self.model_prediction_vector_std
 
@@ -688,6 +781,35 @@ class BNN():
 
         self.plot_2D_hist_std_over_mean(privateWork = privateWork, bin_range=[50,50])
         self.plot_varied_histogram(privateWork = privateWork)
+
+        ''' save percentage/number of events with a smaller std than a specific value to csv file'''
+        sorted_std = sorted(self.model_prediction_vector_std) 
+        conditions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+        dict_nevents_with_specific_std = {}
+
+        for condition in conditions:
+            max_index = max([i for i, j in enumerate(sorted_std) if j <= condition] or [-1]) 
+            if max_index is -1:
+                continue
+            dict_nevents_with_specific_std["<=" + str(condition) + " (ratio)"] = float(len(sorted_std[:max_index+1]))/ len(sorted_std)
+            dict_nevents_with_specific_std["<=" + str(condition)] = len(sorted_std[:max_index+1])
+        
+        import collections
+        dict_nevents_with_specific_std = collections.OrderedDict(sorted(dict_nevents_with_specific_std.items()))
+
+
+        filename = self.save_path.replace(self.save_path.split("/")[-1], "")+"std.csv"
+        file_exists = os.path.isfile(filename)
+        with open(filename, "a+") as f:
+            headers = np.concatenate((["project_name"],dict_nevents_with_specific_std.keys()))
+            csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+            if not file_exists:
+                csv_writer.writeheader()
+            
+            row = {"project_name": self.save_path.split("/")[-1]}
+            row.update(dict_nevents_with_specific_std)
+            csv_writer.writerow(row)
+            print("saved std to "+str(filename))
 
     def plot_2D_hist_std_over_mean(self, privateWork=False, bin_range=[40,40]):
         from matplotlib.colors import LogNorm
