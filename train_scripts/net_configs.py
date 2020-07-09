@@ -13,6 +13,12 @@ from tensorflow_probability.python.distributions import deterministic as determi
 from tensorflow_probability.python.distributions import independent as independent_lib
 from tensorflow_probability.python.distributions import normal as normal_lib
 from tensorflow.python.keras.utils import generic_utils  # pylint: disable=g-direct-tensorflow-import
+from functools import partial, update_wrapper
+
+def wrapped_partial(func, *args, **kwargs):
+        partial_func = partial(func, *args, **kwargs)
+        update_wrapper(partial_func, func)
+        return partial_func
 
 def default_loc_scale_fn(
     is_singular=False,
@@ -85,6 +91,28 @@ def default_mean_field_normal_fn(
         dist, reinterpreted_batch_ndims=batch_ndims)
   return _fn
 
+def default_multivariate_normal_fn(dtype, shape, name, trainable,
+                                   add_variable_fn, scale=1):
+  """Creates multivariate standard `Normal` distribution.
+  Args:
+    dtype: Type of parameter's event.
+    shape: Python `list`-like representing the parameter's event shape.
+    name: Python `str` name prepended to any created (or existing)
+      `tf.Variable`s.
+    trainable: Python `bool` indicating all created `tf.Variable`s should be
+      added to the graph collection `GraphKeys.TRAINABLE_VARIABLES`.
+    add_variable_fn: `tf.get_variable`-like `callable` used to create (or
+      access existing) `tf.Variable`s.
+  Returns:
+    Multivariate standard `Normal` distribution.
+  """
+  del name, trainable, add_variable_fn   # unused
+  dist = normal_lib.Normal(
+      loc=tf.zeros(shape, dtype), scale=dtype.as_numpy_dtype(scale))
+  batch_ndims = tf.size(dist.batch_shape_tensor())
+  return independent_lib.Independent(
+      dist, reinterpreted_batch_ndims=batch_ndims)
+      
 config_dict = {}
 
 config_dict["example_config"] = {
@@ -407,14 +435,12 @@ config_dict["BNN_Flipout_default"] = {
         "activity_regularizer":     None, 
         "trainable":                True,
         "kernel_posterior_fn":      tfp.layers.util.default_mean_field_normal_fn(),
-        "kernel_prior_fn":          tfp.layers.default_multivariate_normal_fn,
+        "kernel_prior_fn":          wrapped_partial(default_multivariate_normal_fn, scale=3),
         "bias_posterior_fn":        tfp.layers.util.default_mean_field_normal_fn(is_singular=True), 
         "bias_prior_fn":            None, 
         "seed":                     None, 
 }
 
-
-#std_kernel_prior und std_bias_prior = 1 mit der Konfiguration
 config_dict["BNN_Flipout_modified_V1"] = {
         "layers":                   [50],
         #"loss_function":            "neg_log_likelihood",
@@ -430,8 +456,29 @@ config_dict["BNN_Flipout_modified_V1"] = {
         "activity_regularizer":     None, 
         "trainable":                True,
         "kernel_posterior_fn":      tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=np.log(np.exp(1)-1), stddev=0.)), #mean is np.ln(np.exp(1)-1) so that after softplus transformation scale around 1.
-        "kernel_prior_fn":          default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=1.0),
+        "kernel_prior_fn":          default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=3.0),
         "bias_posterior_fn":        tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=np.log(np.exp(1)-1), stddev=0.)), 
-        "bias_prior_fn":            default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=1.0), 
+        "bias_prior_fn":            default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=3.0), 
+        "seed":                     None, 
+}
+
+config_dict["BNN_Flipout_modified_V3"] = {
+        "layers":                   [50],
+        #"loss_function":            "neg_log_likelihood",
+        "Dropout":                  0,
+        #"L1_Norm":                  0,
+        #"L2_Norm":                  1e-5,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(learning_rate=1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "sigmoid",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        "activity_regularizer":     None, 
+        "trainable":                True,
+        "kernel_posterior_fn":      tfp.layers.util.default_mean_field_normal_fn(), 
+        "kernel_prior_fn":          wrapped_partial(default_multivariate_normal_fn, scale=3),
+        "bias_posterior_fn":        tfp.layers.util.default_mean_field_normal_fn(), 
+        "bias_prior_fn":            wrapped_partial(default_multivariate_normal_fn, scale=3),
         "seed":                     None, 
 }
