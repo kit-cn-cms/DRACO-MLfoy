@@ -250,6 +250,20 @@ config_dict["binary_crossentropy_Adam_modified"] = {
         "earlystopping_epochs":      100,
 }
 
+config_dict["binary_crossentropy_Adam_modified_100"] = {
+        "layers":                   [100],
+        "loss_function":            "binary_crossentropy",
+        "Dropout":                  0.,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-4,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(learning_rate=1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "Sigmoid",
+        "earlystopping_percentage":  0.02,
+        "earlystopping_epochs":      100,
+}
+
 config_dict["ttbb_reco_v2"] = {
         "layers":                   [100,100],
         "loss_function":            "binary_crossentropy",
@@ -401,7 +415,7 @@ config_dict["BNN_Flipout_default"] = {
 
 
 #std_kernel_prior und std_bias_prior = 1 mit der Konfiguration
-config_dict["BNN_v17"] = {
+config_dict["BNN_Flipout_modified_V1"] = {
         "layers":                   [50],
         #"loss_function":            "neg_log_likelihood",
         "Dropout":                  0,
@@ -415,9 +429,9 @@ config_dict["BNN_v17"] = {
         "earlystopping_epochs":     100,
         "activity_regularizer":     None, 
         "trainable":                True,
-        "kernel_posterior_fn":      tfp.layers.util.default_mean_field_normal_fn(),
-        "kernel_prior_fn":          default_mean_field_normal_fn(non_trainable_transformed_std=1.),
-        "bias_posterior_fn":        tfp.layers.util.default_mean_field_normal_fn(), 
-        "bias_prior_fn":            default_mean_field_normal_fn(non_trainable_transformed_std=1.), 
+        "kernel_posterior_fn":      tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=np.log(np.exp(1)-1), stddev=0.)), #mean is np.ln(np.exp(1)-1) so that after softplus transformation scale around 1.
+        "kernel_prior_fn":          default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=1.0),
+        "bias_posterior_fn":        tfp.layers.util.default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), untransformed_scale_initializer=tf1.initializers.random_normal(mean=np.log(np.exp(1)-1), stddev=0.)), 
+        "bias_prior_fn":            default_mean_field_normal_fn(loc_initializer=tf1.initializers.random_normal(mean=0.,stddev=0.), non_trainable_transformed_std=1.0), 
         "seed":                     None, 
 }
