@@ -196,6 +196,19 @@ config_dict["Legacy_ttH_2017"] = {
         "earlystopping_epochs":     100,
         }
 
+config_dict["multiANN"] = {
+        "layers":                   [150],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.,
+        "L2_Norm":                  1e-4,
+        "batch_size":               2000,
+        "optimizer":                optimizers.Adam(1e-3),
+        "activation_function":      "relu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.02,
+        "earlystopping_epochs":     100,
+        }
+
 config_dict["ttH_2017_baseline"] = {
         "layers":                   [100,100,100],
         "loss_function":            "categorical_crossentropy",
