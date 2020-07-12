@@ -352,29 +352,29 @@ nn8_pred, nn8_pred_std = ann_calc_mean_std(model=dnn_100, input_dir=input_dir_8,
 
 
 # Comparison BNN Var
-plot_correlation_two_NNs(nn2_pred, nn1_pred, nn2_pred_std, nn1_pred_std, "BNN (DV)", "BNN (DV, T)", output_dir, "BNN_Var_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn2_pred, nn1_pred, nn2_pred_std, nn1_pred_std, "BNN" + r'$^{\rm{DV}}_{1 \times 50}$', "BNN" + r'$^{\rm{DV,T}}_{1 \times 50}$', output_dir, "BNN_Var_comparison", privateWork=options.isPrivateWork())
 
 # Comparison BNN Flipout
-plot_correlation_two_NNs(nn4_pred, nn3_pred, nn4_pred_std, nn3_pred_std, "BNN (DF)", "BNN (DF, T)", output_dir, "BNN_Flip_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn4_pred, nn3_pred, nn4_pred_std, nn3_pred_std, "BNN"+r'$^{\rm{DF}}_{1 \times 50}$', "BNN" + r'$^{\rm{DF,T}}_{1 \times 50}$', output_dir, "BNN_Flip_comparison", privateWork=options.isPrivateWork())
 
 # Comparison ANN 150
-plot_correlation_two_NNs(nn6_pred, nn5_pred, nn6_pred_std, nn5_pred_std, "ANN (150N)", "ANN (150N, T)", output_dir, "ANN_150N_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn6_pred, nn5_pred, nn6_pred_std, nn5_pred_std, "ANN"+ r'$^{\rm{D}}_{1 \times 150}$', "ANN"+ r'$^{\rm{D,T}}_{1 \times 150}$', output_dir, "ANN_150N_comparison", privateWork=options.isPrivateWork())
 
 # Comparison ANN 100
-plot_correlation_two_NNs(nn8_pred, nn7_pred, nn8_pred_std, nn7_pred_std, "ANN (100N)", "ANN (100N, T)", output_dir, "ANN_100N_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn8_pred, nn7_pred, nn8_pred_std, nn7_pred_std, "ANN"+r'$^{\rm{D}}_{1 \times 100}$', "ANN" +r'$^{\rm{D,T}}_{1 \times 100}$', output_dir, "ANN_100N_comparison", privateWork=options.isPrivateWork())
 
 # Comparison ANN 150 und BNN Var (mit und ohne QT)
-plot_correlation_two_NNs(nn6_pred, nn2_pred, nn6_pred_std, nn2_pred_std, "ANN (150N)", "BNN (DV, T)", output_dir, "ANN_150N_BNN_comparison", privateWork=options.isPrivateWork())
-plot_correlation_two_NNs(nn5_pred, nn1_pred, nn5_pred_std, nn1_pred_std, "ANN (150N, T)", "BNN (DV, T)", output_dir, "QT_ANN_150N_BNN_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn6_pred, nn2_pred, nn6_pred_std, nn2_pred_std, "ANN"+ r'$^{\rm{D}}_{1 \times 150}$', "BNN" + r'$^{\rm{DV}}_{1 \times 50}$', output_dir, "ANN_150N_BNN_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn5_pred, nn1_pred, nn5_pred_std, nn1_pred_std, "ANN"+ r'$^{\rm{D,T}}_{1 \times 150}$', "BNN" + r'$^{\rm{DV,T}}_{1 \times 50}$', output_dir, "QT_ANN_150N_QT_BNN_comparison", privateWork=options.isPrivateWork())
 
 # Comparison ANN 100 und BNN Flip (mit und ohne QT)
-plot_correlation_two_NNs(nn8_pred, nn4_pred, nn8_pred_std, nn4_pred_std, "ANN", "BNN", output_dir, "ANN_100N_BNN_comparison", privateWork=options.isPrivateWork())
-plot_correlation_two_NNs(nn7_pred, nn3_pred, nn7_pred_std, nn3_pred_std, "ANN (100N, T)", "BNN (DF, T)", output_dir, "QT_ANN_100N_BNN_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn8_pred, nn4_pred, nn8_pred_std, nn4_pred_std, "ANN"+r'$^{\rm{D}}_{1 \times 100}$', "BNN"+r'$^{\rm{DF}}_{1 \times 50}$', output_dir, "ANN_100N_BNN_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn7_pred, nn3_pred, nn7_pred_std, nn3_pred_std, "ANN" +r'$^{\rm{D,T}}_{1 \times 100}$', "BNN" + r'$^{\rm{DF,T}}_{1 \times 50}$', output_dir, "QT_ANN_100N_QT_BNN_comparison", privateWork=options.isPrivateWork())
 
 # Comparison BNN Var und BNN flip (mit und ohne QT)
-plot_correlation_two_NNs(nn2_pred, nn4_pred, nn2_pred_std, nn4_pred_std, "BNN (DV)", "BNN (DF)", output_dir, "Var_Flip_comparison", privateWork=options.isPrivateWork())
-plot_correlation_two_NNs(nn1_pred, nn3_pred, nn1_pred_std, nn3_pred_std, "BNN (DV, T)", "BNN (DF, T)", output_dir, "QT_Var_Flip_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn2_pred, nn4_pred, nn2_pred_std, nn4_pred_std, "BNN" + r'$^{\rm{DV}}_{1 \times 50}$', "BNN"+r'$^{\rm{DF}}_{1 \times 50}$', output_dir, "Var_Flip_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn1_pred, nn3_pred, nn1_pred_std, nn3_pred_std, "BNN" + r'$^{\rm{DV,T}}_{1 \times 50}$', "BNN" + r'$^{\rm{DF,T}}_{1 \times 50}$', output_dir, "QT_Var_Flip_comparison", privateWork=options.isPrivateWork())
 
 # Comparison ANN 150 und ANN 100 (mit und ohne QT)
-plot_correlation_two_NNs(nn6_pred, nn8_pred, nn6_pred_std, nn8_pred_std, "ANN (150N)", "ANN (100N)", output_dir, "ANN_150N_ANN_100N_comparison", privateWork=options.isPrivateWork())
-plot_correlation_two_NNs(nn5_pred, nn7_pred, nn5_pred_std, nn7_pred_std, "ANN (150N, T)", "ANN (100, T)", output_dir, "QT_ANN_150N_QT_ANN_100N_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn6_pred, nn8_pred, nn6_pred_std, nn8_pred_std, "ANN"+ r'$^{\rm{D}}_{1 \times 150}$', "ANN"+r'$^{\rm{D}}_{1 \times 100}$', output_dir, "ANN_150N_ANN_100N_comparison", privateWork=options.isPrivateWork())
+plot_correlation_two_NNs(nn5_pred, nn7_pred, nn5_pred_std, nn7_pred_std, "ANN"+ r'$^{\rm{D,T}}_{1 \times 150}$', "ANN" +r'$^{\rm{D,T}}_{1 \times 100}$', output_dir, "QT_ANN_150N_QT_ANN_100N_comparison", privateWork=options.isPrivateWork())
