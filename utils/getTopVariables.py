@@ -22,7 +22,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 basedir = os.path.dirname(filedir)
 sys.path.append(basedir)
 
-#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i training_ANN/ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_ANN -p --nplot 25 --nvset 25 --std -v -t first_layer ge4j_ge3t
+#cmd: python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i training_ANN_v2/ANN_training_*_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_ANN_v2 -p --nplot 25 --nvset 25 --std -v -t first_layer ge4j_ge3t
 #     python getTopVariables.py -w /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir -i 16-04-2020/BNN_training_JTSTRING -o /home/ycung/Desktop/DRACO-MLfoy_thesis/workdir/variable_ranking_04-05-2020 --std -p -t first_layer ge4j_ge3t
 
 usage = "python getTopVariables.py [options] [jtCategories]"
@@ -263,13 +263,16 @@ if not opts.count:
 
                 # comparison of the top nplot variables
                 filename = opts.outdir+"/top_"+ str(opts.nplot)+ "_variables.csv"
-                file_exists = os.path.isfile(filename)
-                with open(filename, "a+") as f:
+                with open(filename, "w") as f:
                     headers = ["project_name", "variable_name"]
                     csv_writer = DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
-                    if not file_exists: csv_writer.writeheader()
-                    for x in var[-opts.nplot :]:
-                        csv_writer.writerow({"project_name": opts.filename, "variable_name": x})
+                    csv_writer.writeheader()
+                    if not opts.nplot == -1:
+                        for x in var[-opts.nplot :]:
+                            csv_writer.writerow({"project_name": opts.filename, "variable_name": x})
+                    else:
+                        for x in var:
+                            csv_writer.writerow({"project_name": opts.filename, "variable_name": x})
                 print("saved top_"+ str(opts.nplot)+ "_variables.csv to" + str(filename))
 
 
