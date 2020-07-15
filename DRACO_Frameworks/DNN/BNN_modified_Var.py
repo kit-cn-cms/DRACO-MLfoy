@@ -467,6 +467,8 @@ class BNN():
         sess = tf.compat.v1.keras.backend.get_session()
         
         first_layer = True
+        all_initializations = []
+        
         for num_layer in range(len(self.architecture["layers"])):
             if first_layer:
                 num_neurons_previous_layer = self.data.n_input_neurons
@@ -486,9 +488,9 @@ class BNN():
             else: initialize_posterior_std =  self.make_variables(num_param, tf1.initializers.random_normal(mean=untransformed_post_std_mean, stddev=untransformed_post_std_std)).eval(session=sess)
 
             initialize_combined = np.append(initialize_posterior_weights, initialize_posterior_std)
-            initialize = [initialize_combined, self.model.layers[num_layer+1].get_weights()[1]]  #num_layer+1  since in self.model.layers for inputlayer is counted as 0
-            self.model.layers[num_layer+1].set_weights(initialize)  
-        
+            all_initializations.append(initialize_combined) #for posterior
+            all_initializations.append(self.model.layers[num_layer+1].get_weights()[1]) #for prior  #num_layer+1  since in self.model.layers for inputlayer is counted as 0
+
         #Initialize Output Layer (OL)
         if self.use_bias:
             num_param = (self.architecture["layers"][num_layer]+1) * self.data.n_output_neurons
@@ -502,8 +504,10 @@ class BNN():
         else: initialize_OL_posterior_std =  self.make_variables(num_param, tf1.initializers.random_normal(mean=untransformed_post_std_mean, stddev=untransformed_post_std_std)).eval(session=sess)
         
         initialize_OL_combined = np.append(initialize_OL_posterior_weights, initialize_OL_posterior_std)
-        initialize_OL = [initialize_OL_combined, self.model.layers[num_layer+2].get_weights()[1]]
-        self.model.layers[num_layer+2].set_weights(initialize_OL) 
+        all_initializations.append(initialize_OL_combined) #for posterior
+        all_initializations.append(self.model.layers[num_layer+2].get_weights()[1]) #for prior
+
+        self.model.set_weights(all_initializations)
 
     def train_model(self):
         ''' train the model '''
@@ -707,7 +711,7 @@ class BNN():
     def get_input_weights(self):
         ''' get the weights of the input layer and sort input variables by weight sum '''
 
-         # get weights
+        # get weights
         first_layer = self.model.layers[1]
         weights = first_layer.get_weights()[0]
 
