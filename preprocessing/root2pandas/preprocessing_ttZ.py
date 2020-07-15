@@ -73,36 +73,37 @@ ttH_categories = root2pandas.EventCategories()
 ttH_categories.addCategory("ttH",       selection = None)
 ttH_categories.addCategory("ttHbb",     selection = "(matchH_ft_RecoHiggs_matchable > 0.)")
 ttH_categories.addCategory("ttHnonbb",  selection = "(matchH_ft_RecoHiggs_matchable <= 0.)")
-ttH_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
-ttH_categories.addCategory("ttXbb",     selection = "(matchH_ft_RecoHiggs_matchable > 0.)")
-ttH_categories.addCategory("ttXnonbb",  selection = "(matchH_ft_RecoHiggs_matchable <= 0.)")
+#ttH_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+#ttH_categories.addCategory("ttXbb",     selection = "(matchH_ft_RecoHiggs_matchable > 0.)")
+#ttH_categories.addCategory("ttXnonbb",  selection = "(matchH_ft_RecoHiggs_matchable <= 0.)")
 
 ttZ_categories = root2pandas.EventCategories()
 ttZ_categories.addCategory("ttZ",       selection = None)
 ttZ_categories.addCategory("ttZbb",     selection = "(matchZ_ft_RecoZ_matchable > 0.)")
 ttZ_categories.addCategory("ttZnonbb",  selection = "(matchZ_ft_RecoZ_matchable <= 0)")
-ttZ_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
-ttZ_categories.addCategory("ttXbb",     selection = "(matchZ_ft_RecoZ_matchable > 0.)")
-ttZ_categories.addCategory("ttXnonbb",  selection = "(matchZ_ft_RecoZ_matchable <= 0.)")
+#ttZ_categories.addCategory("ttX",       selection = "(matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+#ttZ_categories.addCategory("ttXbb",     selection = "(matchZ_ft_RecoZ_matchable > 0.)")
+#ttZ_categories.addCategory("ttXnonbb",  selection = "(matchZ_ft_RecoZ_matchable <= 0.)")
 
 ttbar_categories = root2pandas.EventCategories()
-ttbar_categories.addCategory("ttbar",   selection = None)
-ttbar_categories.addCategory("ttnonbb", selection = "(GenEvt_I_TTPlusBB == 0)")
+#ttbar_categories.addCategory("ttbar",   selection = None)
+#ttbar_categories.addCategory("ttnonbb", selection = "(GenEvt_I_TTPlusBB == 0)")
 ttbar_categories.addCategory("ttlf",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
 ttbar_categories.addCategory("ttcc",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
-ttbar_categories.addCategory("ttbb5FS", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+#ttbar_categories.addCategory("ttbb5FS", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
 
 ttbb_categories = root2pandas.EventCategories()
 ttbb_categories.addCategory("ttbb",     selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
 
 
 
-ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/ntuples_ttZ_v2/"
+ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/ntuples_ttZ_v2"
+ftpath = "/nfs/dust/cms/user/larmbrus/ttZAnalysis/ntuples/2017"
 friendTrees = {
-    "dnnZ": "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/reconstruction/reco_Z_boson/",
-    "dnnH": "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/reconstruction/reco_H_boson/",
-    "matchZ": "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/matched_Z_bosons/",
-    "matchH": "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/matched_H_bosons/",
+    "dnnZ": ftpath+"/reconstructed_Z_v1",
+    "dnnH": ftpath+"/reconstructed_H_v1",
+    "matchZ": ftpath+"/matchZ_v1",
+    "matchH": ftpath+"/matchH_v1",
     }
 
 # initialize dataset class
@@ -123,14 +124,14 @@ dataset.addBaseSelection(base_selection)
 # add samples to dataset
 dataset.addSample(
     sampleName  = "ttH",
-    ntuples     = ntuplespath+"/ttH*/*nominal*.root",
+    ntuples     = ntuplespath+"/ttHTobb*/*nominal*.root",
     categories  = ttH_categories,
     selections   = "(Evt_Odd == 1)",
     lumiWeight  = 41.5,
     )
 dataset.addSample(
     sampleName  = "ttZ",
-    ntuples     = ntuplespath+"/TTZ*/*nominal*.root",
+    ntuples     = ntuplespath+"/TTZToQQ*/*nominal*.root",
     categories  = ttZ_categories,
     selections   = "(Evt_Odd == 1)",
     lumiWeight  = 41.5,
