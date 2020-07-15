@@ -9,7 +9,7 @@ import numpy as np
 def GetPlotColor( cls ):
     color_dict = {
         "ttZ":          ROOT.kCyan,
-        "ttH":          ROOT.kRed+1,
+        "ttH":          ROOT.kBlue+1,
         "ttHbb":        ROOT.kRed+1,
         "ttHnonbb":     ROOT.kYellow-7,
         "ttlf":         ROOT.kRed-7,
@@ -200,10 +200,11 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     t = canvas.GetTopMargin()
 
     # add category label
-    latex.DrawLatex(l,1.-t+0.01, catLabel)
+    latex.DrawLatex(l+0.47,1.-t+0.01, catLabel)
+
 
     if privateWork:
-        latex.DrawLatex(l, 1.-t+0.04, "CMS private work")
+        latex.DrawLatex(l,1.-t+0.01, "CMS private work")
 
     # add ROC score if activated
     if ROC:
