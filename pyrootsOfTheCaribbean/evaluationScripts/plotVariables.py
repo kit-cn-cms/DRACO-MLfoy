@@ -85,7 +85,7 @@ class variablePlotter:
         self.samples        = {}
         self.ordered_stack  = []
         self.categories     = []
-        self.variableconfig = pandas.read_csv(basedir+'/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv')
+        self.variableconfig = pandas.read_csv(basedir+'/pyrootsOfTheCaribbean/plot_configs/modified_plot_config.csv')
         self.variableconfig.set_index('variablename',inplace=True)
 
         # handle options
@@ -106,7 +106,7 @@ class variablePlotter:
 
         if self.options["privateWork"]:
             self.options["scaleSignal"]=-1
-            self.options["lumiScale"]=1
+            # self.options["lumiScale"]=1
 
 
     def addSample(self, **kwargs):
@@ -249,7 +249,7 @@ class variablePlotter:
                 bin_range   = bin_range,
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
-                ytitle      = setup.GetyTitle(self.options["privateWork"]),
+                ytitle      = "Ereignisse",
                 filled      = sample.filled)
             bkgHists.append(hist)
             bkgLabels.append(sample.sampleName)
@@ -292,7 +292,7 @@ class variablePlotter:
                 bin_range   = bin_range,
                 color       = sample.plotColor,
                 xtitle      = cat+"_"+sample.sampleName+"_"+variable,
-                ytitle      = setup.GetyTitle(),
+                ytitle      = "Ereignisse",
                 filled      = sample.filled)
 
             hist.Scale(scaleFactor)
@@ -309,7 +309,7 @@ class variablePlotter:
 
         # setup legend
         legend = setup.getLegend()
-        # add signal entriesa
+        # add signal entries
         for iSig in range(len(sigHists)):
             labelstring = sigLabels[iSig]
             if not self.options["lumiScale"] == 0.:
@@ -327,7 +327,7 @@ class variablePlotter:
         for iBkg in range(len(bkgHists)):
             legend.AddEntry(bkgHists[iBkg], bkgLabels[iBkg], "F")
 
-        # draw loegend
+        # draw legend
         legend.Draw("same")
 
         # add lumi and category to plot
@@ -360,7 +360,7 @@ class variablePlotter:
             else:
                 ## a) peform a new fit on the data OR
                 if self.options["restore_fit_dir"] is None:
-                    qt = QuantileTransformer(n_quantiles=500, output_distribution='normal')
+                    qt = QuantileTransformer(n_quantiles=1000, random_state=42, subsample=10000, output_distribution='normal')
                     fit_values = qt.fit(X)
                     
                     # save fit information in a .pck file
@@ -391,11 +391,17 @@ class variablePlotter:
             # df = pandas.DataFrame(dict([ (k,pandas.Series(v)) for k,v in X.iteritems() ]), columns = X.keys())
             # df.to_hdf(out_file, key='data', mode='w')
 
-            bins = 50
+            if variable in self.variableconfig.index:
+                bins = int(self.variableconfig.loc[variable,'numberofbins'])
+                displayname = self.variableconfig.loc[variable,'displayname']
+
+            else: 
+                bins = 50
+                displayname = variable
+            
+            logoption = "-"
             maxValue = max([max(X[key]) for key in X.keys()])
             minValue = min([min(X[key]) for key in X.keys()])
-            displayname = variable
-            logoption = "-"
 
             config_string = "{},{},{},{},{},{}\n".format(variable, minValue, maxValue, bins, logoption, displayname)
             with open("new_variable_configs.csv", "a") as f:
@@ -434,8 +440,8 @@ class variablePlotter:
                     nbins       = bins,
                     bin_range   = bin_range,
                     color       = sample.plotColor,
-                    xtitle      = cat+"_"+sample.sampleName+"_"+variable+"_TRANSFORMED_",
-                    ytitle      = setup.GetyTitle(self.options["privateWork"]),
+                    xtitle      = cat+"_"+sample.sampleName+"_"+variable,
+                    ytitle      = "Ereignisse",
                     filled      = sample.filled)
                 bkgHists.append(hist)
                 bkgLabels.append(sample.sampleName)
@@ -477,8 +483,8 @@ class variablePlotter:
                     nbins       = bins,
                     bin_range   = bin_range,
                     color       = sample.plotColor,
-                    xtitle      = cat+"_"+sample.sampleName+"_"+variable+"_TRANSFORMED_",
-                    ytitle      = setup.GetyTitle(),
+                    xtitle      = cat+"_"+sample.sampleName+"_"+variable,
+                    ytitle      = "Ereignisse",
                     filled      = sample.filled)
 
                 hist.Scale(scaleFactor)
@@ -495,7 +501,7 @@ class variablePlotter:
 
             # setup legend
             legend = setup.getLegend()
-            # add signal entriesa
+            # add signal entries
             for iSig in range(len(sigHists)):
                 labelstring = sigLabels[iSig]
                 if not self.options["lumiScale"] == 0.:
@@ -513,7 +519,7 @@ class variablePlotter:
             for iBkg in range(len(bkgHists)):
                 legend.AddEntry(bkgHists[iBkg], bkgLabels[iBkg], "F")
 
-            # draw loegend
+            # draw legend
             legend.Draw("same")
 
             # add lumi and category to plot

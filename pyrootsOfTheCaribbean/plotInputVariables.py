@@ -10,6 +10,10 @@ sys.path.append(basedir)
 
 from evaluationScripts.plotVariables import variablePlotter
 
+# TODO wrong Y-label!! 
+#cmd: python plotInputVariables.py -o plotVariables -v new_variableset_25_v2 -i /local/scratch/ssd/ycung/new_h5_files_2017_v2 --privatework -q
+#cmd: python plotInputVariables.py -o plotVariables_all -v allVariables_2017_bnn_v2 -i /local/scratch/ssd/ycung/new_h5_files_2017_v2 --privatework -q
+
 usage="usage=%prog [options] \n"
 usage+="USE: python plotInputVariables.py -i DIR -o DIR -v FILE  --ksscore --scalesignal=OPTION --lumiscale=FLOAT --ratio --ratiotitel=STR --privatework --log"
 
@@ -136,9 +140,9 @@ plotter.addSample(
 
 # add background samples
 plotter.addSample(
-    sampleName      = "tt+bb", ##me
-    sampleFile      = data_dir+"/ttbb"+naming, ##me
-    XSscaling       = 2.*35.9*0.44,
+    sampleName      = "tt+hf", ##me
+    sampleFile      = data_dir+"/tthf"+naming, ##me
+    XSscaling       = 1., #me
     plotColor       = ROOT.kRed+3)
 
 
@@ -151,20 +155,18 @@ plotter.addSample(
 plotter.addSample(
     sampleName      = "tt+cc",
     sampleFile      = data_dir+"/ttcc"+naming,
-    XSscaling       = 2.,
+    XSscaling       = 1.,
     plotColor       = ROOT.kRed+1)
 
 plotter.addSample(
     sampleName      = "tt+lf", ##light flavor (u, d, s = zusammengefasst, da alle sehr leicht --> schwer zu differenzieren)
-    XSscaling       = 2.,
+    XSscaling       = 1.,
     sampleFile      = data_dir+"/ttlf"+naming,
     plotColor       = ROOT.kRed-7)
 
 
 
 # add JT categories
-#plotter.addCategory("ge4j_ge4t")
-#plotter.addCategory("ge4j_3t")
 plotter.addCategory("ge4j_ge3t") ##me
 
 
