@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import numpy as np
@@ -166,7 +168,7 @@ class plotDiscriminators:
             # initialize canvas
             canvas = setup.drawHistsOnCanvas(
                 sigHists, bkgHists, plotOptions,
-                canvasName = node_cls+" final discriminator")
+                canvasName = node_cls+" finaler Diskriminator")
 
             # setup legend
             legend = setup.getLegend()
@@ -343,7 +345,7 @@ class plotOutputNodes:
             # initialize canvas
             canvas = setup.drawHistsOnCanvas(
                 sigHist, bkgHists, plotOptions,
-                canvasName = node_cls+" node")
+                canvasName = node_cls+" Ausgabeneuron")
 
             # setup legend
             legend = setup.getLegend()
@@ -469,12 +471,13 @@ class plotClosureTest:
                 test.SetLineWidth(1)
                 test.SetMarkerSize(2)
 
-                plotOptions = {"logscale": self.logscale}
-
+                plotOptions = {"ratio":      ratio,
+                               "logscale": self.logscale}
+                
                 # init canvas
                 canvas = setup.drawClosureTestOnCanvas(
                     train, None, test, None, plotOptions,
-                    canvasName = "{} at {} node".format(process, node_cls))
+                    canvasName = "{} am {} Ausgabeneuron".format(process, node_cls))
 
                 # setup legend
                 legend = setup.getLegend()
@@ -483,15 +486,12 @@ class plotClosureTest:
                 ks = train.KolmogorovTest(test)
                 ksvalues += "{}_AT_{}_NODE".format(process, node_cls)+", "+str(ks)+"\n"
                 # add entries
-                legend.AddEntry(train, "train {}".format(process), "F")
-                legend.AddEntry(test,  "test {} (KS = {:.3f})".format(process, ks), "L")
+                legend.AddEntry(train, "Training {}".format(process), "F")
+                legend.AddEntry(test,  "Test {} (KS = {:.3f})".format(process, ks), "L")
 
                 # draw legend
                 legend.Draw("same")
 
-                # prit private work label if activated
-                if self.privateWork:
-                    setup.printPrivateWork(canvas)
                 # add category label
                 setup.printCategoryLabel(canvas, self.event_category)
 
@@ -601,12 +601,14 @@ class plotClosureTest:
             bkg_test.SetMarkerStyle(20)
             bkg_test.SetMarkerSize(2)
 
-            plotOptions = {"logscale": self.logscale}
+            plotOptions = {
+            "ratio":      ratio,
+            "logscale": self.logscale}
 
             # init canvas
             canvas = setup.drawClosureTestOnCanvas(
                 sig_train, bkg_train, sig_test, bkg_test, plotOptions,
-                canvasName = "closure test at {} node".format(node_cls))
+                canvasName = "Closure Test am {} Ausgabeneuron".format(node_cls))
 
             # setup legend
             legend = setup.getLegend()
@@ -615,10 +617,10 @@ class plotClosureTest:
             ksSig = sig_train.KolmogorovTest(sig_test)
             ksBkg = bkg_train.KolmogorovTest(bkg_test)
             # add entries
-            legend.AddEntry(sig_train, "train {}".format("+".join(signalClass)), "F")
-            legend.AddEntry(bkg_train, "train bkg", "F")
-            legend.AddEntry(sig_test,  "test {} (KS = {:.3f})".format("+".join(signalClass),ksSig), "L")
-            legend.AddEntry(bkg_test,  "test bkg (KS = {:.3f})".format(ksBkg), "L")
+            legend.AddEntry(sig_train, "Training {}".format("+".join(signalClass)), "F")
+            legend.AddEntry(bkg_train, "Training Untergrund", "F")
+            legend.AddEntry(sig_test,  "Test {} (KS = {:.3f})".format("+".join(signalClass),ksSig), "L")
+            legend.AddEntry(bkg_test,  "Test Untergrund (KS = {:.3f})".format(ksBkg), "L")
 
             # draw legend
             legend.Draw("same")
@@ -749,8 +751,8 @@ class plotConfusionMatrix:
         cm = setup.setupConfusionMatrix(
             matrix      = self.confusion_matrix.T,
             ncls        = self.n_classes,
-            xtitle      = "predicted class",
-            ytitle      = "true class",
+            xtitle      = "Ausgegebene Klasse",
+            ytitle      = "Tats#ddot{a}chliche Klasse",
             binlabel    = self.event_classes)
 
         canvas = setup.drawConfusionMatrixOnCanvas(cm, "confusion matrix", self.event_category, self.ROCScore, privateWork = privateWork)
@@ -879,7 +881,7 @@ class plotEventYields:
         # initialize canvas
         canvas = setup.drawHistsOnCanvas(
             sigHists, bkgHists, plotOptions,
-            canvasName = "event yields per node")
+            canvasName = "Ausgegebene Ereignisse pro Ausgabeneuron")
 
         # setup legend
         legend = setup.getLegend()
@@ -900,6 +902,9 @@ class plotEventYields:
 
         # add category label
         setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
+        
+        if self.privateWork:
+            setup.printPrivateWork(canvas)
 
         out_path = self.plotdir + "/event_yields.pdf"
         setup.saveCanvas(canvas, out_path)
@@ -1348,7 +1353,7 @@ class plotttbbKS_binary:
         # draw legend
         legend.Draw("same")
 
-        # prit private work label if activated
+        # print private work label if activated
         if self.privateWork:
             setup.printPrivateWork(canvas)
         # add category label
