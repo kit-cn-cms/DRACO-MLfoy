@@ -333,6 +333,8 @@ class Dataset:
                 for ftName in self.friendTrees:
                     # get path to friend tree file
                     friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
+                    if not os.path.exists(friendtreepath):
+                        continue
                     # collect all variables that belong to this friend tree
                     friendtreevars = [v.replace(ftName+"_ft_","") for v in self.variables if v.startswith(ftName+"_ft_")]
                     # open friend tree root file
