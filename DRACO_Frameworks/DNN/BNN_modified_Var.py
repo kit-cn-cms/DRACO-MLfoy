@@ -233,7 +233,7 @@ class BNN():
         for key in config:
             self.architecture[key] = config[key]
         
-    def load_trained_model(self, inputDirectory, n_iterations=100):
+    def load_trained_model(self, inputDirectory, n_iterations=100, outputnameComparison=None):
         ''' load an already trained model '''
         checkpoint_path = inputDirectory+"/checkpoints/trained_model.h5py"
 
@@ -271,7 +271,10 @@ class BNN():
             if not file_exists:
                 csv_writer.writeheader()
             
-            row = {"project_name": inputDirectory.split("workdir/")[-1]+"_loaded"}
+            if outputnameComparison is None:
+                row = {"project_name": inputDirectory.split("workdir/")[-1]+"_loaded"}
+            else:
+                row = {"project_name": outputnameComparison.split("/")[-1]+"__"+inputDirectory.split("workdir/")[-1]}
             row.update(dict_eval_metrics)
             csv_writer.writerow(row)
             print("saved eval metrics to "+str(filename))
@@ -284,8 +287,12 @@ class BNN():
             csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
             if not file_exists:
                 csv_writer.writeheader()
-            csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = self.eval_duration),
-                                 "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/float(n_iterations))})
+            if outputnameComparison is None:
+                csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = self.eval_duration),
+                         "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/float(n_iterations))})
+            else:
+                csv_writer.writerow({"project_name": outputnameComparison.split("/")[-1]+"__"+inputDirectory.split("workdir/")[-1], "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = self.eval_duration),
+                                     "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = self.pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = self.pred_duration/float(n_iterations))})
             print("saved eval duration loaded model to "+str(filename))
 
         # print evaluations  with keras model
@@ -301,7 +308,10 @@ class BNN():
             csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
             if not file_exists:
                 csv_writer.writeheader()
-            csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "roc_auc_score": self.roc_auc_score})
+            if outputnameComparison is None:
+                csv_writer.writerow({"project_name": inputDirectory.split("workdir/")[-1]+"_loaded", "roc_auc_score": self.roc_auc_score})
+            else: 
+                csv_writer.writerow({"project_name": outputnameComparison.split("/")[-1]+"__"+inputDirectory.split("workdir/")[-1], "roc_auc_score": self.roc_auc_score})
             print("saved roc_auc_score to "+str(filename))
             
         return self.model_prediction_vector, self.model_prediction_vector_std, self.data.get_test_labels()
