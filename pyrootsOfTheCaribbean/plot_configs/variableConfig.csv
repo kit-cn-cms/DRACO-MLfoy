@@ -958,3 +958,12 @@ ttbbReco_lepTop2_Pt,0.,600.,30,-,ttbbReco_lepTop2_Pt
 ttbbReco_lepTop2_Eta,-4.,4.,30,-,ttbbReco_lepTop2_Eta
 ttbbReco_lepTop2_M,0.,1000.,30,-,ttbbReco_lepTop2_M
 ttbbReco_lepTop2_E,0.,1200.,30,-,ttbbReco_lepTop2_E
+isTagged,0,1,2,-,isTagged
+jetEnergy,30.,1000.,50,-,jetEnergy
+jetPt,30.0,400.,50,-,jetPt
+jetMass,0.,50.,50,-,jetMass
+jetEta,-2.4,2.4,50,-,jetEta
+jetCharge,-1.0,1.0,50,-,jetCharge
+deepJetValue,0.0,1.0,50,-,deepJetValue
+deepJet_CvsL,0.0,1.0,50,-,deepJet_CvsL
+deepJet_CvsB,0.0,1.0,50,-,deepJet_CvsB
