@@ -50,7 +50,7 @@ config_dict["reco_single_boson"] = {
         "Dropout":                  0.2,
         "L1_Norm":                  1e-4,
         "L2_Norm":                  1e-4,
-        "batch_size":               128,
+        "batch_size":               16,
         "optimizer":                optimizers.Adadelta(),
         "activation_function":      "leakyrelu",
         "output_activation":        "Sigmoid",
