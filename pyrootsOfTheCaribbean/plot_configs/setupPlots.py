@@ -185,7 +185,7 @@ def drawConfusionMatrixOnCanvas(matrix, canvasName, catLabel, ROC = None, ROCerr
     canvas.SetTicks(1,1)
 
     # draw histogram
-    #ROOT.gStyle.SetPalette(69)
+    ROOT.gStyle.SetPalette(71) #71 ##87 ###85 ###105
     draw_option = "colz text1"
     if ROCerr: draw_option += "e"
     matrix.DrawCopy(draw_option)
