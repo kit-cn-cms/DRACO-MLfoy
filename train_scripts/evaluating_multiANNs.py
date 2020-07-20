@@ -142,7 +142,6 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
     for j in range(n_NNs):
         print "ITERATIONS MultiANN: " + input_dir.split("workdir/")[-1]+ ": " + str(j+1) + "/" + str(n_NNs)
         preds, event_class, test_labels, eval_duration, pred_duration, model_eval = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) 
-        preds, event_class, test_labels = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) 
         for sample_name in range(len(preds[0])):
             if event_class[sample_name] not in pred_list.keys():
                 pred_list[event_class[sample_name]] = get_column(preds, sample_name)
