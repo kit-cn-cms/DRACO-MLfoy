@@ -141,7 +141,7 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
 
     for j in range(n_NNs):
         print "ITERATIONS MultiANN: " + input_dir.split("workdir/")[-1]+ ": " + str(j+1) + "/" + str(n_NNs)
-        # DEBUG preds, event_class, test_labels, eval_duration, pred_duration, model_eval = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) 
+        preds, event_class, test_labels, eval_duration, pred_duration, model_eval = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) 
         preds, event_class, test_labels = model.load_trained_model(input_dir+"_"+str(j)+"_"+options.getCategory()) 
         for sample_name in range(len(preds[0])):
             if event_class[sample_name] not in pred_list.keys():
@@ -150,9 +150,9 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
             else:
                 pred_list[event_class[sample_name]]  = np.concatenate((pred_list[event_class[sample_name]], np.reshape(get_column(preds,sample_name),(-1,1))), axis=1)
         
-        # model_eval_list.append(model_eval)
-        # total_eval_duration += eval_duration
-        # total_pred_duration += pred_duration
+        model_eval_list.append(model_eval)
+        total_eval_duration += eval_duration
+        total_pred_duration += pred_duration
 
     for i in range(len(pred_list.keys())):
         test_preds_mean.append(np.mean(pred_list[event_class[i]], axis = 1))
@@ -176,39 +176,39 @@ def multi_ann_calc_mean_std(model, input_dir, n_NNs=1):
 
     print("\nROC-AUC score: {}".format(np.mean(mean_roc_auc_score)))
 
-    # dict_eval_metrics = {}
-    # dict_eval_metrics["model_test_loss"] = np.mean(model_eval_list, axis=0)[0]
-    # for im, metric in enumerate(model.eval_metrics):
-    #     dict_eval_metrics["model_test_"+str(metric)] = np.mean(model_eval_list, axis = 0)[im+1]
+    dict_eval_metrics = {}
+    dict_eval_metrics["model_test_loss"] = np.mean(model_eval_list, axis=0)[0]
+    for im, metric in enumerate(model.eval_metrics):
+        dict_eval_metrics["model_test_"+str(metric)] = np.mean(model_eval_list, axis = 0)[im+1]
     
-    # import collections
-    # dict_eval_metrics = collections.OrderedDict(sorted(dict_eval_metrics.items()))
+    import collections
+    dict_eval_metrics = collections.OrderedDict(sorted(dict_eval_metrics.items()))
 
-    # ''' save eval metrics to csv file'''
-    # filename = basedir+"/workdir/eval_metrics.csv"
-    # file_exists = os.path.isfile(filename)
-    # with open(filename, "a+") as f:
-    #     headers = np.concatenate((["project_name"], dict_eval_metrics.keys()))
-    #     csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
-    #     if not file_exists:
-    #         csv_writer.writeheader()
+    ''' save eval metrics to csv file'''
+    filename = basedir+"/workdir/eval_metrics.csv"
+    file_exists = os.path.isfile(filename)
+    with open(filename, "a+") as f:
+        headers = np.concatenate((["project_name"], dict_eval_metrics.keys()))
+        csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+        if not file_exists:
+            csv_writer.writeheader()
         
-    #     row = {"project_name": options.getOutputDir().split("/")[-1]+"__"+input_dir.split("workdir/")[-1]}
-    #     row.update(dict_eval_metrics)
-    #     csv_writer.writerow(row)
-    #     print("saved eval metrics to "+str(filename))
+        row = {"project_name": options.getOutputDir().split("/")[-1]+"__"+input_dir.split("workdir/")[-1]}
+        row.update(dict_eval_metrics)
+        csv_writer.writerow(row)
+        print("saved eval metrics to "+str(filename))
 
-    # ''' save eval duration loaded model to csv file'''
-    # filename = basedir+"/workdir/eval_duration_loaded_model.csv"
-    # file_exists = os.path.isfile(filename)
-    # with open(filename, "a+") as f:
-    #     headers = ["project_name", "eval_duration (hh:mm:ss)", "total_pred_duration (hh:mm:ss)", "mean_pred_duration (hh:mm:ss/npreds)"]
-    #     csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
-    #     if not file_exists:
-    #         csv_writer.writeheader()
-    #     csv_writer.writerow({"project_name": options.getOutputDir().split("/")[-1]+"__"+input_dir.split("workdir/")[-1], "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = total_eval_duration),
-    #                             "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = total_pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = total_pred_duration/float(n_NNs))})
-    #     print("saved eval duration loaded model to "+str(filename))
+    ''' save eval duration loaded model to csv file'''
+    filename = basedir+"/workdir/eval_duration_loaded_model.csv"
+    file_exists = os.path.isfile(filename)
+    with open(filename, "a+") as f:
+        headers = ["project_name", "eval_duration (hh:mm:ss)", "total_pred_duration (hh:mm:ss)", "mean_pred_duration (hh:mm:ss/npreds)"]
+        csv_writer = csv.DictWriter(f,delimiter=',', lineterminator='\n',fieldnames=headers)
+        if not file_exists:
+            csv_writer.writeheader()
+        csv_writer.writerow({"project_name": options.getOutputDir().split("/")[-1]+"__"+input_dir.split("workdir/")[-1], "eval_duration (hh:mm:ss)": datetime.timedelta(seconds = total_eval_duration),
+                                "total_pred_duration (hh:mm:ss)": datetime.timedelta(seconds = total_pred_duration), "mean_pred_duration (hh:mm:ss/npreds)": datetime.timedelta(seconds = total_pred_duration/float(n_NNs))})
+        print("saved eval duration loaded model to "+str(filename))
 
     return test_preds_mean, test_preds_std, event_class
 
