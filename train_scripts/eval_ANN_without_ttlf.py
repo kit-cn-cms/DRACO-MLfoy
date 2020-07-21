@@ -214,8 +214,8 @@ n_iterations = 100
 suffix = "_without_ttlf"
 suffix_label = "ohne ttlf"
 
-input_dir_1 = work_dir+"training_ANN_150N/QT_ANN_150N_training"
-input_dir_2 = work_dir+"training_ANN_150N/ANN_150N_training"
+input_dir_1 = work_dir+"training_ANN_150N/ANN_150N_training"
+input_dir_2 = work_dir+"training_ANN_150N/QT_ANN_150N_training"
 
 nn1_pred, nn1_pred_std = ann_calc_mean_std(model=dnn, input_dir=input_dir_1, n_NNs=n_iterations, suffix=suffix)
 nn2_pred, nn2_pred_std = ann_calc_mean_std(model=dnn_qt, input_dir=input_dir_2, n_NNs=n_iterations, suffix=suffix)
