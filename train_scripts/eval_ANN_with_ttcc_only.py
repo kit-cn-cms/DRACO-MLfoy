@@ -212,7 +212,7 @@ dnn = DNN.DNN(
 
 n_iterations = 100
 suffix = "_only_ttcc"
-suffix_label = "nur ttcc"
+suffix_label = "nur " + r"$\mathregular{t\overline{t}+cc}$"
 
 input_dir_1 = work_dir+"training_ANN_150N/ANN_150N_training"
 input_dir_2 = work_dir+"training_ANN_150N/QT_ANN_150N_training"

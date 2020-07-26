@@ -325,6 +325,12 @@ dnn_qt = DNN.DNN(
 ########################################################################################################################
 
 event_classes = ["ttH", "tthf", "ttcc", "ttlf"]
+math_dict = {
+    "tthf": r"$\mathregular{t\overline{t}+hf}$",
+    "ttcc": r"$\mathregular{t\overline{t}+cc}$",
+    "ttlf": r"$\mathregular{t\overline{t}+lf}$",
+    "ttH": r"$\mathregular{t\overline{t}+H}$",
+}
 n_iterations = 100 
 
 input_dir_1 = work_dir+"training_modified_multiANNs/modified_MultiANN_training"
@@ -335,7 +341,7 @@ nn2_pred, nn2_pred_std, event_class2 = multi_ann_calc_mean_std(model=dnn_qt, inp
 
 # Comparison multiAnns (with and without QT)
 for i in event_class1:
-    plot_correlation_two_NNs(nn1_pred[event_class1.index(i)], nn2_pred[event_class1.index(i)], nn1_pred_std[event_class1.index(i)], nn2_pred_std[event_class1.index(i)], "(Multi-ANN)"+ r'$^{\rm{D}}_{1 \times 150}$', "(Multi-ANN)" +r'$^{\rm{D,T}}_{1 \times 150}$', output_dir, "MultiANN_comparison_"+i, privateWork=options.isPrivateWork(), current_class = i)
+    plot_correlation_two_NNs(nn1_pred[event_class1.index(i)], nn2_pred[event_class1.index(i)], nn1_pred_std[event_class1.index(i)], nn2_pred_std[event_class1.index(i)], "(Multi-ANN)"+ r'$^{\rm{D}}_{1 \times 150}$', "(Multi-ANN)" +r'$^{\rm{D,T}}_{1 \times 150}$', output_dir, "MultiANN_comparison_"+i, privateWork=options.isPrivateWork(), current_class = math_dict[i])
 
 
 # #compare confusion matrix calues with and without qt
