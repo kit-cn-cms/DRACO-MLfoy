@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt #me
 import numpy as np
 import optparse
 import pylab
+import csv
 
 # local imports
 filedir = os.path.dirname(os.path.realpath(__file__))
@@ -56,6 +57,12 @@ parser.add_option("--count", dest = "count", default=False, action="store_true",
     help = "for only counting the frequency of the variables in top_*.csv")
 
 (opts, args) = parser.parse_args()
+
+make_nice_labels_dict = {}
+with open("/home/ycung/Desktop/DRACO-MLfoy_thesis/utils/make_labels_nice.csv") as f:
+    reader = csv.reader(f, delimiter=',')
+    for row in reader:
+        make_nice_labels_dict[row[0]] = row[1]
 
 if not opts.count:
     inputdir = opts.workdir+"/"+opts.inputdir
@@ -153,6 +160,7 @@ if not opts.count:
                 for v in variables: mean_dict[v] = np.median(variables[v])
 
                 # generate lists sorted by mean variable importance
+                var_latex = []
                 var = []
                 val = []
                 mean = []
@@ -162,6 +170,7 @@ if not opts.count:
                 for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
                     i += 1
                     val.append(i)
+                    var_latex.append(make_nice_labels_dict[v])
                     var.append(v)
                     mean.append(m)
                     # if len(rankings) == 1: 
@@ -174,8 +183,8 @@ if not opts.count:
                     else:
                         if mean[-1]+std[-1] > maxvalue: maxvalue = mean[-1]+std[-1]
                 
-                if opts.nplot is not str(-1):
-                    min_value = mean[len(mean)-opts.nplot] 
+                if not opts.nplot == -1:
+                    min_value = mean[len(mean)-opts.nplot]
                 else:
                     min_value = mean[0] 
                     
@@ -206,7 +215,7 @@ if not opts.count:
                 for v, m in sorted(mean_dict.iteritems(), key = lambda (k, vl): (vl, k)):
                     i += 1
                     val.append(i)
-                    var_latex.append("$\mathrm{"+v.replace("_", "\_")+"}$")
+                    var_latex.append(make_nice_labels_dict[v])
                     var.append(v)
                     mean.append(m)
                     std.append( np.std(variables[v]) )
@@ -236,10 +245,10 @@ if not opts.count:
 
 
                 nvariables = len(var_latex)
-                plt.rc('xtick',labelsize=13)
-                plt.rc('ytick',labelsize=13)
+                plt.rc('xtick',labelsize=20)
+                plt.rc('ytick',labelsize=20)
                 pylab.rcParams['ytick.major.pad']='10'
-                plt.figure(figsize = [10,nvariables/3.5])
+                plt.figure(figsize = [13,nvariables/2.])
                 
                 
                 if opts.no_std is False:
@@ -251,12 +260,12 @@ if not opts.count:
                 
                 #plt.grid()
                 plt.yticks(val, var_latex)
-                plt.xlabel("Mittelwert der Summe der Eingangsgewichte (in Prozent)", fontsize=14)
+                plt.xlabel("Mittelwert der Summe der Eingangsgewichte (in Prozent)", fontsize=24)
                 #plt.xlabel("mean of sum of input weights (in percent)")
-                plt.title(r"$\mathrm{\mathbf{CMS\ private\ work}}$", loc = "left", fontsize=14)
-                plt.title(r"$\geq$ 4 jets, $\geq$ 3b - tags", loc = "right", fontsize=14)
+                plt.title(r"$\mathrm{\mathbf{CMS\ private\ work}}$", loc = "left", fontsize=24)
+                plt.title(r"$\geq$ 4 jets, $\geq$ 3b - tags", loc = "right", fontsize=24)
                 plt.tight_layout()
-                outfile = opts.outdir+"/"+opts.filename+opts.weight_type+"_weight_sums.pdf"
+                outfile = opts.outdir+"/"+opts.filename+opts.weight_type+"_weight_sums"+opts.outdir.split("variable_ranking")[1]+".pdf"
                 plt.savefig(outfile, bbox_inches='tight')
                 plt.clf() 
                 print("saved plot to {}".format(outfile))
