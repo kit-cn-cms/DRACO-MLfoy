@@ -1,4 +1,4 @@
-# cmd: python train_template_bnn_denseflipout.py -o TEST_Flipout -i /local/scratch/ssd/nshadskiy/2017_nominal -c ge4j_ge3t -v allVariables_2017_bnn -n BNN -p --printroc --binary --signal ttH -e 4000 -q
+# cmd: python train_template_bnn_denseflipout.py -o TEST_Flipout -i /local/scratch/ssd/ycung/new_h5_files_2017_v2 -c ge4j_ge3t -v new_variableset_25_v2 -n BNN_Flipout_default -p -P --binary --signal ttH -e 4000 -q
 # global imports
 # so that matplotlib can be used over ssh
 import matplotlib #me
