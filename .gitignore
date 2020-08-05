@@ -22,3 +22,4 @@ train_scripts/training_loop_script_modified_Var_V1_c.sh
 train_scripts/training_loop_script_modified_Var_V3_b.sh
 train_scripts/training_loop_script_modified_Var_V3_c.sh
 train_scripts/training_loop_script_modified_Var_V3_d.sh
+train_scripts/training_loop_script_only_kinematics_2.sh
