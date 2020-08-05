@@ -252,7 +252,11 @@ class variablePlotter:
                 ytitle      = "Ereignisse",
                 filled      = sample.filled)
             bkgHists.append(hist)
-            bkgLabels.append(sample.sampleName)
+            make_nice = {"tt+hf": "t#bar{t}+hf",
+                      "tt+lf": "t#bar{t}+lf",
+                      "tt+cc": "t#bar{t}+cc",
+                      "tt+H": "t#bar{t}+H"}
+            bkgLabels.append(make_nice[sample.sampleName])
 
         sigHists = []
         sigLabels = []
@@ -298,7 +302,7 @@ class variablePlotter:
             hist.Scale(scaleFactor)
 
             sigHists.append(hist)
-            sigLabels.append(sample.sampleName)
+            sigLabels.append(make_nice[sample.sampleName])
             sigScales.append(scaleFactor)
 
         # init canvas
@@ -360,7 +364,7 @@ class variablePlotter:
             else:
                 ## a) peform a new fit on the data OR
                 if self.options["restore_fit_dir"] is None:
-                    qt = QuantileTransformer(n_quantiles=1000, random_state=42, subsample=100000, output_distribution='normal')
+                    qt = QuantileTransformer(n_quantiles=1000, random_state=42, subsample=10000, output_distribution='normal')
                     fit_values = qt.fit(X)
                     
                     # save fit information in a .pck file
@@ -444,7 +448,11 @@ class variablePlotter:
                     ytitle      = "Ereignisse",
                     filled      = sample.filled)
                 bkgHists.append(hist)
-                bkgLabels.append(sample.sampleName)
+                make_nice = {"tt+hf": "t#bar{t}+hf",
+                      "tt+lf": "t#bar{t}+lf",
+                      "tt+cc": "t#bar{t}+cc",
+                      "tt+H": "t#bar{t}+H"}
+                bkgLabels.append(make_nice[sample.sampleName])
 
             sigHists = []
             sigLabels = []
@@ -490,7 +498,7 @@ class variablePlotter:
                 hist.Scale(scaleFactor)
 
                 sigHists.append(hist)
-                sigLabels.append(sample.sampleName)
+                sigLabels.append(make_nice[sample.sampleName])
                 sigScales.append(scaleFactor)
 
             # init canvas

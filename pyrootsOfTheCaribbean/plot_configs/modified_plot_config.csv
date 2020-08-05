@@ -1,49 +1,49 @@
 variablename,minvalue,maxvalue,numberofbins,logoption,displayname
 Evt_CSV_avg,0.15,1,50,-,#bar{CSV}
-Evt_CSV_avg_tagged,0.3,1,50,-,#bar{CSV(Tags)}
+Evt_CSV_avg_tagged,0.3,1,50,-,#bar{CSV}(Tags)
 Evt_CSV_min,0,1,50,-,CSV_{min}
 Evt_CSV_min_tagged,0.277,1,50,-,CSV_{min}(Tags)
-Evt_Deta_JetsAverage,0,3,50,-,"#bar{#Delta#eta(Jet,Jet)}"
-Evt_Deta_TaggedJetsAverage,0,3,50,-, #bar{#Delta#eta(Tags)}
-Evt_Deta_maxDetaJetJet,0,2,50,-,"#Delta#eta(#Delta#eta_{max}(Jet,Jet))"
-Evt_Deta_maxDetaJetTag,0,1.8,50,-,"#Delta#eta(#Delta#eta_{max}(Jet,Tag))"
-Evt_Deta_maxDetaTagTag,0,1.8,50,-,"#Delta#eta(#Delta#eta_{max}(Tag,Tag))"
-Evt_Dr_JetsAverage,0.5,4.0,50,-,"#bar{#DeltaR(Jet,Jet)}"
-Evt_Dr_TaggedJetsAverage,0.5,3.5,50,-,#bar{#DeltaR(Tags)}
-Evt_Dr_maxDrJets,2,5.5,50,-,"#DeltaR(#Delta#eta_{max}(Jet,Jet))"
-Evt_Dr_maxDrTaggedJets,0,5,50,-,"#DeltaR(#Delta#eta_{max}(Tag,Tag))"
-Evt_Dr_minDrJets,0.4,1.8,50,-,"#DeltaR(#DeltaR_{min}(Jet,Jet))"
-Evt_Dr_minDrLepJet,0.4,3,50,-,"#DeltaR(#DeltaR_{min}(Lep,Jet))"
-Evt_Dr_minDrLepTag,0.4,3.5,50,-,"#DeltaR(#DeltaR_{min}(Lep,Tag))"
-Evt_Dr_minDrTaggedJets,0.35,2.5,50,-,"#DeltaR(#DeltaR_{min}(Tag,Tag))"
+Evt_Deta_JetsAverage,0,3,50,-,"#bar{#Delta#eta}(Jet, Jet)"
+Evt_Deta_TaggedJetsAverage,0,3,50,-, #bar{#Delta#eta}(Tags)
+Evt_Deta_maxDetaJetTag,0,1.8,50,-,"#Delta#eta(#Delta#eta_{max}(Jet, Tag))"
+Evt_Deta_maxDetaJetJet,0,2,50,-,"#Delta#eta(#Delta#eta_{max}(Jet, Jet))"
+Evt_Deta_maxDetaTagTag,0,1.8,50,-,"#Delta#eta(#Delta#eta_{max}(Tag, Tag))"
+Evt_Dr_JetsAverage,0.5,4.0,50,-,"#bar{#Delta R}(Jet, Jet)"
+Evt_Dr_TaggedJetsAverage,0.5,3.5,50,-,#bar{#Delta R}(Tags)
+Evt_Dr_maxDrJets,2,5.5,50,-,"#Delta R(#Delta#eta_{max}(Jet, Jet))"
+Evt_Dr_maxDrTaggedJets,0,5,50,-,"#Delta R(#Delta#eta_{max}(Tag, Tag))"
+Evt_Dr_minDrJets,0.4,1.8,50,-,"#Delta R_{min}(Jet, Jet)"
+Evt_Dr_minDrLepJet,0.4,3,50,-,"#Delta R_{min}(Lep, Jet)"
+Evt_Dr_minDrLepTag,0.4,3.5,50,-,"#Delta R_{min}(Lep, Tag)"
+Evt_Dr_minDrTaggedJets,0.35,3.5,50,-,"#Delta R_{min}(Tag, Tag)"
 Evt_E_JetsAverage,40,500,50,-,Evt_E_JetsAverage
-Evt_E_TaggedJetsAverage,0,800,50,-,#bar{E(Tags)}
-Evt_Eta_JetsAverage,-2,2,50,-, #bar{#eta(Jets)}
-Evt_Eta_TaggedJetsAverage,-2,2,50,-,#bar{#eta(Tags)}
+Evt_E_TaggedJetsAverage,0,800,50,-,#bar{E}(Tags)
+Evt_Eta_JetsAverage,-2,2,50,-, #bar{#eta}(Jets)
+Evt_Eta_TaggedJetsAverage,-2,2,50,-,#bar{#eta}(Tags)
 Evt_HT,200,1700,50,x,H_{T}
-Evt_HT_jets,200,1500,50,-,H_{T}(Jets)
+Evt_HT_jets,120,1500,50,-,H_{T}(Jets) in GeV
 Evt_HT_tags,100.,1000.,50,-,H_{T}(Tags)
 Evt_JetPt_over_JetE,0,1,50,-,Evt_JetPt_over_JetE
 Evt_M2_JetsAverage,50.,600.,50,-,Evt_M2_JetsAverage
 Evt_M2_TaggedJetsAverage,40,1000,50,-,Evt_M2_TaggedJetsAverage
-Evt_M2_closestTo125TaggedJets,0,300,50,-,"(M_{2}(Tag,Tag))_{125}"
-Evt_M2_minDrJets,0,200,50,-,"M_{2}(#DeltaR_{min}(Jet,Jet))"
-Evt_M2_minDrTaggedJets,0,400,50,-,"M_{2}(#DeltaR_{min}(Tag,Tag))"
-Evt_M3,50,1000,50,-,M_{3}
+Evt_M2_closestTo125TaggedJets,0,300,50,-,"M_{2}(Tag, Tag)_{125} in GeV" 
+Evt_M2_minDrJets,0,200,50,-,"M_{2}(#Delta R_{min}(Jet, Jet))"
+Evt_M2_minDrTaggedJets,0,400,50,-,"M_{2}(#Delta R_{min}(Tag, Tag))"
+Evt_M3,50,1000,50,-,M_{3} in GeV
 Evt_MET,20,400,50,-,MET
-Evt_MET_Pt,20,400,50,-,p_{T}(MET)
+Evt_MET_Pt,20,400,50,-,p_{T}(MET) in GeV
 Evt_M_JetsAverage,5,50,50,-,Evt_M_JetsAverage
-Evt_M_TaggedJetsAverage,5.,70,50,-,#bar{M(Tags)}
-Evt_M_Total,200.,3000.,50,-,"M(Jets,Lep,MET)"
-Evt_M_minDrLepJet,0,200,50,-,"M_{2}(#DeltaR_{min}(Lep,Jet))"
-Evt_M_minDrLepTag,15.,400.,50,-,"M(#DeltaR_{min}(Lep,Tag)"
+Evt_M_TaggedJetsAverage,5.,45,50,-,#bar{M}(Tags) in GeV
+Evt_M_Total,200.,3000.,50,-,"M(Jets, Lep, MET) in GeV"
+Evt_M_minDrLepJet,0,200,50,-,"M_{2}(#Delta R_{min}(Lep, Jet))"
+Evt_M_minDrLepTag,15.,400.,50,-,"M(#Delta R_{min}(Lep, Tag) in GeV"
 Evt_Pt_JetsAverage,30,500,50,-,Evt_Pt_JetsAverage
 Evt_Pt_TaggedJetsAverage,30,600,50,-,Evt_Pt_TaggedJetsAverage
-Evt_Pt_minDrJets,0,600,50,-,"p_{T}(#DeltaR_{min}(Jet,Jet))"
-Evt_Pt_minDrTaggedJets,20,600,50,-,"p_{T}(#DeltaR_{min}(Tag,Tag))"
+Evt_Pt_minDrJets,0,600,50,-,"p_{T}(#Delta R_{min}(Jet, Jet)) in GeV"
+Evt_Pt_minDrTaggedJets,20,600,50,-,"p_{T}(#Delta R_{min}(Tag, Tag)) in GeV"
 Evt_TaggedJetPt_over_TaggedJetE,0.2,1,50,-,p_{T}(Tags)/E(Tags)
-N_BTagsM,3.5,8.5,5,-,N_BTagsM
-N_Jets,3.5,10.5,7,-,N_{Jets}
+N_BTagsM,3.5,8.5,5 ,-,N_BTagsM
+N_Jets,3.5,10.5,7 ,-,N_{Jets}
 CSV[0],0.3,1,50,x,CSV 1
 CSV[1],0.277,1,50,-,CSV 2
 CSV[2],0.277,1,50,-,CSV 3
@@ -56,19 +56,19 @@ Jet_Eta[0],-2.4,2.4,50,-,#eta(Jet 1)
 Jet_Eta[1],-2.4,2.4,50,-,#eta(Jet 2)
 Jet_Eta[2],-2.4,2.4,50,-,#eta(Jet 3)
 Jet_Eta[3],-2.4,2.4,50,-,#eta(Jet 4)
-Jet_M[0],5.,150,50,-,M(Jet 1)
-Jet_M[1],0,60,50,-,M(Jet 2)
-Jet_M[2],0,40,50,-,M(Jet 3)
-Jet_M[3],0,50,30,-,M(Jet 4)
+Jet_M[0],5.,110,50,-,M(Jet 1) in GeV
+Jet_M[1],0,60,50,-,M(Jet 2) 
+Jet_M[2],0,40,50,-,M(Jet 3) 
+Jet_M[3],0,50,30,-,M(Jet 4) 
 Jet_Phi[0],-3.14159265358979,3.14159265358979,50,-,#varphi(Jet 1)
 Jet_Phi[1],-3.14159265358979,3.14159265358979,50,-,#varphi(Jet 2)
 Jet_Phi[2],-3.14159265358979,3.14159265358979,50,-,#varphi(Jet 3)
 Jet_Phi[3],-3.14159265358979,3.14159265358979,50,-,#varphi(Jet 4)
-Jet_Pt[0],0,600,50,x,p_{T}(Jet 1)
-Jet_Pt[1],30,500,50,-,p_{T}(Jet 2)
-Jet_Pt[2],50,300,30,x,p_{T}(Jet 3)
-Jet_Pt[3],50,200,30,x,p_{T}(Jet 4)
-LooseLepton_E[0],0,600,50,-,E(Lep)
+Jet_Pt[0],30,600,50,-,p_{T}(Jet 1) in GeV
+Jet_Pt[1],30,500,50,-,p_{T}(Jet 2) in GeV
+Jet_Pt[2],30,300,30,-,p_{T}(Jet 3) in GeV
+Jet_Pt[3],30,200,30,-,p_{T}(Jet 4) in GeV
+LooseLepton_E[0],0,600,50,-,E(Lep) in GeV
 LooseLepton_Eta[0],-2.4,2.4,50,-,#eta(Lep)
 LooseLepton_Phi[0],-3.14159265358979,3.14159265358979,50,-,#varphi(Lep)
-LooseLepton_Pt[0],0,400,50,x,p_{T}(Lep)
+LooseLepton_Pt[0],0,400,50,x,p_{T}(Lep) in GeV
