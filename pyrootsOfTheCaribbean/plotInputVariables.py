@@ -10,7 +10,7 @@ sys.path.append(basedir)
 
 from evaluationScripts.plotVariables import variablePlotter
 
-# TODO wrong Y-label!! 
+#cmd: bash loop_getTopVariables.sh
 #cmd: python plotInputVariables.py -o plotVariables -v new_variableset_25_v2 -i /local/scratch/ssd/ycung/new_h5_files_2017_v2 --privatework -q
 #cmd: python plotInputVariables.py -o plotVariables_all -v allVariables_2017_bnn_v2 -i /local/scratch/ssd/ycung/new_h5_files_2017_v2 --privatework -q
 
