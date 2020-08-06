@@ -60,7 +60,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoHiggs_matchable > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoX_matchable > 0.)"
 
 base_selection = "("+base+")"
 
@@ -83,7 +83,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchHiggs_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/matchHiggs_as_X_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
 
 # add samples to dataset
 dataset.addSample(

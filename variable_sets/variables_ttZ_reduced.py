@@ -1,6 +1,6 @@
 recolist = [
-    "dnnH_ft_RecoHiggs_B1_CSV",
-    "dnnH_ft_RecoHiggs_B2_CSV",
+    "dnnH_ft_RecoHiggs_B1_btagValue",
+    "dnnH_ft_RecoHiggs_B2_btagValue",
     #"dnnH_ft_RecoHiggs_B1_Pt",
     #"dnnH_ft_RecoHiggs_B2_Pt",
     #"dnnH_ft_RecoHiggs_B1_M",
@@ -58,8 +58,8 @@ recolist = [
     "dnnH_ft_RecoHiggs_transformedDNNOutput",
 
 
-    "dnnZ_ft_RecoZ_B1_CSV",
-    "dnnZ_ft_RecoZ_B2_CSV",
+    "dnnZ_ft_RecoZ_B1_btagValue",
+    "dnnZ_ft_RecoZ_B2_btagValue",
     #"dnnZ_ft_RecoZ_B1_Pt",
     #"dnnZ_ft_RecoZ_B2_Pt",
     #"dnnZ_ft_RecoZ_B1_M",
@@ -120,18 +120,18 @@ recolist = [
     ]
 
 kinlist = [
-    'CSV[0]',
-    'CSV[1]',
-    'CSV[2]',
-    'CSV[3]',
-    #'CSV[4]',
-    #'CSV[5]',
-    'Jet_CSV[0]',
-    'Jet_CSV[1]',
-    'Jet_CSV[2]',
-    'Jet_CSV[3]',
-    #'Jet_CSV[4]',
-    #'Jet_CSV[5]',
+    'btagValue[0]',
+    'btagValue[1]',
+    'btagValue[2]',
+    'btagValue[3]',
+    #'btagValue[4]',
+    #'btagValue[5]',
+    'Jet_btagValue[0]',
+    'Jet_btagValue[1]',
+    'Jet_btagValue[2]',
+    'Jet_btagValue[3]',
+    #'Jet_btagValue[4]',
+    #'Jet_btagValue[5]',
     #'Jet_DeepJet_b[0]',
     #'Jet_DeepJet_b[1]',
     #'Jet_DeepJet_b[2]',
@@ -206,12 +206,12 @@ kinlist = [
     ]
 
 evtlist = [
-    'Evt_CSV_avg',
-    'Evt_CSV_avg_tagged',
-    'Evt_CSV_dev',
-    'Evt_CSV_dev_tagged',
-    'Evt_CSV_min',
-    'Evt_CSV_min_tagged',
+    'Evt_btagValue_avg',
+    'Evt_btagValue_avg_tagged',
+    'Evt_btagValue_dev',
+    'Evt_btagValue_dev_tagged',
+    'Evt_btagValue_min',
+    'Evt_btagValue_min_tagged',
     'Evt_Deta_JetsAverage',
     'Evt_Deta_TaggedJetsAverage',
     'Evt_Deta_maxDetaJetJet',
@@ -332,6 +332,12 @@ chi2list = [
     'RecoZ_boosted_prodcosTheta',
     'RecoZ_cosdTheta',
     'RecoZ_prodcosTheta',
+
+    'RecoZ_dRGen_Z_genB1_recoB1',
+    'RecoZ_dRGen_Z_genB2_recoB2',
+    'RecoZ_dRGen_Z_genB1_recoB2',
+    'RecoZ_dRGen_Z_genB2_recoB1',
+
     ]
 
 variables = {}

@@ -71,3 +71,20 @@ config_dict["dnn_ttZ_binary"] = {
         "earlystopping_percentage":  0.05,
         "earlystopping_epochs":      20,
 }
+
+
+
+config_dict["ttZ_or_ttH"] = {
+        "layers":                   [100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.2,
+        "L1_Norm":                  1e-4,
+        "L2_Norm":                  1e-4,
+        "batch_size":               256,
+        "optimizer":                optimizers.Adadelta(),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage":  0.05,
+        "earlystopping_epochs":      20,
+}
+

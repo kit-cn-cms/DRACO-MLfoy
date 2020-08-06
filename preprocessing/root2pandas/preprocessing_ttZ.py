@@ -60,7 +60,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"# and matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"# and matchZ_ft_RecoZ_matchable < 100.)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
@@ -97,13 +97,13 @@ ttbb_categories.addCategory("ttbb",     selection = "(GenEvt_I_TTPlusBB >= 1 and
 
 
 
-ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTH/ntuples/ntuples_ttZ_v2"
-ftpath = "/nfs/dust/cms/user/larmbrus/ttZAnalysis/ntuples/2017"
+ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/2017"
+ftpath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples"
 friendTrees = {
     "dnnZ": ftpath+"/reconstructed_Z_v1",
-    "dnnH": ftpath+"/reconstructed_H_v1",
+    "dnnH": ftpath+"/reconstructed_Higgs_v1",
     "matchZ": ftpath+"/matchZ_v1",
-    "matchH": ftpath+"/matchH_v1",
+    "matchH": ftpath+"/matchHiggs_v1",
     }
 
 # initialize dataset class
@@ -146,7 +146,7 @@ dataset.addSample(
 
 dataset.addSample(
     sampleName  = "ttbb",
-    ntuples     = ntuplespath+"/TTbb*/*nominal*.root",
+    ntuples     = ntuplespath+"/TTbb_Powheg_Openloops_new_pmx/*nominal*.root",
     categories  = ttbb_categories,
     selections   = "(Evt_Odd == 1)",
     lumiWeight  = 41.5,
@@ -164,7 +164,7 @@ additional_variables = [
     "N_BTagsM",
     "N_BTagsT",
     "Weight_XS",
-    "Weight_CSV",
+    "Weight_btagSF",
     "Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 
