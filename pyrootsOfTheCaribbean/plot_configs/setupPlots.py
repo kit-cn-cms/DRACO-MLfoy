@@ -32,6 +32,10 @@ def GetPlotColor( cls ):
         "ttbar":        ROOT.kAzure+3,
         "sig":   ROOT.kCyan,
         "bkg":   ROOT.kOrange,
+    
+        "b":    ROOT.kAzure+3,
+        "c":    ROOT.kSpring,
+        "lf":   ROOT.kOrange,
         }
 
     #if "ttZ" in cls: cls = "ttZ"
