@@ -522,55 +522,71 @@ class CNN():
         metrics = ["loss"]
         if self.eval_metrics: metrics += self.eval_metrics
 
-        # loop over metrics and generate matplotlib plot
-        for metric in metrics:
+        # loop over different languages
+        languages = ['eng','ger']
+        for language in languages:
+
+            # loop over metrics and generate matplotlib plot
+            for metric in metrics:
             
-            plt.clf()
-            # get history of train and validation scores
-            train_history = self.model_history[metric]
-            val_history = self.model_history["val_"+metric]
+                plt.clf()
+                # get history of train and validation scores
+                train_history = self.model_history[metric]
+                val_history = self.model_history["val_"+metric]
 
-            n_epochs = len(train_history)
-            epochs = np.arange(1,n_epochs+1,1)
+                n_epochs = len(train_history)
+                epochs = np.arange(1,n_epochs+1,1)
 
-            # plot histories
-            #plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "validation", lw = 1) # same color as fmaps
-            #plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "train", lw = 1) # same color as fmaps
-            #if privateWork:
-            #    plt.title("CMS private work", loc = "left", fontsize = 16)
             
-            # german lables:
-            plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "Testsatz", lw = 1) # same color as fmaps
-            plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "Trainingssatz", lw = 1) # same color as fmaps
-            if privateWork:
-                plt.title("CMS privat", loc = "left", fontsize = 16)
+                matplotlib.rcParams.update({'font.size': 15})
+                #ax.tick_params(axis='both', which='major', labelsize=12)
+                #ax.tick_params(axis='both', which='minor', labelsize=12)
+                
+                if language == 'eng':
+                    #plot histories
+                    plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "validation", lw = 1) # same color as fmaps
+                    plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "train", lw = 1) # same color as fmaps
+                    if privateWork:
+                        plt.title("CMS private work", loc = "left", fontsize = 18)
 
-            # add title
-            #title = self.category_label
-            #title = title.replace("\\geq", "$\geq$")
-            #title = title.replace("\\leq", "$\leq$")
-            #plt.title(title, loc = "right", fontsize = 16)
+                else:
+                    #german lables:
+                    plt.plot(epochs, val_history, color=(179/255.,25/255.,44/255.), label = "Testsatz", lw = 1) # same color as fmaps
+                    plt.plot(epochs, train_history, color=(19/255.,76/255.,135/255.), label = "Trainingssatz", lw = 1) # same color as fmaps
+                    if privateWork:
+                        plt.title("CMS privat", loc = "left", fontsize = 18)
 
-            # make it nicer
-            plt.grid()
-            plt.xlabel("Epoche", fontsize = 16)
-            #plt.ylabel(metric.replace("_"," "), fontsize = 16)
+                # add title
+                #title = self.category_label
+                #title = title.replace("\\geq", "$\geq$")
+                #title = title.replace("\\leq", "$\leq$")
+                #plt.title(title, loc = "right", fontsize = 16)
+
+                # make it nicer
+                plt.grid()
+                
+                if language == 'ger':
+                    plt.xlabel("Epoche", fontsize = 18)
+                    if metric == "loss":
+                        plt.ylabel("Verlustwert", fontsize = 18)
+                    else:
+                        plt.ylabel("Genauigkeit", fontsize = 18)
+
+                else:
+                    plt.xlabel("epoch", fontsize = 18)
+                    plt.ylabel(metric.replace("_"," "), fontsize = 18)
             
-            if metric == "loss":
-                plt.ylabel("Verlustwert", fontsize = 16)
-            else:
-                plt.ylabel("Genauigkeit", fontsize = 16)
             
-            #plt.ylim(ymin=0.)
+                #plt.ylim(ymin=0.)
 
-            # add legend
-            plt.legend()
+                # add legend
+                plt.legend(fontsize = 18)
 
-            # save
-            out_path = self.save_path + "model_history_"+str(metric)+plotName+".pdf"
-            #out_path = self.save_path + "model_history_"+str(metric)+plotName+".png"
-            plt.savefig(out_path)
-            print("saved plot of "+str(metric)+" at "+str(out_path))
+                # save
+                out_path = self.save_path + "model_history_"+str(metric)+plotName+"_"+language+".pdf"
+                #out_path = self.save_path + "model_history_"+str(metric)+plotName+".png"
+                plt.savefig(out_path, bbox_inches='tight')
+                print("saved plot of "+str(metric)+" at "+str(out_path))
 
     def plot_outputNodes(self, log = False, printROC = False, signal_class = None,
                         privateWork = False, nbins = 30, bin_range = [0.,1.],
@@ -679,7 +695,8 @@ class CNN():
             logscale            = log,
             sigScale            = sigScale)
 
-        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name, rotationMode = rotationMode)
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name, rotationMode = rotationMode, language = 'eng')
+        binaryOutput.plot(ratio = False, printROC = printROC, privateWork = privateWork, name = name, rotationMode = rotationMode, language = 'ger')
 
 
 def loadCNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom'):

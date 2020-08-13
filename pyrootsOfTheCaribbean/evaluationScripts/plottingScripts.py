@@ -737,26 +737,43 @@ class plotBinaryOutput:
         self.printROCScore = False
         self.privateWork = False
 
-    def plot(self, ratio = False, printROC = False, privateWork = False, name = "", rotationMode = ""):
+    def plot(self, ratio = False, printROC = False, privateWork = False, name = "", rotationMode = "", language = 'eng'):
         self.printROCScore = printROC
         self.privateWork = privateWork
         
         # name of canvas
-        if rotationMode.find('rot') >0:
-	    if rotationMode[rotationMode.find('no_rot'):] == 'no_rot':
-	        rotation = 'ohne Rotation'
-            elif rotationMode[rotationMode.find('rot_MaxJetPt'):] == 'rot_MaxJetPt':
-                rotation = 'Rotation MaxJetPt'
-            elif rotationMode[rotationMode.find('rot_sph1'):] == 'rot_sph1':
-                rotation = 'Rotation Sphärizität EV1'
-            elif rotationMode[rotationMode.find('rot_sph2'):] == 'rot_sph2':
-                rotation = 'Rotation Sphärizität EV2'
-            elif rotationMode[rotationMode.find('rot_sph3'):] == 'rot_sph3':
-                rotation = 'Rotation Sphärizität EV3'
+        if language == 'ger':
+            if rotationMode.find('rot') >0:
+	        if rotationMode[rotationMode.find('no_rot'):] == 'no_rot':
+	            rotation = 'ohne Rotation'
+                elif rotationMode[rotationMode.find('rot_MaxJetPt'):] == 'rot_MaxJetPt':
+                    rotation = 'Rotation MaxJetPt'
+                elif rotationMode[rotationMode.find('rot_sph1'):] == 'rot_sph1':
+                    rotation = 'Rotation Sphärizität EV1'
+                elif rotationMode[rotationMode.find('rot_sph2'):] == 'rot_sph2':
+                    rotation = 'Rotation Sphärizität EV2'
+                elif rotationMode[rotationMode.find('rot_sph3'):] == 'rot_sph3':
+                    rotation = 'Rotation Sphärizität EV3'
+                else:
+	            rotation = 'Rotation TopLep'
             else:
-	        rotation = 'Rotation TopLep'
+	        rotation = ''
         else:
-	    rotation = ''
+            if rotationMode.find('rot') >0:
+                if rotationMode[rotationMode.find('no_rot'):] == 'no_rot':
+                    rotation = 'no rotation'
+                elif rotationMode[rotationMode.find('rot_MaxJetPt'):] == 'rot_MaxJetPt':
+                    rotation = 'rotation MaxJetPt'
+                elif rotationMode[rotationMode.find('rot_sph1'):] == 'rot_sph1':
+                    rotation = 'rotation sphericity EV1'
+                elif rotationMode[rotationMode.find('rot_sph2'):] == 'rot_sph2':
+                    rotation = 'rotation sphericity EV2'
+                elif rotationMode[rotationMode.find('rot_sph3'):] == 'rot_sph3':
+                    rotation = 'rotation sphericity EV3'
+                else:
+                    rotation = 'rotation TopLep'
+            else:
+                rotation = ''
 
         if self.printROCScore:
             roc = roc_auc_score(self.data.get_test_labels(), self.test_predictions)
@@ -766,30 +783,55 @@ class plotBinaryOutput:
             if self.data.get_test_labels()[k] == 1 ]
         sig_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if self.data.get_test_labels()[k] == 1]
-        sig_hist = setup.setupHistogram(
-            values      = sig_values,
-            weights     = sig_weights,
-            nbins       = self.nbins,
-            bin_range   = self.bin_range,
-            color       = ROOT.kMagenta+2,
-            xtitle      = "Signal",
-            ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = False)
+        
+        if language == 'ger':
+            sig_hist = setup.setupHistogram(
+                values      = sig_values,
+                weights     = sig_weights,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kMagenta+2,
+                xtitle      = "Signal",
+                ytitle      = setup.GetyTitle(self.privateWork, language),
+                filled      = False)
+        else:
+            sig_hist = setup.setupHistogram(
+                values      = sig_values,
+                weights     = sig_weights,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kMagenta+2,
+                xtitle      = "signal",
+                ytitle      = setup.GetyTitle(self.privateWork, language),
+                filled      = False)
+
         sig_hist.SetLineWidth(3)
 
         bkg_values = [ self.test_predictions[k] for k in range(len(self.test_predictions)) \
             if not self.data.get_test_labels()[k] == 1 ]
         bkg_weights =[ self.data.get_lumi_weights()[k] for k in range(len(self.test_predictions)) \
             if not self.data.get_test_labels()[k] == 1]
-        bkg_hist = setup.setupHistogram(
-            values      = bkg_values,
-            weights     = bkg_weights,
-            nbins       = self.nbins,
-            bin_range   = self.bin_range,
-            color       = ROOT.kAzure-9,
-            xtitle      = "Untergrund",
-            ytitle      = setup.GetyTitle(self.privateWork),
-            filled      = True)
+        
+        if language == 'ger':
+            bkg_hist = setup.setupHistogram(
+                values      = bkg_values,
+                weights     = bkg_weights,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kAzure-9,
+                xtitle      = "Untergrund",
+                ytitle      = setup.GetyTitle(self.privateWork, language),
+                filled      = True)
+        else:
+            bkg_hist = setup.setupHistogram(
+                values      = bkg_values,
+                weights     = bkg_weights,
+                nbins       = self.nbins,
+                bin_range   = self.bin_range,
+                color       = ROOT.kAzure-9,
+                xtitle      = "background",
+                ytitle      = setup.GetyTitle(self.privateWork, language),
+                filled      = True)
 
         if self.sigScale == -1:
             scaleFactor = sum(bkg_weights)/(sum(sig_weights)+1e-9)
@@ -815,11 +857,14 @@ class plotBinaryOutput:
         # setup legend
         legend = setup.getLegend()
 
-        # add signal entry
-        legend.AddEntry(sig_hist, "Signal x{:4.0f}".format(scaleFactor), "L")
+        # add legend entries
+        if language == 'ger':
+            legend.AddEntry(sig_hist, "Signal x{:4.0f}".format(scaleFactor), "L")
+            legend.AddEntry(bkg_hist, "Untergrund", "F")
+        else:
+            legend.AddEntry(sig_hist, "signal x{:4.0f}".format(scaleFactor), "L")
+            legend.AddEntry(bkg_hist, "background", "F")
 
-        # add background entries
-        legend.AddEntry(bkg_hist, "Untergrund", "F")
 
         # draw legend
         legend.Draw("same")
@@ -830,15 +875,18 @@ class plotBinaryOutput:
 
         # add lumi or private work label to plot
         if self.privateWork:
-            setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+            setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True, language = language)
         else:
             setup.printLumi(canvas, ratio = plotOptions["ratio"])
 
     
         # add category label
-        setup.printCategoryLabel(canvas, self.event_category.replace('j','J').replace('tags','Jets'), ratio = plotOptions["ratio"])
+        if language == 'ger':
+            setup.printCategoryLabel(canvas, self.event_category.replace('j','J').replace('tags','Jets'), ratio = plotOptions["ratio"])
+        else:
+            setup.printCategoryLabel(canvas, self.event_category, ratio = plotOptions["ratio"])
 
-        out_path = self.plotdir + "binaryDiscriminator" + name + ".pdf"
+        out_path = self.plotdir + "binaryDiscriminator" + name + "_" + language + ".pdf"
         setup.saveCanvas(canvas, out_path)
 
 

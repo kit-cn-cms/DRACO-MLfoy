@@ -26,11 +26,18 @@ def GetPlotColor( cls ):
     if "ttH" in cls: cls = "ttH"
     return color_dict[cls]
 
-def GetyTitle(privateWork = False):
+def GetyTitle(privateWork = False, language = 'eng'):
     # if privateWork flag is enabled, normalize plots to unit area
-    if privateWork:
-        return 'vorhergesagte Events (normiert)'#"normalized to unit area"
-    return "vorhergesagte Events"#"Events expected"
+    
+    if language == 'ger':
+        if privateWork:
+            return 'vorhergesagte Ereignisse (normiert)'#"normalized to unit area"
+        return "vorhergesagte Events"#"Events expected"
+    else:
+        if privateWork:
+            return "normalized to unit area"
+        return "Events expected"
+
 
 
 # ===============================================
@@ -375,7 +382,6 @@ def getLegend():
 
 def saveCanvas(canvas, path):
     canvas.SaveAs(path)
-    canvas.SaveAs(path.replace(".pdf",".png"))
     canvas.Clear()
 
 
@@ -431,7 +437,7 @@ def printROCScore(pad, ROC, ratio = False):
     if ratio:   latex.DrawLatex(l+0.05,1.-t+0.04, text)
     else:       latex.DrawLatex(l,1.-t+0.02, text)
 
-def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
+def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False, language = 'eng'):
     pad.cd(1)
     l = pad.GetLeftMargin()
     t = pad.GetTopMargin()
@@ -442,9 +448,14 @@ def printPrivateWork(pad, ratio = False, twoDim = False, nodePlot = False):
     latex.SetNDC()
     latex.SetTextColor(ROOT.kBlack)
     latex.SetTextSize(0.04)
+    
+    if language == 'ger':
+        text = "CMS privat"#e work"
+        latex.DrawLatex(l+0.65, 1.-t+0.02, text) #if german
+    else:
+        text = "CMS private work"
+        latex.DrawLatex(l+0.57, 1.-t+0.02, text)
 
-    text = "CMS privat"#e work"
-    latex.DrawLatex(l+0.66, 1.-t+0.02, text) #if german
     '''
     if nodePlot:    latex.DrawLatex(l+0.57,1.-t+0.01, text)
     elif twoDim:    latex.DrawLatex(l+0.39,1.-t+0.01, text)
