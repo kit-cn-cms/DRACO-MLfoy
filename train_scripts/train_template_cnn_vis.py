@@ -92,13 +92,13 @@ if options.getModel() == 'noConv':
     out = Dense( cnn.data.n_output_neurons, activation = "sigmoid")(finishing)
 
 else:
-
-    # filter layers
+    
+    # filter layers (needs to be looped in case of alternating parallel and non-parallel towers)
     towers = []
     for column in options.getFilterSize():
-        tower = Conv2D(options.getFilterNum(), (column[0], column[0]), padding = 'same', activation = 'linear', kernel_regularizer=regularizers.l2(1e-4))(input_shape)
+        tower = Conv2D(options.getFilterNum(), (column[0], column[0]), padding = 'same', activation = 'linear', kernel_regularizer=regularizers.l1(1e-4))(input_shape)
         for i in range(len(column)-1):
-            tower = Conv2D(options.getFilterNum(), (column[i+1], column[i+1]), padding = 'same', activation = 'linear', kernel_regularizer=regularizers.l2(1e-4))(tower)
+            tower = Conv2D(options.getFilterNum(), (column[i+1], column[i+1]), padding = 'same', activation = 'linear')(tower)
         towers.append(tower)
         
     # merging layers
@@ -134,7 +134,7 @@ else:
 model = Model(input_shape, out)
 
 # untrainable weights with specific value 
-#ones = np.ones(np.asarray(model.get_weights()[2].shape))
+#ones = np.ones(np.asarray(model.get_weights()[2].shape))*0.1
 #model.set_weights([model.get_weights()[0], model.get_weights()[1], ones, model.get_weights()[3]])
 print("number of free parameters: "+str(model.count_params()))
 
@@ -150,8 +150,6 @@ model.summary()
 if not options.getModel() == "noConv":
     visualizer.readOutFilters(model.get_weights(), 'before')
 
-#print model.get_weights()
-
 # perform the training
 cnn.train_model()
 
@@ -159,11 +157,11 @@ cnn.train_model()
 if not options.getModel() == "noConv":
     visualizer.readOutFilters(model.get_weights(), 'after')
 
-#print model.get_weights()
-
 # evalute the trained model
 cnn.eval_model()
 
+
+#=========
 # plotting
 #=========
 
