@@ -1,4 +1,5 @@
 
+# -*- coding: utf-8 -*-
 '''
 overlaps 10.000 input pictures and draws one picture for every rotation type
 '''
@@ -61,8 +62,8 @@ def do_plot(mylist, path, labels):
 	for i in range (2):
 		for j in range(3):
 			ax=f.add_subplot(innerGrid[i:i+1,j:j+1])
-			ax.set_xlabel('$\\eta$', size=8)
-			ax.set_ylabel('$\\phi$', size=8, rotation=0)
+			ax.set_xlabel('$\\eta$', size=10)
+			ax.set_ylabel('$\\phi$', size=10, rotation=0)
 			ax.set_title(labels[i*3+j])
 			ax.imshow(mylist[i*3+j], cmap=cmap, vmin=0, vmax=1, extent=[-2.2, 2.2, -np.pi, np.pi])
 
@@ -72,14 +73,14 @@ def do_plot(mylist, path, labels):
 
 	# save figure
 	#plt.suptitle('Overlapping Input Images ttH', size= 12)
-	plt.savefig(path+'all_images_ttH.png')
+	plt.savefig(path+'all_images_ttH.pdf')
 	plt.show()
 
 
 # set paths
 path = '../input_images/' 
 filenames = ['_no_rot','_rot_MaxJetPt','_rot_TopLep','_rot_sph1','_rot_sph2','_rot_sph3']
-labels = ['no rotation', 'MaxJetPt', 'TopLep', 'EV sphericity 1', 'EV sphericity 2', 'EV sphericity 3']
+labels = ['ohne Rotation', 'MaxJetPt', 'TopLep', 'Sph'+u'ä'+'rizit'+u'ä'+'t EV 1', 'Sph'+u'ä'+'rizit'+u'ä'+'t EV 2', 'Sph'+u'ä'+'rizit'+u'ä'+'t EV 3']
 image_data = []
 for name in filenames:
 	# read filter data from textfile

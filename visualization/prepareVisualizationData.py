@@ -63,12 +63,20 @@ class visualizer():
                 self.ttHImages = self.decodeInputData(ttHSample, channels[0],10000)
                 self.ttbarImages = self.decodeInputData(ttbarSample, channels[0], 10000)
                 
+
                 # prepare input image
                 if len(channels) > 1:
-                        secondChImage = self.decodeInputData(ttHSample, channels[1], 1)[0]
-                        self.inputImage = np.concatenate((self.ttHImages[0].reshape(self.inputShape + [1]), secondChImage.reshape(self.inputShape + [1])), axis = 2)
+                        firstChImageTTH = self.decodeInputData(ttHSample, channels[0], 1)[0]
+                        secondChImageTTH = self.decodeInputData(ttHSample, channels[1], 1)[0]
+                        self.inputImageTTH = np.concatenate((firstChImageTTH.reshape(self.inputShape + [1]), secondChImageTTH.reshape(self.inputShape + [1])), axis = 2)
+                        firstChImageTTbar = self.decodeInputData(ttbarSample, channels[0], 1)[0]
+                        secondChImageTTbar = self.decodeInputData(ttbarSample, channels[1], 1)[0]
+                        self.inputImageTTbar = np.concatenate((firstChImageTTbar.reshape(self.inputShape + [1]), secondChImageTTbar.reshape(self.inputShape + [1])), axis = 2)
                 else:
-                    self.inputImage = self.ttHImages[0].reshape(self.inputShape + [1])
+                    firstChImageTTH = self.decodeInputData(ttHSample, channels[0], 1)[0]
+                    self.inputImageTTH = firstChImageTTH.reshape(self.inputShape + [1])
+                    firstChImageTTbar = self.decodeInputData(ttbarSample, channels[0], 1)[0]
+                    self.inputImageTTbar = firstChImageTTbar.reshape(self.inputShape + [1])
 
 
 	def decodeInputData(self, sample, channel, importStop):
@@ -190,9 +198,11 @@ class visualizer():
                 print('_'*60)
 
 		#empty lists for saving feature maps with the same shape as the model's
-		self.outputImages = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
-		self.outputImagesSeparate = np.empty(np.asarray(self.networkArchitecture).shape[0:1]).tolist()
-		self.outputImagesTTH = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
+		self.outputImageTTH = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
+		self.outputImageSeparateTTH = np.empty(np.asarray(self.networkArchitecture).shape[0:1]).tolist()
+		self.outputImageTTbar = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
+                self.outputImageSeparateTTbar = np.empty(np.asarray(self.networkArchitecture).shape[0:1]).tolist()
+                self.outputImagesTTH = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
 		self.outputImagesTTbar = np.empty(np.asarray(self.networkArchitecture).shape[0:2]).tolist()
             
                 self.getFilters()
@@ -206,7 +216,8 @@ class visualizer():
 			for j in range(self.maxLayers):
 
                                 # all non-existing layers and pictures in the grid get vaule []
-                                self.outputImages[i][j] = []
+                                self.outputImageTTH[i][j] = []
+                                self.outputImageTTbar[i][j] = []
                                 self.outputImagesTTH[i][j] = []
                                 self.outputImagesTTbar[i][j] = []
                                 
@@ -223,7 +234,8 @@ class visualizer():
                                         weights.append(self.filterWeights[i][j])
 					weights.append(np.zeros(self.filterNum))
 					model.set_weights(weights)
-			    		self.outputImages[i][j] = model.predict(self.inputImage.reshape([1] + self.inputShape + [len(self.channels)])).tolist()
+			    		self.outputImageTTH[i][j] = model.predict(self.inputImageTTH.reshape([1] + self.inputShape + [len(self.channels)])).tolist()
+                                        self.outputImageTTbar[i][j] = model.predict(self.inputImageTTbar.reshape([1] + self.inputShape + [len(self.channels)])).tolist()
 
                                         if len(self.channels) == 1:
 
@@ -264,17 +276,22 @@ class visualizer():
                                 self.outputImagesTTbar[i][0] = self.outputImagesTTbar[i][0].tolist()
                                 
                                 # separate feature maps channel one
-                                self.outputImagesSeparate[i] = []
-                                outputImage = modelSeparate.predict(self.inputImage[:,:,0].reshape([1]+self.inputShape + [1]))
-                                self.outputImagesSeparate[i].append(outputImage.reshape(self.inputShape + [par[1]]).tolist())
-                                
+                                self.outputImageSeparateTTH[i] = []
+                                outputImageTTH = modelSeparate.predict(self.inputImageTTH[:,:,0].reshape([1]+self.inputShape + [1]))
+                                self.outputImageSeparateTTH[i].append(outputImageTTH.reshape(self.inputShape + [par[1]]).tolist())
+                                self.outputImageSeparateTTbar[i] = []
+                                outputImageTTbar = modelSeparate.predict(self.inputImageTTbar[:,:,0].reshape([1]+self.inputShape + [1]))
+                                self.outputImageSeparateTTbar[i].append(outputImageTTbar.reshape(self.inputShape + [par[1]]).tolist())
+
                                 # produce feature maps with filter from second channel
                                 # separate feature maps channel two
                                 weightsSeparate = [self.filterWeights[i][0][:,:,1,:].reshape(par[0], par[0], 1, par[1]), np.zeros(par[1])]
                                 modelSeparate.set_weights(weightsSeparate)
                                     
-                                outputImage = modelSeparate.predict(self.inputImage[:,:,1].reshape([1]+self.inputShape + [1]))
-                                self.outputImagesSeparate[i].append(outputImage.reshape(self.inputShape + [par[1]]).tolist())
+                                outputImageTTH = modelSeparate.predict(self.inputImageTTH[:,:,1].reshape([1]+self.inputShape + [1]))
+                                self.outputImageSeparateTTH[i].append(outputImageTTH.reshape(self.inputShape + [par[1]]).tolist())
+                                outputImageTTbar = modelSeparate.predict(self.inputImageTTbar[:,:,1].reshape([1]+self.inputShape + [1]))
+                                self.outputImageSeparateTTbar[i].append(outputImageTTbar.reshape(self.inputShape + [par[1]]).tolist())
 
 
 	    	self.saveData()
@@ -298,19 +315,32 @@ class visualizer():
                     text_file.write('\npseudo')
                 text_file.close()
 
-		text_file = open(self.outputDir + "input_image" + self.plotName + ".txt", "w")
-		text_file.write(str(self.inputImage.tolist()))
+		text_file = open(self.outputDir + "input_image_ttH" + self.plotName + ".txt", "w")
+		text_file.write(str(self.inputImageTTH.tolist()))
 		text_file.close()
 
-		text_file = open(self.outputDir + "output_images" + self.plotName + ".txt", "w")
-		text_file.write(str(self.outputImages))
+                text_file = open(self.outputDir + "input_image_ttbar" + self.plotName + ".txt", "w")
+                text_file.write(str(self.inputImageTTbar.tolist()))
+                text_file.close()
+
+		text_file = open(self.outputDir + "output_image_ttH" + self.plotName + ".txt", "w")
+		text_file.write(str(self.outputImageTTH))
 		text_file.close()
                 
                 if len(self.channels) > 1:
-		    text_file = open(self.outputDir + "output_images_separate" + self.plotName + ".txt", "w")
-		    text_file.write(str(self.outputImagesSeparate))
+		    text_file = open(self.outputDir + "output_image_separate_ttH" + self.plotName + ".txt", "w")
+		    text_file.write(str(self.outputImageSeparateTTH))
 		    text_file.close()
                 
+                text_file = open(self.outputDir + "output_image_ttbar" + self.plotName + ".txt", "w")
+                text_file.write(str(self.outputImageTTbar))
+                text_file.close()
+
+                if len(self.channels) > 1:
+                    text_file = open(self.outputDir + "output_image_separate_ttbar" + self.plotName + ".txt", "w")
+                    text_file.write(str(self.outputImageSeparateTTbar))
+                    text_file.close()
+
 		text_file = open(self.outputDir + "all_output_images_ttH" + self.plotName + ".txt", "w")
 		text_file.write(str(self.outputImagesTTH))
 		text_file.close()
@@ -322,9 +352,8 @@ class visualizer():
 
 
 # manual use
-#my_vis = visualizer('testfolder', 'testfolder', [11,15], 'test', 'MJPt', ['Jet_Pt[0-16]_Hist','Jet_CSV[0-16]_Hist'], 1, [[1],[2,3],[4,5,6]])
-#my_vis.readOutFilters(test.test_data2, 'after')
+#my_vis = visualizer('/ceph/jvautz/NN/CNNInputs/testCNN/CSV_channel/all_rotations', '../workdir/trainCNN/ch5_models/reduced_pseudo/', [11,15], '_reduced_pseudo', '_CSV_rot_MaxJetPt', ['Jet_Pt[0-16]_Hist'], 8, [[4]], 'reduced', pseudoData=True)
 #my_vis.getFilters()
-
+#my_vis.prepareImageData()
 
 

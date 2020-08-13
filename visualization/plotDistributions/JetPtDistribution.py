@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 '''
-test to read out h5 file
+draw Jet-Pt-histogram
 '''
 # imports
 import numpy as np
@@ -16,7 +17,7 @@ def decode_Samples(path):
 
     # read input data out of h5 file
     with pd.HDFStore(path, mode = "r" ) as store:
-        df = store.select("data", stop = 50000) #stop is arbitrary
+        df = store.select("data", stop = 100000) #stop is arbitrary
         mi = store.select("meta_info")
         shape=list(mi["input_shape"])
 
@@ -53,7 +54,7 @@ def setupHistogram(
         xtitle, ytitle,
         color = ROOT.kBlack, filled = True):
     # define histogram
-    histogram = ROOT.TH1D(xtitle, "", 300, 0.0, 600.0)
+    histogram = ROOT.TH1D(xtitle, "", 100, 0.0, 2000.0)
     #histogram.Sumw2(True)
 
     for value in values:
@@ -63,12 +64,12 @@ def setupHistogram(
     histogram.GetXaxis().SetTitle(xtitle)
     histogram.GetYaxis().SetTitle(ytitle)
 
-    #histogram.GetYaxis().SetTitleOffset(1.4)
-    #histogram.GetXaxis().SetTitleOffset(1.2)
-    #histogram.GetYaxis().SetTitleSize(0.055)
-    #histogram.GetXaxis().SetTitleSize(0.055)
-    #histogram.GetYaxis().SetLabelSize(0.055)
-    #histogram.GetXaxis().SetLabelSize(0.055)
+    histogram.GetYaxis().SetTitleOffset(.9)
+    histogram.GetXaxis().SetTitleOffset(.9)
+    histogram.GetYaxis().SetTitleSize(0.05)
+    histogram.GetXaxis().SetTitleSize(0.05)
+    histogram.GetYaxis().SetLabelSize(0.04)
+    histogram.GetXaxis().SetLabelSize(0.04)
 
     #histogram.SetMarkerColor(color)
 
@@ -102,36 +103,54 @@ for entry in JetPt_entries:
 
 hist = setupHistogram(
     values      = JetPt_entries,
-    color       = ROOT.kBlue-10,
-    xtitle      = "JetPt Distribution",
-    ytitle      = "",
+    color       = ROOT.kBlue-8,
+    xtitle      = "JetPt Verteilung [GeV]",
+    ytitle      = "Anzahl an Jets",
     filled      = True)
 
 hist_qu = setupHistogram(
     values      = entries,
-    color       = ROOT.kBlue-7,
-    xtitle      = "JetPt Distribution",
-    ytitle      = "",
+    color       = ROOT.kBlue-2,
+    xtitle      = "JetPt Verteilung [GeV]",
+    ytitle      = "Anzahl an Jets",
     filled      = True)
+
 
 gStyle.SetOptStat(0);
 
 # initialize canvas
 canvas = ROOT.TCanvas("c","c",800,600)
-
+canvas.SetLogy()
 
 # normalize to 1 integral 
 if hist.Integral()>0:
     hist.Scale(1./float(hist.Integral()))
     hist_qu.Scale(0.95/float(hist_qu.Integral()))
 
+legend=ROOT.TLegend(0.35,0.7,0.55,0.9)
+legend.SetBorderSize(0);
+legend.SetLineStyle(0);
+legend.SetTextFont(42);
+legend.SetTextSize(0.05);
+legend.SetFillStyle(0);
+
+# add signal entry
+legend.AddEntry(hist_qu,  'Jets innerhalb des 95%-Quantils', "F")
+
+# add background entries
+legend.AddEntry(hist, "weitere Jets", "F")
 
 hist.Draw("hist")
 hist_qu.Draw("histsame")
+
+#draw legend
+legend.Draw("same")
+hist.Draw("axis same")
+
 '''
 line = ROOT.TLine(quantile,0,quantile,0.001);
 line.SetLineColor(ROOT.kPink+7);
 line.SetLineWidth(2)
 line.Draw();
 '''
-canvas.SaveAs("JetPt_distr.png")
+canvas.SaveAs("JetPt_distr.pdf")

@@ -20,39 +20,24 @@ def do_plot(mylist, path, labels):
 	cmap = plt.cm.Purples
 
 	# set size of canvas
-	f = plt.figure(figsize=(8., 6.)) 
-
-	grid = gridspec.GridSpec(100, 3, wspace=.3, width_ratios=[15,15,1])
+	f = plt.figure(figsize=(4.5, 5.)) 
+	mpl.rcParams.update({'font.size': 14})
+	grid = gridspec.GridSpec(100, 2, wspace=.5, width_ratios=[16,1])
 	
 	# first channel
 	ax=f.add_subplot(grid[:,0])
-	ax.set_xlabel('$\\eta$', size=8)
-	ax.set_ylabel('$\\phi$', size=8, rotation=0)
-	ax.set_title('physical information')
+	ax.set_xlabel('$\\eta$', size=18)
+	ax.set_ylabel('$\\phi$', size=18, rotation=0)
+	ax.set_title('JetPt', size=18)
 	ax.imshow(mylist[0], cmap=cmap, vmin=0, vmax=1, extent=[-2.2, 2.2, -np.pi, np.pi])
 	
-
-	# first channel pseudo
-	myPseudoList = np.zeros(np.asarray(mylist[0]).shape)
-	for k in range(11):
-		for l in range(15):
-			if mylist[0][l][k] != 0:
-				myPseudoList[l][k] = 1.
-
-
-	ax=f.add_subplot(grid[:,1])
-	ax.set_xlabel('$\\eta$', size=8)
-	ax.set_ylabel('$\\phi$', size=8, rotation=0)
-	ax.set_title('geometrical information')
-	ax.imshow(myPseudoList, cmap=cmap, vmin=0, vmax=1, extent=[-2.2, 2.2, -np.pi, np.pi])
-	
 	# create colorbar
-	cbar_ax = f.add_subplot(grid[11:89,2])
+	cbar_ax = f.add_subplot(grid[1:99,1])
 	mpl.colorbar.ColorbarBase(cbar_ax, cmap=cmap, norm=norm)
 
 	# save figure
 	#plt.suptitle('Overlapping Input Images ttH', size= 12)
-	plt.savefig(path+'image_pseudo_'+ sample +'.png')
+	plt.savefig(path+'image_1ch_'+ sample +'.pdf')
 	plt.show()
 
 

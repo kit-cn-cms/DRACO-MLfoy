@@ -72,7 +72,7 @@ def normalisation(data, quantile, var):
 
 
 # paths
-ttbar_path = '/ceph/jvautz/NN/CNNInputs/testCNN/3ch/ttbar_3ch_rot_MaxJetPt.h5'
+ttbar_path = '/ceph/jvautz/NN/CNNInputs/testCNN/3ch/st_3ch_rot_MaxJetPt.h5'
 ttH_path = '/ceph/jvautz/NN/CNNInputs/testCNN/3ch/ttH_3ch_rot_MaxJetPt.h5'
 
 # prepare data for normalization 
@@ -114,7 +114,7 @@ for i in range(5):
 text_file_ttH = open("3ch_img_ttH.txt", "w")
 text_file_ttH.write(str(all_img_ttH))
 text_file_ttH.close()
-text_file_ttbar = open("3ch_img_ttbar.txt", "w")
+text_file_ttbar = open("3ch_img_st.txt", "w")
 text_file_ttbar.write(str(all_img_ttbar))
 text_file_ttbar.close()
 
