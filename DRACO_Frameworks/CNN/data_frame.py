@@ -28,7 +28,7 @@ class Sample:
         print("-"*50)
         print("loading sample file "+str(self.path))
         with pd.HDFStore( self.path, mode = "r" ) as store:
-            df = store.select("data")#, stop=100) # for debbuging
+            df = store.select("data")#, stop=100)#stop=50000)#, stop=100) # for debbuging
             print("number of events before selections: "+str(df.shape[0]))
             mi = store.select("meta_info")
             self.shape=list(mi["input_shape"])
@@ -63,18 +63,18 @@ class Sample:
             print column_name
             for index, row in df.iterrows():
                 counter += 1
-                if counter%100000 == 0: 
+                if counter%1000 == 0: 
                    print counter,"events decoded in channel", column_name
 
                 r=base64.b64decode(row[column_name])
                 u=np.frombuffer(r,dtype=np.float64)
            
                 ###### old normalization!!!
-                maxjetinevt=np.max(u)
-                if(maxjetinevt!=0):
-                    u=u/maxjetinevt
-                else:
-                    empty_imgs_evtids.append(index[2])
+                #maxjetinevt=np.max(u)
+                #if(maxjetinevt!=0):
+                #    u=u/maxjetinevt
+                #else:
+                #    empty_imgs_evtids.append(index[2])
                 ######
            
                 u=np.reshape(u,self.shape)
@@ -261,7 +261,7 @@ class DataFrame(object):
         del train_samples
 
 	#####################################################################################	
-	'''
+	
         #normalise data
 	
 	hist_data = []
@@ -303,7 +303,7 @@ class DataFrame(object):
 	       normalisedData.append(values)
 	   df[var] = normalisedData
         
-        '''
+        
         #####################################################################################         
         
         # multiclassification labelling
