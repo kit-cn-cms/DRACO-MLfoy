@@ -83,12 +83,12 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/matchHiggs_as_X_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/lepton_variables_integrated/matchHiggs_as_X_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*sig.root",
+    ntuples     = ntuplesPath+"/*Tree.root",
     categories  = sig_categories,
     lumiWeight  = 41.5,
     )

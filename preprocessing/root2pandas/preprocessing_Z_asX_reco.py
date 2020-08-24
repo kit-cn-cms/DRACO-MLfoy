@@ -83,12 +83,12 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/matchZ_as_X_v1/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/lepton_variables_integrated/matchZ_as_X_v1/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/"
 
 # add samples to dataset
 dataset.addSample(
     sampleName  = "sig_Z",
-    ntuples     = ntuplesPath+"/*sig.root",
+    ntuples     = ntuplesPath+"/*Tree.root",
     categories  = sig_categories,
     lumiWeight  = 41.5,
     )
