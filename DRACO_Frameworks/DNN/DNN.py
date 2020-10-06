@@ -351,7 +351,7 @@ class DNN():
         with open(out_file, "w") as f:
             f.write(yml_model)
 
-    def train_model(self):
+    def train_model(self, flags=None):
         ''' train the model '''
 
         # add early stopping if activated
@@ -364,10 +364,39 @@ class DNN():
                 stopping_epochs = self.architecture["earlystopping_epochs"],
                 verbose         = 1)]
 
+
         # train main net
         self.trained_model = self.model.fit(
             x = self.data.get_train_data(as_matrix = True),
             y = self.data.get_train_labels(),
+            batch_size          = self.architecture["batch_size"],
+            epochs              = self.train_epochs,
+            shuffle             = True,
+            callbacks           = callbacks,
+            validation_split    = 0.25,
+            sample_weight       = self.data.get_train_weights())
+
+    def train_model_flags(self, flags=None):
+        ''' train the model '''
+
+        # add early stopping if activated
+        callbacks = None
+        if self.architecture["earlystopping_percentage"] or self.architecture["earlystopping_epochs"]:
+            callbacks = [EarlyStopping(
+                monitor         = "loss",
+                value           = self.architecture["earlystopping_percentage"],
+                min_epochs      = 50,
+                stopping_epochs = self.architecture["earlystopping_epochs"],
+                verbose         = 1)]
+        if (flags is not None):
+            labels=self.data.df_train[flags].values
+        else:
+            labels=self.data.get_train_labels()
+
+        # train main net
+        self.trained_model = self.model.fit(
+            x = self.data.get_train_data(as_matrix = True),
+            y = labels,
             batch_size          = self.architecture["batch_size"],
             epochs              = self.train_epochs,
             shuffle             = True,
@@ -460,6 +489,45 @@ class DNN():
         if get_gradients:
             pickle.dump(self.data.get_test_data(), open(self.cp_path+"/inputvariables.pickle", "wb"))
 
+    def eval_model_flags(self, flags=None):
+        ''' evaluate trained model '''
+
+        if (flags is not None):
+            labels=self.data.df_test[flags].values
+        else:
+            labels=self.data.get_train_labels()
+        # evaluate test dataset
+        self.model_eval = self.model.evaluate(
+            self.data.get_test_data(as_matrix = True),
+            labels,
+            )
+
+        # save history of eval metrics
+        self.model_history = self.trained_model.history
+
+        # save predicitons
+        self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
+        self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
+        
+        #figure out ranges
+#        self.get_ranges()
+
+        # save predicted classes with argmax
+        self.predicted_classes = np.argmax( self.model_prediction_vector, axis = 1)
+
+        # save confusion matrix
+#        from sklearn.metrics import confusion_matrix
+#        self.confusion_matrix = confusion_matrix(labels, self.predicted_classes)
+
+        # print evaluations
+        from sklearn.metrics import roc_auc_score
+        self.roc_auc_score = roc_auc_score(labels, self.model_prediction_vector)
+        print("\nROC-AUC score: {}".format(self.roc_auc_score))
+
+        if self.eval_metrics:
+            print("model test loss: {}".format(self.model_eval[0]))
+            for im, metric in enumerate(self.eval_metrics):
+                print("model test {}: {}".format(metric, self.model_eval[im+1]))
 
     def eval_model(self):
         ''' evaluate trained model '''

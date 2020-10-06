@@ -184,7 +184,7 @@ class DataFrame(object):
                 train_variables,
                 category_cutString = None,
                 category_label     = None,
-                norm_variables = True,
+                norm_variables = False,
                 test_percentage = 0.2,
                 lumi = 41.5,
                 shuffleSeed = None,
@@ -329,7 +329,7 @@ class DataFrame(object):
             for i in gen_dict:
                 df[gen_dict[i]]=df[i]
 
-        df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()
+        #df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()             # normalisierung jakob
         self.norm_csv = norm_csv
 
         self.unsplit_df = df.copy()

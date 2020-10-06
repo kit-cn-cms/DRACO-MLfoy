@@ -45,6 +45,7 @@ trainopts.add_option("--balanceSamples", dest="balanceSamples", action = "store_
         help="activate to balance train samples such that number of events per epoch is roughly equal for all classes. The usual balancing of train weights for all samples is actiaved by default and is not covered with this option.")
 trainopts.add_option("-u", "--unnormed", dest = "norm_variables", action = "store_false", default = True,
         help = "activate to NOT perform a normalization of input features to mean zero and std deviation one.")
+trainopts.add_option("--pre_flag", dest="prenet_config", default=False, help="enable pre net") # Jakob
 parser.add_option_group(trainopts)
 
 plotopts = optparse.OptionGroup(parser, "Plotting Options")
