@@ -5,7 +5,7 @@ import os, numpy as np
 import sys
 import json
 import pandas as pd
-
+import matplotlib.pyplot as plt
 # option handler
 import optionHandler
 options = optionHandler.optionHandler(sys.argv)
@@ -140,11 +140,35 @@ dnn_pre.build_model(config=config_dict["dnn_ttZ_prenet"], penalty=options.getPen
 #print(dnn_pre.data.get_train_labels())
 flags = dnn_pre.data.df_train[pre_var].values
 print flags
-print dnn_pre.data.df_train["flags_ft_has_z_b"]
+#print dnn_pre.data.df_train["flags_ft_has_z_b"]
 # perform the training
 dnn_pre.train_model_flags(flags=pre_var)
-print(dnn_pre.model.predict(dnn_pre.data.get_train_data())[0:10,:])
-print flags[0:10,:]
+
+test_flags = dnn_pre.data.df_test[pre_var].values
+test_pred  = dnn_pre.model.predict(dnn_pre.data.get_test_data())
+for idx, flagName in enumerate(pre_var):
+    print("evaluating flag {}".format(flagName))
+    flagValues  = test_flags[:,idx]
+    predictions = test_pred[:,idx]
+ 
+    # filter entried of predictions where target value was 1
+    soll_true = predictions[ flagValues == 1 ]
+    # filter entried of predictions where target value was 0
+    soll_false = predictions[ flagValues == 0 ]
+
+    plt.hist([soll_true, soll_false], range = [0., 1.], histtype = "step", color = ["red", "blue"], label = ["True", "False"])
+    plt.xlabel("output value {}".format(flagName))
+    plt.ylabel("number of test events")
+    plt.legend()
+    plt.savefig(options.getOutputDir()+"/plots/"+flagName+".png")
+    plt.savefig(options.getOutputDir()+"/plots/"+flagName+".pdf")
+    print("created plot at {}".format(options.getOutputDir()+"/plots/"+flagName+".pdf"))
+    plt.clf()
+    
+
+
+#print(dnn_pre.model.predict(dnn_pre.data.get_train_data())[0:10,:])
+#print flags[0:10,:]
 # evalute the trained model
 dnn_pre.eval_model_flags(flags=pre_var)
 

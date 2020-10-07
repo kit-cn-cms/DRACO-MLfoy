@@ -2,8 +2,6 @@ flags_ft_has_thad_b
 flags_ft_has_tlep_b
 flags_ft_has_thad_q
 flags_ft_has_thad_qq
-flags_ft_has_z_b
-flags_ft_has_z_bb
 flags_ft_has_add_b
 flags_ft_has_add_bb
 flags_ft_has_h_b

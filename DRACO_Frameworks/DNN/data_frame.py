@@ -306,6 +306,11 @@ class DataFrame(object):
 
         df = shuffle(df, random_state = self.shuffleSeed)
 
+        print("var", "nan entries", "mean", "std")
+        for c in df.columns:
+            if not c == "class_label":
+                print(c, df[c].isnull().sum(), df[c].mean(), df[c].std())
+
         # norm variables if activated
         unnormed_df = df.copy()
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
@@ -329,8 +334,14 @@ class DataFrame(object):
             for i in gen_dict:
                 df[gen_dict[i]]=df[i]
 
-        #df[train_variables] = (df[train_variables] - df[train_variables].mean())/df[train_variables].std()             # normalisierung jakob
+        norm_these_variables = [v for v in train_variables if not v.startswith("flag")]
+        df[norm_these_variables] = (df[norm_these_variables] - df[norm_these_variables].mean())/df[norm_these_variables].std()             # normalisierung jakob
         self.norm_csv = norm_csv
+
+        print("var", "nan entries", "mean", "std")
+        for c in df.columns:
+            if not c == "class_label":
+                print(c, df[c].isnull().sum(), df[c].mean(), df[c].std())
 
         self.unsplit_df = df.copy()
 
