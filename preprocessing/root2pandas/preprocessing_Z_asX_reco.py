@@ -68,7 +68,7 @@ base_selection = "("+base+")"
 sig_categories = root2pandas.EventCategories()
 sig_categories.addCategory("sig_Z", selection = None)
 bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg_Z", selection = None)
+bkg_categories.addCategory("bkg", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -83,7 +83,7 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/lepton_variables_integrated/matchZ_as_X_v1/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v2/match_Z_as_X/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
 
 # add samples to dataset
 dataset.addSample(

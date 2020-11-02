@@ -37,7 +37,7 @@ input_samples.addSample(options.getDefaultName("ttXnonbb")  , label = "ttXnonbb"
 input_samples.addSample(options.getDefaultName("ttbar") , label = "ttbar" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttnonbb") , label = "ttnonbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight()*35.8*0.44, total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )

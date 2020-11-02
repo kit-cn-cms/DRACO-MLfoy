@@ -1,21 +1,21 @@
 variables = {}
 variables["ge4j_ge3t"] = [
     
-    # X boson stuff
-    "RecoX_B1_Eta",
-    "RecoX_B2_Eta",
-    "RecoX_B1_Phi",
-    "RecoX_B2_Phi",
-    "RecoX_B1_btagValue",
-    "RecoX_B2_btagValue",
-    "RecoX_B1_M",
-    "RecoX_B2_M",
-    "RecoX_B1_E",
-    "RecoX_B2_E",
-    "RecoX_B1_Pt",
-    "RecoX_B2_Pt",
-    "RecoX_B1_idx",
-    "RecoX_B2_idx",
+    # recoX stuff
+    "RecoX_jet1_Eta",
+    "RecoX_jet2_Eta",
+    "RecoX_jet1_Phi",
+    "RecoX_jet2_Phi",
+    "RecoX_jet1_btagValue",
+    "RecoX_jet2_btagValue",
+    "RecoX_jet1_M",
+    "RecoX_jet2_M",
+    "RecoX_jet1_E",
+    "RecoX_jet2_E",
+    "RecoX_jet1_Pt",
+    "RecoX_jet2_Pt",
+    "RecoX_jet1_idx",
+    "RecoX_jet2_idx",
     "N_Jets",
     "N_BTagsM",
     "RecoX_X_Pt",
@@ -36,14 +36,17 @@ variables["ge4j_ge3t"] = [
     "TightLepton_Phi_0",
     "TightLepton_Pt_0",
 
-    "RecoX_B1_dEta_lept",
-    "RecoX_B2_dEta_lept",
-    "RecoX_B1_dPhi_lept",
-    "RecoX_B2_dPhi_lept",
-    "RecoX_B1_dR_lept",
-    "RecoX_B2_dR_lept",
+    "RecoX_jet1_dEta_lept",
+    "RecoX_jet2_dEta_lept",
+    "RecoX_jet1_dPhi_lept",
+    "RecoX_jet2_dPhi_lept",
+    "RecoX_jet1_dR_lept",
+    "RecoX_jet2_dR_lept",
     "RecoX_X_btagAverage",
 
+    "RecoX_X_dEta_lept",
+    "RecoX_X_dPhi_lept",
+    "RecoX_X_dR_lept",
 
     ]
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))

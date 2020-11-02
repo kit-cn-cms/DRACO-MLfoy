@@ -66,7 +66,7 @@ base_selection = "("+base+")"
 
 # define output classes
 sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig_Higgs", selection = None)
+sig_categories.addCategory("bbfromttbar", selection = None)
 bkg_categories = root2pandas.EventCategories()
 bkg_categories.addCategory("bkg", selection = None)
 
@@ -83,18 +83,18 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v2/match_Higgs_as_X/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v2/match_bbfromttbar/TTbb_Powheg_Openloops_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig_Higgs",
+    sampleName  = "bbfromttbar",
     ntuples     = ntuplesPath+"/*Tree.root",
     categories  = sig_categories,
     lumiWeight  = 41.5,
     )
 
 dataset.addSample(
-    sampleName  = "bkg_Higgs",
+    sampleName  = "bkg_ttbar",
     ntuples     = ntuplesPath+"/*bkg.root",
     categories  = bkg_categories,
     lumiWeight  = 41.5,

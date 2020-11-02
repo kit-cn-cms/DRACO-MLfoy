@@ -65,10 +65,24 @@ base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoX_matchable > 0.)"
 base_selection = "("+base+")"
 
 # define output classes
-sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig_Higgs", selection = None)
+sig_Z_categories = root2pandas.EventCategories()
+sig_Z_categories.addCategory("Zbb", selection = None)
+
+sig_Higgs_categories = root2pandas.EventCategories()
+sig_Higgs_categories.addCategory("Hbb", selection = None)
+
+sig_cc_categories = root2pandas.EventCategories()
+sig_cc_categories.addCategory("cc", selection = None)
+
+sig_bb_categories = root2pandas.EventCategories()
+sig_bb_categories.addCategory("bb", selection = None)
+
+sig_bbfromttbar_categories = root2pandas.EventCategories()
+sig_bbfromttbar_categories.addCategory("ttTobb", selection = None)
+
 bkg_categories = root2pandas.EventCategories()
 bkg_categories.addCategory("bkg", selection = None)
+
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -83,19 +97,79 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v2/match_Higgs_as_X/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath_Higgs = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_Higgs_as_X/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath_Z = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_Z_as_X/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
+ntuplesPath_cc = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_cc_as_X/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath_bb = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_bb_as_X/TTbb_Powheg_Openloops_new_pmx"
+ntuplesPath_bbfromttbar = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_bbfromttbar/TTbb_Powheg_Openloops_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*Tree.root",
-    categories  = sig_categories,
+    sampleName  = "Hbb",
+    ntuples     = ntuplesPath_Higgs+"/*Tree.root",
+    categories  = sig_Higgs_categories,
     lumiWeight  = 41.5,
     )
 
 dataset.addSample(
     sampleName  = "bkg_Higgs",
-    ntuples     = ntuplesPath+"/*bkg.root",
+    ntuples     = ntuplesPath_Higgs+"/*bkg.root",
+    categories  = bkg_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "Zbb",
+    ntuples     = ntuplesPath_Z+"/*Tree.root",
+    categories  = sig_Z_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "bkg_Z",
+    ntuples     = ntuplesPath_Z+"/*bkg.root",
+    categories  = bkg_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "cc",
+    ntuples     = ntuplesPath_cc+"/*Tree.root",
+    categories  = sig_cc_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "bkg_cc",
+    ntuples     = ntuplesPath_cc+"/*bkg.root",
+    categories  = bkg_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "bb",
+    ntuples     = ntuplesPath_bb+"/*Tree.root",
+    categories  = sig_bb_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "bkg_bb",
+    ntuples     = ntuplesPath_bb+"/*bkg.root",
+    categories  = bkg_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "ttTobb",
+    ntuples     = ntuplesPath_bbfromttbar+"/*Tree.root",
+    categories  = sig_bbfromttbar_categories,
+    lumiWeight  = 41.5,
+    )
+
+dataset.addSample(
+    sampleName  = "bkg_bbfromttbar",
+    ntuples     = ntuplesPath_bbfromttbar+"/*bkg.root",
     categories  = bkg_categories,
     lumiWeight  = 41.5,
     )

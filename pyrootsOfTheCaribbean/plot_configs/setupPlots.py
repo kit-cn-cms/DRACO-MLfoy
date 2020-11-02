@@ -236,7 +236,7 @@ def drawClosureTestOnCanvas(sig_train, bkg_train, sig_test, bkg_test, plotOption
 
     # draw first hist
     if plotOptions["logscale"]:
-        bkg_train.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        bkg_train.GetYaxis().SetRangeUser(yMinMax/100, yMax*100)
         canvas.SetLogy()
     else:
         bkg_train.GetYaxis().SetRangeUser(0, yMax*1.5)
@@ -292,7 +292,7 @@ def drawHistsOnCanvas(sigHists, bkgHists, plotOptions, canvasName,displayname=No
     else:
         firstHist = bkgHists[0]
     if plotOptions["logscale"] or logoption:
-        firstHist.GetYaxis().SetRangeUser(yMinMax/10000, yMax*10)
+        firstHist.GetYaxis().SetRangeUser(yMinMax/100, yMax*100)
         canvas.SetLogy()
     else:
         firstHist.GetYaxis().SetRangeUser(0, yMax*1.5)
