@@ -6,6 +6,7 @@ import pickle
 import math
 from array import array
 import ROOT
+import pprint
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -28,6 +29,15 @@ import tensorflow.keras.models as models
 import tensorflow.keras.layers as layer
 from tensorflow.keras import backend as K
 import pandas as pd
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation
+from tensorflow.keras.optimizers import Adam, SGD
+# from tensorflow.keras.utils import np_utils
+# from keras.models import Sequential
+# from keras.layers import Dense, Dropout, Activation
+# from keras.optimizers import Adam, SGD
+from keras.utils import np_utils
 
 # Limit gpu usage
 import tensorflow as tf
@@ -495,6 +505,116 @@ class DNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+
+    def model_to_optimize(self, train_params):
+        number_of_input_neurons =  self.data.get_train_data(as_matrix = True).shape[1]
+        # print(number_of_input_neurons)
+        print("-"*40)
+        print("Testing following configuration:")
+        pprint.pprint(train_params)
+        #Model providing function:
+        #Create Keras model with double curly brackets dropped-in as needed.
+        model = Sequential()
+
+        leaky_relu_activation = keras.layers.LeakyReLU(alpha=0.3)
+        keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1")
+
+        model.add(Dense(units=int(train_params['layer_size_1']), activation=leaky_relu_activation, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        input_shape=(number_of_input_neurons,)))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1"))
+
+        model.add(Dense(units=int(train_params['layer_size_2']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        activation=leaky_relu_activation,))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer2"))
+    
+        model.add(Dense(units=int(train_params['layer_size_3']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        activation=leaky_relu_activation,))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer3"))
+
+        if train_params['four_layer']['include']:
+            model.add(Dense(units=int(train_params['four_layer']['layer_size_4']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                            activation=leaky_relu_activation,))
+            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer4"))
+
+        model.add(Dense(self.data.n_output_neurons, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer'])))
+
+        if self.data.binary_classification :
+            if 0 in self.data.get_train_labels():
+                loss = 'binary_crossentropy'
+                model.add(Activation('sigmoid'))
+            else:
+                loss = 'squared_hinge'
+                model.add(Activation('tanh'))
+        else:
+            model.add(Activation('softmax'))
+            loss = 'categorical_crossentropy'
+
+        if train_params['optimizer']['name'] == 'adam':
+            opt = keras.optimizers.Adam(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'sgd':
+            opt = keras.optimizers.SGD(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'RMSprop':
+            opt = keras.optimizers.RMSprop(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'Adagrad':
+            # opt = keras.optimizers.Adagrad(lr = train_params['optimizer']['learning_rate'])
+            opt = keras.optimizers.Adagrad()
+        elif train_params['optimizer']['name'] == 'Adadelta':
+            opt = keras.optimizers.Adadelta(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'Adamax':
+            opt = keras.optimizers.Adamax(lr = train_params['optimizer']['learning_rate'])
+        else:
+            opt = keras.optimizers.Nadam(lr = train_params['optimizer']['learning_rate'])
+
+        # add early stopping if activated
+        callbacks = None
+        callbacks = [EarlyStopping(
+            monitor         = "loss",
+            value           = 0.05,
+            min_epochs      = 50,
+            stopping_epochs = 50,
+            verbose         = 1)]
+        # compile the model
+        model.compile(
+            loss        =   loss,
+            metrics     =   ['accuracy'],
+            optimizer   =   opt)
+        
+        print(model.summary())
+
+        # train main net
+        model.fit(
+            x                   = self.data.get_train_data(as_matrix = True),
+            y                   = self.data.get_train_labels(),
+            batch_size          = int(train_params['batch_size']),
+            epochs              = 100,
+            shuffle             = True,
+            validation_split    = 0.25,
+            sample_weight       = self.data.get_train_weights())
+
+        return model
+
+    def roc_model_to_optimize(self, model):
+        from sklearn.metrics import roc_auc_score
+        model_prediction_vector = model.predict(self.data.get_test_data (as_matrix = True) )
+        roc_auc_score = roc_auc_score(self.data.get_test_labels(), model_prediction_vector)
+        return np.nanmin(roc_auc_score)
+
+    def evaluate_model_to_optimize(self, model):
+        test_accuracy_to_optimize = model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
+        return np.nanmin(test_accuracy_to_optimize)
+
+    def hyperopt_fcn(self,params):
+          from hyperopt import  STATUS_OK
+          model = self.model_to_optimize(params)
+          test_acc = np.nanmin(self.evaluate_model_to_optimize(model))
+          roc_auc_score = np.nanmin(self.roc_model_to_optimize(model))
+          print("roc_auc_score")
+          print(roc_auc_score)
+          K.clear_session()
+
+          return {'loss': -roc_auc_score,  'status': STATUS_OK}
+
+
 
     def get_ranges(self):
         if not self.data.binary_classification:
