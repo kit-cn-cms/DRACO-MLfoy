@@ -48,6 +48,11 @@ variables["ge4j_ge3t"] = [
     "RecoX_X_dPhi_lept",
     "RecoX_X_dR_lept",
 
+    #"RecoX_jet1_CvsL_deepJet",
+    #"RecoX_jet1_CvsB_deepJet",
+    #"RecoX_jet2_CvsL_deepJet",
+    #"RecoX_jet2_CvsB_deepJet",
+
     ]
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
 

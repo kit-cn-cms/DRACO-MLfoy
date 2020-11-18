@@ -97,11 +97,11 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath_Higgs = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_Higgs_as_X/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
-ntuplesPath_Z = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_Z_as_X/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
-ntuplesPath_cc = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_cc_as_X/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx"
-ntuplesPath_bb = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_bb_as_X/TTbb_Powheg_Openloops_new_pmx"
-ntuplesPath_bbfromttbar = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v3/match_bbfromttbar/TTbb_Powheg_Openloops_new_pmx"
+ntuplesPath_Higgs = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/cTag_infos/v1/match_Higgs_as_X/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath_Z = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/cTag_infos/v1/match_Z_as_X/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
+ntuplesPath_cc = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/cTag_infos/v1/match_cc_as_X/*"
+ntuplesPath_bb = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/cTag_infos/v1/match_bb_as_X/TTbb_Powheg_Openloops_new_pmx"
+ntuplesPath_bbfromttbar = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/cTag_infos/v1/match_bbfromttbar/TTbb_Powheg_Openloops_new_pmx"
 
 # add samples to dataset
 dataset.addSample(

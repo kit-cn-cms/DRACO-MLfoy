@@ -118,16 +118,16 @@ plotter = variablePlotter(
 
 naming = options.naming
 # add signal samples
-#plotter.addSample(
-#    sampleName      = "Zbb",
-#    sampleFile      = data_dir+"/sig_Z"+naming,
-#    plotColor       = ROOT.kBlue,
-#    XSscaling       = 1.,
-#    signalSample    = True)
+plotter.addSample(
+    sampleName      = "Zbb",
+    sampleFile      = data_dir+"/Zbb"+naming,
+    plotColor       = ROOT.kBlue,
+    XSscaling       = 1.,
+    signalSample    = True)
 
 plotter.addSample(
     sampleName      = "Hbb",
-    sampleFile      = data_dir+"/sig_Higgs"+naming,
+    sampleFile      = data_dir+"/Hbb"+naming,
     plotColor       = ROOT.kRed-4,
     XSscaling       = 1.,
     signalSample    = True)
@@ -135,30 +135,30 @@ plotter.addSample(
 # add background samples
 plotter.addSample(
     sampleName      = "bb",
-    sampleFile      = data_dir+"/sig_bb"+naming,
+    sampleFile      = data_dir+"/bb"+naming,
     XSscaling       = 1.,
     plotColor       = ROOT.kGray+3)
 
 
-#plotter.addSample(
-#    sampleName      = "cc",
-#    sampleFile      = data_dir+"/sig_cc"+naming,
-#    XSscaling       = 1.,
-#    plotColor       = ROOT.kGray+2)
+plotter.addSample(
+    sampleName      = "cc",
+    sampleFile      = data_dir+"/cc"+naming,
+    XSscaling       = 1.,
+    plotColor       = ROOT.kGray+2)
 
 plotter.addSample(
-    sampleName      = "ttbb",
-    sampleFile      = data_dir+"/bbfromttbar"+naming,
+    sampleName      = "ttTobb",
+    sampleFile      = data_dir+"/ttTobb"+naming,
     XSscaling       = 1.,
-    #plotColor       = ROOT.kGray+1,
-    plotColor       = ROOT.kGreen+3,
-    signalSample    = True)
+    plotColor       = ROOT.kGray+1)
+    #plotColor       = ROOT.kGreen+3,
+    #signalSample    = True)
 
-#plotter.addSample(
-#    sampleName      = "bkg",
-#    sampleFile      = data_dir+"/bkg"+naming,
-#    XSscaling       = 1.,
-#    plotColor       = ROOT.kGray)
+plotter.addSample(
+    sampleName      = "bkg",
+    sampleFile      = data_dir+"/bkg"+naming,
+    XSscaling       = 1.,
+    plotColor       = ROOT.kGray)
 
 
 
