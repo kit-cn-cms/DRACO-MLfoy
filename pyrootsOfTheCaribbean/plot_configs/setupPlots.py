@@ -30,7 +30,7 @@ def GetPlotColor( cls ):
         "ttmb":         ROOT.kAzure+3,
         "ttbb5FS":      ROOT.kAzure+3,
         "ttbar":        ROOT.kAzure+3,
-<<<<<<< HEAD
+
         "sig":          ROOT.kCyan,
         "Zbb":          ROOT.kBlue,
         "Hbb":          ROOT.kRed-4,
@@ -43,14 +43,13 @@ def GetPlotColor( cls ):
         "bkg_bb":       ROOT.kGray+3,
         "bkg_cc":       ROOT.kGray+3,
         "bkg_bbfromttbar": ROOT.kGray+3,
-=======
-        "sig":   ROOT.kCyan,
-        "bkg":   ROOT.kOrange,
+
+        #"sig":   ROOT.kCyan,
+        #"bkg":   ROOT.kOrange,
     
-        "b":    ROOT.kAzure+3,
-        "c":    ROOT.kSpring,
-        "lf":   ROOT.kOrange,
->>>>>>> c85827ec3c315ff52755b8a0cf32693c99568c89
+        #"b":    ROOT.kAzure+3,
+        #"c":    ROOT.kSpring,
+        #"lf":   ROOT.kOrange,
         }
 
     #if "ttZ" in cls: cls = "ttZ"
