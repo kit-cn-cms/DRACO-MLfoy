@@ -1,0 +1,248 @@
+RecoX_B1_Eta,-2.3999965191,2.3999829292,50,-,RecoX_B1_Eta
+RecoX_B2_Eta,-2.399979353,2.3999893665,50,-,RecoX_B2_Eta
+RecoX_B1_Phi,-3.1415860653,3.1415913105,50,-,RecoX_B1_Phi
+RecoX_B2_Phi,-3.1415808201,3.1415896416,50,-,RecoX_B2_Phi
+RecoX_B1_btagValue,0.0010787693,0.9999994636,50,-,RecoX_B1_btagValue
+RecoX_B2_btagValue,0.0010792612,0.9999994636,50,-,RecoX_B2_btagValue
+RecoX_B1_M,0.6466892958,347.411834717,50,-,RecoX_B1_M
+RecoX_B2_M,0.5178326964,347.411834717,50,-,RecoX_B2_M
+RecoX_B1_E,30.2253036499,4544.67871094,50,-,RecoX_B1_E
+RecoX_B2_E,30.2446422577,3784.57104492,50,-,RecoX_B2_E
+RecoX_B1_Pt,30.0000801086,1781.26367188,50,-,RecoX_B1_Pt
+RecoX_B2_Pt,30.0001220703,1781.26367188,50,-,RecoX_B2_Pt
+RecoX_B1_idx,0,9,50,-,RecoX_B1_idx
+RecoX_B2_idx,0,9,50,-,RecoX_B2_idx
+RecoX_X_Pt,0.2077936977,1873.58996582,50,-,RecoX_X_Pt
+RecoX_X_Eta,-7.1693167687,7.0300292969,50,-,RecoX_X_Eta
+RecoX_X_M,17.3088188171,3520.34375,50,-,RecoX_X_M
+RecoX_X_E,61.9797286987,5635.2578125,50,-,RecoX_X_E
+RecoX_X_openingAngle,0.0810868219,3.140560627,50,-,RecoX_X_openingAngle
+RecoX_X_dPhi,2.08616256714E-06,3.1415915489,50,-,RecoX_X_dPhi
+RecoX_X_dEta,8.34465026855E-07,3.1415729523,50,-,RecoX_X_dEta
+RecoX_X_dPt,2.28881835938E-05,1746.95019531,50,-,RecoX_X_dPt
+RecoX_X_dR,0.3868686557,4.4339222908,50,-,RecoX_X_dR
+Evt_btagValue_min,0.0010792612,0.9998608232,50,-,Evt_btagValue_min
+dnnH_ft_RecoHiggs_squaredDNNOutput,0.0005850693,0.9849601984,50,-,dnnH_ft_RecoHiggs_squaredDNNOutput
+dnnZ_ft_RecoZ_DNNOutput,0.0305533372,0.9852182269,50,-,dnnZ_ft_RecoZ_DNNOutput
+dnnZ_ft_RecoZ_Z_openingAngle,0.083611168,2.695674181,50,-,dnnZ_ft_RecoZ_Z_openingAngle
+dnnZ_ft_RecoZ_B1_idx,0,9,50,-,dnnZ_ft_RecoZ_B1_idx
+dnnZ_ft_RecoZ_B1_btagValue,0.0013548355,0.9999986887,50,-,dnnZ_ft_RecoZ_B1_btagValue
+dnnZ_ft_RecoZ_Z_Eta,-5.897395134,3.4710304737,50,-,dnnZ_ft_RecoZ_Z_Eta
+dnnH_ft_RecoHiggs_H_dR,0.3829381764,3.937769413,50,-,dnnH_ft_RecoHiggs_H_dR
+btagValue[3],0.3033026159,0.9999661446,50,-,btagValue[3]
+Evt_btagValue_dev_tagged,1.15666587419E-10,0.1198492944,50,-,Evt_btagValue_dev_tagged
+dnnZ_ft_RecoZ_Z_Pt,2.1769270897,1437.53063965,50,-,dnnZ_ft_RecoZ_Z_Pt
+dnnH_ft_RecoHiggs_B2_btagValue,0.0017089957,0.9999994636,50,-,dnnH_ft_RecoHiggs_B2_btagValue
+dnnZ_ft_RecoZ_Z_dPhi,0.000005126,3.1314444542,50,-,dnnZ_ft_RecoZ_Z_dPhi
+dnnZ_ft_RecoZ_transformedDNNOutput,-3.4572515488,4.1994681358,50,-,dnnZ_ft_RecoZ_transformedDNNOutput
+Evt_Dr_closestTo91TaggedJets,0.3829381764,4.0876197815,50,-,Evt_Dr_closestTo91TaggedJets
+dnnH_ft_RecoHiggs_H_E,64.4086532593,2341.69091797,50,-,dnnH_ft_RecoHiggs_H_E
+Evt_btagValue_avg,0.1536176652,0.9999237061,50,-,Evt_btagValue_avg
+dnnZ_ft_RecoZ_B2_btagValue,0.0017242485,0.9999992847,50,-,dnnZ_ft_RecoZ_B2_btagValue
+Jet_btagValue[1],0.0011301192,0.9999989867,50,-,Jet_btagValue[1]
+btagValue[0],0.3571515977,0.9999994636,50,-,btagValue[0]
+dnnZ_ft_RecoZ_Z_dR,0.3829381764,3.1766014099,50,-,dnnZ_ft_RecoZ_Z_dR
+Evt_btagValue_dev,2.50409293301E-09,0.2471799105,50,-,Evt_btagValue_dev
+dnnZ_ft_RecoZ_Z_M,17.3514385223,523.342712402,50,-,dnnZ_ft_RecoZ_Z_M
+dnnH_ft_RecoHiggs_H_dEta,2.20537185669E-06,2.9447946549,50,-,dnnH_ft_RecoHiggs_H_dEta
+dnnZ_ft_RecoZ_Z_E,63.7351150513,2423.30322266,50,-,dnnZ_ft_RecoZ_Z_E
+Jet_btagValue[0],0.0010792612,0.9999990463,50,-,Jet_btagValue[0]
+Evt_btagValue_avg_tagged,0.333183378,0.9999845028,50,-,Evt_btagValue_avg_tagged
+dnnZ_ft_RecoZ_B2_idx,0,9,50,-,dnnZ_ft_RecoZ_B2_idx
+dnnH_ft_RecoHiggs_H_M,36.7104911804,454.64666748,50,-,dnnH_ft_RecoHiggs_H_M
+Evt_btagValue_min_tagged,0.3033026159,0.9999661446,50,-,Evt_btagValue_min_tagged
+dnnH_ft_RecoHiggs_transformedDNNOutput,-3.697404623,4.8788437843,50,-,dnnH_ft_RecoHiggs_transformedDNNOutput
+dnnZ_ft_RecoZ_Z_dPt,0.0001373291,1261.1192627,50,-,dnnZ_ft_RecoZ_Z_dPt
+dnnH_ft_RecoHiggs_H_Eta,-7.4368987083,6.906621933,50,-,dnnH_ft_RecoHiggs_H_Eta
+dnnH_ft_RecoHiggs_B2_idx,0,9,50,-,dnnH_ft_RecoHiggs_B2_idx
+Jet_btagValue[3],0.0011613617,0.9999991059,50,-,Jet_btagValue[3]
+dnnH_ft_RecoHiggs_DNNOutput,0.0241882056,0.9924516082,50,-,dnnH_ft_RecoHiggs_DNNOutput
+dnnH_ft_RecoHiggs_H_openingAngle,0.083611168,3.1359262466,50,-,dnnH_ft_RecoHiggs_H_openingAngle
+btagValue[2],0.3035393357,0.999987483,50,-,btagValue[2]
+Evt_blr,0.1137119904,1,50,-,Evt_blr
+dnnH_ft_RecoHiggs_B1_btagValue,0.0015506118,0.9999992847,50,-,dnnH_ft_RecoHiggs_B1_btagValue
+dnnH_ft_RecoHiggs_H_dPt,0.0001678467,1435.75842285,50,-,dnnH_ft_RecoHiggs_H_dPt
+dnnZ_ft_RecoZ_squaredDNNOutput,0.0009335064,0.9706549644,50,-,dnnZ_ft_RecoZ_squaredDNNOutput
+btagValue[1],0.312171936,0.9999977946,50,-,btagValue[1]
+dnnH_ft_RecoHiggs_H_Pt,0.2106410563,1541.98120117,50,-,dnnH_ft_RecoHiggs_H_Pt
+dnnH_ft_RecoHiggs_B1_idx,0,9,50,-,dnnH_ft_RecoHiggs_B1_idx
+Jet_btagValue[2],0.001145229,0.9999994636,50,-,Jet_btagValue[2]
+dnnH_ft_RecoHiggs_H_dPhi,1.40964984894E-05,3.1415612698,50,-,dnnH_ft_RecoHiggs_H_dPhi
+dnnZ_ft_RecoZ_Z_dEta,1.89542770386E-05,2.2387981415,50,-,dnnZ_ft_RecoZ_Z_dEta
+Evt_btagValue_min,0.0009613994,0.3032931387,50,-,Evt_btagValue_min
+dnnH_ft_RecoHiggs_squaredDNNOutput,4.30121981481E-05,0.9911558628,50,-,dnnH_ft_RecoHiggs_squaredDNNOutput
+dnnZ_ft_RecoZ_DNNOutput,0.0131799299,0.9933502078,50,-,dnnZ_ft_RecoZ_DNNOutput
+dnnZ_ft_RecoZ_Z_openingAngle,0.0802509487,3.0692851543,50,-,dnnZ_ft_RecoZ_Z_openingAngle
+dnnZ_ft_RecoZ_B1_idx,0,9,50,-,dnnZ_ft_RecoZ_B1_idx
+dnnZ_ft_RecoZ_B1_btagValue,0.0010958351,0.9999990463,50,-,dnnZ_ft_RecoZ_B1_btagValue
+dnnZ_ft_RecoZ_Z_Eta,-6.8828663826,6.0420308113,50,-,dnnZ_ft_RecoZ_Z_Eta
+dnnH_ft_RecoHiggs_H_dR,0.3668012619,4.2758383751,50,-,dnnH_ft_RecoHiggs_H_dR
+btagValue[3],0.0009613994,0.3032947779,50,-,btagValue[3]
+Evt_btagValue_dev_tagged,5.29591171264E-12,0.107829988,50,-,Evt_btagValue_dev_tagged
+dnnZ_ft_RecoZ_Z_Pt,0.4397147,1698.06921387,50,-,dnnZ_ft_RecoZ_Z_Pt
+dnnH_ft_RecoHiggs_B2_btagValue,0.0013176542,0.9999995232,50,-,dnnH_ft_RecoHiggs_B2_btagValue
+dnnZ_ft_RecoZ_Z_dPhi,1.19209289551E-06,3.1415438652,50,-,dnnZ_ft_RecoZ_Z_dPhi
+dnnZ_ft_RecoZ_transformedDNNOutput,-4.3157925606,5.00649786,50,-,dnnZ_ft_RecoZ_transformedDNNOutput
+Evt_Dr_closestTo91TaggedJets,0.3780180812,99,50,-,Evt_Dr_closestTo91TaggedJets
+dnnH_ft_RecoHiggs_H_E,62.6932945251,2819.35205078,50,-,dnnH_ft_RecoHiggs_H_E
+Evt_btagValue_avg,0.1174933165,0.8247469664,50,-,Evt_btagValue_avg
+dnnZ_ft_RecoZ_B2_btagValue,0.0013672111,0.9999992847,50,-,dnnZ_ft_RecoZ_B2_btagValue
+Jet_btagValue[1],0.001042827,0.9999992251,50,-,Jet_btagValue[1]
+btagValue[0],0.3181651235,0.9999995232,50,-,btagValue[0]
+dnnZ_ft_RecoZ_Z_dR,0.3668012619,3.4737269878,50,-,dnnZ_ft_RecoZ_Z_dR
+Evt_btagValue_dev,0.0036622696,0.2481282502,50,-,Evt_btagValue_dev
+dnnZ_ft_RecoZ_Z_M,15.0831575394,637.911132812,50,-,dnnZ_ft_RecoZ_Z_M
+dnnH_ft_RecoHiggs_H_dEta,2.02655792236E-06,3.2581040859,50,-,dnnH_ft_RecoHiggs_H_dEta
+dnnZ_ft_RecoZ_Z_E,62.1670455933,3636.79638672,50,-,dnnZ_ft_RecoZ_Z_E
+Jet_btagValue[0],0.0009613994,0.9999992847,50,-,Jet_btagValue[0]
+Evt_btagValue_avg_tagged,0.3098701835,0.9999880195,50,-,Evt_btagValue_avg_tagged
+dnnZ_ft_RecoZ_B2_idx,0,9,50,-,dnnZ_ft_RecoZ_B2_idx
+dnnH_ft_RecoHiggs_H_M,29.3316135406,779.578186035,50,-,dnnH_ft_RecoHiggs_H_M
+Evt_btagValue_min_tagged,0.3033009768,0.9999790192,50,-,Evt_btagValue_min_tagged
+dnnH_ft_RecoHiggs_transformedDNNOutput,-5.0204334259,5.4144845009,50,-,dnnH_ft_RecoHiggs_transformedDNNOutput
+dnnZ_ft_RecoZ_Z_dPt,0.0001869202,1635.83337402,50,-,dnnZ_ft_RecoZ_Z_dPt
+dnnH_ft_RecoHiggs_H_Eta,-8.3576612473,8.229672432,50,-,dnnH_ft_RecoHiggs_H_Eta
+dnnH_ft_RecoHiggs_B2_idx,0,9,50,-,dnnH_ft_RecoHiggs_B2_idx
+Jet_btagValue[3],0.0009884723,0.9999993443,50,-,Jet_btagValue[3]
+dnnH_ft_RecoHiggs_DNNOutput,0.0065583684,0.9955680966,50,-,dnnH_ft_RecoHiggs_DNNOutput
+dnnH_ft_RecoHiggs_H_openingAngle,0.0824364647,3.1320383549,50,-,dnnH_ft_RecoHiggs_H_openingAngle
+btagValue[2],0.3033009768,0.9999790192,50,-,btagValue[2]
+Evt_blr,0.0119339768,0.9999890327,50,-,Evt_blr
+dnnH_ft_RecoHiggs_B1_btagValue,0.0011360794,0.999999404,50,-,dnnH_ft_RecoHiggs_B1_btagValue
+dnnH_ft_RecoHiggs_H_dPt,3.0517578125E-05,1623.1953125,50,-,dnnH_ft_RecoHiggs_H_dPt
+dnnZ_ft_RecoZ_squaredDNNOutput,0.0001737105,0.9867446423,50,-,dnnZ_ft_RecoZ_squaredDNNOutput
+btagValue[1],0.3044686019,0.9999952912,50,-,btagValue[1]
+dnnH_ft_RecoHiggs_H_Pt,0.0748171508,1691.66870117,50,-,dnnH_ft_RecoHiggs_H_Pt
+dnnH_ft_RecoHiggs_B1_idx,0,9,50,-,dnnH_ft_RecoHiggs_B1_idx
+Jet_btagValue[2],0.0010008117,0.9999995232,50,-,Jet_btagValue[2]
+dnnH_ft_RecoHiggs_H_dPhi,6.91413879395E-06,3.1415810585,50,-,dnnH_ft_RecoHiggs_H_dPhi
+dnnZ_ft_RecoZ_Z_dEta,7.7486038208E-07,2.7072942257,50,-,dnnZ_ft_RecoZ_Z_dEta
+Evt_btagValue_min,0.0010792612,0.9998608232,50,-,Evt_btagValue_min
+dnnZ_ft_RecoX_B2_idx,0,9,50,-,dnnZ_ft_RecoX_B2_idx
+dnnZ_ft_RecoX_X_openingAngle,0.0794576332,2.3852932453,50,-,dnnZ_ft_RecoX_X_openingAngle
+dnnH_ft_RecoX_X_Pt,2.1769270897,1437.53063965,50,-,dnnH_ft_RecoX_X_Pt
+dnnZ_ft_RecoX_transformedDNNOutput,-4.2120671272,1.1466379166,50,-,dnnZ_ft_RecoX_transformedDNNOutput
+dnnZ_ft_RecoX_DNNOutput,0.0145994099,0.7588962913,50,-,dnnZ_ft_RecoX_DNNOutput
+dnnH_ft_RecoX_transformedDNNOutput,-4.2120671272,1.1466379166,50,-,dnnH_ft_RecoX_transformedDNNOutput
+dnnH_ft_RecoX_X_dEta,1.00135803223E-05,2.2428674698,50,-,dnnH_ft_RecoX_X_dEta
+btagValue[3],0.3033026159,0.9999661446,50,-,btagValue[3]
+dnnZ_ft_RecoX_X_dR,0.3829381764,3.1766014099,50,-,dnnZ_ft_RecoX_X_dR
+dnnH_ft_RecoX_X_Eta,-5.897395134,3.9844624996,50,-,dnnH_ft_RecoX_X_Eta
+dnnZ_ft_RecoX_B1_idx,0,9,50,-,dnnZ_ft_RecoX_B1_idx
+dnnH_ft_RecoX_B2_btagValue,0.0014400266,0.9999992847,50,-,dnnH_ft_RecoX_B2_btagValue
+Evt_btagValue_dev_tagged,1.15666587419E-10,0.1198492944,50,-,Evt_btagValue_dev_tagged
+dnnZ_ft_RecoX_X_dPt,0.0001373291,1049.7923584,50,-,dnnZ_ft_RecoX_X_dPt
+dnnZ_ft_RecoX_squaredDNNOutput,0.0002131428,0.5759235621,50,-,dnnZ_ft_RecoX_squaredDNNOutput
+dnnH_ft_RecoX_X_dR,0.3829381764,3.1766014099,50,-,dnnH_ft_RecoX_X_dR
+dnnZ_ft_RecoX_X_M,16.059923172,490.301757812,50,-,dnnZ_ft_RecoX_X_M
+dnnZ_ft_RecoX_X_E,63.2671203613,2579.14941406,50,-,dnnZ_ft_RecoX_X_E
+Evt_Dr_closestTo91TaggedJets,0.3829381764,4.0876197815,50,-,Evt_Dr_closestTo91TaggedJets
+dnnH_ft_RecoX_B2_idx,0,9,50,-,dnnH_ft_RecoX_B2_idx
+dnnH_ft_RecoX_X_openingAngle,0.0794576332,2.3852932453,50,-,dnnH_ft_RecoX_X_openingAngle
+dnnZ_ft_RecoX_X_Pt,2.1769270897,1437.53063965,50,-,dnnZ_ft_RecoX_X_Pt
+Jet_btagValue[1],0.0011301192,0.9999989867,50,-,Jet_btagValue[1]
+btagValue[0],0.3571515977,0.9999994636,50,-,btagValue[0]
+dnnZ_ft_RecoX_X_dEta,1.00135803223E-05,2.2428674698,50,-,dnnZ_ft_RecoX_X_dEta
+dnnH_ft_RecoX_X_dPt,0.0001373291,1049.7923584,50,-,dnnH_ft_RecoX_X_dPt
+dnnH_ft_RecoX_X_M,16.059923172,490.301757812,50,-,dnnH_ft_RecoX_X_M
+Evt_btagValue_dev,2.50409293301E-09,0.2471799105,50,-,Evt_btagValue_dev
+dnnH_ft_RecoX_X_dPhi,6.16908073425E-06,3.1311717033,50,-,dnnH_ft_RecoX_X_dPhi
+Jet_btagValue[0],0.0010792612,0.9999990463,50,-,Jet_btagValue[0]
+Evt_btagValue_avg_tagged,0.333183378,0.9999845028,50,-,Evt_btagValue_avg_tagged
+dnnH_ft_RecoX_squaredDNNOutput,0.0002131428,0.5759235621,50,-,dnnH_ft_RecoX_squaredDNNOutput
+dnnZ_ft_RecoX_B2_btagValue,0.0014400266,0.9999992847,50,-,dnnZ_ft_RecoX_B2_btagValue
+dnnH_ft_RecoX_DNNOutput,0.0145994117,0.7588962913,50,-,dnnH_ft_RecoX_DNNOutput
+Evt_btagValue_avg,0.1536176652,0.9999237061,50,-,Evt_btagValue_avg
+dnnZ_ft_RecoX_X_dPhi,6.16908073425E-06,3.1311717033,50,-,dnnZ_ft_RecoX_X_dPhi
+Evt_btagValue_min_tagged,0.3033026159,0.9999661446,50,-,Evt_btagValue_min_tagged
+dnnH_ft_RecoX_B1_idx,0,9,50,-,dnnH_ft_RecoX_B1_idx
+dnnH_ft_RecoX_X_E,63.2671203613,2579.14941406,50,-,dnnH_ft_RecoX_X_E
+Jet_btagValue[3],0.0011613617,0.9999991059,50,-,Jet_btagValue[3]
+dnnZ_ft_RecoX_B1_btagValue,0.0014620654,0.9999990463,50,-,dnnZ_ft_RecoX_B1_btagValue
+btagValue[2],0.3035393357,0.999987483,50,-,btagValue[2]
+Evt_blr,0.1137119904,1,50,-,Evt_blr
+btagValue[1],0.312171936,0.9999977946,50,-,btagValue[1]
+dnnZ_ft_RecoX_X_Eta,-5.897395134,3.9844624996,50,-,dnnZ_ft_RecoX_X_Eta
+dnnH_ft_RecoX_B1_btagValue,0.0014620654,0.9999990463,50,-,dnnH_ft_RecoX_B1_btagValue
+Jet_btagValue[2],0.001145229,0.9999994636,50,-,Jet_btagValue[2]
+Evt_btagValue_min,0.0009613994,0.3032931387,50,-,Evt_btagValue_min
+dnnZ_ft_RecoX_B2_idx,0,9,50,-,dnnZ_ft_RecoX_B2_idx
+dnnZ_ft_RecoX_X_openingAngle,0.0802509487,3.0692851543,50,-,dnnZ_ft_RecoX_X_openingAngle
+dnnH_ft_RecoX_X_Pt,0.4397147,1304.02294922,50,-,dnnH_ft_RecoX_X_Pt
+dnnZ_ft_RecoX_transformedDNNOutput,-5.5628209114,1.2602803707,50,-,dnnZ_ft_RecoX_transformedDNNOutput
+btagValue[0],0.3181651235,0.9999995232,50,-,btagValue[0]
+btagValue[1],0.3044686019,0.9999977946,50,-,btagValue[1]
+btagValue[2],0.3033009768,0.999987483,50,-,btagValue[2]
+btagValue[3],0.0009613994,0.9999661446,50,-,btagValue[3]
+Jet_btagValue[0],0.0009613994,0.9999992847,50,-,Jet_btagValue[0]
+Jet_btagValue[1],0.001042827,0.9999992251,50,-,Jet_btagValue[1]
+Jet_btagValue[2],0.0010008117,0.9999995232,50,-,Jet_btagValue[2]
+Jet_btagValue[3],0.0009884723,0.9999993443,50,-,Jet_btagValue[3]
+Evt_btagValue_avg,0.1174933165,0.9999237061,50,-,Evt_btagValue_avg
+Evt_btagValue_avg_tagged,0.3098701835,0.9999880195,50,-,Evt_btagValue_avg_tagged
+Evt_btagValue_dev,2.50409293301E-09,0.2481282502,50,-,Evt_btagValue_dev
+Evt_btagValue_dev_tagged,5.29591171264E-12,0.1198492944,50,-,Evt_btagValue_dev_tagged
+Evt_btagValue_min,0.0009613994,0.9998608232,50,-,Evt_btagValue_min
+Evt_btagValue_min_tagged,0.3033009768,0.9999790192,50,-,Evt_btagValue_min_tagged
+Evt_Dr_closestTo91TaggedJets,0.3780180812,99,50,-,Evt_Dr_closestTo91TaggedJets
+Evt_blr,0.0119339768,1,50,-,Evt_blr
+dnnZ_ft_RecoX_B1_btagValue,0.0011624567,0.999999404,50,-,dnnZ_ft_RecoX_B1_btagValue
+dnnZ_ft_RecoX_B2_btagValue,0.0009613994,0.9999992847,50,-,dnnZ_ft_RecoX_B2_btagValue
+dnnZ_ft_RecoX_B1_idx,0,9,50,-,dnnZ_ft_RecoX_B1_idx
+dnnZ_ft_RecoX_B2_idx,0,9,50,-,dnnZ_ft_RecoX_B2_idx
+dnnZ_ft_RecoX_X_dPhi,2.38418579102E-07,3.1415748596,50,-,dnnZ_ft_RecoX_X_dPhi
+dnnZ_ft_RecoX_X_dEta,7.7486038208E-07,2.5716266632,50,-,dnnZ_ft_RecoX_X_dEta
+dnnZ_ft_RecoX_X_dPt,0.0001373291,1203.66687012,50,-,dnnZ_ft_RecoX_X_dPt
+dnnZ_ft_RecoX_X_dR,0.3668012619,3.6432204247,50,-,dnnZ_ft_RecoX_X_dR
+dnnZ_ft_RecoX_X_Pt,0.4397147,1437.53063965,50,-,dnnZ_ft_RecoX_X_Pt
+dnnZ_ft_RecoX_X_Eta,-6.8828663826,6.0420308113,50,-,dnnZ_ft_RecoX_X_Eta
+dnnZ_ft_RecoX_X_M,15.0831575394,779.578186035,50,-,dnnZ_ft_RecoX_X_M
+dnnZ_ft_RecoX_X_E,62.1670455933,2819.35205078,50,-,dnnZ_ft_RecoX_X_E
+dnnZ_ft_RecoX_X_openingAngle,0.0794576332,3.0692851543,50,-,dnnZ_ft_RecoX_X_openingAngle
+dnnZ_ft_RecoX_DNNOutput,0.0038232608,0.7790743709,50,-,dnnZ_ft_RecoX_DNNOutput
+dnnZ_ft_RecoX_squaredDNNOutput,1.46173233588E-05,0.6069568992,50,-,dnnZ_ft_RecoX_squaredDNNOutput
+dnnZ_ft_RecoX_transformedDNNOutput,-5.5628209114,1.2602803707,50,-,dnnZ_ft_RecoX_transformedDNNOutput
+dnnH_ft_RecoX_B1_btagValue,0.0011624567,0.999999404,50,-,dnnH_ft_RecoX_B1_btagValue
+dnnH_ft_RecoX_B2_btagValue,0.0009613994,0.9999992847,50,-,dnnH_ft_RecoX_B2_btagValue
+dnnH_ft_RecoX_B1_idx,0,9,50,-,dnnH_ft_RecoX_B1_idx
+dnnH_ft_RecoX_B2_idx,0,9,50,-,dnnH_ft_RecoX_B2_idx
+dnnH_ft_RecoX_X_dPhi,2.38418579102E-07,3.1415748596,50,-,dnnH_ft_RecoX_X_dPhi
+dnnH_ft_RecoX_X_dEta,7.7486038208E-07,2.5716266632,50,-,dnnH_ft_RecoX_X_dEta
+dnnH_ft_RecoX_X_dPt,0.0001373291,1203.66687012,50,-,dnnH_ft_RecoX_X_dPt
+dnnH_ft_RecoX_X_dR,0.3668012619,3.6432204247,50,-,dnnH_ft_RecoX_X_dR
+dnnH_ft_RecoX_X_Pt,0.4397147,1437.53063965,50,-,dnnH_ft_RecoX_X_Pt
+dnnH_ft_RecoX_X_Eta,-6.8828663826,6.0420308113,50,-,dnnH_ft_RecoX_X_Eta
+dnnH_ft_RecoX_X_M,15.0831575394,779.578186035,50,-,dnnH_ft_RecoX_X_M
+dnnH_ft_RecoX_X_E,62.1670455933,2819.35205078,50,-,dnnH_ft_RecoX_X_E
+dnnH_ft_RecoX_X_openingAngle,0.0794576332,3.0692851543,50,-,dnnH_ft_RecoX_X_openingAngle
+dnnH_ft_RecoX_DNNOutput,0.0038232608,0.7790743709,50,-,dnnH_ft_RecoX_DNNOutput
+dnnH_ft_RecoX_squaredDNNOutput,1.46173233588E-05,0.6069568992,50,-,dnnH_ft_RecoX_squaredDNNOutput
+dnnH_ft_RecoX_transformedDNNOutput,-5.5628209114,1.2602803707,50,-,dnnH_ft_RecoX_transformedDNNOutput
+RecoX_X_M,0,500,50,-,boson candidate mass [GeV]
+RecoX_X_openingAngle,0,3.141,50,-,opening angle of boson candidate
+RecoX_X_dR,0.4,4,50,-,#DeltaR of boson candidate
+RecoX_X_Pt,0,500,50,-,boson candidate p_{T}
+RecoX_X_btagAverage,0,1,50,-,average of the two b-tag values
+RecoX_X_dR_lept,0,6,50,-,#DeltaR between boson and lepton
+RecoX_jet2_dEta_lept,0,4.7,50,-,#Delta#eta between second additional jet and lepton
+RecoX_jet1_dR_lept,0.4,4.4,50,-,#DeltaR between first additional jet and lepton
+RecoX_jet2_btagValue,0,1,50,-,b-tag value of second additional jet
+RecoX_jet1_btagValue,0,1,50,-,b-tag value of first additional jet
+RecoX_jet1_dEta_lept,0,4.7,50,-,#Delta#eta between first additional jet and lepton
+RecoX_jet2_dR_lept,0.4,5.5,50,-,#DeltaR between second additional jet and lepton
+RecoX_jet1_E,30,1500,50,-,Energy of first additional jet
+RecoX_jet2_Pt,30,500,50,-,p_{T} of second additional jet
+RecoX_X_dEta,0,4.7,50,-,#Delta#eta of boson candidate
+RecoX_jet1_Pt,30,700,50,-,p_{T} of first additional jet
+RecoX_jet2_M,0,60,50,-,Mass of second additional jet [GeV]
+RecoX_X_dPhi,0,3.14,50,-,#Delta#phi of boson candidate
+RecoX_jet2_E,30,1100,50,-,Energy of second additional jet
+RecoX_X_dPt,0,700,50,-,#Deltap_{T} of boson candidate
+RecoX_jet1_M,0,120,50,-,Mass of first additional jet [GeV]
+RecoX_X_E,0,1700,50,-,boson candidate energy
+RecoX_X_Eta,-5,5,50,-,#eta of boson candidate
+TightLepton_E_0,0,1000,50,-,lepton energy
+TightLepton_Eta_0,-2.4,2.4,50,-,lepton #eta
+TightLepton_M_0,-0.3,0.3,50,-,lepton mass
+TightLepton_Phi_0,-3.1415,3.1415,50,-,lepton #phi
+TightLepton_Pt_0,0,550,50,-,lepton p_{T}

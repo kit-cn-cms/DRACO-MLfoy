@@ -164,7 +164,7 @@ class plotDiscriminators:
             # initialize canvas
             canvas = setup.drawHistsOnCanvas(
                 sigHists, bkgHists, plotOptions,
-                canvasName = node_cls+" final discriminator")
+                canvasName = node_cls+" final discriminant")
 
             # setup legend
             legend = setup.getLegend()
@@ -198,7 +198,7 @@ class plotDiscriminators:
 
         # add the histograms together
         workdir = os.path.dirname(self.plotdir[:-1])
-        cmd = "pdfunite "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminators.pdf"
+        cmd = "pdfunite "+str(self.plotdir)+"/finaldiscr_*.pdf "+str(workdir)+"/discriminants.pdf"
         print(cmd)
         os.system(cmd)
 
@@ -249,6 +249,9 @@ class plotOutputNodes:
         self.printROCScore = printROC
         self.privateWork = privateWork
 
+        allBKGhists = []
+        allSIGhists = []
+
         # generate one plot per output node
         for i, node_cls in enumerate(self.event_classes):
             if i>=self.n_classes: continue
@@ -272,6 +275,11 @@ class plotOutputNodes:
             bkgLabels = []
             weightIntegral = 0
 
+
+            sig_values = []
+            sig_labels = []
+            sig_weights = []
+
             # loop over all classes to fill hists according to truth level class
             for j, truth_cls in enumerate(self.event_classes):
                 if j>=self.n_classes: continue
@@ -286,9 +294,9 @@ class plotOutputNodes:
 
                 if j in signalIndex:
                     # signal histogram
-                    sig_values  = filtered_values
-                    sig_label   = str(truth_cls)
-                    sig_weights = filtered_weights
+                    sig_values.append(filtered_values)
+                    sig_labels.append(str(truth_cls))
+                    sig_weights.append(filtered_weights)
                 else:
                     # background histograms
                     weightIntegral += sum(filtered_weights)
@@ -306,6 +314,68 @@ class plotOutputNodes:
                     bkgHists.append( histogram )
                     bkgLabels.append( truth_cls )
 
+            
+            ###############################################
+            # for more than one signal class
+            ###############################################
+            allBKGhists.append( bkgHists )
+            sigHists = []
+            scaleFactors = []
+            for iSig in range(len(sig_labels)):
+                # setup signal histogram
+                sigHist = setup.setupHistogram(
+                    values    = sig_values[iSig],
+                    weights   = sig_weights[iSig],
+                    nbins     = self.nbins,
+                    bin_range = self.bin_range,
+                    color     = setup.GetPlotColor(sig_labels[iSig]),
+                    xtitle    = str(sig_labels[iSig])+" at "+str(node_cls)+" node",
+                    ytitle    = setup.GetyTitle(self.privateWork),
+                    filled    = False)
+
+                # set signal histogram linewidth
+                sigHist.SetLineWidth(3)
+
+                # set scalefactor
+                if self.sigScale == -1:
+                    scaleFactor = weightIntegral/(sum(sig_weights[iSig])+1e-9)
+                else:
+                    scaleFactor = float(self.sigScale)
+                allSIGhists.append(sigHist.Clone())
+                sigHist.Scale(scaleFactor)
+                sigHists.append(sigHist)
+                scaleFactors.append(scaleFactor)
+
+
+            # rescale histograms if privateWork is enabled
+            if privateWork:
+                for sHist in sigHists:
+                    sHist.Scale(1./sHist.Integral())
+                for bHist in bkgHists:
+                    bHist.Scale(1./weightIntegral)
+
+            plotOptions = {
+                "ratio":      ratio,
+                "ratioTitle": "#frac{scaled Signal}{Background}",
+                "logscale":   self.logscale}
+
+            # initialize canvas
+            canvas = setup.drawHistsOnCanvas(
+                sigHists, bkgHists, plotOptions,
+                canvasName = node_cls+" node")
+
+            # setup legend
+            legend = setup.getLegend()
+
+            # add signal entry
+            for i, h in enumerate(sigHists):
+                legend.AddEntry(h, sig_labels[i]+" x {:4.0f}".format(scaleFactors[i]), "L")
+
+
+            '''    
+            ###############################################
+            # for one signal class
+            ###############################################
             # setup signal histogram
             sigHist = setup.setupHistogram(
                 values    = sig_values,
@@ -316,6 +386,7 @@ class plotOutputNodes:
                 xtitle    = str(sig_label)+" at "+str(node_cls)+" node",
                 ytitle    = setup.GetyTitle(self.privateWork),
                 filled    = False)
+            
 
             # set signal histogram linewidth
             sigHist.SetLineWidth(3)
@@ -326,6 +397,7 @@ class plotOutputNodes:
             else:
                 scaleFactor = float(self.sigScale)
             sigHist.Scale(scaleFactor)
+            
 
             # rescale histograms if privateWork enabled
             if privateWork:
@@ -348,6 +420,8 @@ class plotOutputNodes:
 
             # add signal entry
             legend.AddEntry(sigHist, sig_label+" x {:4.0f}".format(scaleFactor), "L")
+
+            '''
 
             # add background entries
             for i, h in enumerate(bkgHists):
