@@ -333,6 +333,9 @@ class Dataset:
                 for ftName in self.friendTrees:
                     # get path to friend tree file
                     friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
+                    if not os.path.exists(friendtreepath):
+                        print("friend tree doesnt exist {}".format(friendtreepath))
+                        continue
                     # collect all variables that belong to this friend tree
                     friendtreevars = [v.replace(ftName+"_ft_","") for v in self.variables if v.startswith(ftName+"_ft_")]
                     # open friend tree root file
@@ -343,7 +346,7 @@ class Dataset:
                         # rename columns
                         renameDict = {v: "_ft_".join([ftName, v]) for v in friendtreevars}
                         ft_df = ft_df.rename(columns=renameDict)
-                        
+                        print(df.shape[0],ft_df.shape[0])
                         # concatenate dataframes
                         df = pd.concat([df, ft_df], axis = 1)
 

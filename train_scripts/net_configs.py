@@ -16,6 +16,20 @@ config_dict["ttH_SL_legacy"] = {
         "earlystopping_epochs":     20,
         }
 
+config_dict["flavorTag"] = {
+        "layers":                   [100,100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               2048,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.1,
+        "earlystopping_epochs":     50,
+        }
+
 config_dict["ttZ_2018_final"] = {
         "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",

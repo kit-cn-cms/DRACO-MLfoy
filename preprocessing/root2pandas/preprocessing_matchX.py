@@ -60,15 +60,20 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoHiggs_matchable > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoX_matchable > 0.)"
 
 base_selection = "("+base+")"
 
 # define output classes
 sig_categories = root2pandas.EventCategories()
 sig_categories.addCategory("sig_Higgs", selection = None)
+sig_categories.addCategory("sig_Z", selection = None)
+
 bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg_Higgs", selection = None)
+bkg_categories.addCategory("bkg_bb", selection = None)
+bkg_categories.addCategory("bkg_cc", selection = None)
+bkg_categories.addCategory("bkg_lf", selection = None)
+bkg_categories.addCategory("bkg_misc", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -82,23 +87,69 @@ dataset = root2pandas.Dataset(
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
+##########################################
+##########################################
+#  Maybe loop over all ntuples for training,
+#  so that e.g. for Higgs ntuple:
+#  H,Z,bb,cc,lf,misc hypothesis is apllied
+###########################################
+###########################################
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchHiggs_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/matchX/multiclassJAN"
+
+ntuplepathList = []
+ntuplepathList.append(ntuplesPath+"/match_Higgs_as_X_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx")
+ntuplepathList.append(ntuplesPath+"/match_Z_as_X_v1/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8")
+ntuplepathList.append(ntuplesPath+"/match_bb_as_X_v1/TTbb_Powheg_Openloops_new_pmx")
+ntuplepathList.append(ntuplesPath+"/match_cc_as_X_v1/????")
+ntuplepathList.append(ntuplesPath+"/match_lf_as_X_v1/????")
+ntuplepathList.append(ntuplesPath+"/match_misc_as_X_v1/????")
+
 
 # add samples to dataset
-dataset.addSample(
-    sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*sig.root",
-    categories  = sig_categories,
-    lumiWeight  = 41.5,
-    )
+for i in len(ntuplesPathList):
 
-dataset.addSample(
-    sampleName  = "bkg_Higgs",
-    ntuples     = ntuplesPath+"/*bkg.root",
-    categories  = bkg_categories,
-    lumiWeight  = 41.5,
-    )
+    dataset.addSample(
+        sampleName  = "sig_Higgs",
+        ntuples     = ntuplesPathList[i]+"/*Tree_Higgs.root",
+        categories  = sig_categories,
+        lumiWeight  = 41.5,
+        )
+
+    dataset.addSample(
+        sampleName  = "sig_Z",
+        ntuples     = ntuplesPath[i]+"/*Tree_Z.root",
+        categories  = sig_categories,
+        lumiWeight  = 41.5,
+        )
+
+    dataset.addSample(
+        sampleName  = "bkg_bb",
+        ntuples     = ntuplesPath[i]+"/*Tree_bb.root",
+        categories  = bkg_categories,
+        lumiWeight  = 41.5,
+        )
+
+    dataset.addSample(
+        sampleName  = "bkg_cc",
+        ntuples     = ntuplesPath[i]+"/*Tree_cc.root",
+        categories  = bkg_categories,
+        lumiWeight  = 41.5,
+        )
+
+    dataset.addSample(
+        sampleName  = "bkg_lf",
+        ntuples     = ntuplesPath[i]+"/*Tree_lf.root",
+        categories  = bkg_categories,
+        lumiWeight  = 41.5,
+        )
+
+    dataset.addSample(
+        sampleName  = "bkg_misc",
+        ntuples     = ntuplesPath[i]+"/*Tree_misc.root",
+        categories  = bkg_categories,
+        lumiWeight  = 41.5,
+        )
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)

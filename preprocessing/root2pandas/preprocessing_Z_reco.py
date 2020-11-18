@@ -66,9 +66,9 @@ base_selection = "("+base+")"
 
 # define output classes
 sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig", selection = None)
+sig_categories.addCategory("sig_Z", selection = None)
 bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg", selection = None)
+bkg_categories.addCategory("bkg_Z", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -83,18 +83,18 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/matched_Z_bosons/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchZ_v1/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig",
+    sampleName  = "sig_Z",
     ntuples     = ntuplesPath+"/*sig.root",
     categories  = sig_categories,
     lumiWeight  = 41.5,
     )
 
 dataset.addSample(
-    sampleName  = "bkg",
+    sampleName  = "bkg_Z",
     ntuples     = ntuplesPath+"/*bkg.root",
     categories  = bkg_categories,
     lumiWeight  = 41.5,
@@ -109,7 +109,7 @@ additional_variables = [
     "N_Jets",
     "N_BTagsM",
     "Weight_XS",
-    "Weight_CSV",
+    "Weight_btagSF",
     "Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 

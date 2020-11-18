@@ -40,7 +40,7 @@ class Sample:
             self.data = store.select("data", stop = self.stop)
         print("\tnevents: {}".format(self.data.shape[0]))
         # hack
-        self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
+        #self.data["Weight_XS"] = self.data["Weight_XS"].astype(float)
 
     def cutData(self, cut, variables, lumi_scale):
         # if lumi scale was set to zero set scale to 1
@@ -57,12 +57,12 @@ class Sample:
         category_cut = JTcut.getJTstring(cut)
 
         # only save variables that are needed
-        variables += ["Weight_XS", "Weight_GEN_nom"]
+        #variables += ["Weight_XS", "Weight_GEN_nom"]
         self.cut_data[cut] = self.data.query(category_cut)
         self.cut_data[cut] = self.cut_data[cut][list(set(variables))]
 
         # add weight entry for scaling
-        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: x.Weight_XS*x.Weight_GEN_nom*scale*self.XSScale)
+        self.cut_data[cut] = self.cut_data[cut].assign(weight = lambda x: 1.*scale*self.XSScale)
 
 
 

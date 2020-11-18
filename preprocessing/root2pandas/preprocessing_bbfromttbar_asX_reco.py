@@ -60,15 +60,15 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoHiggs_matchable > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoX_matchable > 0.)"
 
 base_selection = "("+base+")"
 
 # define output classes
 sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig_Higgs", selection = None)
+sig_categories.addCategory("bbfromttbar", selection = None)
 bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg_Higgs", selection = None)
+bkg_categories.addCategory("bkg", selection = None)
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -83,18 +83,18 @@ dataset = root2pandas.Dataset(
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchHiggs_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
+ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN/matchX/v2/match_bbfromttbar/TTbb_Powheg_Openloops_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*sig.root",
+    sampleName  = "bbfromttbar",
+    ntuples     = ntuplesPath+"/*Tree.root",
     categories  = sig_categories,
     lumiWeight  = 41.5,
     )
 
 dataset.addSample(
-    sampleName  = "bkg_Higgs",
+    sampleName  = "bkg_ttbar",
     ntuples     = ntuplesPath+"/*bkg.root",
     categories  = bkg_categories,
     lumiWeight  = 41.5,

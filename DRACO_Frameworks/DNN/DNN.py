@@ -450,11 +450,11 @@ class DNN():
         print("wrote net configs to "+str(json_file))
 
         '''  save configurations of variables for plotscript '''
-        plot_file = self.cp_path+"/plot_config.csv"
-        variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
-        variables = variable_configs.loc[self.train_variables]
-        variables.to_csv(plot_file, sep = ",")
-        print("wrote config of input variables to {}".format(plot_file))
+        #plot_file = self.cp_path+"/plot_config.csv"
+        #variable_configs = pd.read_csv(basedir+"/pyrootsOfTheCaribbean/plot_configs/variableConfig.csv").set_index("variablename", drop = True)
+        #variables = variable_configs.loc[self.train_variables]
+        #variables.to_csv(plot_file, sep = ",")
+        #print("wrote config of input variables to {}".format(plot_file))
 
         # Serialize the test inputs for the analysis of the gradients
         if get_gradients:

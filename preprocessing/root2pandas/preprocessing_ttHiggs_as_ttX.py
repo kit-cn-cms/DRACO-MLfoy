@@ -60,15 +60,51 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoHiggs_matchable > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0. and matchH_ft_RecoX_matchable < 100.)"
 
-base_selection = "("+base+")"
+# single lepton selections
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1 or ( Triggered_HLT_Ele32_WPTight_Gsf_L1DoubleEG_vX == 1 and Triggered_HLT_Ele32_WPTight_Gsf_2017SeedsX == 1 )))"
+
+base_selection = "("+base+" and ("+single_mu_sel+" or "+single_el_sel+"))"
 
 # define output classes
-sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig_Higgs", selection = None)
-bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg_Higgs", selection = None)
+ttH_categories = root2pandas.EventCategories()
+ttH_categories.addCategory("ttH",       selection = None)
+ttH_categories.addCategory("ttHbb",     selection = "(matchH_ft_RecoX_matchable > 0.)")
+ttH_categories.addCategory("ttHnonbb",  selection = "(matchH_ft_RecoX_matchable <= 0.)")
+#ttH_categories.addCategory("ttX",       selection = "(matchH_ft_RecoX_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+#ttH_categories.addCategory("ttXbb",     selection = "(matchH_ft_RecoX_matchable > 0.)")
+#ttH_categories.addCategory("ttXnonbb",  selection = "(matchH_ft_RecoX_matchable <= 0.)")
+
+ttZ_categories = root2pandas.EventCategories()
+ttZ_categories.addCategory("ttZ",       selection = None)
+ttZ_categories.addCategory("ttZbb",     selection = "(matchZ_ft_RecoX_matchable > 0.)")
+ttZ_categories.addCategory("ttZnonbb",  selection = "(matchZ_ft_RecoX_matchable <= 0)")
+#ttZ_categories.addCategory("ttX",       selection = "(matchH_ft_RecoX_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)")
+#ttZ_categories.addCategory("ttXbb",     selection = "(matchZ_ft_RecoX_matchable > 0.)")
+#ttZ_categories.addCategory("ttXnonbb",  selection = "(matchZ_ft_RecoX_matchable <= 0.)")
+
+ttbar_categories = root2pandas.EventCategories()
+#ttbar_categories.addCategory("ttbar",   selection = None)
+#ttbar_categories.addCategory("ttnonbb", selection = "(GenEvt_I_TTPlusBB == 0)")
+ttbar_categories.addCategory("ttlf",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 0)")
+ttbar_categories.addCategory("ttcc",    selection = "(GenEvt_I_TTPlusBB == 0 and GenEvt_I_TTPlusCC == 1)")
+#ttbar_categories.addCategory("ttbb5FS", selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+
+ttbb_categories = root2pandas.EventCategories()
+ttbb_categories.addCategory("ttbb",     selection = "(GenEvt_I_TTPlusBB >= 1 and GenEvt_I_TTPlusCC == 0)")
+
+
+
+ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/2017"
+ftpath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples"
+friendTrees = {
+    "dnnZ": ftpath+"/recoX/reco_Z_as_X_v1",
+    "dnnH": ftpath+"/recoX/reco_Higgs_as_X_v1",
+    "matchZ": ftpath+"/matchX/matchZ_as_X_v1",
+    "matchH": ftpath+"/matchX/matchHiggs_as_X_v1",
+    }
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -77,28 +113,45 @@ dataset = root2pandas.Dataset(
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
     ttbarReco   = options.ttbarReco,
+    friendTrees = friendTrees,
     ncores      = options.ncores)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchHiggs_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*sig.root",
-    categories  = sig_categories,
+    sampleName  = "ttH",
+    ntuples     = ntuplespath+"/ttHTobb*/*nominal*.root",
+    categories  = ttH_categories,
+    selections   = "(Evt_Odd == 1)",
+    lumiWeight  = 41.5,
+    )
+dataset.addSample(
+    sampleName  = "ttZ",
+    ntuples     = ntuplespath+"/TTZToQQ*/*nominal*.root",
+    categories  = ttZ_categories,
+    selections   = "(Evt_Odd == 1)",
     lumiWeight  = 41.5,
     )
 
 dataset.addSample(
-    sampleName  = "bkg_Higgs",
-    ntuples     = ntuplesPath+"/*bkg.root",
-    categories  = bkg_categories,
+    sampleName  = "ttbar",
+    ntuples     = ntuplespath+"/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/*nominal*.root",
+    categories  = ttbar_categories,
     lumiWeight  = 41.5,
     )
+
+dataset.addSample(
+    sampleName  = "ttbb",
+    ntuples     = ntuplespath+"/TTbb*/*nominal*.root",
+    categories  = ttbb_categories,
+    selections   = "(Evt_Odd == 1)",
+    lumiWeight  = 41.5,
+    )
+
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
@@ -107,7 +160,9 @@ dataset.addVariables(variable_set.all_variables)
 additional_variables = [
     "Evt_Odd",
     "N_Jets",
+    "N_BTagsL",
     "N_BTagsM",
+    "N_BTagsT",
     "Weight_XS",
     "Weight_btagSF",
     "Weight_GEN_nom",

@@ -59,16 +59,25 @@ else:
     sys.exit("ERROR: Output Directory does not exist!")
 
 # define a base event selection which is applied for all Samples
-# select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and RecoHiggs_matchable > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3)"
+
+# single lepton selections
+single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
+single_el_sel = "(N_LooseMuons == 0 and N_TightElectrons == 1 and (Triggered_HLT_Ele28_eta2p1_WPTight_Gsf_HT150_vX == 1 or ( Triggered_HLT_Ele32_WPTight_Gsf_L1DoubleEG_vX == 1 and Triggered_HLT_Ele32_WPTight_Gsf_2017SeedsX == 1 )))"
 
 base_selection = "("+base+")"
 
 # define output classes
-sig_categories = root2pandas.EventCategories()
-sig_categories.addCategory("sig_Higgs", selection = None)
-bkg_categories = root2pandas.EventCategories()
-bkg_categories.addCategory("bkg_Higgs", selection = None)
+flav_categories = root2pandas.EventCategories()
+flav_categories.addCategory("b",    selection = "jetFlavor==5")
+flav_categories.addCategory("c",    selection = "jetFlavor==4")
+flav_categories.addCategory("lf",   selection = "jetFlavor==0")
+
+
+
+ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/friendTrees/2017/jets/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_new_pmx/"
+friendTrees = {
+    }
 
 # initialize dataset class
 dataset = root2pandas.Dataset(
@@ -77,43 +86,35 @@ dataset = root2pandas.Dataset(
     addMEM      = options.MEM,
     maxEntries  = options.maxEntries,
     ttbarReco   = options.ttbarReco,
+    friendTrees = friendTrees,
     ncores      = options.ncores)
 
 # add base event selection
 dataset.addBaseSelection(base_selection)
 
 
-ntuplesPath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/matchHiggs_v1/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8_new_pmx"
 
 # add samples to dataset
 dataset.addSample(
-    sampleName  = "sig_Higgs",
-    ntuples     = ntuplesPath+"/*sig.root",
-    categories  = sig_categories,
+    sampleName  = "ttbar",
+    ntuples     = ntuplespath+"/*nominal*.root",
+    categories  = flav_categories,
+    selections  = None,
     lumiWeight  = 41.5,
     )
 
-dataset.addSample(
-    sampleName  = "bkg_Higgs",
-    ntuples     = ntuplesPath+"/*bkg.root",
-    categories  = bkg_categories,
-    lumiWeight  = 41.5,
-    )
 
 # initialize variable list 
 dataset.addVariables(variable_set.all_variables)
 
 # define an additional variable list
 additional_variables = [
-    "Evt_Odd",
     "N_Jets",
     "N_BTagsM",
-    "Weight_XS",
-    "Weight_btagSF",
-    "Weight_GEN_nom",
     "Evt_ID", 
     "Evt_Run", 
-    "Evt_Lumi"]
+    "Evt_Lumi",
+    "Evt_JetIdx"]
 
 # add these variables to the variable list
 dataset.addVariables(additional_variables)
