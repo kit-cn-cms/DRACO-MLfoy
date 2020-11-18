@@ -56,11 +56,7 @@ recolist = [
     "dnnH_ft_RecoHiggs_DNNOutput",
     "dnnH_ft_RecoHiggs_squaredDNNOutput",
     "dnnH_ft_RecoHiggs_transformedDNNOutput",
-<<<<<<< HEAD
-=======
 
-
->>>>>>> c85827ec3c315ff52755b8a0cf32693c99568c89
     "dnnZ_ft_RecoZ_B1_btagValue",
     "dnnZ_ft_RecoZ_B2_btagValue",
     #"dnnZ_ft_RecoZ_B1_Pt",
