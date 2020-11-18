@@ -958,8 +958,6 @@ ttbbReco_lepTop2_Pt,0,600,30,-,ttbbReco_lepTop2_Pt
 ttbbReco_lepTop2_Eta,-4,4,30,-,ttbbReco_lepTop2_Eta
 ttbbReco_lepTop2_M,0,1000,30,-,ttbbReco_lepTop2_M
 ttbbReco_lepTop2_E,0,1200,30,-,ttbbReco_lepTop2_E
-<<<<<<< HEAD
-=======
 isTagged,0,1,2,-,isTagged
 jetEnergy,30,1000,50,-,jetEnergy
 jetPt,30,400,50,-,jetPt
@@ -971,7 +969,6 @@ deepJet_CvsL,0,1,50,-,deepJet_CvsL
 deepJet_CvsB,0,1,50,-,deepJet_CvsB
 RecoX_B1_btagValue,0,1,50,-,b-tag value of first b-jet
 RecoX_B2_btagValue,0,1,50,-,b-tag value of second b-jet
->>>>>>> c85827ec3c315ff52755b8a0cf32693c99568c89
 RecoX_X_M,0,500,50,-,boson candidate mass [GeV]
 RecoX_X_openingAngle,0,3.141,50,-,opening angle of boson candidate
 RecoX_X_dR,0.4,4,50,-,#DeltaR of boson candidate

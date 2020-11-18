@@ -2,13 +2,10 @@ RecoX_B1_Eta,-2.3999965191,2.3999829292,50,-,RecoX_B1_Eta
 RecoX_B2_Eta,-2.399979353,2.3999893665,50,-,RecoX_B2_Eta
 RecoX_B1_Phi,-3.1415860653,3.1415913105,50,-,RecoX_B1_Phi
 RecoX_B2_Phi,-3.1415808201,3.1415896416,50,-,RecoX_B2_Phi
-<<<<<<< HEAD
 RecoX_B1_btagValue,0.0010787693,0.9999994636,50,-,RecoX_B1_btagValue
 RecoX_B2_btagValue,0.0010792612,0.9999994636,50,-,RecoX_B2_btagValue
-=======
 RecoX_B1_btagValue,0,1,50,-,b-tag value of first b-jet
 RecoX_B2_btagValue,0,1,50,-,b-tag value of second b-jet
->>>>>>> c85827ec3c315ff52755b8a0cf32693c99568c89
 RecoX_B1_M,0.6466892958,347.411834717,50,-,RecoX_B1_M
 RecoX_B2_M,0.5178326964,347.411834717,50,-,RecoX_B2_M
 RecoX_B1_E,30.2253036499,4544.67871094,50,-,RecoX_B1_E
@@ -17,7 +14,6 @@ RecoX_B1_Pt,30.0000801086,1781.26367188,50,-,RecoX_B1_Pt
 RecoX_B2_Pt,30.0001220703,1781.26367188,50,-,RecoX_B2_Pt
 RecoX_B1_idx,0,9,50,-,RecoX_B1_idx
 RecoX_B2_idx,0,9,50,-,RecoX_B2_idx
-<<<<<<< HEAD
 RecoX_X_Pt,0.2077936977,1873.58996582,50,-,RecoX_X_Pt
 RecoX_X_Eta,-7.1693167687,7.0300292969,50,-,RecoX_X_Eta
 RecoX_X_M,17.3088188171,3520.34375,50,-,RecoX_X_M
@@ -252,7 +248,6 @@ TightLepton_Eta_0,-2.4,2.4,50,-,lepton #eta
 TightLepton_M_0,-0.3,0.3,50,-,lepton mass
 TightLepton_Phi_0,-3.1415,3.1415,50,-,lepton #phi
 TightLepton_Pt_0,0,550,50,-,lepton p_{T}
-=======
 RecoX_X_Pt,0,1000,50,-,boson p_{T}
 RecoX_X_Eta,-7.1693167687,7.0300292969,50,-,RecoX_X_Eta
 RecoX_X_M,17.3088188171,1000,50,-,boson mass
@@ -2212,4 +2207,3 @@ RecoX_jet1_Phi,-3.14158606529,3.14159059525,50,-,RecoX_jet1_Phi
 RecoX_jet2_dPhi_lept,5.00679016113e-06,3.14159011841,50,-,RecoX_jet2_dPhi_lept
 RecoX_jet1_idx,0.0,9.0,50,-,RecoX_jet1_idx
 RecoX_X_dEta_lept,1.84620785149e-06,8.18231964111,50,-,RecoX_X_dEta_lept
->>>>>>> c85827ec3c315ff52755b8a0cf32693c99568c89
