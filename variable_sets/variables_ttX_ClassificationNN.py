@@ -53,10 +53,7 @@ recolist = [
     #"dnnH_ft_RecoX_dPhi_boosted",
     #"dnnH_ft_RecoX_dEta_boosted",
     #"dnnH_ft_RecoX_dR_boosted",
-    #"dnnH_ft_RecoX_DNNOutput",
-    "dnnH_ft_RecoX_squaredDNNOutput",
-    "dnnH_ft_RecoX_transformedDNNOutput",
-    "dnnH_ft_RecoX_X_Chi2",
+    #"dnnH_ft_RecoX_X_Chi2",
 
 
     "dnnZ_ft_RecoX_jet1_btagValue",
@@ -113,11 +110,7 @@ recolist = [
     #"dnnZ_ft_RecoX_dPhi_boosted",
     #"dnnZ_ft_RecoX_dEta_boosted",
     #"dnnZ_ft_RecoX_dR_boosted",
-    "dnnZ_ft_RecoX_DNNOutput",
-    "dnnZ_ft_RecoX_squaredDNNOutput",
-    "dnnZ_ft_RecoX_transformedDNNOutput",
-    "dnnZ_ft_RecoX_X_Chi2",
-
+    #"dnnZ_ft_RecoX_X_Chi2",
 
     ]
 
@@ -278,66 +271,12 @@ evtlist = [
     ]
 
 chi2list = [
-    'RecoX_BJet1_E',
-    'RecoX_BJet1_Eta',
-    'RecoX_BJet1_M',
-    'RecoX_BJet1_Phi',
-    'RecoX_BJet1_Pt',
-    'RecoX_BJet2_E',
-    'RecoX_BJet2_Eta',
-    'RecoX_BJet2_M',
-    'RecoX_BJet2_Phi',
-    'RecoX_BJet2_Pt',
-    'RecoX_Chi2',
-    'RecoX_Chi2_log',
-    'RecoX_Deta',
-    'RecoX_Dphi',
-    'RecoX_Dr',
-    'RecoX_E',
-    'RecoX_Eta',
-    'RecoX_M',
-    'RecoX_M_log',
-    'RecoX_Phi',
-    'RecoX_Pt',
-    'RecoX_boosted_Deta',
-    'RecoX_boosted_Dphi',
-    'RecoX_boosted_Dr',
-    'RecoX_boosted_cosdTheta',
-    'RecoX_boosted_prodcosTheta',
-    'RecoX_cosdTheta',
-    'RecoX_prodcosTheta',
-    #'RecoZ_BJet1_E',
-    #'RecoZ_BJet1_Eta',
-    #'RecoZ_BJet1_M',
-    #'RecoZ_BJet1_Phi',
-    #'RecoZ_BJet1_Pt',
-    #'RecoZ_BJet2_E',
-    #'RecoZ_BJet2_Eta',
-    #'RecoZ_BJet2_M',
-    #'RecoZ_BJet2_Phi',
-    #'RecoZ_BJet2_Pt',
-    #'RecoZ_Chi2',
-    #'RecoZ_Chi2_log',
-    #'RecoZ_Deta',
-    #'RecoZ_Dphi',
-    #'RecoZ_Dr',
-    #'RecoZ_E',
-    #'RecoZ_Eta',
-    #'RecoZ_M',
-    #'RecoZ_M_log',
-    #'RecoZ_Phi',
-    #'RecoZ_Pt',
-    #'RecoZ_boosted_Deta',
-    #'RecoZ_boosted_Dphi',
-    #'RecoZ_boosted_Dr',
-    #'RecoZ_boosted_cosdTheta',
-    #'RecoZ_boosted_prodcosTheta',
-    #'RecoZ_cosdTheta',
-    #'RecoZ_prodcosTheta',
+    "dnnH_ft_RecoX_X_Chi2",
+    "dnnZ_ft_RecoX_X_Chi2"
     ]
 
 variables = {}
-variables["ge6j_ge3t"] = kinlist+recolist+evtlist#+chi2list
-variables["ge4j_ge3t"] = kinlist+recolist+evtlist#+chi2list
+variables["ge6j_ge3t"] = kinlist+recolist+evtlist+chi2list
+variables["ge4j_ge3t"] = kinlist+recolist+evtlist+chi2list
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
