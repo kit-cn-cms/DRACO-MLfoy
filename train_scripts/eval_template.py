@@ -38,7 +38,7 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label", metavar="privateWork")
 
-parser.add_option("--signalclass", dest="signal_class", default=None,
+parser.add_option("--signalclass","-S", dest="signal_class", default=None,
         help="STR of signal class for plots", metavar="signal_class")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
