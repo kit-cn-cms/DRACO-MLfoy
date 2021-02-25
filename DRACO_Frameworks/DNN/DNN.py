@@ -41,6 +41,7 @@ from keras.utils import np_utils
 
 # Limit gpu usage
 import tensorflow as tf
+import shap
 
 import matplotlib.pyplot as plt
 
@@ -446,6 +447,7 @@ class DNN():
         configs["evalSelection"] = self.oddSel
         configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
+        configs["netConfig"] = self.test_percentage
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -876,7 +878,117 @@ class DNN():
         with open(output_path+".csv", "w") as f:
             f.write(csvtext)
         print("wrote coefficient information to {}.csv".format(output_path))
-                 
+
+
+    # def __create_shap_dependance_plots(self, index, shap_values, test_data, train_variables, outname):
+    #     plt.clf()
+    #     fig, ax = plt.subplots(figsize=(20, 8))
+    #     shap.summary_plot(ind = index, shap_values = shap_values,
+    #                                     features = test_data, 
+    #                                     feature_names= train_variables,
+    #                                     # interaction_index = None
+    #                                     )
+    #     plt.savefig("{}.pdf".format(outname))
+    #     plt.savefig("{}.png".format(outname))
+    #     plt.close()
+
+    def __create_shap_plots(self, shap_values, class_names, outname, \
+                            test_data, train_variables, plot_dependance = False):
+        max_display = test_data.shape[1]
+
+        plt.clf()
+        fig, ax = plt.subplots(figsize=(20, 8))
+        shap.summary_plot(shap_values, test_data, plot_type = "bar",
+            feature_names = train_variables,
+            class_names = class_names,
+            max_display = max_display, show = False, auto_size_plot=False)
+
+        plt.savefig(self.save_path+"/{}.pdf".format(outname))
+        plt.savefig(self.save_path+"/{}.png".format(outname))
+        plt.close()
+        if plot_dependance:
+            # outpath = os.path.join(self.save_path, class_names[0])
+            # if not os.path.exists(outpath):
+            #     os.makedirs(outpath)
+            # outname = os.path.join(outpath, "dependance_{}".format(train_variables[i]))
+            plt.clf()
+            fig, ax = plt.subplots(figsize=(20, 8))
+            shap.summary_plot(shap_values, test_data, plot_type = "violin",
+                                feature_names = train_variables,
+                                class_names = class_names,
+                                max_display = max_display, show = False, 
+                                auto_size_plot=False)
+            plt.savefig(self.save_path+"/{}_violin.pdf".format(outname))
+            plt.savefig(self.save_path+"/{}_violin.png".format(outname))
+            plt.close()
+
+            plt.clf()
+            fig, ax = plt.subplots(figsize=(20, 8))
+            shap.summary_plot(shap_values, test_data, plot_type = "layered_violin",
+                                feature_names = train_variables,
+                                class_names = class_names,
+                                max_display = max_display, show = False, 
+                                auto_size_plot=False)
+            plt.savefig(self.save_path+"/{}_layered_violin.pdf".format(outname))
+            plt.savefig(self.save_path+"/{}_layered_violin.png".format(outname))
+            plt.close()
+                # self.__create_shap_dependance_plots(index=i,
+                #                                     shap_values=shap_values,
+                #                                     test_data=test_data,
+                #                                     train_variables=train_variables,
+                #                                     outname = outname)
+                
+
+    def get_shap_evaluation(self, samplesize = 10000):
+
+
+        train_variables = self.train_variables
+        train_data = self.data.get_train_data (as_matrix = True, sort_list = train_variables)[:samplesize]
+        test_data = self.data.get_test_data (as_matrix = True, sort_list = train_variables)[:samplesize]
+        y_predicted = self.model_prediction_vector
+        class_names = self.event_classes
+        print("classes: {}".format(", ".join(class_names)))
+        
+        # exit(0)
+        # for explainer, name  in ((shap.DeepExplainer(model,inX_test[:1000]),"DeepExplainer"), (shap.GradientExplainer(model,inX_test[:1000]),"GradientExplainer")):
+        # print(json.dumps(self.model.__dict__, indent=4))
+        for explainer, name  in [(shap.GradientExplainer(self.model, 
+                                    train_data, 
+                                    session = tf.compat.v1.keras.backend.get_session()),\
+                                        "GradientExplainer")]:
+            shap.initjs()
+            print("... {0}: explainer.shap_values(X)".format(name))
+            shap_values = explainer.shap_values(test_data)
+            print("... shap.summary_plot")
+            print("... do overall plot")
+            outname = "shap_summary_{}_{}".format(name, samplesize)
+            self.__create_shap_plots(shap_values=shap_values, class_names= class_names,
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables)
+            exclude_nodes = "tHq tHW".split()
+            interesting_nodes = class_names
+            sub_shap_values = shap_values
+
+            for node in exclude_nodes:
+                idx = interesting_nodes.index(node)
+                interesting_nodes.pop(idx)
+                sub_shap_values.pop(idx)
+
+            print("... do summary plot for nodes {}".format(", ".join(interesting_nodes)))
+            outname = "shap_summary_{}_main_nodes_{}".format(name, samplesize)
+            self.__create_shap_plots(shap_values=sub_shap_values, class_names= interesting_nodes,
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables)
+
+            # summary plot for each node separately
+            for i, cname in enumerate(class_names):
+                print("... do summary plot for node {}".format(cname))
+                outname = "shap_summary_{}_{}_{}".format(name, cname, samplesize)
+                self.__create_shap_plots(shap_values=shap_values[i], class_names= [cname],
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables,
+                                        plot_dependance=True)
+            
 
 
     # --------------------------------------------------------------------
@@ -1100,8 +1212,10 @@ class DNN():
         return sigmin, sigmax
 
 
-def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
-category_label= None):
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, \
+            binary_target = None, \
+            total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', \
+            category_cutString = None, category_label= None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -1112,9 +1226,10 @@ category_label= None):
         config = f.read()
     config = json.loads(config)
 
-
+    test_percentage = config.get("test_percentage", 0.2)
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"])
+    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"], 
+                                            test_percentage = test_percentage)
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
@@ -1131,12 +1246,15 @@ category_label= None):
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
       addSampleSuffix = config["addSampleSuffix"],
+      test_percentage = test_percentage
     )
 
 
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
+    dnn.netConfig = config.get("netConfig", None)
+
     # dnn.predict_event_query()
 
     return dnn
