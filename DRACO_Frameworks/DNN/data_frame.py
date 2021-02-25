@@ -8,7 +8,10 @@ from sklearn.utils import shuffle
 from sklearn.decomposition import PCA
 
 class Sample:
-    def __init__(self, path, label, normalization_weight = 1., train_weight = 1., test_percentage = 0.2, total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', addSampleSuffix = ""):
+    def __init__(self, path, label, normalization_weight = 1., \
+                    train_weight = 1., test_percentage = 0.2, \
+                    total_weight_expr='x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', \
+                    addSampleSuffix = ""):
         self.path = path
         self.label = label
         self.normalization_weight = normalization_weight
@@ -185,7 +188,7 @@ class DataFrame(object):
                 category_cutString = None,
                 category_label     = None,
                 norm_variables = True,
-                test_percentage = 0.2,
+                test_percentage = 0.1,
                 lumi = 41.5,
                 shuffleSeed = None,
                 balanceSamples = True,
@@ -310,6 +313,7 @@ class DataFrame(object):
         norm_csv = pd.DataFrame(index=train_variables, columns=["mu", "std"])
         if norm_variables:
             for v in train_variables:
+                print("current variable is '{}'".format(v))
                 norm_csv["mu"][v] = unnormed_df[v].mean()
                 norm_csv["std"][v] = unnormed_df[v].std()
                 if norm_csv["std"][v] == 0.:
@@ -410,9 +414,10 @@ class DataFrame(object):
         self.df_train = shuffle(self.df_train)
 
     # train data -----------------------------------
-    def get_train_data(self, as_matrix = True):
-        if as_matrix: return self.df_train[ self.train_variables ].values
-        else:         return self.df_train[ self.train_variables ]
+    def get_train_data(self, as_matrix = True, sort_list = None):
+        sort_list = sort_list if sort_list else self.train_variables
+        if as_matrix:  return self.df_test[ sort_list ].sort_values(sort_list).values
+        else:          return self.df_test[ sort_list ].sort_values(sort_list)
 
     def get_train_weights(self):
         return self.df_train["train_weight"].values
@@ -426,10 +431,11 @@ class DataFrame(object):
         return self.df_train["lumi_weight"].values
 
     # test data ------------------------------------
-    def get_test_data(self, as_matrix=True, normed=True):
-        if not normed: return self.df_test_unnormed[ self.train_variables ]
-        if as_matrix:  return self.df_test[ self.train_variables ].values
-        else:          return self.df_test[ self.train_variables ]
+    def get_test_data(self, as_matrix=True, normed=True, sort_list = None):
+        sort_list = sort_list if sort_list else self.train_variables
+        if not normed: return self.df_test_unnormed[ sort_list ].sort_values(sort_list)
+        if as_matrix:  return self.df_test[ sort_list ].sort_values(sort_list).values
+        else:          return self.df_test[ sort_list ].sort_values(sort_list)
 
     def get_all_test_data(self, unnormed=True):
         if unnormed:  return self.df_test_unnormed
