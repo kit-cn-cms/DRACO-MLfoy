@@ -416,8 +416,8 @@ class DataFrame(object):
     # train data -----------------------------------
     def get_train_data(self, as_matrix = True, sort_list = None):
         sort_list = sort_list if sort_list else self.train_variables
-        if as_matrix:  return self.df_test[ sort_list ].sort_values(sort_list).values
-        else:          return self.df_test[ sort_list ].sort_values(sort_list)
+        if as_matrix:  return self.df_train[ sort_list ].sort_values(sort_list).values
+        else:          return self.df_train[ sort_list ].sort_values(sort_list)
 
     def get_train_weights(self):
         return self.df_train["train_weight"].values
