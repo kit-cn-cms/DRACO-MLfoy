@@ -54,5 +54,27 @@ variables["ge4j_3t"] = [
     "Evt_CSV_avg_tagged",
     "Evt_CSV_avg",
 ]
+kNN_vars = """
+    Evt_Deta_maxDetaJetJet
+    Evt_Deta_maxDetaTagTag
+    Evt_Dr_TaggedJetsAverage
+    Evt_M3
+    Evt_HT_jets
+    Evt_HT_tags
+
+    Jet_Pt[0]
+    Jet_Pt[1]
+    Jet_Pt[2]
+    Jet_Pt[3]
+    Evt_M2_minDrTaggedJets
+
+    Evt_TaggedJetPt_over_TaggedJetE
+    
+    Evt_Pt_TaggedJetsAverage
+
+""".split()
+
+for key in variables:
+    variables[key] = list(set(kNN_vars+variables[key]))
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
