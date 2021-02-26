@@ -447,7 +447,7 @@ class DNN():
         configs["evalSelection"] = self.oddSel
         configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
-        configs["netConfig"] = self.test_percentage
+        configs["test_percentage"] = self.test_percentage
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -778,6 +778,7 @@ class DNN():
             quit()
 
         try:
+            print("self.netconfig = ".format(self.netConfig))
             name_keras_model = self.netConfig
             model_tensorflow_impl = getattr(
                 net_configs_tensorflow, self.netConfig + "_tensorflow")
