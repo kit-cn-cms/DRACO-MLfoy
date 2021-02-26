@@ -944,8 +944,8 @@ class DNN():
 
 
         train_variables = self.train_variables
-        train_data = self.data.get_train_data (as_matrix = True, sort_list = train_variables)[:samplesize]
-        test_data = self.data.get_test_data (as_matrix = True, sort_list = train_variables)[:samplesize]
+        train_data = self.data.get_train_data (as_matrix = True)[:samplesize]
+        test_data = self.data.get_test_data (as_matrix = True)[:samplesize]
         y_predicted = self.model_prediction_vector
         class_names = self.event_classes
         print("classes: {}".format(", ".join(class_names)))
