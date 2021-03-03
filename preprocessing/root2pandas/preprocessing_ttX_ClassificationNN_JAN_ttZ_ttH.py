@@ -60,7 +60,7 @@ else:
 
 # define a base event selection which is applied for all Samples
 # select only events with GEN weight > 0 because training with negative weights is weird
-base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"
+base = "(N_Jets >= 4 and N_BTagsM >= 3 and Evt_MET_Pt > 20. and Weight_GEN_nom > 0.)"# and matchH_ft_RecoHiggs_matchable < 100. and matchZ_ft_RecoZ_matchable < 100.)"
 
 # single lepton selections
 single_mu_sel = "(N_LooseElectrons == 0 and N_TightMuons == 1 and Triggered_HLT_IsoMu24_vX == 1)"
@@ -100,8 +100,8 @@ ttZ_categories.addCategory("ttZnonbb",  selection = "(matchZ_ft_RecoX_matchable 
 ntuplespath = "/nfs/dust/cms/user/vdlinden/legacyTTZ/ntuples/2017"
 ftpath = "/nfs/dust/cms/user/larmbrus/combined_ttZ_ttH/ntuples/2017/new_ntuples/multiclassJAN"
 friendTrees = {
-    "chi2Z": ftpath+"/recoX/chi2_test/v1/reco_Z_chi2",
-    "chi2H": ftpath+"/recoX/chi2_test/v1/reco_Higgs_chi2",
+    "dnnZ": ftpath+"/recoX/bkg_merging/cTag_infos/v1/recoZ",
+    "dnnH": ftpath+"/recoX/bkg_merging/cTag_infos/v1/recoHiggs",
     "matchZ": ftpath+"/matchX/cTag_infos/v1/match_Z_as_X",
     "matchH": ftpath+"/matchX/cTag_infos/v1/match_Higgs_as_X",
     }
