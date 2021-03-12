@@ -967,33 +967,33 @@ jetCharge,-1,1,50,-,jetCharge
 deepJetValue,0,1,50,-,deepJetValue
 deepJet_CvsL,0,1,50,-,deepJet_CvsL
 deepJet_CvsB,0,1,50,-,deepJet_CvsB
-RecoX_B1_btagValue,0,1,50,-,b-tag value of first b-jet
-RecoX_B2_btagValue,0,1,50,-,b-tag value of second b-jet
+RecoX_B1_btagValue,0,1,50,-,b-tag value of first jet
+RecoX_B2_btagValue,0,1,50,-,b-tag value of second jet
 RecoX_X_M,0,500,50,-,boson candidate mass [GeV]
 RecoX_X_openingAngle,0,3.141,50,-,opening angle of boson candidate
 RecoX_X_dR,0.4,4,50,-,#DeltaR of boson candidate
-RecoX_X_Pt,0,500,50,-,boson candidate p_{T}
+RecoX_X_Pt,0,500,50,-,boson candidate p_{T} [GeV]
 RecoX_X_btagAverage,0,1,50,-,average of the two b-tag values
 RecoX_X_dR_lept,0,6,50,-,#DeltaR between boson and lepton
-RecoX_jet2_dEta_lept,0,4.7,50,-,#Delta#eta between second additional jet and lepton
-RecoX_jet1_dR_lept,0.4,4.4,50,-,#DeltaR between first additional jet and lepton
-RecoX_jet2_btagValue,0,1,50,-,b-tag value of second additional jet
-RecoX_jet1_btagValue,0,1,50,-,b-tag value of first additional jet
-RecoX_jet1_dEta_lept,0,4.7,50,-,#Delta#eta between first additional jet and lepton
-RecoX_jet2_dR_lept,0.4,5.5,50,-,#DeltaR between second additional jet and lepton
-RecoX_jet1_E,30,1500,50,-,Energy of first additional jet
-RecoX_jet2_Pt,30,500,50,-,p_{T} of second additional jet
+RecoX_jet2_dEta_lept,0,4.7,50,-,#Delta#eta between second jet and lepton
+RecoX_jet1_dR_lept,0.4,4.4,50,-,#DeltaR between first jet and lepton
+RecoX_jet2_btagValue,0,1,50,-,b-tag value of second jet
+RecoX_jet1_btagValue,0,1,50,-,b-tag value of first jet
+RecoX_jet1_dEta_lept,0,4.7,50,-,#Delta#eta between first jet and lepton
+RecoX_jet2_dR_lept,0.4,5.5,50,-,#DeltaR between second jet and lepton
+RecoX_jet1_E,30,1500,50,-,Energy of first jet [Gev]
+RecoX_jet2_Pt,30,500,50,-,p_{T} of second jet
 RecoX_X_dEta,0,4.7,50,-,#Delta#eta of boson candidate
-RecoX_jet1_Pt,30,700,50,-,p_{T} of first additional jet
-RecoX_jet2_M,0,60,50,-,Mass of second additional jet [GeV]
+RecoX_jet1_Pt,30,700,50,-,p_{T} of first jet [GeV]
+RecoX_jet2_M,0,60,50,-,Mass of second jet [GeV]
 RecoX_X_dPhi,0,3.14,50,-,#Delta#phi of boson candidate
-RecoX_jet2_E,30,1100,50,-,Energy of second additional jet
-RecoX_X_dPt,0,700,50,-,#Deltap_{T} of boson candidate
-RecoX_jet1_M,0,120,50,-,Mass of first additional jet [GeV]
-RecoX_X_E,0,1700,50,-,boson candidate energy
+RecoX_jet2_E,30,1100,50,-,Energy of second jet [GeV]
+RecoX_X_dPt,0,700,50,-,#Deltap_{T} of boson candidate [GeV]
+RecoX_jet1_M,0,120,50,-,Mass of first jet [GeV]
+RecoX_X_E,0,1700,50,-,boson candidate energy [GeV]
 RecoX_X_Eta,-5,5,50,-,#eta of boson candidate
-TightLepton_E_0,0,1000,50,-,lepton energy
+TightLepton_E_0,0,1000,50,-,lepton energy [GeV]
 TightLepton_Eta_0,-2.4,2.4,50,-,lepton #eta
-TightLepton_M_0,-0.3,0.3,50,-,lepton mass
+TightLepton_M_0,-0.3,0.3,50,-,lepton mass [GeV]
 TightLepton_Phi_0,-3.1415,3.1415,50,-,lepton #phi
-TightLepton_Pt_0,0,550,50,-,lepton p_{T}
+TightLepton_Pt_0,0,550,50,-,lepton p_{T} [GeV]

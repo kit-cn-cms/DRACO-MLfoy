@@ -59,7 +59,8 @@ def GetPlotColor( cls ):
 def GetyTitle(privateWork = False):
     # if privateWork flag is enabled, normalize plots to unit area
     if privateWork:
-        return "normalized to unit area"
+        #return "normalized to unit area"
+        return "arbitrary units"
     return "Events expected"
 
 

@@ -550,7 +550,6 @@ variables["ge4j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_
 #variables["ge6j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 #variables["ge4j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 
-
 #for CNN without reco-variables
 #variables["ge6j_ge3t"] = evtlist+kinlist
 #variables["ge4j_ge3t"] = evtlist+kinlist
