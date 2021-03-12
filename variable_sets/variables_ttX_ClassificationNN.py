@@ -310,12 +310,12 @@ recolist_ttTobb = [
     ]
 
 kinlist = [
-    #'btagValue[0]',
-    #'btagValue[1]',
-    #'btagValue[2]',
-    #'btagValue[3]',
-    #'btagValue[4]',
-    #'btagValue[5]',
+    'btagValue[0]',
+    'btagValue[1]',
+    'btagValue[2]',
+    'btagValue[3]',
+    'btagValue[4]',
+    'btagValue[5]',
     #'Jet_btagValue[0]',
     #'Jet_btagValue[1]',
     #'Jet_btagValue[2]',
@@ -358,41 +358,41 @@ kinlist = [
     #'Jet_DeepJet_uds[3]',
     #'Jet_DeepJet_uds[4]',
     #'Jet_DeepJet_uds[5]',
-    #'Jet_E[0]',
-    #'Jet_E[1]',
-    #'Jet_E[2]',
-    #'Jet_E[3]',
-    #'Jet_E[4]',
-    #'Jet_E[5]',
-    #'Jet_Eta[0]',
-    #'Jet_Eta[1]',
-    #'Jet_Eta[2]',
-    #'Jet_Eta[3]',
-    #'Jet_Eta[4]',
-    #'Jet_Eta[5]',
-    #'Jet_M[0]',
-    #'Jet_M[1]',
-    #'Jet_M[2]',
-    #'Jet_M[3]',
-    #'Jet_M[4]',
-    #'Jet_M[5]',
-    #'Jet_Phi[0]',
-    #'Jet_Phi[1]',
-    #'Jet_Phi[2]',
-    #'Jet_Phi[3]',
-    #'Jet_Phi[4]',
-    #'Jet_Phi[5]',
-    #'Jet_Pt[0]',
-    #'Jet_Pt[1]',
-    #'Jet_Pt[2]',
-    #'Jet_Pt[3]',
-    #'Jet_Pt[4]',
-    #'Jet_Pt[5]',
-    #'LooseLepton_E[0]',
-    #'LooseLepton_Eta[0]',
-    #'LooseLepton_M[0]',
-    #'LooseLepton_Phi[0]',
-    #'LooseLepton_Pt[0]',
+    'Jet_E[0]',
+    'Jet_E[1]',
+    'Jet_E[2]',
+    'Jet_E[3]',
+    'Jet_E[4]',
+    'Jet_E[5]',
+    'Jet_Eta[0]',
+    'Jet_Eta[1]',
+    'Jet_Eta[2]',
+    'Jet_Eta[3]',
+    'Jet_Eta[4]',
+    'Jet_Eta[5]',
+    'Jet_M[0]',
+    'Jet_M[1]',
+    'Jet_M[2]',
+    'Jet_M[3]',
+    'Jet_M[4]',
+    'Jet_M[5]',
+    'Jet_Phi[0]',
+    'Jet_Phi[1]',
+    'Jet_Phi[2]',
+    'Jet_Phi[3]',
+    'Jet_Phi[4]',
+    'Jet_Phi[5]',
+    'Jet_Pt[0]',
+    'Jet_Pt[1]',
+    'Jet_Pt[2]',
+    'Jet_Pt[3]',
+    'Jet_Pt[4]',
+    'Jet_Pt[5]',
+    'TightLepton_E[0]',
+    'TightLepton_Eta[0]',
+    'TightLepton_M[0]',
+    'TightLepton_Phi[0]',
+    'TightLepton_Pt[0]',
     ]
 
 evtlist = [
@@ -542,6 +542,10 @@ variables = {}
 #variables["ge6j_ge3t"] = kinlist+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb+evtlist
 #variables["ge4j_ge3t"] = kinlist+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb+evtlist
 
+# for multiclassJAN method  -  only reco-variables
+variables["ge6j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
+variables["ge4j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
+
 #for chi^2-method
 #variables["ge6j_ge3t"] = chi2list_Z+chi2list_H+evtlist+kinlist
 #variables["ge4j_ge3t"] = chi2list_Z+chi2list_H+evtlist+kinlist
@@ -554,8 +558,9 @@ variables = {}
 #variables["ge6j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 #variables["ge4j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 
-#all lists (needed in preprocessing for chi2_ttX_JAN_rest-method)
-variables["ge6j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
-variables["ge4j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
+
+#for CNN without reco-variables
+#variables["ge6j_ge3t"] = evtlist+kinlist#+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
+#variables["ge4j_ge3t"] = evtlist+kinlist#+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
