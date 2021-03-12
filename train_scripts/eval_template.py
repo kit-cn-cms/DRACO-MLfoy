@@ -38,7 +38,7 @@ parser.add_option("-l", "--log", dest="log", action = "store_true", default=Fals
 parser.add_option("--privatework", dest="privateWork", action = "store_true", default=False,
         help="activate to create private work plot label", metavar="privateWork")
 
-parser.add_option("--signalclass", dest="signal_class", default=None,
+parser.add_option("--signalclass","-S", dest="signal_class", default=None,
         help="STR of signal class for plots", metavar="signal_class")
 
 parser.add_option("--printroc", dest="printROC", action = "store_true", default=False,
@@ -55,6 +55,8 @@ parser.add_option("--total-weight-expr", dest="total_weight_expr",default="x.Wei
 
 parser.add_option("-d", "--derivatives", dest="derivatives", action = "store_true", default=False,
         help="activate to get first and second order derivatives", metavar="dev")
+parser.add_option("-s", "--shap_evaluation", dest="shap_evaluation", action = "store_true", default=False,
+        help="activate to get input feature decomposition using SHAP algorithm. Default: False")
 
 parser.add_option("-c", "--category", dest="category",default="4j_ge3t",
                 help="STR name of the category (ge/le)[nJets]j_(ge/le)[nTags]t", metavar="CATEGORY")
@@ -127,3 +129,9 @@ if options.plot:
 
         # plot closure test
         dnn.plot_closureTest(log = options.log, signal_class = options.signal_class, privateWork = options.privateWork)
+
+if options.derivatives:
+    dnn.get_gradients(options.binary)
+
+if options.shap_evaluation:
+    dnn.get_shap_evaluation()

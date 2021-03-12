@@ -396,6 +396,12 @@ kinlist = [
     ]
 
 evtlist = [
+    'Evt_btagValue_avg',
+    'Evt_btagValue_avg_tagged',
+    'Evt_btagValue_dev',
+    'Evt_btagValue_dev_tagged',
+    'Evt_btagValue_min',
+    'Evt_btagValue_min_tagged',
     'Evt_Deta_JetsAverage',
     'Evt_Deta_TaggedJetsAverage',
     'Evt_Deta_maxDetaJetJet',
@@ -426,6 +432,7 @@ evtlist = [
     'Evt_M2_minDrJets',
     'Evt_M2_minDrTaggedJets',
     'Evt_M3',
+    #'Evt_M3_oneTagged',
     'Evt_MET',
     'Evt_MET_Phi',
     'Evt_MET_Pt',
@@ -446,12 +453,6 @@ evtlist = [
     'Evt_aplanarity_tags',
     'Evt_blr',
     'Evt_blr_transformed',
-    'Evt_btagValue_avg',
-    'Evt_btagValue_avg_tagged',
-    'Evt_btagValue_dev',
-    'Evt_btagValue_dev_tagged',
-    'Evt_btagValue_min',
-    'Evt_btagValue_min_tagged',
     'Evt_h0',
     'Evt_h1',
     'Evt_h2',
@@ -462,7 +463,6 @@ evtlist = [
     'Evt_transverse_sphericity',
     'Evt_transverse_sphericity_jets',
     'Evt_transverse_sphericity_tags',
-
     ]
 
 chi2list_H = [
@@ -535,32 +535,23 @@ chi2list_Z = [
 
 variables = {}
 # for JAN_ttZ_ttH method
-#variables["ge6j_ge3t"] = kinlist+recolist_Z+recolist_H+evtlist
-#variables["ge4j_ge3t"] = kinlist+recolist_Z+recolist_H+evtlist
+#variables["ge6j_ge3t"] = recolist_Z+recolist_H+evtlist+kinlist
+#variables["ge4j_ge3t"] = recolist_Z+recolist_H+evtlist+kinlist
 
 # for multiclassJAN method
-#variables["ge6j_ge3t"] = kinlist+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb+evtlist
-#variables["ge4j_ge3t"] = kinlist+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb+evtlist
-
-# for multiclassJAN method  -  only reco-variables
-variables["ge6j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
-variables["ge4j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
+variables["ge6j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb#+evtlist+kinlist
+variables["ge4j_ge3t"] = recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb#+evtlist+kinlist
 
 #for chi^2-method
-#variables["ge6j_ge3t"] = chi2list_Z+chi2list_H+evtlist+kinlist
-#variables["ge4j_ge3t"] = chi2list_Z+chi2list_H+evtlist+kinlist
-
-#for chi2_ttX_JAN_rest-method
-#variables["ge6j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
-#variables["ge4j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_Z+recolist_H+recolist_cc+recolist_bb+recolist_ttTobb
+#variables["ge6j_ge3t"] = evtlist+chi2list_Z+chi2list_H+kinlist
+#variables["ge4j_ge3t"] = evtlist+chi2list_Z+chi2list_H+kinlist
 
 #for chi2_ttX_JAN_rest-method
 #variables["ge6j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 #variables["ge4j_ge3t"] = kinlist+evtlist+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
 
-
 #for CNN without reco-variables
-#variables["ge6j_ge3t"] = evtlist+kinlist#+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
-#variables["ge4j_ge3t"] = evtlist+kinlist#+chi2list_Z+chi2list_H+recolist_cc+recolist_bb+recolist_ttTobb#+recolist_Z+recolist_H
+#variables["ge6j_ge3t"] = evtlist+kinlist
+#variables["ge4j_ge3t"] = evtlist+kinlist
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))

@@ -30,7 +30,7 @@ class EventCategories:
         return selections
 
 class Sample:
-    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, lumiWeight = 1.):
+    def __init__(self, sampleName, ntuples, categories, selections = None, MEMs = None, ownVars = [], even_odd = False, lumiWeight = 1., friendTrees = {}):
         self.sampleName = sampleName
         self.ntuples    = ntuples
         self.selections = selections
@@ -39,6 +39,8 @@ class Sample:
         self.ownVars    = ownVars
         self.lumiWeight = lumiWeight
         self.even_odd   = even_odd
+        self.friendTrees = friendTrees
+
         self.evenOddSplitting()
 
     def printInfo(self):
@@ -54,7 +56,7 @@ class Sample:
                 self.selections = "(Evt_Odd == 1)"
 
 class Dataset:
-    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID', friendTrees = {}, ttbarReco=False, ncores=1):
+    def __init__(self, outputdir, tree=['MVATree'], naming='', addMEM=False, maxEntries=50000, varName_Run='Evt_Run', varName_LumiBlock='Evt_Lumi', varName_Event='Evt_ID', ttbarReco=False, ncores=1):
         # settings for paths
         self.outputdir = outputdir
         self.naming = naming
@@ -62,8 +64,6 @@ class Dataset:
         self.varName_Run = varName_Run
         self.varName_LumiBlock = varName_LumiBlock
         self.varName_Event = varName_Event
-
-        self.friendTrees = friendTrees
 
         # generating output dir
         if not os.path.exists(self.outputdir):
@@ -326,11 +326,13 @@ class Dataset:
                 # delete subentry index
                 try: df = df.reset_index(1, drop = True)
                 except: None
+                # print(df)
 
                 # add friend trees 
                 samplepath, filename = os.path.split(f)
                 basepath, samplename = os.path.split(samplepath)
-                for ftName in self.friendTrees:
+                
+                for ftName in sample.friendTrees:
                     # get path to friend tree file
                     friendtreepath = "/".join([self.friendTrees[ftName], samplename, filename])
                     if not os.path.exists(friendtreepath):
@@ -349,7 +351,6 @@ class Dataset:
                         print(df.shape[0],ft_df.shape[0])
                         # concatenate dataframes
                         df = pd.concat([df, ft_df], axis = 1)
-
 
                 # handle vector variables, loop over them
                 for vecvar in self.vector_variables:
@@ -425,9 +426,14 @@ class Dataset:
 
                 # convert tree to df but only extract the variables needed
                 df = tree.pandas.df(memVariables)
-
+                n = df.shape[0]
+                # drop duplicate events, which actually should not happen!!
+                df.drop_duplicates(inplace=True)
+                x = abs(df.shape[0] - n)
+                if x !=0:
+                    print("Warning: Found {n} duplicate MEM entries in {file}".format(n = x, file = f)) 
                 # set index
-                df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
+                # df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
 
                 # save data
                 with pd.HDFStore(outputFile, "a") as store:
@@ -437,6 +443,10 @@ class Dataset:
         # load the generated MEM file
         with pd.HDFStore(outputFile, "r") as store:
             df = store.select("MEM_data")
+
+        df.drop_duplicates(inplace=True, subset=["event","lumi","run"])
+        df.set_index(["run", "lumi", "event"], inplace = True, drop = True)
+        
         print("-"*50)
 
         return df
@@ -469,7 +479,7 @@ class Dataset:
         # create variable with default value
         df.loc[:, "memDBp"] = -1
 
-        # add mem variable
+        # update df with mem column, matching is done via multiindex
         df.update( memdf["mem_p"].rename("memDBp") )
 
         # check if some mems could not be set
@@ -479,6 +489,7 @@ class Dataset:
             df_tmp = df.query("memDBp != -1")
             entries_after = df_tmp.shape[0]
             print("{}/{} events without mem, setting to -1".format(entries_before-entries_after, entries_before))
+        # print(df)
         return df
 
     def removeTriggerVariables(self, df):

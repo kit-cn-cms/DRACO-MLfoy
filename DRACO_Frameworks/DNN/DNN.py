@@ -6,6 +6,7 @@ import pickle
 import math
 from array import array
 import ROOT
+import pprint
 
 # local imports
 filedir  = os.path.dirname(os.path.realpath(__file__))
@@ -29,8 +30,18 @@ import tensorflow.keras.layers as layer
 from tensorflow.keras import backend as K
 import pandas as pd
 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation
+from tensorflow.keras.optimizers import Adam, SGD
+# from tensorflow.keras.utils import np_utils
+# from keras.models import Sequential
+# from keras.layers import Dense, Dropout, Activation
+# from keras.optimizers import Adam, SGD
+from keras.utils import np_utils
+
 # Limit gpu usage
 import tensorflow as tf
+import shap
 
 import matplotlib.pyplot as plt
 
@@ -436,6 +447,7 @@ class DNN():
         configs["evalSelection"] = self.oddSel
         configs["addSampleSuffix"] =self.addSampleSuffix
         configs["netConfig"] = self.netConfig
+        configs["test_percentage"] = self.test_percentage
 
         # save information for binary DNN
         if self.data.binary_classification:
@@ -495,6 +507,116 @@ class DNN():
             print("model test loss: {}".format(self.model_eval[0]))
             for im, metric in enumerate(self.eval_metrics):
                 print("model test {}: {}".format(metric, self.model_eval[im+1]))
+
+    def model_to_optimize(self, train_params):
+        number_of_input_neurons =  self.data.get_train_data(as_matrix = True).shape[1]
+        # print(number_of_input_neurons)
+        print("-"*40)
+        print("Testing following configuration:")
+        pprint.pprint(train_params)
+        #Model providing function:
+        #Create Keras model with double curly brackets dropped-in as needed.
+        model = Sequential()
+
+        leaky_relu_activation = keras.layers.LeakyReLU(alpha=0.3)
+        keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1")
+
+        model.add(Dense(units=int(train_params['layer_size_1']), activation=leaky_relu_activation, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        input_shape=(number_of_input_neurons,)))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1"))
+
+        model.add(Dense(units=int(train_params['layer_size_2']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        activation=leaky_relu_activation,))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer2"))
+    
+        model.add(Dense(units=int(train_params['layer_size_3']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                        activation=leaky_relu_activation,))
+        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer3"))
+
+        if train_params['four_layer']['include']:
+            model.add(Dense(units=int(train_params['four_layer']['layer_size_4']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                            activation=leaky_relu_activation,))
+            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer4"))
+
+        model.add(Dense(self.data.n_output_neurons, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer'])))
+
+        if self.data.binary_classification :
+            if 0 in self.data.get_train_labels():
+                loss = 'binary_crossentropy'
+                model.add(Activation('sigmoid'))
+            else:
+                loss = 'squared_hinge'
+                model.add(Activation('tanh'))
+        else:
+            model.add(Activation('softmax'))
+            loss = 'categorical_crossentropy'
+
+        if train_params['optimizer']['name'] == 'adam':
+            opt = keras.optimizers.Adam(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'sgd':
+            opt = keras.optimizers.SGD(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'RMSprop':
+            opt = keras.optimizers.RMSprop(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'Adagrad':
+            # opt = keras.optimizers.Adagrad(lr = train_params['optimizer']['learning_rate'])
+            opt = keras.optimizers.Adagrad()
+        elif train_params['optimizer']['name'] == 'Adadelta':
+            opt = keras.optimizers.Adadelta(lr = train_params['optimizer']['learning_rate'])
+        elif train_params['optimizer']['name'] == 'Adamax':
+            opt = keras.optimizers.Adamax(lr = train_params['optimizer']['learning_rate'])
+        else:
+            opt = keras.optimizers.Nadam(lr = train_params['optimizer']['learning_rate'])
+
+        # add early stopping if activated
+        callbacks = None
+        callbacks = [EarlyStopping(
+            monitor         = "loss",
+            value           = 0.05,
+            min_epochs      = 50,
+            stopping_epochs = 50,
+            verbose         = 1)]
+        # compile the model
+        model.compile(
+            loss        =   loss,
+            metrics     =   ['accuracy'],
+            optimizer   =   opt)
+        
+        print(model.summary())
+
+        # train main net
+        model.fit(
+            x                   = self.data.get_train_data(as_matrix = True),
+            y                   = self.data.get_train_labels(),
+            batch_size          = int(train_params['batch_size']),
+            epochs              = 100,
+            shuffle             = True,
+            validation_split    = 0.25,
+            sample_weight       = self.data.get_train_weights())
+
+        return model
+
+    def roc_model_to_optimize(self, model):
+        from sklearn.metrics import roc_auc_score
+        model_prediction_vector = model.predict(self.data.get_test_data (as_matrix = True) )
+        roc_auc_score = roc_auc_score(self.data.get_test_labels(), model_prediction_vector)
+        return np.nanmin(roc_auc_score)
+
+    def evaluate_model_to_optimize(self, model):
+        test_accuracy_to_optimize = model.evaluate(self.data.get_test_data(as_matrix = True), self.data.get_test_labels())
+        return np.nanmin(test_accuracy_to_optimize)
+
+    def hyperopt_fcn(self,params):
+          from hyperopt import  STATUS_OK
+          model = self.model_to_optimize(params)
+          test_acc = np.nanmin(self.evaluate_model_to_optimize(model))
+          roc_auc_score = np.nanmin(self.roc_model_to_optimize(model))
+          print("roc_auc_score")
+          print(roc_auc_score)
+          K.clear_session()
+
+          return {'loss': -roc_auc_score,  'status': STATUS_OK}
+
+
 
     def get_ranges(self):
         if not self.data.binary_classification:
@@ -656,6 +778,7 @@ class DNN():
             quit()
 
         try:
+            print("self.netconfig = ".format(self.netConfig))
             name_keras_model = self.netConfig
             model_tensorflow_impl = getattr(
                 net_configs_tensorflow, self.netConfig + "_tensorflow")
@@ -756,7 +879,117 @@ class DNN():
         with open(output_path+".csv", "w") as f:
             f.write(csvtext)
         print("wrote coefficient information to {}.csv".format(output_path))
-                 
+
+
+    # def __create_shap_dependance_plots(self, index, shap_values, test_data, train_variables, outname):
+    #     plt.clf()
+    #     fig, ax = plt.subplots(figsize=(20, 8))
+    #     shap.summary_plot(ind = index, shap_values = shap_values,
+    #                                     features = test_data, 
+    #                                     feature_names= train_variables,
+    #                                     # interaction_index = None
+    #                                     )
+    #     plt.savefig("{}.pdf".format(outname))
+    #     plt.savefig("{}.png".format(outname))
+    #     plt.close()
+
+    def __create_shap_plots(self, shap_values, class_names, outname, \
+                            test_data, train_variables, plot_dependance = False):
+        max_display = test_data.shape[1]
+
+        plt.clf()
+        fig, ax = plt.subplots(figsize=(20, 8))
+        shap.summary_plot(shap_values, test_data, plot_type = "bar",
+            feature_names = train_variables,
+            class_names = class_names,
+            max_display = max_display, show = False, auto_size_plot=False)
+
+        plt.savefig(self.save_path+"/{}.pdf".format(outname))
+        plt.savefig(self.save_path+"/{}.png".format(outname))
+        plt.close()
+        if plot_dependance:
+            # outpath = os.path.join(self.save_path, class_names[0])
+            # if not os.path.exists(outpath):
+            #     os.makedirs(outpath)
+            # outname = os.path.join(outpath, "dependance_{}".format(train_variables[i]))
+            plt.clf()
+            fig, ax = plt.subplots(figsize=(20, 8))
+            shap.summary_plot(shap_values, test_data, plot_type = "violin",
+                                feature_names = train_variables,
+                                class_names = class_names,
+                                max_display = max_display, show = False, 
+                                auto_size_plot=False)
+            plt.savefig(self.save_path+"/{}_violin.pdf".format(outname))
+            plt.savefig(self.save_path+"/{}_violin.png".format(outname))
+            plt.close()
+
+            plt.clf()
+            fig, ax = plt.subplots(figsize=(20, 8))
+            shap.summary_plot(shap_values, test_data, plot_type = "layered_violin",
+                                feature_names = train_variables,
+                                class_names = class_names,
+                                max_display = max_display, show = False, 
+                                auto_size_plot=False)
+            plt.savefig(self.save_path+"/{}_layered_violin.pdf".format(outname))
+            plt.savefig(self.save_path+"/{}_layered_violin.png".format(outname))
+            plt.close()
+                # self.__create_shap_dependance_plots(index=i,
+                #                                     shap_values=shap_values,
+                #                                     test_data=test_data,
+                #                                     train_variables=train_variables,
+                #                                     outname = outname)
+                
+
+    def get_shap_evaluation(self, samplesize = 10000):
+
+
+        train_variables = self.train_variables
+        train_data = self.data.get_train_data (as_matrix = True)[:samplesize]
+        test_data = self.data.get_test_data (as_matrix = True)[:samplesize]
+        y_predicted = self.model_prediction_vector
+        class_names = self.event_classes
+        print("classes: {}".format(", ".join(class_names)))
+        
+        # exit(0)
+        # for explainer, name  in ((shap.DeepExplainer(model,inX_test[:1000]),"DeepExplainer"), (shap.GradientExplainer(model,inX_test[:1000]),"GradientExplainer")):
+        # print(json.dumps(self.model.__dict__, indent=4))
+        for explainer, name  in [(shap.GradientExplainer(self.model, 
+                                    train_data, 
+                                    session = tf.compat.v1.keras.backend.get_session()),\
+                                        "GradientExplainer")]:
+            shap.initjs()
+            print("... {0}: explainer.shap_values(X)".format(name))
+            shap_values = explainer.shap_values(test_data)
+            print("... shap.summary_plot")
+            print("... do overall plot")
+            outname = "shap_summary_{}_{}".format(name, samplesize)
+            self.__create_shap_plots(shap_values=shap_values, class_names= class_names,
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables)
+            exclude_nodes = "tHq tHW".split()
+            interesting_nodes = class_names
+            sub_shap_values = shap_values
+
+            for node in exclude_nodes:
+                idx = interesting_nodes.index(node)
+                interesting_nodes.pop(idx)
+                sub_shap_values.pop(idx)
+
+            print("... do summary plot for nodes {}".format(", ".join(interesting_nodes)))
+            outname = "shap_summary_{}_main_nodes_{}".format(name, samplesize)
+            self.__create_shap_plots(shap_values=sub_shap_values, class_names= interesting_nodes,
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables)
+
+            # summary plot for each node separately
+            for i, cname in enumerate(class_names):
+                print("... do summary plot for node {}".format(cname))
+                outname = "shap_summary_{}_{}_{}".format(name, cname, samplesize)
+                self.__create_shap_plots(shap_values=shap_values[i], class_names= [cname],
+                                        outname=outname, test_data= test_data,
+                                        train_variables=train_variables,
+                                        plot_dependance=True)
+            
 
 
     # --------------------------------------------------------------------
@@ -980,8 +1213,10 @@ class DNN():
         return sigmin, sigmax
 
 
-def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, binary_target = None, total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', category_cutString = None,
-category_label= None):
+def loadDNN(inputDirectory, outputDirectory, binary = False, signal = None, \
+            binary_target = None, \
+            total_weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom', \
+            category_cutString = None, category_label= None):
 
     # get net config json
     configFile = inputDirectory+"/checkpoints/net_config.json"
@@ -992,9 +1227,10 @@ category_label= None):
         config = f.read()
     config = json.loads(config)
 
-
+    test_percentage = config.get("test_percentage", 0.2)
     # load samples
-    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"])
+    input_samples = data_frame.InputSamples(config["inputData"], addSampleSuffix = config["addSampleSuffix"], 
+                                            test_percentage = test_percentage)
 
     if binary:
         input_samples.addBinaryLabel(signal, binary_target)
@@ -1011,12 +1247,15 @@ category_label= None):
       train_variables = config["trainVariables"],
       shuffle_seed    = config["shuffleSeed"],
       addSampleSuffix = config["addSampleSuffix"],
+      test_percentage = test_percentage
     )
 
 
 
     # load the trained model
     dnn.load_trained_model(inputDirectory)
+    dnn.netConfig = config.get("netConfig", None)
+
     # dnn.predict_event_query()
 
     return dnn

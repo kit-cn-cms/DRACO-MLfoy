@@ -453,7 +453,6 @@ class plotOutputNodes:
         os.system(cmd)
 
 
-
 class plotClosureTest:
     def __init__(self, data, test_prediction, train_prediction, event_classes, nbins, bin_range, signal_class, event_category, plotdir, logscale = False):
         self.data               = data
@@ -464,7 +463,6 @@ class plotClosureTest:
         self.pred_classes_train = np.argmax(self.train_prediction, axis = 1)
 
         self.event_classes      = event_classes
-        self.n_classes         = len(self.event_classes)-self.data.input_samples.additional_samples
         self.nbins              = nbins
         self.bin_range          = bin_range
         self.signal_class       = signal_class
@@ -489,9 +487,95 @@ class plotClosureTest:
     def plot(self, ratio = False, privateWork = False):
         self.privateWork = privateWork
 
+        ksvalues = ""
+        for i, node_cls in enumerate(self.event_classes):
+            nodeIndex = self.data.class_translation[node_cls]
+            
+            test_values = self.test_prediction[:,i]
+            train_values = self.train_prediction[:,i]
+
+            for j, process in enumerate(self.event_classes):
+                procIndex = self.data.class_translation[process]
+    
+                test_values_proc = [test_values[k] for k in range(len(test_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == procIndex \
+                    and self.pred_classes_test[k] == nodeIndex]
+
+                train_values_proc = [train_values[k] for k in range(len(train_values)) \
+                    if self.data.get_train_labels(as_categorical = False)[k] == procIndex \
+                    and self.pred_classes_train[k] == nodeIndex]
+
+                test_weights_proc = [self.data.get_lumi_weights()[k] for k in range(len(test_values)) \
+                    if self.data.get_test_labels(as_categorical = False)[k] == procIndex \
+                    and self.pred_classes_test[k] == nodeIndex]
+
+                train_weights_proc = [self.data.get_train_lumi_weights()[k] for k in range(len(train_values)) \
+                    if self.data.get_train_labels(as_categorical = False)[k] == procIndex \
+                    and self.pred_classes_train[k] == nodeIndex]
+
+                train = setup.setupHistogram(
+                    values      = train_values_proc,
+                    weights     = train_weights_proc,
+                    nbins       = self.nbins*3,
+                    bin_range   = self.bin_range,
+                    color       = ROOT.kBlue,
+                    xtitle      = "train {} at {} node".format(process, node_cls),
+                    ytitle      = setup.GetyTitle(privateWork = True),
+                    filled      = True)
+                train.Scale(1./train.Integral())
+                train.SetLineWidth(1)
+                train.SetFillColorAlpha(ROOT.kBlue, 0.5)
+
+
+                test = setup.setupHistogram(
+                    values      = test_values_proc,
+                    weights     = test_weights_proc,
+                    nbins       = self.nbins*3,
+                    bin_range   = self.bin_range,
+                    color       = ROOT.kRed,
+                    xtitle      = "test {} at {} node".format(process, node_cls),
+                    ytitle      = setup.GetyTitle(privateWork = True),
+                    filled      = False)
+                test.Scale(1./test.Integral())
+                test.SetMarkerStyle(20)
+                test.SetLineWidth(1)
+                test.SetMarkerSize(2)
+
+                plotOptions = {"logscale": self.logscale}
+
+                # init canvas
+                canvas = setup.drawClosureTestOnCanvas(
+                    train, None, test, None, plotOptions,
+                    canvasName = "{} at {} node".format(process, node_cls))
+
+                # setup legend
+                legend = setup.getLegend()
+    
+                legend.SetTextSize(0.02)
+                ks = train.KolmogorovTest(test)
+                ksvalues += "{}_AT_{}_NODE".format(process, node_cls)+", "+str(ks)+"\n"
+                # add entries
+                legend.AddEntry(train, "train {}".format(process), "F")
+                legend.AddEntry(test,  "test {} (KS = {:.3f})".format(process, ks), "L")
+
+                # draw legend
+                legend.Draw("same")
+
+                # prit private work label if activated
+                if self.privateWork:
+                    setup.printPrivateWork(canvas)
+                # add category label
+                setup.printCategoryLabel(canvas, self.event_category)
+
+                # add private work label if activated
+                if self.privateWork:
+                    setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+
+                out_path = self.plotdir+"/closureTest_for_{}_at_{}_node.pdf".format(process, node_cls)
+                setup.saveCanvas(canvas, out_path)
+
         # loop over output nodes
         for i, node_cls in enumerate(self.event_classes):
-            if i>=self.n_classes: continue
             # get index of node
             nodeIndex = self.data.class_translation[node_cls]
             if self.signal_class:
@@ -598,7 +682,7 @@ class plotClosureTest:
 
             # setup legend
             legend = setup.getLegend()
-
+    
             legend.SetTextSize(0.02)
             ksSig = sig_train.KolmogorovTest(sig_test)
             ksBkg = bkg_train.KolmogorovTest(bkg_test)
@@ -618,9 +702,11 @@ class plotClosureTest:
             setup.printCategoryLabel(canvas, self.event_category)
 
 
-            # # add private work label if activated
-            # if self.privateWork:
-            #     setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+
+
+            # add private work label if activated
+            if self.privateWork:
+                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
 
             out_path = self.plotdir+"/closureTest_at_{}_node.pdf".format(node_cls)
             setup.saveCanvas(canvas, out_path)
@@ -630,8 +716,12 @@ class plotClosureTest:
         cmd = "pdfunite "+str(self.plotdir)+"/closureTest_*.pdf "+str(workdir)+"/closureTest.pdf"
         print(cmd)
         os.system(cmd)
-
-
+    
+        outfile = workdir+"/KSValues.txt"
+        with open(outfile, "w") as f:
+            f.write(ksvalues)
+        print("wrote ks values to {}".format(outfile))
+        print(ksvalues)
 
 
 
