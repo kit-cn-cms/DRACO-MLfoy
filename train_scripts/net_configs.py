@@ -30,6 +30,65 @@ config_dict["flavorTag"] = {
         "earlystopping_epochs":     50,
         }
 
+config_dict["ttH_SL_legacy_opt44"] = {
+        "layers":                   [1024,2048,512,512],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               4096,
+        # "optimizer":                optimizers.Adam(lr = 0.0006),
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
+config_dict["ttH_SL_legacy_STXS_opt44"] = {
+        "layers":                   [2048,2048,64],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               1024,
+        # "optimizer":                optimizers.Adam(lr = 0.0006),
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
+config_dict["ttH_SL_legacy_opt43"] = {
+        "layers":                   [2048,182,1024,64],
+        "loss_function":            "categorical_crossentropy",
+        # "Dropout":                  0.05,
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               2048,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
+config_dict["ttH_SL_legacy_STXS_opt43"] = {
+        "layers":                   [2048,2048,512,1024],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.5,
+        "L2_Norm":                  1e-5,
+        "L1_Norm":                  1e-5,
+        "batch_size":               1024,
+        "optimizer":                optimizers.Adagrad(),
+        "activation_function":      "leakyrelu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     50,
+        }
+
 config_dict["ttZ_2018_final"] = {
         "layers":                   [50,50],
         "loss_function":            "categorical_crossentropy",
