@@ -537,6 +537,14 @@ class DNN():
             model.add(Dense(units=int(train_params['four_layer']['layer_size_4']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
                             activation=leaky_relu_activation,))
             model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer4"))
+        if all(train_params[x]['include'] for x in 'four_layer five_layer'.split()):
+            model.add(Dense(units=int(train_params['five_layer']['layer_size_5']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                            activation=leaky_relu_activation,))
+            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer5"))
+        if all(train_params[x]['include'] for x in 'four_layer five_layer six_layer'.split()):
+            model.add(Dense(units=int(train_params['six_layer']['layer_size_6']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                            activation=leaky_relu_activation,))
+            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer6"))
 
         model.add(Dense(self.data.n_output_neurons, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer'])))
 

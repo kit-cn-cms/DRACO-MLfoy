@@ -233,6 +233,28 @@ else:
                                     }
 
                                 ])
+    fifth_layer_search_space = choice('five_layer',
+                                [
+                                    {
+                                    'include': False,
+                                    },
+                                    {
+                                    'include': True,
+                                    'layer_size_5': power_of_two(quniform('layer_size_5', 5, 10, q=1)),
+                                    }
+
+                                ])
+    sixth_layer_search_space = choice('six_layer',
+                                [
+                                    {
+                                    'include': False,
+                                    },
+                                    {
+                                    'include': True,
+                                    'layer_size_6': power_of_two(quniform('layer_size_6', 5, 10, q=1)),
+                                    }
+
+                                ])
     # @scope.define
     # def power_of_two(a):
     #         return 2.0 ** a
@@ -245,9 +267,11 @@ else:
         # 'layer_size_2'        : 32,
         # 'layer_size_3'        : 32,
         'four_layer'          : fourth_layer_search_space,
+        'five_layer'          : fifth_layer_search_space,
+        'six_layer'           : sixth_layer_search_space,
         # 'dropout'             : uniform('dropout', 0, 1),
         'dropout'             : 0.5,
-        'batch_size'          : power_of_two(quniform('batch_size', 10, 12, q=1)),
+        'batch_size'          : power_of_two(quniform('batch_size', 10, 14, q=1)),
         # 'batch_size'          : 10000,
         # 'optimizer'           : opt_search_space,
         'optimizer'           : opt_search_space,
