@@ -25,8 +25,20 @@ variables["ge4j_ge4t"] = [
     "Evt_CSV_avg",
     "CSV[2]",
 ]
+
+variables["ge4j_ge4t"] += """
+    Evt_HT_tags
+
+ 
+    Evt_M2_minDrTaggedJets
+    
+    Evt_Pt_TaggedJetsAverage
+
+""".split()
+
+variables["ge4j_ge4t"] += ["memDBp"]
+
 variables["ge4j_3t"] = [
-    "memDBp",
     # "Reco_ttbar_whad_m",
     # "Reco_ttbar_toplep_m",
     "Reco_ttbar_bestJABDToutput",
@@ -54,17 +66,14 @@ variables["ge4j_3t"] = [
     # "Evt_CSV_avg_tagged",
     "Evt_CSV_avg",
 ]
-kNN_vars = """
-    Evt_HT_tags
+variables["ge4j_3t"] += """
+    Evt_HT_jets
 
- 
-    Evt_M2_minDrTaggedJets
-    
-    Evt_Pt_TaggedJetsAverage
-
+    Jet_Pt[0]
 """.split()
+variables["ge4j_3t"] += ["memDBp"]
 
 for key in variables:
-    variables[key] = list(set(kNN_vars+variables[key]))
+    variables[key] = list(set(variables[key]))
 
 all_variables = list(set( [v for key in variables for v in variables[key] ] ))
