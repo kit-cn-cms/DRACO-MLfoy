@@ -520,32 +520,20 @@ class DNN():
 
         leaky_relu_activation = keras.layers.LeakyReLU(alpha=0.3)
         keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1")
+        
+        layersAndNodes = list(train_params['choice_layers'].values()) #len is number of layers
 
-        model.add(Dense(units=int(train_params['layer_size_1']), activation=leaky_relu_activation, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+        for i,x in enumerate(layersAndNodes):
+            if i == 0:
+                model.add(Dense(units=int(x), activation=leaky_relu_activation, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
                         input_shape=(number_of_input_neurons,)))
-        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer1"))
-
-        model.add(Dense(units=int(train_params['layer_size_2']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
-                        activation=leaky_relu_activation,))
-        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer2"))
-    
-        model.add(Dense(units=int(train_params['layer_size_3']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
-                        activation=leaky_relu_activation,))
-        model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer3"))
-
-        if train_params['four_layer']['include']:
-            model.add(Dense(units=int(train_params['four_layer']['layer_size_4']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
+                model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer{}".format(i)))
+            else:
+                model.add(Dense(units=int(x), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
                             activation=leaky_relu_activation,))
-            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer4"))
-        if all(train_params[x]['include'] for x in 'four_layer five_layer'.split()):
-            model.add(Dense(units=int(train_params['five_layer']['layer_size_5']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
-                            activation=leaky_relu_activation,))
-            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer5"))
-        if all(train_params[x]['include'] for x in 'four_layer five_layer six_layer'.split()):
-            model.add(Dense(units=int(train_params['six_layer']['layer_size_6']), kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer']),
-                            activation=leaky_relu_activation,))
-            model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer6"))
+                model.add(keras.layers.Dropout(train_params['dropout'], name = "Drop_out_layer{}".format(i)))
 
+        # output layer
         model.add(Dense(self.data.n_output_neurons, kernel_regularizer=keras.regularizers.l2(train_params['l2_regularizer'])))
 
         if self.data.binary_classification :

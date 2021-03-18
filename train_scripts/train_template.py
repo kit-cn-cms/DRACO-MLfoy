@@ -22,6 +22,8 @@ import DRACO_Frameworks.DNN.data_frame as df
 def power_of_two(a):
     return 2.0 ** a
 
+
+
 options.initArguments()
 
 # load samples
@@ -196,6 +198,14 @@ else:
     from hyperopt.pyll import scope
     from hyperas.distributions import choice, uniform, loguniform, quniform
 
+    def node_params(n_layers):
+        # define the parameters that are conditional on the number of layers here
+        # in this case the number of nodes in each layer
+        params = {}
+        for n in range(n_layers):
+            params['n_nodes_layer_{}'.format(n)] = power_of_two(quniform('n_nodes_{}_{}'.format(n_layers, n), 5, 10, q=1))
+        return params
+
     opt_search_space = choice('name',
                                 [
                                     # {'name': 'adam',
@@ -222,57 +232,17 @@ else:
                                     # 'beta_2': loguniform('beta_2_adamax', -10, 0),
                                     # }
                                     ])
-    fourth_layer_search_space = choice('four_layer',
-                                [
-                                    {
-                                    'include': False,
-                                    },
-                                    {
-                                    'include': True,
-                                    'layer_size_4': power_of_two(quniform('layer_size_4', 5, 10, q=1)),
-                                    }
 
-                                ])
-    fifth_layer_search_space = choice('five_layer',
-                                [
-                                    {
-                                    'include': False,
-                                    },
-                                    {
-                                    'include': True,
-                                    'layer_size_5': power_of_two(quniform('layer_size_5', 5, 10, q=1)),
-                                    }
 
-                                ])
-    sixth_layer_search_space = choice('six_layer',
-                                [
-                                    {
-                                    'include': False,
-                                    },
-                                    {
-                                    'include': True,
-                                    'layer_size_6': power_of_two(quniform('layer_size_6', 5, 10, q=1)),
-                                    }
-
-                                ])
-    # @scope.define
-    # def power_of_two(a):
-    #         return 2.0 ** a
+    # list of the number of layers you want to consider
+    layer_options = [3, 4, 5, 6]
 
     search_space = {
-        'layer_size_1'        : power_of_two(quniform('layer_size_1', 5, 11, q=1)),
-        'layer_size_2'        : power_of_two(quniform('layer_size_2', 5, 11, q=1)),
-        'layer_size_3'        : power_of_two(quniform('layer_size_3', 5, 11, q=1)),
-        # 'layer_size_1'        : 32,
-        # 'layer_size_2'        : 32,
-        # 'layer_size_3'        : 32,
-        'four_layer'          : fourth_layer_search_space,
-        'five_layer'          : fifth_layer_search_space,
-        'six_layer'           : sixth_layer_search_space,
+        'choice_layers'        : choice('layers',[node_params(n) for n in layer_options]),
         # 'dropout'             : uniform('dropout', 0, 1),
         'dropout'             : 0.5,
         'batch_size'          : power_of_two(quniform('batch_size', 10, 14, q=1)),
-        # 'batch_size'          : 10000,
+        # 'batch_size'          : 100000,
         # 'optimizer'           : opt_search_space,
         'optimizer'           : opt_search_space,
         # 'l2_regularizer'      : loguniform('l2_regularizer', -10,-1)
