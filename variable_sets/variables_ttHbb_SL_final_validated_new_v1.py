@@ -36,12 +36,11 @@ variables["ge4j_ge4t"] += """
 
 """.split()
 
-variables["ge4j_ge4t"] += ["memDBp"]
+# variables["ge4j_ge4t"] += ["memDBp"]
 
 variables["ge4j_3t"] = [
     # "Reco_ttbar_whad_m",
     # "Reco_ttbar_toplep_m",
-    "Reco_ttbar_bestJABDToutput",
     "Reco_ttH_bestJABDToutput",
     # "Reco_tHq_bestJABDToutput",
     # "Reco_tHW_whad_dr",
@@ -55,7 +54,6 @@ variables["ge4j_3t"] = [
     "Evt_h1",
     "Evt_blr_transformed",
     "Evt_Pt_minDrTaggedJets",
-    "Evt_M_Total",
     "Evt_M_TaggedJetsAverage",
     "Evt_M_JetsAverage",
     # "Evt_JetPt_over_JetE",
@@ -67,11 +65,8 @@ variables["ge4j_3t"] = [
     "Evt_CSV_avg",
 ]
 
-variables["ge4j_3t"] += """
-    Jet_Pt[0]
-""".split()
 
-variables["ge4j_3t"] += ["memDBp"]
+# variables["ge4j_3t"] += ["memDBp"]
 
 for key in variables:
     variables[key] = list(set(variables[key]))
