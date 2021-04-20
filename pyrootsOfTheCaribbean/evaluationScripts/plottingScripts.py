@@ -448,7 +448,8 @@ class plotClosureTest:
                     xtitle      = "train {} at {} node".format(process, node_cls),
                     ytitle      = setup.GetyTitle(privateWork = True),
                     filled      = True)
-                train.Scale(1./train.Integral())
+                if train.Integral() != 0:
+                    train.Scale(1./train.Integral())
                 train.SetLineWidth(1)
                 train.SetFillColorAlpha(ROOT.kBlue, 0.5)
 

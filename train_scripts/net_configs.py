@@ -276,3 +276,19 @@ config_dict["BNN"] = {
         "earlystopping_percentage": 0.02,
         "earlystopping_epochs":     100,
 }
+
+
+config_dict["ttHH_2017"] = {
+        "layers":                   [100,100,100],
+        "loss_function":            "categorical_crossentropy",
+        "Dropout":                  0.50,
+        "L1_Norm":                  0.,
+        "L2_Norm":                  1e-5,
+        "batch_size":               4096,
+        "optimizer":                optimizers.Adam(1e-4),
+        "activation_function":      "elu",
+        "output_activation":        "Softmax",
+        "earlystopping_percentage": 0.05,
+        "earlystopping_epochs":     100,
+        }
+

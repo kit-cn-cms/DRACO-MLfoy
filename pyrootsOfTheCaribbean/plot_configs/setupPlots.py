@@ -24,7 +24,8 @@ def GetPlotColor( cls ):
         "tHW":          ROOT.kBlue+3,
         "sig":          ROOT.kCyan,
         "bkg":          ROOT.kOrange,
-
+        "ttHH":         ROOT.kBlue,
+        "tt4b":         ROOT.kRed,
         "ttH_STXS_0":          ROOT.kAzure,
         "ttH_STXS_1":          ROOT.kBlue-1,
         "ttH_STXS_2":          ROOT.kBlue-2,

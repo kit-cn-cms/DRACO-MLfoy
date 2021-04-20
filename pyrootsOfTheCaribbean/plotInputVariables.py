@@ -126,17 +126,17 @@ plotter.addSample(
     signalSample    = True)
 
 # add background samples
-plotter.addSample(
-    sampleName      = "tt+b",
-    sampleFile      = data_dir+"/ttmb"+naming,
-    XSscaling       = 2.*35.9*0.44,
-    plotColor       = ROOT.kRed+3)
+#plotter.addSample(
+#    sampleName      = "tt+b",
+#    sampleFile      = data_dir+"/ttmb"+naming,
+#    XSscaling       = 2.*35.9*0.44,
+#    plotColor       = ROOT.kRed+3)
 
-plotter.addSample(
-    sampleName      = "tt+2b",
-    sampleFile      = data_dir+"/tt2b"+naming,
-    XSscaling       = 2.*35.9*0.44,
-    plotColor       = ROOT.kRed+2)
+#plotter.addSample(
+ #   sampleName      = "tt+2b",
+ #   sampleFile      = data_dir+"/tt2b"+naming,
+ #   XSscaling       = 2.*35.9*0.44,
+ #   plotColor       = ROOT.kRed+2)
 
 plotter.addSample(
     sampleName      = "tt+cc",
@@ -151,10 +151,32 @@ plotter.addSample(
     plotColor       = ROOT.kRed-7)
 
 
+plotter.addSample(
+    sampleName      = "tt+bb",
+    sampleFile      = data_dir+"/ttbb"+naming,
+    XSscaling       = 2.,
+    plotColor       = ROOT.kRed-3)
+
+plotter.addSample(
+    sampleName      = "tt+HH",
+    XSscaling       = 2.,
+    sampleFile      = data_dir+"/ttHH"+naming,
+    plotColor       = ROOT.kMagenta,
+    signalSample    = True)
+
+plotter.addSample(
+    sampleName      = "tt+4b",
+    XSscaling       = 2.,
+    sampleFile      = data_dir+"/tt4b"+naming,
+    plotColor       = ROOT.kGreen,
+    signalSample    = True)
+
+
+
 
 # add JT categories
-plotter.addCategory("ge4j_ge4t")
-plotter.addCategory("ge4j_3t")
+plotter.addCategory("ge4j_ge3t")
+#plotter.addCategory("ge4j_3t")
 
 
 # perform plotting routine

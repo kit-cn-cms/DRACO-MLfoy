@@ -9,9 +9,9 @@ def getJTstring(cat):
         if part.endswith("l"):
             cutstring += "N_LooseLeptons"
         elif part.endswith("j"):
-            cutstring += "N_Jets"
+            cutstring += "N_Jets_nom"
         elif part.endswith("t"):
-            cutstring += "N_BTagsM"
+            cutstring += "N_BTagsM_nom"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue

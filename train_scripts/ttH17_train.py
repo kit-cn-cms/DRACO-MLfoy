@@ -25,9 +25,9 @@ input_samples = df.InputSamples(options.getInputDirectory(), options.getActivate
 # define all samples
 # only ttH sample needs even/odd splitting for 2017 MC
 input_samples.addSample(options.getDefaultName("ttH"),  label = "ttH",  normalization_weight = options.getNomWeight())
-input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttbb"), label = "ttbb", normalization_weight = 1.)
 input_samples.addSample(options.getDefaultName("tt2b"), label = "tt2b", normalization_weight = 1.)
-input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = 1.)
+#input_samples.addSample(options.getDefaultName("ttb"),  label = "ttb",  normalization_weight = 1.)
 input_samples.addSample(options.getDefaultName("ttcc"), label = "ttcc", normalization_weight = 1.)
 input_samples.addSample(options.getDefaultName("ttlf"), label = "ttlf", normalization_weight = 1.)
 
@@ -61,7 +61,7 @@ dnn.train_model()
 dnn.eval_model()
 
 # save information
-dnn.save_model(sys.argv, filedir)
+dnn.save_model(sys.argv, filedir, options.getNetConfigName(), get_gradients = options.doGradients())
 
 # save and print variable ranking
 dnn.get_input_weights()

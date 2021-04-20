@@ -21,45 +21,49 @@ options.initArguments()
 
 # load samples
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage(), options.getAddSampleSuffix())
-
-weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
+weight_expr = 'x.Weight_GEN_nom * x.lumiWeight'
+#weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHbb")  , label = "ttHbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHnonbb")  , label = "ttHnonbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb")  , label = "ttHbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHnonbb")  , label = "ttHnonbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHH") , label = "ttHH" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("tt4b") , label = "tt4b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+
+#input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-input_samples.addSample(options.getDefaultName("ttH_STXS_0") ,  label = "ttH_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_STXS_1") ,  label = "ttH_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_STXS_2") ,  label = "ttH_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_STXS_3") ,  label = "ttH_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttH_STXS_4") ,  label = "ttH_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttH_STXS_0") ,  label = "ttH_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttH_STXS_1") ,  label = "ttH_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttH_STXS_2") ,  label = "ttH_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttH_STXS_3") ,  label = "ttH_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttH_STXS_4") ,  label = "ttH_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-input_samples.addSample(options.getDefaultName("ttHbb_STXS_0") ,  label = "ttHbb_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHbb_STXS_1") ,  label = "ttHbb_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHbb_STXS_2") ,  label = "ttHbb_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHbb_STXS_3") ,  label = "ttHbb_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHbb_STXS_4") ,  label = "ttHbb_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb_STXS_0") ,  label = "ttHbb_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb_STXS_1") ,  label = "ttHbb_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb_STXS_2") ,  label = "ttHbb_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb_STXS_3") ,  label = "ttHbb_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#input_samples.addSample(options.getDefaultName("ttHbb_STXS_4") ,  label = "ttHbb_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
 
 # additional samples for adversary training
-if options.isAdversary():
-    input_samples.addSample(options.getAddSampleName("ttmb"), label = "ttmb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-    input_samples.addSample(options.getAddSampleName("ttbb"), label = "ttbb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-    input_samples.addSample(options.getAddSampleName("tt2b"), label = "tt2b"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-    input_samples.addSample(options.getAddSampleName("ttb") , label = "ttb"+options.getAddSampleSuffix() , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#if options.isAdversary():
+#    input_samples.addSample(options.getAddSampleName("ttmb"), label = "ttmb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#    input_samples.addSample(options.getAddSampleName("ttbb"), label = "ttbb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#    input_samples.addSample(options.getAddSampleName("tt2b"), label = "tt2b"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+#    input_samples.addSample(options.getAddSampleName("ttb") , label = "ttb"+options.getAddSampleSuffix() , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-if options.isBinary():
-    input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
+#if options.isBinary():
+#    input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
 if not options.isAdversary():
     # initializing DNN training class
@@ -123,7 +127,7 @@ if options.doVariations():
 # plotting
 if options.doPlots():
     # plot the evaluation metrics
-    dnn.plot_metrics(privateWork = options.isPrivateWork())
+    #dnn.plot_metrics(privateWork = options.isPrivateWork())
 
     if options.isBinary():
         # plot output node

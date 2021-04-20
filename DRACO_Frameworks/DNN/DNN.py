@@ -475,7 +475,7 @@ class DNN():
         # save predicitons
         self.model_prediction_vector = self.model.predict(self.data.get_test_data (as_matrix = True))
         self.model_train_prediction  = self.model.predict(self.data.get_train_data(as_matrix = True))
-        
+        print("Prediction Vector: {}".format(self.model_prediction_vector)) 
         #figure out ranges
         self.get_ranges()
 
@@ -771,7 +771,7 @@ class DNN():
 
         # loop over metrics and generate matplotlib plot
         for metric in metrics:
-            plt.clf()
+            #plt.clf()
             # get history of train and validation scores
             train_history = self.model_history[metric]
             val_history = self.model_history["val_"+metric]

@@ -49,6 +49,7 @@ class Sample:
         # assign train weight
         weight_sum = sum(df["total_weight"].values)
         df = df.assign(train_weight = lambda x: x.total_weight/weight_sum*self.train_weight)
+        print("TEST!!!!!!! train weight: {}".format(df["train_weight"]))
         print("sum of train weights: {}".format(sum(df["train_weight"].values)))
 
         if self.addSampleSuffix in self.label:
