@@ -3,6 +3,8 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 import os
 import sys
+import numpy as np
+import pprint
 
 # option handler
 import optionHandler
@@ -17,53 +19,54 @@ sys.path.append(basedir)
 import DRACO_Frameworks.DNN.DNN as DNN
 import DRACO_Frameworks.DNN.data_frame as df
 
+def power_of_two(a):
+    return 2.0 ** a
+
+
+
 options.initArguments()
 
 # load samples
 input_samples = df.InputSamples(options.getInputDirectory(), options.getActivatedSamples(), options.getTestPercentage(), options.getAddSampleSuffix())
-weight_expr = 'x.Weight_GEN_nom * x.lumiWeight'
-#weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
+
+weight_expr = 'x.Weight_XS * x.Weight_CSV * x.Weight_GEN_nom * x.lumiWeight'
 # define all samples
 input_samples.addSample(options.getDefaultName("ttH")  , label = "ttH"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHbb")  , label = "ttHbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHnonbb")  , label = "ttHnonbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb")  , label = "ttHbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHnonbb")  , label = "ttHnonbb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttmb") , label = "ttmb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttbb") , label = "ttbb" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("ttHH") , label = "ttHH" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-input_samples.addSample(options.getDefaultName("tt4b") , label = "tt4b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-
-#input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("tt2b") , label = "tt2b" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttb")  , label = "ttb"  , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttcc") , label = "ttcc" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 input_samples.addSample(options.getDefaultName("ttlf") , label = "ttlf" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("tHq") ,  label = "tHq" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("tHW") ,  label = "tHW" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("sig") ,  label = "sig" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("bkg") ,  label = "bkg" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-#input_samples.addSample(options.getDefaultName("ttH_STXS_0") ,  label = "ttH_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttH_STXS_1") ,  label = "ttH_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttH_STXS_2") ,  label = "ttH_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttH_STXS_3") ,  label = "ttH_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttH_STXS_4") ,  label = "ttH_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttH_STXS_0") ,  label = "ttH_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttH_STXS_1") ,  label = "ttH_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttH_STXS_2") ,  label = "ttH_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttH_STXS_3") ,  label = "ttH_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttH_STXS_4") ,  label = "ttH_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-#input_samples.addSample(options.getDefaultName("ttHbb_STXS_0") ,  label = "ttHbb_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHbb_STXS_1") ,  label = "ttHbb_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHbb_STXS_2") ,  label = "ttHbb_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHbb_STXS_3") ,  label = "ttHbb_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#input_samples.addSample(options.getDefaultName("ttHbb_STXS_4") ,  label = "ttHbb_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb_STXS_0") ,  label = "ttHbb_STXS_0" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb_STXS_1") ,  label = "ttHbb_STXS_1" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb_STXS_2") ,  label = "ttHbb_STXS_2" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb_STXS_3") ,  label = "ttHbb_STXS_3" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+input_samples.addSample(options.getDefaultName("ttHbb_STXS_4") ,  label = "ttHbb_STXS_4" , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
 
 # additional samples for adversary training
-#if options.isAdversary():
-#    input_samples.addSample(options.getAddSampleName("ttmb"), label = "ttmb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#    input_samples.addSample(options.getAddSampleName("ttbb"), label = "ttbb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#    input_samples.addSample(options.getAddSampleName("tt2b"), label = "tt2b"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
-#    input_samples.addSample(options.getAddSampleName("ttb") , label = "ttb"+options.getAddSampleSuffix() , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+if options.isAdversary():
+    input_samples.addSample(options.getAddSampleName("ttmb"), label = "ttmb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+    input_samples.addSample(options.getAddSampleName("ttbb"), label = "ttbb"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+    input_samples.addSample(options.getAddSampleName("tt2b"), label = "tt2b"+options.getAddSampleSuffix(), normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
+    input_samples.addSample(options.getAddSampleName("ttb") , label = "ttb"+options.getAddSampleSuffix() , normalization_weight = options.getNomWeight(), total_weight_expr = weight_expr )
 
-#if options.isBinary():
-#    input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
+if options.isBinary():
+    input_samples.addBinaryLabel(options.getSignal(), options.getBinaryBkgTarget())
 
 if not options.isAdversary():
     # initializing DNN training class
@@ -102,90 +105,206 @@ else:
         norm_variables  = options.doNormVariables(),
         addSampleSuffix = options.getAddSampleSuffix())
 
-# build DNN model
-dnn.build_model(config=options.getNetConfig(), penalty=options.getPenalty())
 
-# perform the training
-dnn.train_model()
+if not options.doHyperparametersOptimization():
+    # build DNN model
+    dnn.build_model(config=options.getNetConfig(), penalty=options.getPenalty())
 
-# evalute the trained model
-dnn.eval_model()
+    # perform the training
+    dnn.train_model()
 
-# save information
-dnn.save_model(sys.argv, filedir, options.getNetConfigName(), get_gradients = options.doGradients())
+    # evalute the trained model
+    dnn.eval_model()
 
-# save and print variable ranking according to the input layer weights
-dnn.get_input_weights()
+    # save information
+    dnn.save_model(sys.argv, filedir, options.getNetConfigName(), get_gradients = options.doGradients())
 
-# save and print variable ranking according to all layer weights
-dnn.get_weights()
+    # save and print variable ranking according to the input layer weights
+    dnn.get_input_weights()
 
-# variation plots
-if options.doVariations():
-    dnn.get_variations(options.isBinary())
+    # save and print variable ranking according to all layer weights
+    dnn.get_weights()
 
-# plotting
-if options.doPlots():
-    # plot the evaluation metrics
-    #dnn.plot_metrics(privateWork = options.isPrivateWork())
+    # variation plots
+    if options.doVariations():
+        dnn.get_variations(options.isBinary())
 
-    if options.isBinary():
-        # plot output node
-        bin_range = options.getBinaryBinRange()
-        dnn.plot_binaryOutput(
-            log         = options.doLogPlots(),
-            privateWork = options.isPrivateWork(),
-            printROC    = options.doPrintROC(),
-            nbins       = 15,
-            bin_range   = bin_range,
-            name        = options.getName(),
-            sigScale    = options.getSignalScale())
-        if options.isAdversary():
-            dnn.plot_ttbbKS_binary(
+    # plotting
+    if options.doPlots():
+        # plot the evaluation metrics
+        dnn.plot_metrics(privateWork = options.isPrivateWork())
+
+        if options.isBinary():
+            # plot output node
+            bin_range = options.getBinaryBinRange()
+            dnn.plot_binaryOutput(
+                log         = options.doLogPlots(),
+                privateWork = options.isPrivateWork(),
+                printROC    = options.doPrintROC(),
+                nbins       = 15,
+                bin_range   = bin_range,
+                name        = options.getName(),
+                sigScale    = options.getSignalScale())
+            if options.isAdversary():
+                dnn.plot_ttbbKS_binary(
+                    log                 = options.doLogPlots(),
+                    signal_class        = options.getSignal(),
+                    privateWork         = options.isPrivateWork())
+        else:
+            # plot the confusion matrix
+            dnn.plot_confusionMatrix(
+                privateWork = options.isPrivateWork(),
+                printROC    = options.doPrintROC())
+
+            # plot the output discriminators
+            dnn.plot_discriminators(
+                log                 = options.doLogPlots(),
+                signal_class        = options.getSignal(),
+                privateWork         = options.isPrivateWork(),
+                printROC            = options.doPrintROC(),
+                sigScale            = options.getSignalScale())
+
+            # plot the output nodes
+            dnn.plot_outputNodes(
+                log                 = options.doLogPlots(),
+                signal_class        = options.getSignal(),
+                privateWork         = options.isPrivateWork(),
+                printROC            = options.doPrintROC(),
+                sigScale            = options.getSignalScale())
+
+            # plot event yields
+            dnn.plot_eventYields(
+                log                 = options.doLogPlots(),
+                signal_class        = options.getSignal(),
+                privateWork         = options.isPrivateWork(),
+                sigScale            = options.getSignalScale())
+
+            # plot closure test
+            dnn.plot_closureTest(
                 log                 = options.doLogPlots(),
                 signal_class        = options.getSignal(),
                 privateWork         = options.isPrivateWork())
-    else:
-        # plot the confusion matrix
-        dnn.plot_confusionMatrix(
-            privateWork = options.isPrivateWork(),
-            printROC    = options.doPrintROC())
 
-        # plot the output discriminators
-        dnn.plot_discriminators(
-            log                 = options.doLogPlots(),
-            signal_class        = options.getSignal(),
-            privateWork         = options.isPrivateWork(),
-            printROC            = options.doPrintROC(),
-            sigScale            = options.getSignalScale())
+            # plot ttbb KS test
+            if options.isAdversary():
+                dnn.plot_ttbbKS(
+                    log                 = options.doLogPlots(),
+                    signal_class        = options.getSignal(),
+                    privateWork         = options.isPrivateWork())
 
-        # plot the output nodes
-        dnn.plot_outputNodes(
-            log                 = options.doLogPlots(),
-            signal_class        = options.getSignal(),
-            privateWork         = options.isPrivateWork(),
-            printROC            = options.doPrintROC(),
-            sigScale            = options.getSignalScale())
+else:
+    import hyperopt as hp
+    from hyperopt import fmin, STATUS_OK, tpe, space_eval, Trials
+    from hyperopt.pyll import scope
+    from hyperas.distributions import choice, uniform, loguniform, quniform
 
-        # plot event yields
-        dnn.plot_eventYields(
-            log                 = options.doLogPlots(),
-            signal_class        = options.getSignal(),
-            privateWork         = options.isPrivateWork(),
-            sigScale            = options.getSignalScale())
+    def node_params(n_layers):
+        # define the parameters that are conditional on the number of layers here
+        # in this case the number of nodes in each layer
+        params = {}
+        for n in range(n_layers):
+            params['n_nodes_layer_{}'.format(n)] = power_of_two(quniform('n_nodes_{}_{}'.format(n_layers, n), 5, 10, q=1))
+        return params
 
-        # plot closure test
-        dnn.plot_closureTest(
-            log                 = options.doLogPlots(),
-            signal_class        = options.getSignal(),
-            privateWork         = options.isPrivateWork())
+    opt_search_space = choice('name',
+                                [
+                                    # {'name': 'adam',
+                                    # 'learning_rate': loguniform('learning_rate_adam', -10, 0),
+                                    #'beta_1': loguniform('beta_1_adam', -10, -1),# Note the name of the label to avoid duplicates
+                                    #'beta_2': loguniform('beta_2_adam', -10, -1),
+                                    # },
+                                    # {'name': 'sgd',
+                                    # 'learning_rate': loguniform('learning_rate_sgd', -10, 0), # Note the name of the label to avoid duplicates
+                                    #'momentum': uniform('momentum_sgd', 0, 1.0),
+                                    # },
+                                    # {'name': 'Adagrad',
+                                    # 'learning_rate': loguniform('learning_rate_adagrad', -10, 0), # Note the name of the label to avoid duplicates
+                                    # },
+                                    {'name': 'Adagrad',
+                                    'learning_rate': loguniform('learning_rate_adagrad', -10, 0), # Note the name of the label to avoid duplicates
+                                    },
+                                    # {'name': 'Adadelta',
+                                    # 'learning_rate': loguniform('learning_rate_adadelta', -10, 0), # Note the name of the label to avoid duplicates
+                                    # },
+                                    # {'name': 'Adamax',
+                                    # 'learning_rate': loguniform('learning_rate_adamax', -10, 0), # Note the name of the label to avoid duplicates
+                                    # 'beta_1': loguniform('beta_1_adamax', -10, 0),# Note the name of the label to avoid duplicates
+                                    # 'beta_2': loguniform('beta_2_adamax', -10, 0),
+                                    # }
+                                    ])
 
-        # plot ttbb KS test
-        if options.isAdversary():
-            dnn.plot_ttbbKS(
-                log                 = options.doLogPlots(),
-                signal_class        = options.getSignal(),
-                privateWork         = options.isPrivateWork())
+
+    # list of the number of layers you want to consider
+    layer_options = [3, 4, 5, 6]
+
+    search_space = {
+        'choice_layers'        : choice('layers',[node_params(n) for n in layer_options]),
+        # 'dropout'             : uniform('dropout', 0, 1),
+        'dropout'             : 0.5,
+        'batch_size'          : power_of_two(quniform('batch_size', 10, 14, q=1)),
+        # 'batch_size'          : 100000,
+        # 'optimizer'           : opt_search_space,
+        'optimizer'           : opt_search_space,
+        # 'l2_regularizer'      : loguniform('l2_regularizer', -10,-1)
+        'l2_regularizer'      : 1E-5
+    }
+
+    trials = Trials()
+    best = fmin(dnn.hyperopt_fcn, search_space, algo=tpe.suggest, max_evals=25, trials=trials)
+    # best = fmin(dnn.hyperopt_fcn, search_space, algo=tpe.suggest, max_evals=50, trials=trials)
+    params = space_eval(search_space, best)
+    f = open(options.getOutputDir()+"/hyperparamsOptimizations.txt","w")
+    f.write( str(params) )
+    f.close()
+    pprint.pprint(params)
+
+    if options.doPlots():
+        import matplotlib.pyplot as plt
+        plt.figure()
+        xs = [t['tid'] for t in trials.trials]
+        ys = [-t['result']['loss'] for t in trials.trials]
+        plt.xlim(xs[0]-1, xs[-1]+1)
+        plt.scatter(xs, ys, s=20, linewidth=0.01, alpha=0.75)
+        plt.xlabel('Iteration', fontsize=16)
+        plt.ylabel('Accuracy', fontsize=16)
+        plt.savefig(options.getOutputDir()+"/Accuracy.png", bbox_inches='tight')
+        plt.savefig(options.getOutputDir()+"/Accuracy.pdf", bbox_inches='tight')
+        plt.close()
+        # Some additional visualization
+        parameters = search_space.keys()
+        cmap = plt.cm.Dark2
+
+        # for t in trials.trials:
+            # pprint.pprint(t)
+        pprint.pprint(trials.trials[0])
+        # pprint.pprint(trials.trials[0]['misc']['vals'])
+        for i, name in enumerate(trials.trials[0]['misc']['vals']):
+            plt.figure()
+            x = []
+            for t in trials.trials:
+                if np.array(t['misc']['vals'][name]).ravel().size == 0:
+                    continue
+                x+=t['misc']['vals'][name]
+            xs = np.array(x).ravel()
+            # xs = np.array([t['misc']['vals'][name] for t in trials.trials if size(np.array(t['misc']['vals'][name])).ravel() != 0 ).ravel() 
+            print("-"*20)
+            print(name)
+            print(xs)
+            if xs.size == 0: continue
+            ys = [-t['result']['loss'] for t in trials.trials ]
+            zs = [t['tid'] for t in trials.trials]
+            xs, ys, zs = zip(*sorted(zip(xs, ys, zs)))
+            ys = np.array(ys)
+            plt.scatter(xs, ys, s=20, linewidth=0.01, alpha=0.75, c=cmap(float(i)/len(parameters)))
+            plt.savefig(options.getOutputDir()+"/"+name+"_vs_Accuracy.png", bbox_inches='tight')
+            plt.savefig(options.getOutputDir()+"/"+name+"_vs_Accuracy.pdf", bbox_inches='tight')
+            plt.close()
+
+            plt.figure()
+            plt.scatter(xs, zs, s=20, linewidth=0.01, alpha=0.75, c=cmap(float(i)/len(parameters)))
+            plt.savefig(options.getOutputDir()+"/"+name+"_vs_Iteration.png", bbox_inches='tight')
+            plt.savefig(options.getOutputDir()+"/"+name+"_vs_Iteration.pdf", bbox_inches='tight')
+            plt.close()
 
 if options.doGradients():
     dnn.get_gradients(options.isBinary())
