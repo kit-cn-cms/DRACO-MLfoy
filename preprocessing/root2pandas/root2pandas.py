@@ -285,6 +285,7 @@ class Dataset:
     
         pool = Pool(self.ncores)
         chunks = [{"self": self, "chunk": c, "sample": sample, "chunkNumber": i+1, "mem_df": mem_df} for i,c in enumerate(ntuple_files)]
+        # print(chunks)
         pool.map(processChunk, chunks)
 
         # concatenate single thread files
