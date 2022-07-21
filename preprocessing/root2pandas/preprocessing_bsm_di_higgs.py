@@ -126,6 +126,13 @@ Wjet_categories.addCategory("Wjet")
 misc_categories = root2pandas.EventCategories()
 misc_categories.addCategory("misc")
 
+# friend trees
+friendTrees = {
+    "gen": "/nfs/dust/cms/user/mmarz/NMSSM_friends/UL/friends/2018/14_7/friend_genWeights",
+    "bSF": "/nfs/dust/cms/user/mmarz/NMSSM_friends/UL/friends/2018/14_7/friend_bTagWeights",
+    "lepSF": "/nfs/dust/cms/user/mmarz/NMSSM_friends/UL/friends/2018/14_7/friend_lepWeights",
+    }
+
 # Signal
 for i in range(1,5):
     dataset.addSample(
@@ -643,7 +650,7 @@ additional_variables = [
   "run",
   "lumi",
   "event",
-  "Weight_LHEreweighting",
+  "",
 ]
 
 # add these variables to the variable list
