@@ -76,7 +76,7 @@ friendTrees = {
     "ftName": "new/base/path/",
     ...
 ```
-Variables specifically from these friend trees can be obtained via `ftName.varName` in the variable set files.
+Variables specifically from these friend trees can be obtained via `ftName_ft_varName` in the variable set files or additional variables list.
 This is also the name of these variables in the resulting data frames.
 Currently only non-vectorized variables are supported
 
