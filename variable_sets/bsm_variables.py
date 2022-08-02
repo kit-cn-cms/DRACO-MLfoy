@@ -1,5 +1,5 @@
 variables = {}
-variables["normal"] = [
+variables["ge2j_ge1t_ge0A"] = [
     "Pair_Mu_Pt_corr",
     "Pair_Tau_Pt_corr",
     "Pair_M_corr",

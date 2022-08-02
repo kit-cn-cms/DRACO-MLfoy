@@ -186,7 +186,7 @@ class DataFrame(object):
                 category_label     = None,
                 norm_variables = True,
                 test_percentage = 0.2,
-                lumi = 41.5,
+                lumi = 59.7,
                 shuffleSeed = None,
                 balanceSamples = True,
                 evenSel = "",

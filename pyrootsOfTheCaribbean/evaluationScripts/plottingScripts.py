@@ -493,9 +493,9 @@ class plotClosureTest:
                 # add category label
                 setup.printCategoryLabel(canvas, self.event_category)
 
-                # add private work label if activated
-                if self.privateWork:
-                    setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+                # # add private work label if activated
+                # if self.privateWork:
+                #     setup.printPrivateWork(canvas, ratio=plotOptions["ratio"], nodePlot = True)
 
                 out_path = self.plotdir+"/closureTest_for_{}_at_{}_node.pdf".format(process, node_cls)
                 setup.saveCanvas(canvas, out_path)
@@ -630,9 +630,9 @@ class plotClosureTest:
 
 
 
-            # add private work label if activated
-            if self.privateWork:
-                setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
+            # # add private work label if activated
+            # if self.privateWork:
+            #     setup.printPrivateWork(canvas, plotOptions["ratio"], nodePlot = True)
 
             out_path = self.plotdir+"/closureTest_at_{}_node.pdf".format(node_cls)
             setup.saveCanvas(canvas, out_path)

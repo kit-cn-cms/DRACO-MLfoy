@@ -25,6 +25,16 @@ def GetPlotColor( cls ):
         "sig":          ROOT.kCyan,
         "bkg":          ROOT.kOrange,
 
+        "Sig_MH600_hSBB":          ROOT.kGreen+1,
+        "Sig_MH600_hSTauTau":      ROOT.kAzure,
+        "Sig_MH1200_hSBB":          ROOT.kGreen+1,
+        "Sig_MH1200_hSTauTau":      ROOT.kAzure,
+        "misc":         ROOT.kRed+1,
+        "Zll":          ROOT.kYellow-7,
+        "Wjet":         ROOT.kBlue+3,
+        "ST":           ROOT.kMagenta,
+
+
         "ttH_STXS_0":          ROOT.kAzure,
         "ttH_STXS_1":          ROOT.kBlue-1,
         "ttH_STXS_2":          ROOT.kBlue-2,

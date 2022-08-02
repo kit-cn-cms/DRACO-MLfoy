@@ -28,13 +28,12 @@ Evt_weights = "x.Weight_GEN * x.gen_ft_xsNorm * x.lepSF_ft_muIsoSF * x.lepSF_ft_
 
 # during preprocessing half of the ttH sample is discarded (Even/Odd splitting),
 # thus, the event yield has to be multiplied by two. This is done with normalization_weight = 2.
-input_samples.addSample(options.getDefaultName("Sig_MH600_hSBB"), label = "Sig_MH600_hSBB", total_weight_expr=Evt_weights)
-input_samples.addSample(options.getDefaultName("Sig_MH600_hSTauTau"), label = "Sig_MH600_hSTauTau", total_weight_expr=Evt_weights)
+input_samples.addSample(options.getDefaultName("Sig_MH1200_hSBB"), label = "Sig_MH1200_hSBB", total_weight_expr=Evt_weights)
+input_samples.addSample(options.getDefaultName("Sig_MH1200_hSTauTau"), label = "Sig_MH1200_hSTauTau", total_weight_expr=Evt_weights)
 input_samples.addSample(options.getDefaultName("ttbar"), label = "ttbar", total_weight_expr=Evt_weights)
 input_samples.addSample(options.getDefaultName("Zll"), label = "Zll", total_weight_expr=Evt_weights)
 input_samples.addSample(options.getDefaultName("Wjet"), label = "Wjet", total_weight_expr=Evt_weights)
-input_samples.addSample(options.getDefaultName("misc"), label = "misc", total_weight_expr=Evt_weights)
-input_samples.addSample(options.getDefaultName("ST"), label = "ST", total_weight_expr=Evt_weights)
+
 
 
 if options.isBinary():
@@ -138,6 +137,5 @@ if options.doPlots():
             log                 = options.doLogPlots(),
             signal_class        = options.getSignal(),
             privateWork         = options.isPrivateWork())
-
 
 dnn.get_gradients(options.isBinary())

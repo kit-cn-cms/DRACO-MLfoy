@@ -9,9 +9,11 @@ def getJTstring(cat):
         if part.endswith("l"):
             cutstring += "N_LooseLeptons"
         elif part.endswith("j"):
-            cutstring += "N_Jets"
+            cutstring += "N_allJets_corr_nom"
         elif part.endswith("t"):
-            cutstring += "N_BTagsM"
+            cutstring += "N_taggedJets_corr_nom"
+        elif part.endswith("A"):
+            cutstring += "N_AK8Jets_nom"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue
@@ -62,6 +64,8 @@ def getJTlabel(cat):
             partstring += " jet"
         elif part.endswith("t"):
             partstring += " b-tag"
+        elif part.endswith("A"):
+            partstring += " AK8 jet"
         else:
             print("invalid format of category substring '{}' - IGNORING".format(part))
             continue

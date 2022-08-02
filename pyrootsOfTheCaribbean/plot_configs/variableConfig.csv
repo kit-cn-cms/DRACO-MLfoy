@@ -958,3 +958,36 @@ ttbbReco_lepTop2_Pt,0.,600.,30,-,ttbbReco_lepTop2_Pt
 ttbbReco_lepTop2_Eta,-4.,4.,30,-,ttbbReco_lepTop2_Eta
 ttbbReco_lepTop2_M,0.,1000.,30,-,ttbbReco_lepTop2_M
 ttbbReco_lepTop2_E,0.,1200.,30,-,ttbbReco_lepTop2_E
+
+Pair_Mu_Pt_corr,20,400,50,-,p_{T}(muon)
+Pair_Tau_Pt_corr,20,400,50,-,p_{T}(tau)
+Pair_M_corr,0,60,50,-,mass of lepton pair
+Pair_Pt_corr,20,400,50,-,p_{T}(lepton pair)
+N_taggedJets_corr_nom,-0.5,6.5,7,-,N(bJets)
+nontaggedJets_Pt_corr_nom[0],0,600,50,-,p_{T}(leading non bJet)
+N_nontaggedJets_corr_nom,-0.5,6.5,7,-,N(non bJets)
+nonbJetPair_dR_corr_nom,0.4,2.2,50,-,#DeltaR(non bJets)
+nonbJetPair_M_corr_nom,0,200,50,-,mass of non bJet pair
+nonbJetPair_Pt_corr_nom,0,1000,100,-,p_{T}(non bJets)
+taggedJets_Pt_corr_nom[0],20,1000,50,-,p_{T}(leading bJet)
+taggedJets_Pt_corr_nom[1],20,1000,50,-,p_{T}(subleading bJet)
+nontaggedJets_Pt_corr_nom[1],0,600,50,-,p_{T}(subleading non bJet)
+bJetPair_bTagDisSorted_M_corr_nom,0,200,50,-,mass of bJet pair
+bJetPair_bTagDisSorted_Pt_corr_nom,0,1000,100,-,p_{T}(bJets)
+System_bTagDisSorted_M_corr_nom,0.4,2.2,50,-,#DeltaR(bJets)
+
+
+Pair_dR_corr,0,5,50,-,#DeltaR(#mu#tau)
+System_bTagDisSorted_dR_corr_nom,0,5,50,-,#DeltaR(jets leptons)
+bJetPair_bTagDisSorted_dR_corr_nom,0,5,50,-,#DeltaR(b jets)
+N_AK8Jets_nom,-0.5,6.5,7,-,N(non AK8)   
+AK8Jet_Pt_nom[0],0,2000,100,-,lead p_{T}(AK8)
+AK8Jet_msoftdrop_nom[0],0,2000,100,-,msoftdrop(AK8)
+AK8Jet_tauratio21_nom[0],0,1,50,-,lead #frac{#tau_2}{#tau_1}(AK8)
+AK8Jet_tauratio32_nom[0],0,1,50,-,lead #frac{#tau_2}{#tau_1}(AK8)
+AK8Jet_particleNetMD_QCD_nom[0],0,1,50,-,lead particleNetMD_QCD (AK8)
+AK8Jet_particleNetMD_Xbb_nom[0],0,1,50,-,lead particleNetMD_Xbb (AK8)
+AK8Jet_tau1_nom[0],0,1,50,-,lead #tau_1 (AK8)
+AK8Jet_tau2_nom[0],0,1,50,-,ead #tau_1 (AK8)
+AK8Jet_tau3_nom[0],0,1,50,-,ead #tau_1 (AK8)
+AK8Jet_tau4_nom[0],0,1,50,-,ead #tau_1 (AK8) 
